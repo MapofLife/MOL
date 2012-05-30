@@ -5,6 +5,7 @@ mol.modules.map.query = function(mol) {
     mol.map.query.QueryEngine = mol.mvp.Engine.extend(
     {
         init : function(proxy, bus, map) {
+                //testing a commit
                 this.proxy = proxy;
                 this.bus = bus;
                 this.map = map;
