@@ -298,26 +298,32 @@ mol.modules.map.query = function(mol) {
                         listWindow : listWindow
                     };
 
-                    $(listWindow).html(content[0]);
 
                     listWindow.dialog({
                         autoOpen : true,
                         width : 680,
                         height : 380,
                         dialogClass : "mol-splash",
-                        modal : false
+                        modal : false,
+                        title : 'Species List of Birds at Lat/Lng',
+                        open: function(event,ui) {
+                            console.log('dialog open');
+                        }
                         
                     });
-                    $(listWindow).width('98%');
-
-                    $(".ui-widget-overlay").live("click", function() {
-                        listWindow.dialog("close");
-                        listradius.setMap(null);
-                        delete (self.features[listradius.center.toString() + listradius.radius]);
+                    
+                    $(function(){
+                        $("#tabs").tabs();
+                        $("#tabs > #list").html(content[0]);
                     });
-
-                    console.log("tablesorter");
-                    console.log($(".tablesorter", $(listWindow)));
+                    
+                    $(listWindow).dialog({
+                       beforeClose: function(event, ui) {
+                           console.log('second close function');
+                           listradius.setMap(null);
+                           delete (self.features[listradius.center.toString() + listradius.radius]);
+                       }
+                    });
 
                     $(".tablesorter", $(listWindow)).tablesorter({
                         headers : {
@@ -478,8 +484,16 @@ mol.modules.map.query = function(mol) {
     
     mol.map.query.listDisplay = mol.mvp.View.extend({
         init : function() {
-            var html = '' + '<div class="mol-Splash">' + '</div>';
+            var html = '' + 
+                '<div class="mol-Splash ui-tabs" id="tabs">' +
+                '   <ul class="ui-tabs-nav">' +
+                '      <li><a href="#overview">Overview</a></li>' +
+                '      <li><a href="#list">List</a></li>' + 
+                '   </ul>' + 
+                '   <div id="overview" class="ui-tabs-panel">Initial content.</div>' +
+                '   <div id="list" class="ui-tabs-panel">Second Content.</div>' +
+                '</div>';
             this._super(html);
         }
     });
-};
+}
