@@ -2737,6 +2737,7 @@ wax.g.connector.prototype.getTile = function(coord, zoom, ownerDocument) {
     }
     if (!this.cache[key]) {
         var img = this.cache[key] = new Image(256, 256);
+        this.cache[key].style.display='none';
         this.cache[key].src = this.getTileUrl(coord, zoom);
         this.cache[key].setAttribute('gTileKey', key);
         this.cache[key].style.opacity = this.opacity;
@@ -2744,8 +2745,8 @@ wax.g.connector.prototype.getTile = function(coord, zoom, ownerDocument) {
             this.cache[key].style.filter="alpha(opacity="+this.opacity*100+")";
         }
         this.loading++;
-        this.cache[key].onerror = function() { img.style.display = 'none'; self.loading--; if (self.loading<=0){self.onafterload();}};
-        this.cache[key].onload = function() {self.loading--; if (self.loading<=0){self.onafterload();}};
+        this.cache[key].onerror = function() {this.style.display = 'none'; self.loading--; if (self.loading<=0){self.onafterload();}};
+        this.cache[key].onload = function() {this.style.display='';self.loading--; if (self.loading<=0){self.onafterload();}};
     }
     return this.cache[key];
 };

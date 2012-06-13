@@ -33,7 +33,7 @@ mol.modules.map.basemap = function(mol) {
                                 {
                                     featureType: "administrative",
                                     stylers: [
-                                     { visibility: "simplified" }
+                                     { visibility: "on" }
                                     ]
                                 },
                                 {
@@ -76,7 +76,7 @@ mol.modules.map.basemap = function(mol) {
                       },{
                         featureType: "administrative",
                         stylers: [
-                          { visibility: "off" }
+                          { visibility: "on" }
                         ]
                       },{
                         featureType: "administrative.country",

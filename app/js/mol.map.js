@@ -235,14 +235,14 @@ mol.modules.map = function(mol) {
                 this._super(element);
 
                 mapOptions = {
-                    zoom: 2,
+                    zoom: 3,
                     maxZoom: 10,
                     minZoom: 2,
                     minLat: -85,
                     maxLat: 85,
                     mapTypeControl: false,
                     //mapTypeControlOptions: {position: google.maps.ControlPosition.BOTTOM_LEFT},
-                    center: new google.maps.LatLng(0,0),
+                    center: new google.maps.LatLng(0,-50),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     styles: [
                       {
@@ -291,7 +291,7 @@ mol.modules.map = function(mol) {
                       },{
                         featureType: "administrative",
                         stylers: [
-                          { visibility: "off" }
+                          { visibility: "on" }
                         ]
                       },{
                         featureType: "administrative.country",

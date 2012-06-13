@@ -88,7 +88,7 @@
 	         proxy = new env.services.Proxy(bus)
 	         me = new env.map.MapEngine(proxy, bus)
 	         me.start('body');
-		     spe = new env.map.splash.SplashEngine(proxy, bus)
+		     spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
              spe.start()
              if(!spe.IE8) {
 	           se = new env.map.search.SearchEngine(proxy, bus)
@@ -130,7 +130,7 @@
 	         proxy = new env.services.Proxy(bus)
 	         me = new env.map.MapEngine(proxy, bus)
 	         me.start('body');
-		     spe = new env.map.splash.SplashEngine(proxy, bus)
+		     spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
            	 spe.start()
            	 if(!spe.IE8) {
 	           se = new env.map.search.SearchEngine(proxy, bus)

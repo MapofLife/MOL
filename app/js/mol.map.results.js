@@ -43,7 +43,18 @@ mol.modules.map.results = function(mol) {
                         self.display.toggleSelections(true);
                     }
                 );
-
+                this.bus.addHandler(
+                    'results-select-all',
+                    function(event) {
+                        self.display.selectAllLink.click();
+                    }
+                );
+                this.bus.addHandler(
+                    'results-map-selected',
+                    function(event) {
+                        self.display.addAllButton.click();
+                    }
+                );
                 /**
                  * Clicking the 'map selected layers' button fires an 'add-layers'
                  * event on the bus.
