@@ -187,7 +187,6 @@ mol.modules.map.query = function(mol) {
                             }
                         );
                         self.bus.fireEvent( new mol.bus.Event('show-loading-indicator', {source : 'listradius'}));
-                        //self.getList(event.gmaps_event.latLng.lat(),event.gmaps_event.latLng.lng(),listradius, constraints, className);
                         
                         _.each(
                             self.features,
@@ -199,8 +198,9 @@ mol.modules.map.query = function(mol) {
                             }
                         );
                         
+                        self.getList(event.gmaps_event.latLng.lat(),event.gmaps_event.latLng.lng(),listradius, constraints, className);
                         //temporarily replaced this with a function to load a local list
-                        self.getLocalList(event.gmaps_event.latLng.lat(), event.gmaps_event.latLng.lng(), listradius, constraints, className);
+                        //self.getLocalList(event.gmaps_event.latLng.lat(), event.gmaps_event.latLng.lng(), listradius, constraints, className);
                     }
                  }
             );
@@ -241,7 +241,7 @@ mol.modules.map.query = function(mol) {
                                         ['CR',0],
                                         ['EW',0],
                                         ['EX',0]
-                                    ]
+                                    ];
                         
                        _.each(
                            event.response.rows,
@@ -281,14 +281,20 @@ mol.modules.map.query = function(mol) {
                                             
                                     }
 
-                                    tablerows.push("<tr class='" + tclass + "'><td><button value='"+row.scientificname+"'>map</button></td>" +
-                                        "<td class='wiki'>" +
+                                    //row header
+                                    //taking button out temporarily
+                                    //<button value='"+row.scientificname+"'>map</button>
+                                    tablerows.push("<tr class='" + tclass + "'><td><div class='arrow'></div></td>" +
+                                        "<td class='wiki sci'>" +
                                         row.scientificname + "</td><td class='wiki english'>" +
                                         ((english != null) ? english : '') + "</td><td class='wiki'>" +
                                         ((row.order != null) ? row.order : '')+ "</td><td class='wiki'>" +
                                         ((row.family != null) ? row.family : '')+ "</td><td>" +
                                         ((row.sequenceid != null) ? row.sequenceid : '')+ '</td><td class="iucn" data-scientificname="'+row.scientificname+'">' +
                                         ((redlist != null) ? redlist : '') + "</td></tr>");
+                                        
+                                    //row collapisble content
+                                    tablerows.push("<tr class='expand-child'><td colspan='7'>" + row.scientificname + "</td></tr>");
                                         
                                         providers.push('<a class="type {0}">{1}</a>, <a class="provider {2}">{3}</a>'.format(row.type,row.type_title,row.provider,row.provider_title));
                                     if (year != null && year != '') {
@@ -339,7 +345,6 @@ mol.modules.map.query = function(mol) {
                                     '</div>');
                                     
                             iucnContent = $('<div class="mol-Map-ListQueryInfoWindow">' +
-                                    '           <div>' + 
                                     '               <div id="iucnChartDiv"></div>' + stats +
                                     '       </div>');
                                     
@@ -384,7 +389,7 @@ mol.modules.map.query = function(mol) {
                     });
                     
                     $(".mol-Map-ListDialog").parent().bind("resize", function(){ 
-                         $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-107); 
+                         $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-110); 
                       } ); 
                     
                     $(function(){
@@ -395,27 +400,45 @@ mol.modules.map.query = function(mol) {
                         $("#tabs > #iucnTab").html(iucnContent[0]);
                         
                         $(".mol-Map-ListQueryDownload").button();
-                        $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-107);
+                        $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-110);
                         
-                        $("#iucnChartDiv").height($(".mol-Map-ListDialog").height()-121);
+                        
+                        //table creation
+                        $("table.tablesorter tr:odd").addClass("master");
+                        $("table.tablesorter tr:not(.master)").hide();
+                        $("table.tablesorter tr:first-child").show();                       
+                        $("table.tablesorter tr.master").click(function(){
+                            console.log('master click');
+                            $(this).next("tr").toggle();
+                            $(this).find(".arrow").toggleClass("up");
+                            
+                            if(!$(this).hasClass('hasWiki'))
+                            {
+                                $(this).addClass('hasWiki');
+                                self.callWiki(this);
+                            }
+                                
+                        });
+                        
+                        //chart creation
+                        $("#iucnChartDiv").height($(".mol-Map-ListDialog").height()-130);
                         
                         //chart creation
                         var iucndata = google.visualization.arrayToDataTable(iucnList);
                 
-                        console.log('dimensions');
-                        console.log($("#iucnChartDiv").width());
-                
                         var options = {
-                            width: $("#iucnChartDiv").width(),
+                            width: 605,
                             height: $("#iucnChartDiv").height(),
+                            backgroundColor: 'transparent',
                             title: 'Species by IUCN Status',
-                            colors: ['#006666', '#88c193', '#cc9900', '#cc6633', '#cc3333', '#FFFFFF', '#000000']
+                            colors: ['#006666', '#88c193', '#cc9900', '#cc6633', '#cc3333', '#FFFFFF', '#000000'],
+                            chartArea: {left:125,top:25,width:"100%",height:"85%"}
                         };
                 
                         var chart = new google.visualization.PieChart(document.getElementById('iucnChartDiv'));
                         chart.draw(iucndata, options);
                         
-                        listTabs.tabs("select", 0);
+                        listTabs.tabs("select", 1);
                         
                     });
                     
@@ -475,7 +498,6 @@ mol.modules.map.query = function(mol) {
                     }
 
                     self.bus.fireEvent( new mol.bus.Event('hide-loading-indicator', {source : 'listradius'}));
-
                 }
              );
 
@@ -547,35 +569,93 @@ mol.modules.map.query = function(mol) {
                 }
             )
         },
-        createGoogleChart: function() {
-            console.log('in google chart');
+        callWiki: function(row) {
+            //call wikipedia for info
+            //put up a spinner
+            console.log('calling wiki');
             
-            /*
-            google.setOnLoadCallback(function() {
-                $(function() {
-                    console.log('drawChart');
-                
-                    var data = google.visualization.arrayToDataTable([
-                      ['Task', 'Hours per Day'],
-                      ['Work',     11],
-                      ['Eat',      2],
-                      ['Commute',  2],
-                      ['Watch TV', 2],
-                      ['Sleep',    7]
-                    ]);
+            var q = escape($(row).find('td.english').html());
+            var qs = escape($(row).find('td.sci').html());
             
-                    var options = {
-                      title: 'My Daily Activities'
-                    };
-            
-                    var chart = new google.visualization.PieChart(document.getElementById('iucnChartDiv'));
-                    chart.draw(data, options);
-                })
-            });
-            
-            console.log('createchart');
-            
-            */
+            $.post(
+                'http://en.wikipedia.org/w/api.php?action=query&format=json&callback=test&prop=extracts|images&imlimit=10&exlimit=1&exintro=&iwurl=&titles=' + q + '&exchars=560',
+                function(data, textStatus, jqXHR) {
+
+                    console.log(textStatus);
+                    console.log(data);
+
+                    if(textStatus == "success")
+                    {
+                        var wikidata = null;
+                        var wikiimg = null;
+                        
+                        for(var e in data.query.pages)
+                        {
+                            var prop = data.query.pages[e];
+                            wikidata = prop.extract.replace('...','');
+                            wikidata = wikidata.replace('<b>','<strong>');
+                            wikidata = wikidata.replace('<i>','<em>');
+                            wikidata = wikidata.replace('</b>','</strong>');
+                            wikidata = wikidata.replace('</i>','</em>');
+                            $(row).next().find('td').html(wikidata);
+                            console.log('re-adding elipse');
+                            $(row).next().find('td p:last').append(' ... (Source:<a href="' + 'http://en.wikipedia.com/wiki/' + unescape(qs).replace(/ /g, '_') + '" target="_blank">Wikipedia</a>)');
+                            $(row).next().find('td p:last').append('<button style="float:right; margin:0 0 -4px 6px" class="mapButton" value="' + unescape(qs) + '">Map</button>');
+                            $(row).next().find('td p br').remove();
+
+                            var a = prop.images;
+                            
+                            for(var i=0;i < a.length;i++)
+                            {
+                                var imgtitle = a[i].title;
+                                console.log('testing');
+                                
+                                if(imgtitle.search(unescape(q)) != -1 || imgtitle.search(unescape(qs)) != -1)
+                                {
+                                    console.log('img match!');
+                                    wikiimg = imgtitle;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if(wikiimg != null)
+                        {
+                            $.post(
+                            'http://en.wikipedia.org//w/api.php?action=query&prop=imageinfo&format=json&iiprop=url&iilimit=10&iiurlwidth=125&titles=' + wikiimg,
+                            function(data, textStatus, jqXHR) {
+                                
+                                    var imgurl = null;
+                                
+                                    if(textStatus == "success")
+                                    {        
+                                        for(var x in data.query.pages)
+                                        {
+                                            var z = data.query.pages[x];
+                                            console.log(z);                            
+                                            imgurl = z.imageinfo[0].thumburl;
+                                            
+                                            $("<img src='" + imgurl + "' style='float:left; margin:0 4px 0 0;'/>").prependTo($(row).next().find('td'));
+                                        }
+                                    }  
+                                }, 'jsonp'
+                            );
+                        }
+                        
+                    }
+                    else
+                    {
+                        //put html in saying information unavailable...
+                        $(row).next().find('td').html('<p>Description unavailable.');
+                    }
+                    
+                    $("button.mapButton").click(function(event) {
+                        self.bus.fireEvent(new mol.bus.Event('search', {
+                            term : event.target.value
+                        }));
+                    });
+                }, 'jsonp'
+            );
         }
     }
     );
