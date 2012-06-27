@@ -50,6 +50,7 @@ table.tablesorter div.arrow {
 	width: 16px;
 	height: 16px;
 	display: block;
+	cursor: pointer;
 }
 table.tablesorter div.up {
 	background-position: 0px 0px;
