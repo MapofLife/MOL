@@ -21,8 +21,12 @@ mol.modules.map.query = function(mol) {
                         "   dt.type as type, " +
                         "   pv.provider as provider, " +
                         "   t.year_assessed as year_assessed, " +
-                        "   s.sequenceid as sequenceid " +
+                        "   s.sequenceid as sequenceid, " +
+                        "   eolthumbnailurl as eol_thumb_url, " +
+                        "   page_id as eol_page_id " +
                         "FROM {3} p " +
+                        "LEFT JOIN eol e " +
+                        "ON p.scientificname = e.scientificname " +
                         "LEFT JOIN synonym_metadata n " +
                         "ON p.scientificname = n.scientificname " +
                         "LEFT JOIN taxonomy t " +
@@ -210,6 +214,7 @@ mol.modules.map.query = function(mol) {
                     var content,
                         dlContent,
                         iucnContent,
+                        imgContent,
                         className,
                         listradius  = event.listradius,
                         tablerows = [],
@@ -285,18 +290,19 @@ mol.modules.map.query = function(mol) {
                                     //taking button out temporarily
                                     //<button value='"+row.scientificname+"'>map</button>
                                     tablerows.push("<tr class='" + tclass + "'><td class='arrowBox'><div class='arrow'></div></td>" +
-                                        "<td class='wiki sci'>" +
-                                        row.scientificname + "</td><td class='wiki english'>" +
+                                        "<td class='wiki sci' value='" + row.eol_thumb_url + "'>" +
+                                        row.scientificname + "</td><td class='wiki english' value='" + row.eol_media_url + "' eol-page='" + row.eol_page_id + "'>" +
                                         ((english != null) ? english : '') + "</td><td class='wiki'>" +
                                         ((row.order != null) ? row.order : '')+ "</td><td class='wiki'>" +
                                         ((row.family != null) ? row.family : '')+ "</td><td>" +
                                         ((row.sequenceid != null) ? row.sequenceid : '')+ '</td><td class="iucn" data-scientificname="'+row.scientificname+'">' +
                                         ((redlist != null) ? redlist : '') + "</td></tr>");
                                         
-                                    //row collapisble content
+                                    //row collapsible content
                                     tablerows.push("<tr class='expand-child'><td colspan='7' value='" + row.scientificname + "'></td></tr>");
                                         
-                                        providers.push('<a class="type {0}">{1}</a>, <a class="provider {2}">{3}</a>'.format(row.type,row.type_title,row.provider,row.provider_title));
+                                    providers.push('<a class="type {0}">{1}</a>, <a class="provider {2}">{3}</a>'.format(row.type,row.type_title,row.provider,row.provider_title));
+                                    
                                     if (year != null && year != '') {
                                         years.push(year)
                                     }
@@ -402,9 +408,7 @@ mol.modules.map.query = function(mol) {
                         $(".mol-Map-ListQueryDownload").button();
                         $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-110);
                         
-                        
                         //table creation
-                        
                         $("table.tablesorter tr:odd").addClass("master");
                         $("table.tablesorter tr:not(.master)").hide();
                         $("table.tablesorter tr:first-child").show();                      
@@ -423,6 +427,19 @@ mol.modules.map.query = function(mol) {
                             sortList: [[5,0]] 
                         });
                         
+                        //image gallery creation                       
+                        _.each(
+                           event.response.rows,
+                            function(row) {
+                                if(row.eol_thumb_url != null)
+                                {
+                                    var english = (row.english != null) ? _.uniq(row.english.split(',')).join(',') : '';
+                                    $("#gallery").append('<li><a href="' + 'http://eol.org/pages/' + row.eol_page_id + '" target="_blank"><img src="' + row.eol_thumb_url + '" title="' + english + '"></a></li>');
+                                }                         
+                            }
+                        );
+                        
+                        $('#gallery').ppGallery({thumbWidth: 91, maxWidth: 635});
                         
                         //chart creation
                         $("#iucnChartDiv").height($(".mol-Map-ListDialog").height()-130);
@@ -442,7 +459,7 @@ mol.modules.map.query = function(mol) {
                         var chart = new google.visualization.PieChart(document.getElementById('iucnChartDiv'));
                         chart.draw(iucndata, options);
                         
-                        listTabs.tabs("select", 1);
+                        listTabs.tabs("select", 0);
                         
                     });
                     
@@ -567,15 +584,15 @@ mol.modules.map.query = function(mol) {
             )
         },
         callWiki: function(row) {
-            console.log('calling wiki');
-                
             $(row).find('td.arrowBox').html('<img src="/static/loading-small.gif" width="' + $(row).find('td.arrowBox').height() +'" height="' + $(row).find('td.arrowBox').width() + '" />');
             
             var q = escape($(row).find('td.english').html());
             var qs = escape($(row).find('td.sci').html());
+            var eolimg = $(row).find('td.sci').attr('value');
+            var eolpage = $(row).find('td.english').attr('eol-page');
             
             $.post(
-                'http://en.wikipedia.org/w/api.php?action=query&format=json&callback=test&prop=extracts|images&imlimit=10&exlimit=1&&redirects=exintro=&iwurl=&titles=' + qs + '&exchars=400',
+                'http://en.wikipedia.org/w/api.php?action=query&format=json&callback=test&prop=extracts|images&imlimit=10&exlimit=1&redirects=exintro=&iwurl=&titles=' + qs + '&exchars=275',
                 function(data, textStatus, jqXHR) {
 
                     if(textStatus == "success")
@@ -584,9 +601,7 @@ mol.modules.map.query = function(mol) {
                         var wikiimg = null;
                         
                         for(var e in data.query.pages)
-                        {
-                            console.log(e);
-                            
+                        {                           
                             if(e != -1)
                             {
                                var prop = data.query.pages[e];
@@ -595,33 +610,35 @@ mol.modules.map.query = function(mol) {
                                 wikidata = wikidata.replace('<i>','<em>');
                                 wikidata = wikidata.replace('</b>','</strong>');
                                 wikidata = wikidata.replace('</i>','</em>');
+                                wikidata = wikidata.replace('<br />', "");
+                                wikidata = wikidata.replace(/<p>/g, '<div>');
+                                wikidata = wikidata.replace(/<\/p>/g,'</div>');
+                                wikidata = wikidata.replace(/<h2>/g, '<strong>');
+                                wikidata = wikidata.replace(/<\/h2>/g,'</strong>');
+                                wikidata = wikidata.replace(/<h3>/g, '<strong>');
+                                wikidata = wikidata.replace(/<\/h3>/g,'</strong>');
+                                wikidata = wikidata.replace(/\n/g, "");
+                                wikidata = wikidata.replace('</div>\n<div>', " ");
+                                wikidata = wikidata.replace('</div><div>', " ");
+                                wikidata = wikidata.replace('</div><strong>', " <strong> ");
+                                wikidata = wikidata.replace('</strong><div>', " </strong> ");
+                                
+                                console.log(wikidata);                               
+                                
                                 $(row).next().find('td').html(wikidata);
-                                console.log('re-adding elipse');
-                                $(row).next().find('td p:last').append(' ... (Source:<a href="' + 'http://en.wikipedia.com/wiki/' + unescape(qs).replace(/ /g, '_') + '" target="_blank">Wikipedia</a>)<p><button class="mapButton" value="' + unescape(qs) + '">Map</button></p>');
-                                //$(row).next().find('td p:last').append('<button class="mapButton" value="' + unescape(qs) + '">Map</button>');
-                                $(row).next().find('td p br').remove();
+                                $(row).next().find('td div br').remove();
     
                                 var a = prop.images;
                                 
                                 for(var i=0;i < a.length;i++)
                                 {
                                     var imgtitle = a[i].title;
-                                    console.log('testing');
-                                    console.log(unescape(q));
-                                    console.log(unescape(qs));
-                                    console.log(a[i].title.toLowerCase());
                                     
                                     var req = new RegExp(unescape(q), "i");
                                     var reqs = new RegExp(unescape(qs), "i");
-                                    console.log(req);
-                                    console.log(reqs);
-                                    console.log('regexp q match : ' + imgtitle.search(req));
-                                    console.log('regexp qs match : ' + imgtitle.search(reqs));
                                     
                                     if(imgtitle.search(req) != -1 || imgtitle.search(reqs) != -1)
                                     {
-                                        console.log('img match!');
-                                        console.log(imgtitle);
                                         wikiimg = imgtitle;
                                         break;
                                     }
@@ -629,11 +646,15 @@ mol.modules.map.query = function(mol) {
                             }
                         }
                         
-                        //get img
-                        if(wikiimg != null)
+                        if(eolimg != "null")
+                        {
+                            $('<a href="' + 'http://eol.org/pages/' + eolpage + '" target="_blank"><img src="' + eolimg + '" style="float:left; margin:0 4px 0 0;"/></a>').prependTo($(row).next().find('td'));
+                            $(row).next().find('td div:last').append('... (Text Source:<a href="' + 'http://en.wikipedia.com/wiki/' + unescape(qs).replace(/ /g, '_') + '" target="_blank">Wikipedia</a>; Image Source:<a href="' + 'http://eol.org/pages/' + eolpage + '" target="_blank">EOL</a>)<p><button class="mapButton" value="' + unescape(qs) + '">Map</button></p>');
+                        }
+                        else if(wikiimg != null)
                         {
                             $.post(
-                            'http://en.wikipedia.org/w/api.php?action=query&prop=imageinfo&format=json&iiprop=url&iilimit=10&iiurlwidth=125&titles=' + wikiimg,
+                            'http://en.wikipedia.org/w/api.php?action=query&prop=imageinfo&format=json&iiprop=url&iilimit=10&iiurlwidth=91&iiurlheight=68&titles=' + wikiimg,
                             function(data, textStatus, jqXHR) {
                                 
                                     var imgurl = null;
@@ -642,14 +663,11 @@ mol.modules.map.query = function(mol) {
                                     {        
                                         for(var x in data.query.pages)
                                         {
-                                            var z = data.query.pages[x];
-                                            console.log(z);                            
+                                            var z = data.query.pages[x];                          
                                             imgurl = z.imageinfo[0].thumburl;
                                             
-                                            console.log("thumbnail");
-                                            console.log(imgurl);
-                                            
-                                            $("<img src='" + imgurl + "' style='float:left; margin:0 4px 0 0;'/>").prependTo($(row).next().find('td'));
+                                            $('<a href="' + 'http://en.wikipedia.com/wiki/' + unescape(qs).replace(/ /g, '_') + '" target="_blank"><img src="' + imgurl + '" style="float:left; margin:0 4px 0 0;"/>').prependTo($(row).next().find('td'));
+                                            $(row).next().find('td div:last').append('... (Text Source:<a href="' + 'http://en.wikipedia.com/wiki/' + unescape(qs).replace(/ /g, '_') + '" target="_blank">Wikipedia</a>; Image Source:<a href="' + 'http://en.wikipedia.com/wiki/' + wikiimg + '" target="_blank">Wikipedia</a>)<p><button class="mapButton" value="' + unescape(qs) + '">Map</button></p>');
                                         }
                                     }  
                                 }, 'jsonp'
@@ -657,39 +675,21 @@ mol.modules.map.query = function(mol) {
                         }
                         
                         //check for link to eol, if true, add button
-                                        
-                        $.post(
-                        'http://eol.org/api/search/' + qs + '.json?exact=1?callback=eolcallback',
-                        function(data, textStatus, jqXHR) {
+                        if(eolpage != "null")
+                        {
+                            $(row).next().find('td p:last').append('<button class="eolButton" value="' + 'http://eol.org/pages/' + eolpage + '">Encyclopedia of Life</button>');
                             
-                                if(textStatus == "success")
-                                {        
-                                    console.log('eol success');
-                                    
-                                    if(data.results.length > 0)
-                                    {
-                                        //do the append
-                                        console.log(data.results[0].link);
-                                        $(row).next().find('td p:last').append('<button class="eolButton" value="' + data.results[0].link + '">Encyclopedia of Life</button>');
-                                    } 
-                                }
-                                
-                                console.log('at eol callback');
-                                $(row).find('td.arrowBox').html("<div class='arrow up'></div>");
-                                
-                                $("button.eolButton").click(function(event) {
-                                    var win = window.open(event.target.value);
-                                    win.focus();
-                                });  
-                            }, 'jsonp'
-                        );
+                            $('button.eolButton[value="' + 'http://eol.org/pages/' + eolpage + '"]').click(function(event) {
+                                var win = window.open(event.target.value);
+                                win.focus();
+                            });
+                        }
                         
+                        $(row).find('td.arrowBox').html("<div class='arrow up'></div>");                        
                     }
                     else
                     {
                         //put html in saying information unavailable...
-                        
-                        console.log('at no info available');
                         $(row).find('td.arrowBox').html("<div class='arrow up'></div>");
                         $(row).next().find('td').html('<p>Description unavailable.</p>');
                     }
@@ -757,13 +757,13 @@ mol.modules.map.query = function(mol) {
             var html = '' + 
                 '<div class="mol-Map-ListDialogContent ui-tabs" id="tabs">' +
                 '   <ul class="ui-tabs-nav">' +
-                '      <li><a href="#overviewTab">Overview</a></li>' +
                 '      <li><a href="#listTab">List</a></li>' + 
+                '      <li><a href="#imagesTab">Images</a></li>' +
                 '      <li><a href="#iucnTab">IUCN</a></li>' + 
                 '      <li><a href="#dlTab">Download</a></li>' + 
                 '   </ul>' + 
-                '   <div id="overviewTab" class="ui-tabs-panel">Initial content.</div>' +
                 '   <div id="listTab" class="ui-tabs-panel">Second Content.</div>' +
+                '   <div id="imagesTab" class="ui-tabs-panel"><div>Source:<a href="http://eol.org/" target="_blank"> Encyclopedia of Life</a></div><ul id="gallery" style="overflow: auto;"></ul></div>' +
                 '   <div id="iucnTab" class="ui-tabs-panel">Highlight of IUCN concern species.</div>' +
                 '   <div id="dlTab" class="ui-tabs-panel">Download.</div>' +
                 '</div>';
