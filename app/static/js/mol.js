@@ -3514,7 +3514,7 @@ mol.modules.map.query = function(mol) {
                     $.post(
                         'cache/get',
                         {
-                            key: 'lq-{0}-{1}-{2}-{3}'.format(lat,lng,listradius.radius,constraints),
+                            key: 'spliquimg-{0}-{1}-{2}-{3}'.format(lat,lng,listradius.radius,constraints),
                             sql:sql
                         },
                         function(data, textStatus, jqXHR) {
