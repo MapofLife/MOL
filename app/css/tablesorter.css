@@ -146,23 +146,12 @@ table.grid .collapsible {
  * 
  */
 
-#xofpp, #closeBoxpp, #playpp, #stoppp, #imageTitlepp{
-	cursor:pointer;
-	margin:0 10px;
-	color:white;
-	float:left;
-}
-#nextButtonBoxpp, #previousButtonBoxpp, #xofpp{
-	cursor:pointer;
-	margin:0 10px;
-	color:white;
-	float:right;
-}
+
 #gallery, #gallery ul{
     list-style:none;
     margin:0 auto;
     padding:0;
-	height:265px;
+	height:260px;
 }
 #gallery li{
     margin:0px 0px;
@@ -172,14 +161,19 @@ table.grid .collapsible {
     cursor:pointer;
     height:72px;
 }
-#gallery img{
+#gallery img, #gallery div {
     border:2px white solid;
 }
-#imagesTab div {
-	font-size: 12px;
+#imagesTab div, #gallery div {
 	font-style: normal;
 	font-weight: normal;
 	padding-top: 4px;
 	padding-left: 4px;
+}
+#imagesTab div {
+	font-size: 12px;
+}
+#gallery div {
+	font-size: 10px
 }
 
