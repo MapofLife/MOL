@@ -1,4 +1,4 @@
-application: map-of-life
+application: tom-auer
 version: canary
 runtime: python27
 threadsafe: true
