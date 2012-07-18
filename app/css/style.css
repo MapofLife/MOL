@@ -398,11 +398,43 @@ div#content .wrapper #code{
 div#content .wrapper #code a{ 
     color: #b8fd85;
 }
-div#footer {float: left; position: relative; width: 800px; left: 50%; margin-left: -400px; margin-bottom: 30px; height: 40px;}
+div#footer {float: left; position: relative; width: 800px; left: 50%; margin-left: -690px; margin-bottom: 0px; height: 40px;}
 div#footer #footer_links { float: right; width: 500px; text-align: left; margin-right: 10px; height: auto; color: #fff; }
 div#footer #footer_links a { font-size: 1.1em; color: #aaa; padding-right: 8px; padding-left: 8px; line-height: 150%; text-decoration: underline;}
  
-div#footer #footer_imgs { float: right; width: 200px; margin-right: 50px; height: auto; color: #fff; }
-div#footer #footer_imgs img{ float: right; height: 32px; padding-right: 10px; opacity: 0.7;}
- 
+#footer_imgs { 
+    clear: both;
+    position: relative;
+    float: left; 
+    width: 780px; 
+    left: 50%;
+    height: auto; 
+    color: #fff; 
+    margin-left: -390px;
+    padding-bottom: 30px;
+}
+
+#footer_imgs #sponsors {
+    float: right;
+}
+
+#footer_imgs #sponsors img {
+    padding-left: 5px;
+}
+
+#footer_imgs #partners {
+    float: left;
+}
+
+#footer_imgs #partners img {
+    padding-right: 5px;
+}
+
+
+#footer_imgs img{ 
+    float: right; 
+    height: 42px; 
+    opacity: 0.7;
+    border: 0px;
+}
 
