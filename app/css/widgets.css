@@ -1016,13 +1016,24 @@ padding: 3px;
      width:650px;
      overflow-y:scroll;
      overflow-x:hidden;
-     margin:5px
+     margin:2px;
+     margin-top:6px;
 }
+
 .mol-Map-ListQueryInfoWindow td{
         cursor: pointer;
  }
+.mol-Map-ListQueryInfoWindow button{
+        font-size: 0.8em;
+ }
+
 .mol-Map-ListQueryInfoWindow .english{
-        max-width: 150px;
+        max-width: 135px;
+        overflow: hidden;
+        text-overflow:ellipsis;
+ }
+ .mol-Map-ListQueryInfoWindow .wiki{
+        max-width: 135px;
         overflow: hidden;
         text-overflow:ellipsis;
  }
