@@ -14,8 +14,8 @@ mol.modules.map.layers = function(mol) {
                 this.display = new mol.map.layers.LayerListDisplay('.map_container');
                 this.fireEvents();
                 this.addEventHandlers();
-				this.initSortable();
-				this.display.toggle(false);
+                this.initSortable();
+                this.display.toggle(false);
             },
 
             /**
@@ -66,6 +66,7 @@ mol.modules.map.layers = function(mol) {
                 this.bus.addHandler(
                     'add-layers',
                     function(event) {
+                        var bounds = null;
                         _.each(
                             event.layers,
                             function(layer) { // Removes duplicate layers.
@@ -74,7 +75,24 @@ mol.modules.map.layers = function(mol) {
                                 }
                             }
                         );
+                        _.each(
+                            event.layers,
+                            function(layer) {
+                                var extent = $.parseJSON(layer.extent);
+                                var layer_bounds = new google.maps.LatLngBounds(
+                                        new google.maps.LatLng(extent.sw.lat,extent.sw.lng),
+                                        new google.maps.LatLng(extent.ne.lat,extent.ne.lng)
+                                     );
+                                if(!bounds) {
+                                    bounds = layer_bounds;
+                                } else {
+                                    bounds.union(layer_bounds)
+                                }
+                            }
+                        )
                         self.addLayers(event.layers);
+                        self.map.fitBounds(bounds)
+
                     }
                 );
                 this.bus.addHandler(
@@ -244,12 +262,14 @@ mol.modules.map.layers = function(mol) {
                                 var params = {
                                         layer: layer,
                                         auto_bound: true
-                                    },
-                                    e = new mol.bus.Event('layer-zoom-extent', params),
-                                    le = new mol.bus.Event('show-loading-indicator',{source : "map"});
+                                },
+                                    extent = eval('({0})'.format(layer.extent)),
+                                    bounds = new google.maps.LatLngBounds(new google.maps.LatLng(extent.sw.lat, extent.sw.lng), new google.maps.LatLng(extent.ne.lat, extent.ne.lng));
+                                if(!$(l.layer).hasClass('selected')){
+                                    l.layer.click();
+                                }
+                                self.map.fitBounds(bounds);
 
-                                self.bus.fireEvent(e);
-                                self.bus.fireEvent(le);
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }
@@ -348,37 +368,37 @@ mol.modules.map.layers = function(mol) {
                 }
             },
 
-			   /**
-			    * Add sorting capability to LayerListDisplay, when a result is
+               /**
+                * Add sorting capability to LayerListDisplay, when a result is
              * drag-n-drop, and the order of the result list is changed,
              * then the map will re-render according to the result list's order.
-			    **/
-			   initSortable: function() {
-				    var self = this,
-					     display = this.display;
+                **/
+               initSortable: function() {
+                    var self = this,
+                         display = this.display;
 
-				    display.list.sortable(
+                    display.list.sortable(
                     {
-					        update: function(event, ui) {
-						          var layers = [],
-						          params = {},
+                            update: function(event, ui) {
+                                  var layers = [],
+                                  params = {},
                             e = null;
 
-						          $(display.list).find('.layerContainer').each(
+                                  $(display.list).find('.layerContainer').each(
                                 function(i, el) {
-							               layers.push($(el).attr('id'));
-						              }
+                                           layers.push($(el).attr('id'));
+                                      }
                             );
 
                             params.layers = layers;
-						          e = new mol.bus.Event('reorder-layers', params);
-						          self.bus.fireEvent(e);
-					         }
-				        }
+                                  e = new mol.bus.Event('reorder-layers', params);
+                                  self.bus.fireEvent(e);
+                             }
+                        }
                     );
 
 
-			   }
+               }
         }
     );
 
@@ -459,19 +479,19 @@ mol.modules.map.layers = function(mol) {
                 return $(this).find('#{0}'.format(layer.id));
             },
 
-			   getLayerById: function(id) {
-				    return _.find(this.layers, function(layer){ return layer.id === id; });
-			   },
+               getLayerById: function(id) {
+                    return _.find(this.layers, function(layer){ return layer.id === id; });
+               },
 
             addLayer: function(layer) {
                 var ld = new mol.map.layers.LayerDisplay(layer);
                 this.list.append(ld);
-				this.layers.push(layer);
+                this.layers.push(layer);
                 return ld;
             },
 
             render: function(howmany, order) {
-				    var self = this;
+                    var self = this;
                 this.updateLayerNumber();
                 return this;
             },
@@ -479,16 +499,16 @@ mol.modules.map.layers = function(mol) {
             updateLayerNumber: function() {
                 var t = 0;
                 _(this.layers).each(function(a) {
-					if(a.enabled) t++;
-				});
+                    if(a.enabled) t++;
+                });
                 $(this).find('.layer_number').html(t + " LAYER"+ (t>1?'S':''));
             },
 
             sortLayers: function() {
                 var order = [];
                 $(this).find('.layerContainer').each(function(i, el) {
-					order.push($(el).attr('id'));
-				});
+                    order.push($(el).attr('id'));
+                });
                 this.bus.emit("map:reorder_layers", order);
             },
 
