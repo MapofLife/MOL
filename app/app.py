@@ -16,13 +16,13 @@ class BaseHandler(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), "templates", f)
         self.response.out.write(template.render(path, template_args))
 
-    def push_html(self, f):        
+    def push_html(self, f):
         path = os.path.join(os.path.dirname(__file__), "html", f)
         self.response.out.write(open(path, 'r').read())
 
 class MapPage(BaseHandler):
     def get(self):
-        self.render_template('map-index-template.html', 
+        self.render_template('map-index-template.html',
                              {'prod': PROD, 'r': random.random()})
 
 class TestPage(BaseHandler):
@@ -30,7 +30,7 @@ class TestPage(BaseHandler):
         self.render_template('design.html', {})
 
 application = webapp2.WSGIApplication(
-         [('/', MapPage),
+         [('/', MapPage), ('/.*',MapPage),
          ('/design', TestPage)],
          debug=True)
 
