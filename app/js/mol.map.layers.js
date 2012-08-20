@@ -476,7 +476,7 @@ mol.modules.map.layers = function(mol) {
             },
 
             getLayer: function(layer) {
-                return $(this).find('#{0}'.format(layer.id));
+                return $(this).find('#{0}'.format(escape(layer.id)));
             },
 
                getLayerById: function(id) {

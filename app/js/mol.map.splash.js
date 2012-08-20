@@ -78,6 +78,7 @@ mol.modules.map.splash = function(mol) {
             $(".ui-widget-overlay").live("click", function() {
                 self.display.dialog("close");
             });
+            this.map.setCenter(new google.maps.LatLng(0,-50));
         },
         /*
         *  Display a message for IE8- users.

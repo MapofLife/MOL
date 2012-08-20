@@ -242,8 +242,6 @@ mol.modules.map = function(mol) {
                     minLat: -85,
                     maxLat: 85,
                     mapTypeControl: false,
-                    //mapTypeControlOptions: {position: google.maps.ControlPosition.BOTTOM_LEFT},
-                    center: new google.maps.LatLng(0,-50),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     styles: [
                       {

@@ -47,13 +47,14 @@ mol.modules.map.boot = function(mol) {
                 $.post(
                 'cache/get',
                 {
-                    key: 'boot-results-08102012210-{0}'.format(self.term),
+                    key: 'boot-results-08102012210-{0}'.format(self.term), //number on the key is there to invalidate cache. Using date+time invalidated.
                     sql: this.sql.format(self.term)
                 },
                 function(response) {
                     var results = mol.services.cartodb.convert(response);
                     if (Object.keys(results.layers).length == 0) {
                         self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
+                        this.map.setCenter(new google.maps.LatLng(0,-50));
                     } else {
                         //parse the results
                         self.loadLayers(self.getLayersWithIds(results.layers));
@@ -68,9 +69,11 @@ mol.modules.map.boot = function(mol) {
          */
         loadLayers: function(layers) {
             if (Object.keys(layers).length < 25) {
-                this.bus.fireEvent(new mol.bus.Event('add-layers', {layers: layers}))
+                this.bus.fireEvent(new mol.bus.Event('add-layers', {layers: layers}));
+
             } else if (this.term != null) {
                 this.bus.fireEvent(new mol.bus.Event('search', {term: this.term}));
+                this.map.setCenter(new google.maps.LatLng(0,-50));
             }
         },
         /*
