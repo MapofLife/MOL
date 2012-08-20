@@ -173,6 +173,17 @@ mol.modules.map.query = function(mol) {
                                 }
                             );
                             self.bus.fireEvent(new mol.bus.Event('show-loading-indicator', {source : 'listradius'}));
+                            
+                            _.each(
+                                self.features,
+                                function(feature) {
+                                    if(feature.listWindow)
+                                    {
+                                        feature.listWindow.dialog("close");
+                                    }
+                                }
+                            )
+                            
                             self.getList(event.gmaps_event.latLng.lat(),event.gmaps_event.latLng.lng(),listradius, constraints, className);
                         }
                     }
@@ -191,7 +202,7 @@ mol.modules.map.query = function(mol) {
                             providers = [],
                             scientificnames = {},
                             years = [],
-                            infoWindow,
+                            listWindow,
                             latHem,
                             lngHem,
                             height,
@@ -262,14 +273,7 @@ mol.modules.map.query = function(mol) {
                                 content=$('' +
                                           '<div class="mol-Map-ListQueryInfoWindow" style="height:'+ height+'px">' +
                                           '    <div>' +
-                                          '        <b>' +
-                                          className +
-                                          '        </b>' +
-                                          listradius.radius/1000 + ' km around ' +
-                                          Math.abs(Math.round(listradius.center.lat()*1000)/1000) + '&deg;&nbsp;' + latHem + '&nbsp;' +
-                                          Math.abs(Math.round(listradius.center.lng()*1000)/1000) + '&deg;&nbsp;' + lngHem + ':<br>' +
-                                          speciestotal + ' '+
-                                          stats +
+                                                   stats +
                                           '        <br>' +
                                           '        Data type/source:&nbsp;' + providers.join(', ') + '.&nbsp;All&nbsp;seasonalities.<br>' +
                                           '        <a href="http://mol.cartodb.com/api/v2/sql?q='+event.sql+'&format=csv">download csv</a>' +
@@ -295,42 +299,48 @@ mol.modules.map.query = function(mol) {
                                             '</div>');
                             }
 
-                            infoWindow= new google.maps.InfoWindow(
-                                {
-                                    content: content[0],
-                                    position: listradius.center,
-                                    height: height+100,
-                                    maxWidth:800
-                                }
-                            );
+                            listWindow = new mol.map.query.listDisplay();
+                            listWindow.html(content[0]);
 
                             self.features[listradius.center.toString()+listradius.radius] = {
                                 listradius : listradius,
-                                infoWindow : infoWindow
+                                listWindow : listWindow
                             };
-
-                            google.maps.event.addListener(
-                                infoWindow,
-                                "closeclick",
-                                function (event) {
-                                    listradius.setMap(null);
-                                    delete(self.features[listradius.center.toString()+listradius.radius]);
-                                }
-                            );
-
+                            
+                            listWindow.dialog({
+                                autoOpen: true,
+                                width: 680,
+                                height: 380,
+                                dialogClass: 'mol-Map-ListDialog',
+                                modal: false,
+                                title: speciestotal + ' species of ' + className + ' within ' + listradius.radius/1000 + ' km of ' + 
+                                    Math.abs(Math.round(listradius.center.lat()*1000)/1000) + '&deg;&nbsp;' + latHem + '&nbsp;' + 
+                                    Math.abs(Math.round(listradius.center.lng()*1000)/1000) + '&deg;&nbsp;' + lngHem
+                            });
+                                                      
+                            $(".mol-Map-ListDialog").parent().bind("resize", function(){ 
+                                $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-75); 
+                            });
+                            
                             self.features[listradius.center.toString()+listradius.radius] = {
                                 listradius : listradius,
-                                infoWindow : infoWindow
+                                listWindow : listWindow
                             };
 
-                            infoWindow.open(self.map);
+                            $(listWindow).dialog({
+                               beforeClose: function(evt, ui) {
+                                   $(".mol-Map-ListDialogContent").remove();
+                                   listradius.setMap(null);
+                                   delete (self.features[listradius.center.toString() + listradius.radius]);
+                               }
+                            });
 
-                            $(".tablesorter", $(infoWindow.content)).tablesorter(
+                            $(".tablesorter", $(listWindow)).tablesorter(
                                 { headers: { 0: { sorter: false}}, widthFixed: true}
                             );
 
                             _.each(
-                                $('.mapit',$(infoWindow.content)),
+                                $('.mapit',$(listWindow)),
                                 function(button) {
                                     $(button).click(
                                         function(event) {
@@ -341,7 +351,7 @@ mol.modules.map.query = function(mol) {
                             );
 
                             _.each(
-                                $('.eol', $(infoWindow.content)),
+                                $('.eol', $(listWindow)),
                                 function(button) {
                                     if (button.value == '' || button.value == 'null') {
                                         $(button).click(
@@ -362,7 +372,7 @@ mol.modules.map.query = function(mol) {
                             );
 
                             _.each(
-                                $('.wiki',$(infoWindow.content)),
+                                $('.wiki',$(listWindow)),
                                 function(wiki) {
                                     $(wiki).click(
                                         function(event) {
@@ -374,7 +384,7 @@ mol.modules.map.query = function(mol) {
                             );
 
                             _.each(
-                                $('.iucn',$(infoWindow.content)),
+                                $('.iucn',$(listWindow.content)),
                                 function(iucn) {
                                     if ($(iucn).data('scientificname') != '') {
                                         $(iucn).click(
@@ -407,7 +417,7 @@ mol.modules.map.query = function(mol) {
                                 self.features,
                                 function(feature) {
                                     feature.listradius.setMap(self.map);
-                                    feature.infoWindow.setMap(self.map);
+                                    feature.listWindow.setMap(self.map);
                                 }
                             );
                         } else {
@@ -415,8 +425,11 @@ mol.modules.map.query = function(mol) {
                             _.each(
                                 self.features,
                                 function(feature) {
+                                    if(feature.listWindow)
+                                    {
+                                        feature.listWindow.dialog("close");
+                                    }
                                     feature.listradius.setMap(null);
-                                    feature.infoWindow.setMap(null);
                                 }
                             );
                         }
@@ -505,4 +518,13 @@ mol.modules.map.query = function(mol) {
             }
         }
     );
+    
+    mol.map.query.listDisplay = mol.mvp.View.extend({
+        init : function() {
+            var html = '' + 
+                '<div class="mol-Map-ListDialogContent">' +
+                '</div>';
+            this._super(html);
+        }
+    });
 };
