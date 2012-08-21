@@ -224,7 +224,8 @@ div#content .person{
     color: #fff;
     font-size: 1.2em;
     text-align: justify;
-    min-height: 272px;
+/*  min-height: 272px;      <-- This is ideal. */
+    min-height: 325px;
 }
 
 div#content .person.partner {
