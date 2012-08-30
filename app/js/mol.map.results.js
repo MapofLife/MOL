@@ -65,8 +65,7 @@ mol.modules.map.results = function(mol) {
                         layers = _.map(
                             checkedResults,
                             function(result) {
-                                var id = $(result).find('.result').attr('id');
-                                return mol.core.getLayerFromId(id);
+                                return $.data(result[0],"layer");
                             }
                         );
                         if(self.map.overlayMapTypes.length + layers.length > 100) {
@@ -175,14 +174,14 @@ mol.modules.map.results = function(mol) {
                     // TODO: Wire up results.
                         result.source.click(
                             function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { type: result.layerObj.type, provider: result.layerObj.source, _class: result.layerObj._class, name: result.layerObj.name }}));
+                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { type: $.data(result[0],'layer').type, provider: $.data(result[0],'layer').source, _class: $.data(result[0],'layer')._class, name: $.data(result[0],'layer').name }}));
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }
                         );
                         result.type.click(
                             function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { type: result.layerObj.type}}));
+                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { type: $.data(result[0],'layer').type}}));
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }
@@ -394,17 +393,7 @@ mol.modules.map.results = function(mol) {
                 return _.map(
                     layers,
                     function(layer) {
-                        var id = layer.id,
-                            name = layer.name,
-                            source = layer.source,
-                            type = layer.type,
-                            names = layer.names,
-                            feature_count = layer.feature_count,
-                            type_title = layer.type_title,
-                            source_title = layer.source_title,
-                            sourcetype = layer.sourcetype,
-                            result = new mol.map.results.ResultDisplay(name, id, source, type, names, feature_count, type_title, source_title, sourcetype);
-                            result.layerObj = layer;
+                        var result = new mol.map.results.ResultDisplay(layer);
                         this.resultList.append(result);
                         return result;
                     },
@@ -470,7 +459,7 @@ mol.modules.map.results = function(mol) {
      */
     mol.map.results.ResultDisplay = mol.mvp.View.extend(
         {
-            init: function(name, id, source, type, names, feature_count, type_title, source_title) {
+            init: function(layer) {
                 var self=this, html = '' +
                     '<div>' +
                     '<ul id="{0}" class="result">' +
@@ -490,15 +479,13 @@ mol.modules.map.results = function(mol) {
                     '<div class="break"></div>' +
                     '</div>';
 
-                this._super(html.format(id, name, source, type, names, feature_count, type_title, source_title));
-
+                this._super(html.format(layer.id, layer.name, layer.source, layer.type, layer.names, layer.feature_count, layer.type_title, layer.source_title));
+                $.data(this[0],'layer',layer);
                 this.infoLink = $(this).find('.info');
                 this.nameBox = $(this).find('.resultName');
                 this.source = $(this).find('.source');
                 this.type = $(this).find('.type');
                 this.checkbox = $(this).find('.checkbox');
-                //this.customCheck = $(this).find('.customCheck');
-
             }
         }
     );

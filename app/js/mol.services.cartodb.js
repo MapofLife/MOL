@@ -287,19 +287,7 @@ mol.modules.services.cartodb = function(mol) {
                 for (i in rows) {
                     row = rows[i];
                     key = i + '';
-                    layers[key] = {
-                        name: row.name.charAt(0).toUpperCase()+row.name.slice(1).toLowerCase(),
-                        source: row.source.toLowerCase(),
-                        type: row.type.toLowerCase(),
-                        // This removes duplicates:
-                        names: (row.names != undefined) ? _.uniq(row.names.split(', ')).join(', ') : '',
-                        feature_count: row.feature_count,
-                        type_title: row.type_title,
-                        source_title: row.source_title,
-                        sourcetype : row.sourcetype,
-                        _class: row._class,
-                        extent: row.extent
-                    };
+                    layers[key] = row;
                 }
                 return layers;
             },
