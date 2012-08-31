@@ -18,13 +18,7 @@ mol.modules.map.layers = function(mol) {
                 this.display.toggle(false);
             },
 
-            /**
-             * Handler a layer-opacity event. This handler only does something
-             * when the event.opacity is undefined. This is to support layer
-             * toggling with opacity only (instead of removing overlays from
-             * the map). In this case, the opacity from the layer widget is
-             * bubbled to a new layer-opacity event that gets fired on the bus.
-             */
+
             addEventHandlers: function() {
                 var self = this;
                 this.display.removeAll.click (
@@ -178,6 +172,8 @@ mol.modules.map.layers = function(mol) {
                         opacity: parseFloat(l.opacity.slider("value"))
                     },
 
+                    layer.opacity = params.opacity; //store the opacity on the layer object
+
                     e = new mol.bus.Event('layer-opacity', params);
 
                     self.bus.fireEvent(e);
@@ -205,6 +201,7 @@ mol.modules.map.layers = function(mol) {
                         self.bus.fireEvent(new mol.bus.Event('show-layer-display-toggle'));
 
                         // Set initial opacity based on layer type.
+                        //TODO, pull this from the types metadata table instead (issue #125)
                         switch (layer.type) {
                         case 'points':
                             opacity = 1.0;
@@ -219,7 +216,7 @@ mol.modules.map.layers = function(mol) {
                             opacity = .5;
                             break;
                         }
-
+                        layer.opacity = opacity;
                         //disable interactivity to start
                         self.map.overlayMapTypes.forEach(
                                     function(mt) {
@@ -233,7 +230,7 @@ mol.modules.map.layers = function(mol) {
 
                         // Opacity slider change handler.
                         l.opacity.bind("slide",self.opacityHandler(layer, l));
-                        l.opacity.slider("value",opacity);
+                        l.opacity.slider("value",layer.opacity);
 
                         // Close handler for x button fires a 'remove-layers' event.
                         l.close.click(
@@ -270,6 +267,20 @@ mol.modules.map.layers = function(mol) {
                                 }
                                 self.map.fitBounds(bounds);
 
+                                event.stopPropagation();
+                                event.cancelBubble = true;
+                            }
+                        );
+                        // Click handler for style toggle button fires 'apply-layer-style'
+                        //TODO replace with a style picker widget (issue #124)
+                        l.styler.click(
+                            function(event) {
+                                var params = {
+                                        layer: layer,
+                                        style: (layer.style) ? '' : '#polygons {polygon-fill:gray}' //turns the layer gray, or goes back to default style.
+                                };
+                                self.bus.fireEvent(new mol.bus.Event('apply-layer-style', params));
+                                layer.style = params.style; // keep the style around for later
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }
@@ -418,7 +429,7 @@ mol.modules.map.layers = function(mol) {
                     '    <input class="keycatcher" type="text" />' +
                     '    <button title="Remove layer." class="close">x</button>' +
                     '    <button title="Zoom to layer extent." class="zoom">z</button>' +
-                    //'    <button title="Layer metadata info." class="info">i</button>' +
+                    '    <button title="Layer styler." class="styler">s</button>' +
                     '    <label class="buttonContainer"><input class="toggle" type="checkbox"><span title="Toggle layer visibility." class="customCheck"></span></label>' +
                     '    <div class="opacityContainer"><div class="opacity"/></div>' +
                     '  </div>' +
@@ -429,6 +440,7 @@ mol.modules.map.layers = function(mol) {
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();
+                this.styler = $(this).find('.styler');
                 this.zoom = $(this).find('.zoom');
                 this.info = $(this).find('.info');
                 this.close = $(this).find('.close');

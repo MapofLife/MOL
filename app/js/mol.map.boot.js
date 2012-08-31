@@ -7,7 +7,7 @@ mol.modules.map.boot = function(mol) {
             this.proxy = proxy;
             this.bus = bus;
             this.IE8 = false;
-            this.sql = '' +
+            this.sql = '' + //TODO replace with postgres function (issue #126)
                 'SELECT DISTINCT l.scientificname as name,'+
                 '       l.type as type,'+
                 '       t.title as type_title,'+

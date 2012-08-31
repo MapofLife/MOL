@@ -120,6 +120,46 @@ mol.modules.map.tiles = function(mol) {
                 );
 
                 /**
+                 * Handler for applying cartocss style to a layer.
+                 */
+                this.bus.addHandler(
+                    'apply-layer-style',
+                    function(event) {
+                        var layer = event.layer,
+                            style = event.style;
+
+                        if(layer.type == 'points') {
+                            return;
+                        }
+
+                        self.map.overlayMapTypes.forEach(
+                            function(maptype, index) {
+                                //find the overlaymaptype to style
+                                if (maptype.name === layer.id) {
+                                    //remove it from the map
+                                    self.map.overlayMapTypes.removeAt(index);
+                                    //add the style
+                                    layer.tile_style = style;
+                                    //make the layer
+                                    self.getTile(layer);
+                                    //fix the layer order
+                                    self.map.overlayMapTypes.forEach(
+                                        function(newmaptype, newindex) {
+                                            var mt;
+                                            if(newmaptype.name === layer.id) {
+                                                mt = self.map.overlayMapTypes.removeAt(newindex);
+                                                self.map.overlayMapTypes.insertAt(index, mt);
+                                                return
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        );
+                    }
+                );
+
+                /**
                  * Handler for when the add-layers event is fired. This renders
                  * the layers on the map by firing a add-map-layer event. The
                  * event.layers is an array of layer objects {name:, type:}.
@@ -259,6 +299,7 @@ mol.modules.map.tiles = function(mol) {
                 }
                 maptype.layer.params.layer.onbeforeload = function (){self.bus.fireEvent(new mol.bus.Event("show-loading-indicator",{source : layer.id}))};
                 maptype.layer.params.layer.onafterload = function (){self.bus.fireEvent(new mol.bus.Event("hide-loading-indicator",{source : layer.id}))};
+                return maptype.layer;
             },
 
             /**
@@ -308,11 +349,9 @@ mol.modules.map.tiles = function(mol) {
             init: function(layer, table, map) {
                 var sql =  "SELECT * FROM {0} where scientificname = '{1}' and type = '{2}' and provider = '{3}'",
                     opacity = layer.opacity && table !== 'points' ? layer.opacity : null,
-                    tile_style = opacity ? "#{0}{polygon-fill:#99cc00;}".format(table, opacity) : null,
                     hostname = 'dtredc0xh764j.cloudfront.net',//window.location.hostname,
                     style_table_name = table,
-                    info_query = sql;
-                    tile_style =  null,
+                    info_query = sql,
                     infowindow = true;
 
                 if (layer.type === 'points') {
@@ -334,6 +373,7 @@ mol.modules.map.tiles = function(mol) {
                 this.layer = new google.maps.CartoDBLayer(
                     {
                         tile_name: layer.id,
+                        tile_style: layer.tile_style,
                         hostname: hostname,
                         map_canvas: 'map_container',
                         map: map,
@@ -343,10 +383,9 @@ mol.modules.map.tiles = function(mol) {
                         style_table_name: style_table_name,
                         query: sql,
                         info_query: info_query,
-                        tile_style: tile_style,
                         map_style: false,
                         infowindow: infowindow,
-                        opacity: 0.5
+                        opacity: layer.opacity
                     }
                 );
             }
