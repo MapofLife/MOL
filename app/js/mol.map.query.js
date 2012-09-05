@@ -196,6 +196,8 @@ mol.modules.map.query = function(mol) {
                     'species-list-query-results',
                     function (event) {
                         var content,
+                            dlContent,
+                            iucnContent,
                             className,
                             listradius  = event.listradius,
                             tablerows = [],
@@ -210,19 +212,39 @@ mol.modules.map.query = function(mol) {
                             stats,
                             speciestotal = 0,
                             speciesthreatened = 0,
-                            speciesdd = 0;
+                            speciesdd = 0,
+                            iucnlist,
+                            iucndata,
+                            options,
+                            chart;
 
                         // TODO: This if statement is insane. Need to break this apart into functions. See Github issue #114
                         if (!event.response.error) {
                             className = event.className;
                             latHem = (listradius.center.lat() > 0) ? 'N' : 'S';
                             lngHem = (listradius.center.lng() > 0) ? 'E' : 'W';
+                            
                             _.each(
                                 event.response.rows,
                                 function(row) {
                                     var english = (row.english != null) ? _.uniq(row.english.split(',')).join(',') : '',
                                         year = (row.year_assessed != null) ? _.uniq(row.year_assessed.split(',')).join(',') : '',
-                                        redlist = (row.redlist != null) ? _.uniq(row.redlist.split(',')).join(',') : '';
+                                        redlist = (row.redlist != null) ? _.uniq(row.redlist.split(',')).join(',') : '',
+                                        tclass = "";
+                                        
+                                    //create a class for the three threatened iucn classes
+                                    //this will be used in the list formatting, in the near future
+                                    switch(redlist) {
+                                        case "VU":
+                                            tclass = "iucnvu";
+                                            break;
+                                        case "EN":
+                                            tclass = "iucnen";
+                                            break;
+                                        case "CR":
+                                            tclass = "iucncr";
+                                            break;
+                                    }
 
                                     tablerows.push("" +
                                                    "<tr><td>" +
@@ -265,28 +287,35 @@ mol.modules.map.query = function(mol) {
                                 }
                             );
 
-                            height = (90 + 22*speciestotal < 300) ? 90 + 22*speciestotal : 300;
-
                             stats = (speciesthreatened > 0) ? ('('+speciesthreatened+' considered threatened by <a href="http://www.iucnredlist.org" target="_iucn">IUCN</a> '+years.join(',')+')') : '';
 
                             if (speciestotal > 0) {
-                                content=$('' +
-                                          '<div class="mol-Map-ListQueryInfoWindow" style="height:'+ height+'px">' +
-                                          '    <div>' +
-                                                   stats +
-                                          '        <br>' +
-                                          '        Data type/source:&nbsp;' + providers.join(', ') + '.&nbsp;All&nbsp;seasonalities.<br>' +
-                                          '        <a href="http://mol.cartodb.com/api/v2/sql?q='+event.sql+'&format=csv">download csv</a>' +
-                                          '    </div> ' +
-                                          '    <div> ' +
-                                          '        <table class="tablesorter">' +
-                                          '            <thead><tr><th></th><th>Scientific Name</th><th>English Name</th><th>Order</th><th>Family</th><th>Rank&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>IUCN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th></tr></thead>' +
-                                          '            <tbody class="tablebody">' +
-                                          tablerows.join('') +
-                                          '            </tbody>' +
-                                          '        </table>' +
-                                          '    </div>' +
-                                          '</div>');
+                                content = $('' +
+                                            '<div class="mol-Map-ListQueryInfoWindow">' +
+                                            '   <div>' + 
+                                                   'Data type/source:&nbsp;' + providers.join(', ') + '.&nbsp;All&nbsp;seasonalities.<br>' +
+                                            '   </div> ' +
+                                            '   <div> ' +
+                                            '       <table class="tablesorter">' +
+                                            '           <thead><tr><th></th><th>Scientific Name</th><th>English Name</th><th>Order</th><th>Family</th><th>Rank&nbsp;&nbsp;&nbsp;</th><th>IUCN&nbsp;&nbsp;</th></tr></thead>' +
+                                            '           <tbody class="tablebody">' +
+                                                            tablerows.join('') +
+                                            '           </tbody>' +
+                                            '       </table>' +
+                                            '   </div>' +
+                                            '</div>');
+                                    
+                                dlContent = $('' + 
+                                              '<div class="mol-Map-ListQueryInfoWindow">' +
+                                              '   <div>' +
+                                              '       <a href="http://mol.cartodb.com/api/v2/sql?q='+event.sql+'&format=csv" class="mol-Map-ListQueryDownload">download csv</a>' +
+                                              '   </div> ' +
+                                              '</div>');
+                                    
+                                iucnContent = $('' + 
+                                                '<div class="mol-Map-ListQueryInfoWindow">' +
+                                                '    <div id="iucnChartDiv"></div>' + stats +
+                                                '</div>');    
                             } else {
                                 content = $(''+
                                             '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
@@ -297,10 +326,19 @@ mol.modules.map.query = function(mol) {
                                             Math.abs(Math.round(listradius.center.lng()*1000)/1000) + '&deg;&nbsp;' + lngHem +
                                             '       </b>' +
                                             '</div>');
+                                            
+                                dlContent = $('' + 
+                                              '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
+                                              '    <b>No list to download</b>' +
+                                              '</div>');
+                                    
+                                iucnContent = $('' +
+                                                '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
+                                                '    <b>No species found.</b>' +
+                                                '</div>');
                             }
 
                             listWindow = new mol.map.query.listDisplay();
-                            listWindow.html(content[0]);
 
                             self.features[listradius.center.toString()+listradius.radius] = {
                                 listradius : listradius,
@@ -319,7 +357,39 @@ mol.modules.map.query = function(mol) {
                             });
                                                       
                             $(".mol-Map-ListDialog").parent().bind("resize", function(){ 
-                                $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-75); 
+                                $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-115); 
+                            });
+                            
+                            $(function() {
+                                var listTabs = $("#tabs").tabs();
+                                
+                                $("#tabs > #listTab").html(content[0]);
+                                $("#tabs > #dlTab").html(dlContent[0]);
+                                $("#tabs > #iucnTab").html(iucnContent[0]);
+                                
+                                $(".mol-Map-ListQueryDownload").button();
+                                var mmlHeight = $(".mol-Map-ListDialog").height();
+                                $(".mol-Map-ListQueryInfoWindow").height(mmlHeight-115);
+                                
+                                //chart creation
+                                $("#iucnChartDiv").height(mmlHeight-130);
+
+                                iucnlist = self.getRedListCounts(event.response.rows);
+                                iucndata = google.visualization.arrayToDataTable(iucnlist);
+                        
+                                options = {
+                                    width: 605,
+                                    height: $("#iucnChartDiv").height(),
+                                    backgroundColor: 'transparent',
+                                    title: 'Species by IUCN Status',
+                                    colors: ['#006666', '#88c193', '#cc9900', '#cc6633', '#cc3333', '#FFFFFF', '#000000'],
+                                    chartArea: {left:125,top:25,width:"100%",height:"85%"}
+                                };
+                        
+                                chart = new google.visualization.PieChart(document.getElementById('iucnChartDiv'));
+                                chart.draw(iucndata, options);
+                                
+                                listTabs.tabs("select", 0);
                             });
                             
                             self.features[listradius.center.toString()+listradius.radius] = {
@@ -470,6 +540,53 @@ mol.modules.map.query = function(mol) {
                         }
                     }
                 );
+            },
+                    
+            /*
+             * Bins the IUCN species for a list query request into categories and returns an associate array with totals
+             */
+            getRedListCounts: function(rows) {
+                
+                var iucnListArray = [
+                        ['IUCN Status', 'Count'],
+                        ['LC',0],
+                        ['NT',0],
+                        ['VU',0],
+                        ['EN',0],
+                        ['CR',0],
+                        ['EW',0],
+                        ['EX',0]
+                    ], redlist;
+                
+                _.each(rows, function(row) {     
+                    redlist = (row.redlist != null) ? _.uniq(row.redlist.split(',')).join(',') : '';
+                        
+                    switch(redlist) {
+                        case "LC":
+                            iucnListArray[1][1]++;
+                            break;
+                        case "NT":
+                            iucnListArray[2][1]++;
+                            break;
+                        case "VU":
+                            iucnListArray[3][1]++;
+                            break;
+                        case "EN":
+                            iucnListArray[4][1]++;
+                            break;
+                        case "CR":
+                            iucnListArray[5][1]++;
+                            break;
+                        case "EW":
+                            iucnListArray[6][1]++;
+                            break;
+                        case "EX":
+                            iucnListArray[7][1]++;
+                            break;
+                    }           
+                });
+                
+                return iucnListArray;
             }
         }
     );
@@ -522,7 +639,17 @@ mol.modules.map.query = function(mol) {
     mol.map.query.listDisplay = mol.mvp.View.extend({
         init : function() {
             var html = '' + 
-                '<div class="mol-Map-ListDialogContent">' +
+                '<div class="mol-Map-ListDialogContent ui-tabs" id="tabs">' +
+                '   <ul class="ui-tabs-nav">' +
+                '      <li><a href="#listTab">List</a></li>' + 
+                '      <li><a href="#imagesTab">Images</a></li>' +
+                '      <li><a href="#iucnTab">IUCN</a></li>' + 
+                '      <li><a href="#dlTab">Download</a></li>' + 
+                '   </ul>' + 
+                '   <div id="listTab" class="ui-tabs-panel">Second Content.</div>' +
+                '   <div id="imagesTab" class="ui-tabs-panel"><div><span id="imgTotals"></span>Coming Soon. Source: <a href="http://eol.org/" target="_blank">Encyclopedia of Life</a></div><ul id="gallery" style="overflow: auto;"></ul></div>' +
+                '   <div id="iucnTab" class="ui-tabs-panel">Highlight of IUCN concern species. Coming Soon.</div>' +
+                '   <div id="dlTab" class="ui-tabs-panel">Download.</div>' +
                 '</div>';
             this._super(html);
         }
