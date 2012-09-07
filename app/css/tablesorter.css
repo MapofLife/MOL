@@ -1,49 +1,6 @@
-/* tables */
 /*
-table.tablesorter {
-    font-family:arial;
-    background-color: #CDCDCD;
-    font-size: 7pt;
-    width: 100%;
-    text-align: left;
-}
-table.tablesorter thead tr th, table.tablesorter tfoot tr th {
-    background-color: #e6EEEE;
-    border: 1px solid #FFF;
-    font-size: 8pt;
-    padding: 0px;
-}
-table.tablesorter thead tr .header {
-    background-image: url(../static/bg.gif);
-    background-repeat: no-repeat;
-    background-position: center right;
-    cursor: pointer;
-}
-
-table.tablesorter tbody td {
-    color: #3D3D3D;
-    background-color: #FFF;
-    vertical-align: top;
-    white-space: nowrap;
-}
-table.tablesorter tbody tr.odd td {
-    background-color:#F0F0F6;
-}
-table.tablesorter thead tr .headerSortUp {
-    background-image: url(../static/asc.gif);
-}
-table.tablesorter thead tr .headerSortDown {
-    background-image: url(../static/desc.gif);
-}
-table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-background-color: #8dbdd8;
-}
-*/
-
-/*
- * new table css
+ * species list table
  */
-
 
 table.tablesorter div.arrow {
     background: transparent url(../static/arrows.png) no-repeat scroll 0px -16px;
@@ -55,9 +12,11 @@ table.tablesorter div.arrow {
 table.tablesorter div.up {
     background-position: 0px 0px;
 }
+     
+/* 
+ * define table skin 
+ */
 
-        
-/* define table skin */
 table.tablesorter {
     margin: 0;
     padding: 0;
@@ -134,8 +93,45 @@ table.tablesorter td div em {
     font-style: italic;
 }
 
-
-/* expand/collapse */
 table.grid .collapsible {
     padding: 0 0 3px 0;
+}
+
+/*
+ * image gallery
+ */
+
+#gallery, #gallery ul{
+    list-style:none;
+    margin:0 auto;
+    padding:0;
+    height:259px;
+}
+
+#gallery li{
+    margin:0px 0px;
+    padding:4px;
+    float:left;
+    list-style:none;
+    cursor:pointer;
+    height:72px;
+}
+
+#gallery img, #gallery div {
+    border:2px white solid;
+}
+
+#imagesTab div, #gallery div {
+    font-style: normal;
+    font-weight: normal;
+    padding-top: 4px;
+    padding-left: 4px;
+}
+
+#imagesTab div {
+    font-size: 12px;
+}
+
+#gallery div {
+    font-size: 10px
 }

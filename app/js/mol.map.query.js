@@ -423,6 +423,11 @@ mol.modules.map.query = function(mol) {
                                 chart = new google.visualization.PieChart(document.getElementById('iucnChartDiv'));
                                 chart.draw(iucndata, options);
                                 
+                                /*
+                                 * Create image gallery
+                                 */
+                                self.createImageGallery(event.response.rows, speciestotal);
+                                
                                 listTabs.tabs("select", 0);
                             });
                             
@@ -546,7 +551,8 @@ mol.modules.map.query = function(mol) {
             },
                     
             /*
-             * Bins the IUCN species for a list query request into categories and returns an associate array with totals
+             * Bins the IUCN species for a list query request into categories 
+             * and returns an associate array with totals
              */
             getRedListCounts: function(rows) {
                 
@@ -591,6 +597,106 @@ mol.modules.map.query = function(mol) {
                 });
                 
                 return iucnListArray;
+            },
+            
+            /*
+             * Creates and populates image gallery tab
+             */
+            
+            createImageGallery: function (rows, sptotal) {
+                var hasImg = 0,
+                    english;
+                                            
+                _.each(
+                   rows,
+                    function(row) {
+                        english = (row.english != null) ? 
+                            _.uniq(row.english.split(',')).join(',') : '';
+                        
+                        if(row.eol_thumb_url != null) {
+                            $("#gallery").append('' + 
+                                '<li><a href="http://eol.org/pages/' + 
+                                row.eol_page_id + 
+                                '" target="_blank"><img src="' + 
+                                row.eol_thumb_url + 
+                                '" title="' + 
+                                english + 
+                                '" sci-name="' + 
+                                row.scientificname + '"/></a></li>');
+                                
+                            hasImg++;
+                        } else {
+                            $("#gallery").append('' + 
+                                '<li><div style="width:91px; height:68px"' + 
+                                'title="' + english + 
+                                '" sci-name="' + row.scientificname + 
+                                '">No image for ' + 
+                                english + '.</div></li>');
+                        }                      
+                    }
+                );
+                
+                $('#gallery').ppGallery({thumbWidth: 91, maxWidth: 635});
+                $('#imgTotals').html('' + 
+                                    'Images are available for ' + 
+                                    hasImg + ' of ' + sptotal + 
+                                    ' species. ');                        
+                
+                $('#gallery li a img').qtip({
+                    content: {
+                        text: function(api) {
+                            return '<div>' + $(this).attr('oldtitle') + 
+                                '<br/><button class="mapButton" value="' + 
+                                $(this).attr('sci-name') + 
+                                '">Map</button>' + 
+                                '<button class="eolButton" value="' + 
+                                $(this).parent().attr('href') + 
+                                '">EOL</button></div>';
+                        }
+                    },
+                    hide: {
+                        fixed: true,
+                        delay: 500
+                    },
+                    events: {
+                        visible: function(event, api) {                  
+                            $("button.mapButton").click(function(event) {
+                                self.bus.fireEvent(new mol.bus.Event('search', {
+                                    term : event.target.value
+                                }));
+                            });
+                            
+                            $('button.eolButton').click(function(event) {
+                                var win = window.open(event.target.value);
+                                win.focus();
+                            });
+                        }
+                    }
+                });
+                
+                $('#gallery li div').qtip({
+                    content: {
+                        text: function(api) {
+                            return '<div>' + $(this).attr('title') + 
+                                '<br/><button class="mapButton" value="' + 
+                                $(this).attr('sci-name') + 
+                                '">Map</button></div>';
+                        }
+                    },
+                    hide: {
+                        fixed: true,
+                        delay: 500
+                    },
+                    events: {
+                        visible: function(event, api) {                  
+                            $("button.mapButton").click(function(event) {
+                                self.bus.fireEvent(new mol.bus.Event('search', {
+                                    term : event.target.value
+                                }));
+                            });
+                        }
+                    }
+                });
             },
             
             /*
@@ -862,7 +968,7 @@ mol.modules.map.query = function(mol) {
                 '      <li><a href="#dlTab">Download</a></li>' + 
                 '   </ul>' + 
                 '   <div id="listTab" class="ui-tabs-panel">Content.</div>' +
-                '   <div id="imagesTab" class="ui-tabs-panel"><div><span id="imgTotals"></span>Coming Soon. Source: <a href="http://eol.org/" target="_blank">Encyclopedia of Life</a></div><ul id="gallery" style="overflow: auto;"></ul></div>' +
+                '   <div id="imagesTab" class="ui-tabs-panel"><div><span id="imgTotals"></span>Source: <a href="http://eol.org/" target="_blank">Encyclopedia of Life</a></div><ul id="gallery" style="overflow: auto;"></ul></div>' +
                 '   <div id="iucnTab" class="ui-tabs-panel">Highlight of IUCN concern species. Coming Soon.</div>' +
                 '   <div id="dlTab" class="ui-tabs-panel">Download.</div>' +
                 '</div>';
