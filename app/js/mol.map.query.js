@@ -32,7 +32,8 @@ mol.modules.map.query = function(mol) {
                     'LEFT JOIN synonym_metadata n ' +
                     '    ON p.scientificname = n.scientificname ' +
                     'LEFT JOIN taxonomy t ' +
-                    '    ON (p.scientificname = t.scientificname OR n.mol_scientificname = t.scientificname) ' +
+                    '    ON (p.scientificname = t.scientificname OR ' + 
+                    '        n.mol_scientificname = t.scientificname) ' +
                     'LEFT JOIN sequence_metadata s ' +
                     '    ON t.family = s.family ' +
                     'LEFT JOIN types dt ON ' +
@@ -40,7 +41,9 @@ mol.modules.map.query = function(mol) {
                     'LEFT JOIN providers pv ON ' +
                     '    p.provider = pv.provider ' +
                     'WHERE ' +
-                    '    ST_DWithin(p.the_geom_webmercator,ST_Transform(ST_PointFromText(\'POINT({0})\',4326),3857),{1}) ' + //radius test
+                    '    ST_DWithin(p.the_geom_webmercator,ST_Transform' +
+                    //radius test
+                    '    (ST_PointFromText(\'POINT({0})\',4326),3857),{1}) ' +
                     '    {2} ' + //other constraints
                     'ORDER BY s.sequenceid, p.scientificname asc';
 
@@ -61,7 +64,8 @@ mol.modules.map.query = function(mol) {
                     'LEFT JOIN synonym_metadata n ' +
                     '    ON p.scientificname = n.scientificname ' +
                     'LEFT JOIN taxonomy t ' +
-                    '    ON (p.scientificname = t.scientificname OR n.mol_scientificname = t.scientificname) ' +
+                    '    ON (p.scientificname = t.scientificname OR ' + 
+                    '        n.mol_scientificname = t.scientificname) ' +
                     'LEFT JOIN sequence_metadata s ' +
                     '    ON t.family = s.family ' +
                     'LEFT JOIN types dt ' +
@@ -69,7 +73,9 @@ mol.modules.map.query = function(mol) {
                     'LEFT JOIN providers pv ' +
                     '    ON p.provider = pv.provider ' +
                     'WHERE ' +
-                    '    ST_DWithin(p.the_geom_webmercator,ST_Transform(ST_PointFromText(\'POINT({0})\',4326),3857),{1}) ' + //radius test
+                    '    ST_DWithin(p.the_geom_webmercator,ST_Transform' + 
+                    //radius test
+                    '   (ST_PointFromText(\'POINT({0})\',4326),3857),{1}) ' +
                     '    {2} ' + //other constraints
                     'ORDER BY "Sequence ID", "Scientific Name" asc';
                 this.queryct=0;
@@ -94,28 +100,41 @@ mol.modules.map.query = function(mol) {
                 this.features={};
                 this.display = new mol.map.QueryDisplay();
                 params.display = this.display;
-                this.bus.fireEvent( new mol.bus.Event('add-map-control', params));
+                this.bus.fireEvent(new mol.bus.Event('add-map-control', params));
             },
             /*
-             *  Method to build and submit an AJAX call that retrieves species at a radius around a lat, long.
+             *  Method to build and submit an AJAX call that retrieves species 
+             *  at a radius around a lat, long.
              */
             getList: function(lat, lng, listradius, constraints, className) {
                 var self = this,
-                    sql = this.sql.format((Math.round(lng*100)/100+' '+Math.round(lat*100)/100), listradius.radius, constraints, 'polygons'),
-                    csv_sql = escape(this.csv_sql.format((Math.round(lng*100)/100+' '+Math.round(lat*100)/100), listradius.radius, constraints, 'polygons')),
+                    sql = this.sql.format(
+                        (Math.round(lng*100)/100+ ' ' +Math.round(lat*100)/100), 
+                        listradius.radius, 
+                        constraints, 
+                        'polygons'),
+                    csv_sql = escape(
+                        this.csv_sql.format(
+                            (Math.round(lng*100)/100+' '+Math.round(lat*100)/100), 
+                            listradius.radius, 
+                            constraints, 
+                            'polygons')),
                     params = {
                         sql:sql,
-                        key: '{0}'.format((lat+'-'+lng+'-'+listradius.radius+constraints))
+                        key: '{0}'.format(
+                            (lat+'-'+lng+'-'+listradius.radius+constraints))
                     };
 
                 if (self.queryct > 0) {
-                    alert('Please wait for your last species list request to complete before starting another.');
+                    alert('Please wait for your last species list request to ' + 
+                    'complete before starting another.');
                 } else {
                     self.queryct++;
                     $.post(
                         'cache/get',
                         {
-                            key: 'listq-{0}-{1}-{2}-{3}'.format(lat, lng, listradius.radius, constraints),
+                            key: 'listq-{0}-{1}-{2}-{3}'.format(
+                                lat, lng, listradius.radius, constraints),
                             sql:sql
                         },
                         function(data, textStatus, jqXHR) {
@@ -126,7 +145,8 @@ mol.modules.map.query = function(mol) {
                                 response:data,
                                 sql:csv_sql
                             },
-                            e = new mol.bus.Event('species-list-query-results', results);
+                            e = new mol.bus.Event('species-list-query-results', 
+                                results);
                             self.queryct--;
                             self.bus.fireEvent(e);
                         }
@@ -137,16 +157,20 @@ mol.modules.map.query = function(mol) {
             addEventHandlers : function () {
                 var self = this;
                 /*
-                 * Attach some rules to the ecoregion / range button-switch in the controls.
+                 * Attach some rules to the ecoregion / 
+                 * range button-switch in the controls.
                  */
                 _.each(
                     $('button',$(this.display.types)),
                     function(button) {
                         $(button).click(
                             function(event) {
-                                $('button',$(self.display.types)).removeClass('selected');
+                                $('button',$(self.display.types))
+                                    .removeClass('selected');
                                 $(this).addClass('selected');
-                                if ($(this).hasClass('range') && self.display.classInput.val().toLowerCase().indexOf('reptil') > 0) {
+                                if ($(this).hasClass('range') && 
+                                    self.display.classInput.val().
+                                        toLowerCase().indexOf('reptil') > 0) {
                                     alert('Available for North America only.');
                                 }
                             }
@@ -160,20 +184,26 @@ mol.modules.map.query = function(mol) {
                     'species-list-query-click',
                     function (event) {
                         var listradius,
-                            constraints = $(self.display.classInput).val() + $(".selected", $(self.display.types)).val(),
-                            className =  $("option:selected", $(self.display.classInput)).text();
+                            constraints = $(self.display.classInput).val() + 
+                                $(".selected", $(self.display.types)).val(),
+                            className =  $("option:selected", 
+                                $(self.display.classInput)).text();
 
                         if (self.enabled) {
                             listradius = new google.maps.Circle(
                                 {
                                     map: event.map,
-                                    radius: parseInt(self.display.radiusInput.val())*1000, // 50 km
+                                    radius: parseInt(
+                                        self.display.radiusInput.val())*1000, 
+                                        // 50 km
                                     center: event.gmaps_event.latLng,
                                     strokeWeight: 0,
                                     clickable:false
                                 }
                             );
-                            self.bus.fireEvent(new mol.bus.Event('show-loading-indicator', {source : 'listradius'}));
+                            self.bus.fireEvent(new mol.bus.Event(
+                                'show-loading-indicator', 
+                                {source : 'listradius'}));
                             
                             _.each(
                                 self.features,
@@ -185,300 +215,61 @@ mol.modules.map.query = function(mol) {
                                 }
                             )
                             
-                            self.getList(event.gmaps_event.latLng.lat(),event.gmaps_event.latLng.lng(),listradius, constraints, className);
+                            self.getList(
+                                event.gmaps_event.latLng.lat(),
+                                event.gmaps_event.latLng.lng(),
+                                listradius, 
+                                constraints, 
+                                className);
                         }
                     }
                 );
 
                 /*
-                 *  Assembles HTML for an species list InfoWindow given results from an AJAX call made in getList.
+                 *  Assembles HTML for an species list given results from 
+                 *  an AJAX call made in getList.
                  */
                 this.bus.addHandler(
                     'species-list-query-results',
                     function (event) {
-                        var content,
-                            dlContent,
-                            iucnContent,
-                            className,
+                        var className,
                             listradius  = event.listradius,
-                            tablerows = [],
-                            providers = [],
-                            scientificnames = {},
-                            years = [],
-                            listWindow,
                             latHem,
                             lngHem,
-                            height,
-                            redlistCt = {},
-                            stats,
-                            speciestotal = 0,
-                            speciesthreatened = 0,
-                            speciesdd = 0,
-                            listTabs,
-                            iucnlist,
-                            iucndata,
-                            options,
-                            chart;
+                            listRowsDone;
 
-                        // TODO: This if statement is insane. Need to break this apart into functions. See Github issue #114
                         if (!event.response.error) {
                             className = event.className;
                             latHem = (listradius.center.lat() > 0) ? 'N' : 'S';
                             lngHem = (listradius.center.lng() > 0) ? 'E' : 'W';
                             
-                            _.each(
+                            listRowsDone = self.processListRows(
+                                                listradius, 
+                                                latHem, 
+                                                lngHem, 
+                                                event.response.rows,
+                                                event.sql);
+
+                            self.displayListWindow(
+                                listradius, 
+                                listRowsDone.speciestotal, 
+                                className, 
+                                latHem, 
+                                lngHem, 
                                 event.response.rows,
-                                function(row) {
-                                    var english = (row.english != null) ? _.uniq(row.english.split(',')).join(',') : '',
-                                        year = (row.year_assessed != null) ? _.uniq(row.year_assessed.split(',')).join(',') : '',
-                                        redlist = (row.redlist != null) ? _.uniq(row.redlist.split(',')).join(',') : '',
-                                        tclass = "";
-                                        
-                                    //create a class for the three threatened iucn classes
-                                    //this will be used in the list formatting, in the near future
-                                    switch(redlist) {
-                                        case "VU":
-                                            tclass = "iucnvu";
-                                            break;
-                                        case "EN":
-                                            tclass = "iucnen";
-                                            break;
-                                        case "CR":
-                                            tclass = "iucncr";
-                                            break;
-                                    }
-
-                                    //list row header
-                                    tablerows.push(""+
-                                        "<tr class='" + tclass + "'>" + 
-                                        "   <td class='arrowBox'>" + 
-                                        "       <div class='arrow'></div>" + 
-                                        "   </td>" +
-                                        "   <td class='wiki sci' value='" + row.eol_thumb_url + "'>" + row.scientificname + "</td>" + 
-                                        "   <td class='wiki english' value='" + row.eol_media_url + "' eol-page='" + row.eol_page_id + "'>" + ((english != null) ? english : '') + "</td>" + 
-                                        "   <td class='wiki'>" + ((row.order != null) ? row.order : '')+ "</td>" + 
-                                        "   <td class='wiki'>" + ((row.family != null) ? row.family : '')+ "</td>" + 
-                                        "   <td>" + ((row.sequenceid != null) ? row.sequenceid : '')+ "</td>" + 
-                                        "   <td class='iucn' data-scientificname='" + row.scientificname + "'>" + ((redlist != null) ? redlist : '') + "</td>" + 
-                                        "</tr>");
-                                        
-                                    //list row collapsible content
-                                    tablerows.push("" + 
-                                        "<tr class='expand-child'>" + 
-                                        "   <td colspan='7' value='" + row.scientificname + "'></td>" + 
-                                        "</tr>");           
-                                                   
-                                    providers.push('<a class="type {0}">{1}</a>, <a class="provider {2}">{3}</a>'.format(row.type,row.type_title,row.provider,row.provider_title));
-                                    if (year != null && year != '') {
-                                        years.push(year);
-                                    }
-                                    scientificnames[row.scientificname]=redlist;
-                                }
-                            );
-                            years = _.uniq(years);
-                            tablerows = _.uniq(tablerows);
-                            providers = _.uniq(providers);
-
-                            years = _.sortBy(
-                                _.uniq(years),
-                                function(val) {
-                                    return val;
-                                }
-                            );
-
-                            years[years.length-1] = (years.length > 1) ? ' and '+years[years.length-1] : years[years.length-1];
-
-                            _.each(
-                                scientificnames,
-                                function(red_list_status) {
-                                    speciestotal++;
-                                    speciesthreatened += ((red_list_status.indexOf('EN')>=0) || (red_list_status.indexOf('VU')>=0) || (red_list_status.indexOf('CR')>=0) || (red_list_status.indexOf('EX')>=0) || (red_list_status.indexOf('EW')>=0) )  ? 1 : 0;
-                                    speciesdd += (red_list_status.indexOf('DD')>0)  ? 1 : 0;
-                                }
-                            );
-
-                            stats = (speciesthreatened > 0) ? ('('+speciesthreatened+' considered threatened by <a href="http://www.iucnredlist.org" target="_iucn">IUCN</a> '+years.join(',')+')') : '';
-
-                            if (speciestotal > 0) {
-                                content = $('' +
-                                            '<div class="mol-Map-ListQueryInfoWindow">' +
-                                            '   <div>' + 
-                                                   'Data type/source:&nbsp;' + providers.join(', ') + '.&nbsp;All&nbsp;seasonalities.<br>' +
-                                            '   </div> ' +
-                                            '   <div> ' +
-                                            '       <table class="tablesorter">' +
-                                            '           <thead><tr><th></th><th>Scientific Name</th><th>English Name</th><th>Order</th><th>Family</th><th>Rank&nbsp;&nbsp;&nbsp;</th><th>IUCN&nbsp;&nbsp;</th></tr></thead>' +
-                                            '           <tbody class="tablebody">' +
-                                                            tablerows.join('') +
-                                            '           </tbody>' +
-                                            '       </table>' +
-                                            '   </div>' +
-                                            '</div>');
-                                    
-                                dlContent = $('' + 
-                                              '<div class="mol-Map-ListQueryInfoWindow">' +
-                                              '   <div>' +
-                                              '       <a href="http://mol.cartodb.com/api/v2/sql?q='+event.sql+'&format=csv" class="mol-Map-ListQueryDownload">download csv</a>' +
-                                              '   </div> ' +
-                                              '</div>');
-                                    
-                                iucnContent = $('' + 
-                                                '<div class="mol-Map-ListQueryInfoWindow">' +
-                                                '    <div id="iucnChartDiv"></div>' + stats +
-                                                '</div>');    
-                            } else {
-                                content = $(''+
-                                            '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
-                                            '    <b>' +
-                                            '        No ' + className.replace(/All/g, '') + ' species found within ' +
-                                            listradius.radius/1000 + ' km of ' +
-                                            Math.abs(Math.round(listradius.center.lat()*1000)/1000) + '&deg;&nbsp;' + latHem + '&nbsp;' +
-                                            Math.abs(Math.round(listradius.center.lng()*1000)/1000) + '&deg;&nbsp;' + lngHem +
-                                            '       </b>' +
-                                            '</div>');
-                                            
-                                dlContent = $('' + 
-                                              '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
-                                              '    <b>No list to download</b>' +
-                                              '</div>');
-                                    
-                                iucnContent = $('' +
-                                                '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
-                                                '    <b>No species found.</b>' +
-                                                '</div>');
-                            }
-
-                            listWindow = new mol.map.query.listDisplay();
-
-                            self.features[listradius.center.toString()+listradius.radius] = {
-                                listradius : listradius,
-                                listWindow : listWindow
-                            };
-                            
-                            listWindow.dialog({
-                                autoOpen: true,
-                                width: 680,
-                                height: 380,
-                                dialogClass: 'mol-Map-ListDialog',
-                                modal: false,
-                                title: speciestotal + ' species of ' + className + ' within ' + listradius.radius/1000 + ' km of ' + 
-                                    Math.abs(Math.round(listradius.center.lat()*1000)/1000) + '&deg;&nbsp;' + latHem + '&nbsp;' + 
-                                    Math.abs(Math.round(listradius.center.lng()*1000)/1000) + '&deg;&nbsp;' + lngHem
-                            });
-                                                      
-                            $(".mol-Map-ListDialog").parent().bind("resize", function(){ 
-                                $(".mol-Map-ListQueryInfoWindow").height($(".mol-Map-ListDialog").height()-115); 
-                            });
-                            
-                            //tabs() function needs document ready to
-                            //have been called on the dialog content
-                            $(function() {
-                                var mmlHeight;
-                                
-                                //initialize tabs and set height
-                                listTabs = $("#tabs").tabs();
-                                
-                                $("#tabs > #listTab").html(content[0]);
-                                $("#tabs > #dlTab").html(dlContent[0]);
-                                $("#tabs > #iucnTab").html(iucnContent[0]);
-                                
-                                $(".mol-Map-ListQueryDownload").button();
-                                mmlHeight = $(".mol-Map-ListDialog").height();
-                                $(".mol-Map-ListQueryInfoWindow").height(mmlHeight-115);
-                                
-                                //list table creation
-                                $("table.tablesorter tr:odd").addClass("master");
-                                $("table.tablesorter tr:not(.master)").hide();
-                                $("table.tablesorter tr:first-child").show();                      
-                                $("table.tablesorter tr.master td.arrowBox").click(function(){                            
-                                    $(this).parent().next("tr").toggle();
-                                    $(this).parent().find(".arrow").toggleClass("up");
-                                    
-                                    if(!$(this).parent().hasClass('hasWiki'))
-                                    {
-                                        $(this).parent().addClass('hasWiki');
-                                        self.callWiki($(this).parent());
-                                    }
-                                        
-                                });
-                                $(".tablesorter", $(listWindow)).tablesorter({
-                                    sortList: [[5,0]] 
-                                });
-                                
-                                //chart creation
-                                $("#iucnChartDiv").height(mmlHeight-130);
-
-                                iucnlist = self.getRedListCounts(event.response.rows);
-                                iucndata = google.visualization.arrayToDataTable(iucnlist);
-                        
-                                options = {
-                                    width: 605,
-                                    height: $("#iucnChartDiv").height(),
-                                    backgroundColor: 'transparent',
-                                    title: 'Species by IUCN Status',
-                                    colors: ['#006666', '#88c193', '#cc9900', '#cc6633', '#cc3333', '#FFFFFF', '#000000'],
-                                    chartArea: {left:125,top:25,width:"100%",height:"85%"}
-                                };
-                        
-                                chart = new google.visualization.PieChart(document.getElementById('iucnChartDiv'));
-                                chart.draw(iucndata, options);
-                                
-                                /*
-                                 * Create image gallery
-                                 */
-                                self.createImageGallery(event.response.rows, speciestotal);
-                                
-                                listTabs.tabs("select", 0);
-                            });
-                            
-                            self.features[listradius.center.toString()+listradius.radius] = {
-                                listradius : listradius,
-                                listWindow : listWindow
-                            };
-
-                            $(listWindow).dialog({
-                               beforeClose: function(evt, ui) {
-                                   listTabs.tabs("destroy");
-                                   $(".mol-Map-ListDialogContent").remove();
-                                   listradius.setMap(null);
-                                   delete (self.features[listradius.center.toString() + listradius.radius]);
-                               }
-                            });
-
-                            _.each(
-                                $('.wiki',$(listWindow)),
-                                function(wiki) {
-                                    $(wiki).click(
-                                        function(event) {
-                                            var win = window.open('' + 
-                                                'http://en.wikipedia.com/wiki/' +
-                                                $(this).text().split(',')[0].replace(/ /g, '_'));
-                                            win.focus();
-                                        }
-                                    );
-                                }
-                            );
-
-                            _.each(
-                                $('.iucn',$(listWindow)),
-                                function(iucn) {
-                                    if ($(iucn).data('scientificname') != '') {
-                                        $(iucn).click(
-                                            function(event) {
-                                                var win = window.open('' + 
-                                                'http://www.iucnredlist.org/apps/redlist/search/external?text=' 
-                                                +$(this).data('scientificname'));
-                                                win.focus();
-                                            }
-                                        );
-                                    }
-                                }
-                            );
+                                listRowsDone.content,
+                                listRowsDone.dlContent,
+                                listRowsDone.iucnContent);
                         } else {
                             listradius.setMap(null);
-                            delete(self.features[listradius.center.toString()+listradius.radius]);
+                            delete(
+                                self.features[listradius.center.toString()+
+                                              listradius.radius]);
                         }
-                        self.bus.fireEvent( new mol.bus.Event('hide-loading-indicator', {source : 'listradius'}));
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : 'listradius'}));
                     }
                 );
 
@@ -530,24 +321,329 @@ mol.modules.map.query = function(mol) {
                 this.display.classInput.change(
                     function(event) {
                         if ($(this).val().toLowerCase().indexOf('fish') > 0) {
-                            $(self.display.types).find('.ecoregion').toggle(false);
-                            $(self.display.types).find('.ecoregion').removeClass('selected');
-                            if ($(self.display.types).find('.range').hasClass('selected')) {
-                                alert('Available for North America only.');
+                            $(self.display.types).find('.ecoregion')
+                                .toggle(false);
+                            $(self.display.types).find('.ecoregion')
+                                .removeClass('selected');
+                            if ($(self.display.types).find('.range')
+                                .hasClass('selected')) {
+                                    alert('Available for North America only.');
                             };
                         } else if ($(this).val().toLowerCase().indexOf('reptil') > 0) {
-                            $(self.display.types).find('.ecoregion').toggle(true);
-                            $(self.display.types).find('.ecoregion').removeClass('selected');
-                            if ($(self.display.types).find('.range').hasClass('selected')) {
-                                alert('Available for North America only.');
+                            $(self.display.types).find('.ecoregion')
+                                .toggle(true);
+                            $(self.display.types).find('.ecoregion')
+                                .removeClass('selected');
+                            if ($(self.display.types).find('.range')
+                                .hasClass('selected')) {
+                                    alert('Available for North America only.');
                             };
                         } else {
-                            $(self.display.types).find('.ecoregion').toggle(false);
-                            $(self.display.types).find('.range').toggle(true);
-                            $(self.display.types).find('.range').addClass('selected');
+                            $(self.display.types).find('.ecoregion')
+                                .toggle(false);
+                            $(self.display.types).find('.range')
+                                .toggle(true);
+                            $(self.display.types).find('.range')
+                                .addClass('selected');
                         }
                     }
                 );
+            },
+            
+            /*
+             * Processes response content for List dialog
+             */
+            processListRows: function(listrad, latH, lngH, rows, sqlurl) {
+                var self = this,
+                    listradius = listrad,
+                    latHem = latH,
+                    lngHem = lngH,
+                    tablerows = [],
+                    providers = [],
+                    scientificnames = {},
+                    years = [],
+                    redlistCt = {},
+                    stats,
+                    speciestotal = 0,
+                    speciesthreatened = 0,
+                    speciesdd = 0;
+                
+                _.each(
+                    rows,
+                    function(row) {
+                        var english = (row.english != null) ? 
+                                _.uniq(row.english.split(',')).join(',') : '',
+                            year = (row.year_assessed != null) ? 
+                                _.uniq(row.year_assessed.split(',')).join(',') : '',
+                            redlist = (row.redlist != null) ? 
+                                _.uniq(row.redlist.split(',')).join(',') : '',
+                            tclass = "";
+                            
+                        //create class for 3 threatened iucn classes                                    
+                        switch(redlist) {
+                            case "VU":
+                                tclass = "iucnvu";
+                                break;
+                            case "EN":
+                                tclass = "iucnen";
+                                break;
+                            case "CR":
+                                tclass = "iucncr";
+                                break;
+                        }
+
+                        //list row header
+                        tablerows.push(""+
+                            "<tr class='" + tclass + "'>" + 
+                            "   <td class='arrowBox'>" + 
+                            "       <div class='arrow'></div>" + 
+                            "   </td>" +
+                            "   <td class='wiki sci' value='" + 
+                                    row.eol_thumb_url + "'>" + 
+                                    row.scientificname + 
+                            "   </td>" + 
+                            "   <td class='wiki english' value='" + 
+                                    row.eol_media_url + "' eol-page='" + 
+                                    row.eol_page_id + "'>" + 
+                                    ((english != null) ? english : '') + 
+                            "   </td>" + 
+                            "   <td class='wiki'>" + 
+                                    ((row.order != null) ? 
+                                        row.order : '') + 
+                            "   </td>" + 
+                            "   <td class='wiki'>" + 
+                                    ((row.family != null) ? 
+                                        row.family : '') + 
+                            "   </td>" + 
+                            "   <td>" + ((row.sequenceid != null) ? 
+                                            row.sequenceid : '') + 
+                            "   </td>" + 
+                            "   <td class='iucn' data-scientificname='" + 
+                                    row.scientificname + "'>" + 
+                                    ((redlist != null) ? redlist : '') + 
+                            "   </td>" + 
+                            "</tr>");
+                            
+                        //list row collapsible content
+                        tablerows.push("" + 
+                            "<tr class='expand-child'>" + 
+                            "   <td colspan='7' value='" + 
+                                    row.scientificname + "'>" + 
+                            "   </td>" + 
+                            "</tr>");           
+                                       
+                        providers.push(
+                            ('<a class="type {0}">{1}</a>, ' + 
+                             '<a class="provider {2}">{3}</a>')
+                                .format(
+                                    row.type,
+                                    row.type_title,
+                                    row.provider,
+                                    row.provider_title));
+                        if (year != null && year != '') {
+                            years.push(year);
+                        }
+                        scientificnames[row.scientificname]=redlist;
+                    }
+                );
+                years = _.uniq(years);
+                tablerows = _.uniq(tablerows);
+                providers = _.uniq(providers);
+
+                years = _.sortBy(_.uniq(years), function(val) {
+                        return val;
+                    }
+                );
+
+                years[years.length-1] = (years.length > 1) ? 
+                    ' and ' + years[years.length-1] : years[years.length-1];
+
+                _.each(
+                    scientificnames,
+                    function(red_list_status) {
+                        speciestotal++;
+                        speciesthreatened += 
+                            ((red_list_status.indexOf('EN')>=0) || 
+                             (red_list_status.indexOf('VU')>=0) || 
+                             (red_list_status.indexOf('CR')>=0) || 
+                             (red_list_status.indexOf('EX')>=0) || 
+                             (red_list_status.indexOf('EW')>=0) )  ?
+                                1 : 0;
+                        speciesdd += 
+                            (red_list_status.indexOf('DD')>0)  ? 
+                                1 : 0;
+                    }
+                );
+
+                stats = (speciesthreatened > 0) ? 
+                    ('(' + speciesthreatened + ' considered threatened by ' + 
+                    '<a href="http://www.iucnredlist.org" ' + 
+                    'target="_iucn">IUCN</a> '+years.join(',')+')') : '';
+
+                if (speciestotal > 0) {
+                    content = $('' +
+                        '<div class="mol-Map-ListQueryInfoWindow">' +
+                        '   <div>' + 
+                               'Data type/source:&nbsp;' + 
+                               providers.join(', ') + 
+                               '.&nbsp;All&nbsp;seasonalities.<br>' +
+                        '   </div> ' +
+                        '   <div> ' +
+                        '       <table class="tablesorter">' +
+                        '           <thead>' + 
+                        '               <tr>' + 
+                        '                   <th></th>' + 
+                        '                   <th>Scientific Name</th>' + 
+                        '                   <th>English Name</th>' + 
+                        '                   <th>Order</th>' + 
+                        '                   <th>Family</th>' + 
+                        '                   <th>Rank&nbsp;&nbsp;&nbsp;</th>' + 
+                        '                   <th>IUCN&nbsp;&nbsp;</th>' + 
+                        '               </tr>' + 
+                        '           </thead>' +
+                        '           <tbody class="tablebody">' +
+                                        tablerows.join('') +
+                        '           </tbody>' +
+                        '       </table>' +
+                        '   </div>' +
+                        '</div>');
+                        
+                    dlContent = $('' + 
+                        '<div class="mol-Map-ListQueryInfoWindow">' +
+                        '   <div>' +
+                        '       <a href="http://mol.cartodb.com/api/v2/sql?q=' + 
+                                    sqlurl + '&format=csv"' + 
+                                    ' class="mol-Map-ListQueryDownload">download csv</a>' +
+                        '   </div> ' +
+                        '</div>');
+                        
+                    iucnContent = $('' + 
+                        '<div class="mol-Map-ListQueryInfoWindow">' +
+                        '    <div id="iucnChartDiv"></div>' + stats +
+                        '</div>');    
+                } else {
+                    content = $(''+
+                        '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
+                        '   <b>No ' + className.replace(/All/g, '') + 
+                                ' species found within ' +
+                                listradius.radius/1000 + ' km of ' +
+                                Math.abs(
+                                    Math.round(
+                                        listradius.center.lat()*1000)/1000) + 
+                                        '&deg;&nbsp;' + latHem + '&nbsp;' +
+                                Math.abs(
+                                    Math.round(
+                                        listradius.center.lng()*1000)/1000) + 
+                                        '&deg;&nbsp;' + lngHem +
+                        '   </b>' +
+                        '</div>');
+                                
+                    dlContent = $('' + 
+                        '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
+                        '    <b>No list to download</b>' +
+                        '</div>');
+                        
+                    iucnContent = $('' +
+                        '<div class="mol-Map-ListQueryEmptyInfoWindow">' +
+                        '    <b>No species found.</b>' +
+                        '</div>');
+                }
+                
+                return {speciestotal: speciestotal,
+                        content: content,
+                        dlContent: dlContent,
+                        iucnContent: iucnContent}
+            },
+            
+            /*
+             * Displays and Manages the List dialog
+             */
+            
+            displayListWindow: function(listrad, sptot, clname, latH, lngH, 
+                                        rows, con, dlCon, iuCon) {
+                var self = this,
+                    listradius = listrad,
+                    listWindow,
+                    listTabs,
+                    speciestotal = sptot,
+                    className = clname,
+                    latHem = latH,
+                    lngHem = lngH,
+                    content = con;
+                    dlContent = dlCon,
+                    iucnContent = iuCon;
+                
+                listWindow = new mol.map.query.listDisplay();
+
+                self.features[listradius.center.toString()+listradius.radius] = {
+                    listradius : listradius,
+                    listWindow : listWindow
+                };
+                
+                listWindow.dialog({
+                    autoOpen: true,
+                    width: 680,
+                    height: 380,
+                    dialogClass: 'mol-Map-ListDialog',
+                    modal: false,
+                    title: speciestotal + ' species of ' + className + 
+                           ' within ' + listradius.radius/1000 + ' km of ' + 
+                           Math.abs(Math.round(
+                               listradius.center.lat()*1000)/1000) + 
+                               '&deg;&nbsp;' + latHem + '&nbsp;' + 
+                           Math.abs(Math.round(
+                               listradius.center.lng()*1000)/1000) + 
+                               '&deg;&nbsp;' + lngHem
+                });
+                                          
+                $(".mol-Map-ListDialog").parent().bind("resize", function() { 
+                    $(".mol-Map-ListQueryInfoWindow")
+                        .height($(".mol-Map-ListDialog").height()-115); 
+                });
+                
+                //tabs() function needs document ready to
+                //have been called on the dialog content
+                $(function() {
+                    var mmlHeight;
+                    
+                    //initialize tabs and set height
+                    listTabs = $("#tabs").tabs();
+                    
+                    $("#tabs > #listTab").html(content[0]);
+                    $("#tabs > #dlTab").html(dlContent[0]);
+                    $("#tabs > #iucnTab").html(iucnContent[0]);
+                    
+                    $(".mol-Map-ListQueryDownload").button();
+                    mmlHeight = $(".mol-Map-ListDialog").height();
+                    $(".mol-Map-ListQueryInfoWindow").height(mmlHeight-115);
+                    
+                    //list table creation
+                    self.createSpeciesListTable(listWindow);
+                    
+                    //chart creation
+                    self.createIucnChart(rows, mmlHeight);
+                    
+                    //image gallery creation
+                    self.createImageGallery(rows, speciestotal);
+                    
+                    listTabs.tabs("select", 0);
+                });
+                
+                self.features[listradius.center.toString()+listradius.radius] = {
+                    listradius : listradius,
+                    listWindow : listWindow
+                };
+
+                $(listWindow).dialog({
+                   beforeClose: function(evt, ui) {
+                       listTabs.tabs("destroy");
+                       $(".mol-Map-ListDialogContent").remove();
+                       listradius.setMap(null);
+                       delete (
+                           self.features[listradius.center.toString() + 
+                                         listradius.radius]);
+                   }
+                });
             },
                     
             /*
@@ -600,9 +696,99 @@ mol.modules.map.query = function(mol) {
             },
             
             /*
+             * Creates List Table
+             */
+            createSpeciesListTable: function(lw) {
+                var self = this;
+
+                $("table.tablesorter tr:odd").addClass("master");
+                $("table.tablesorter tr:not(.master)").hide();
+                $("table.tablesorter tr:first-child").show();                      
+                $("table.tablesorter tr.master td.arrowBox")
+                    .click(function(){                            
+                        $(this).parent().next("tr").toggle();
+                        $(this).parent().find(".arrow").toggleClass("up");
+                    
+                        if(!$(this).parent().hasClass('hasWiki')) {
+                            $(this).parent().addClass('hasWiki');
+                            self.callWiki($(this).parent());
+                        }
+                    }
+                );
+                $(".tablesorter", $(lw)).tablesorter({
+                    sortList: [[5,0]] 
+                });
+                
+                _.each(
+                    $('.wiki',$(lw)),
+                    function(wiki) {
+                        $(wiki).click(
+                            function(event) {
+                                var win = window.open('' + 
+                                    'http://en.wikipedia.com/wiki/'+
+                                    $(this).text().split(',')[0]
+                                        .replace(/ /g, '_'));
+                                win.focus();
+                            }
+                        );
+                    }
+                );
+
+                _.each(
+                    $('.iucn',$(lw)),
+                    function(iucn) {
+                        if ($(iucn).data('scientificname') != '') {
+                            $(iucn).click(
+                                function(event) {
+                                    var win = window.open('' + 
+                                    'http://www.iucnredlist.org/apps/redlist/search/external?text=' 
+                                    +$(this).data('scientificname'));
+                                    win.focus();
+                                }
+                            );
+                        }
+                    }
+                );
+            },
+            
+            /*
+             * Creates IUCN pie chart
+             */
+            createIucnChart: function(rows, mHeight) {
+                var self = this,
+                    iucnlist,
+                    iucndata,
+                    options,
+                    chart;
+                
+                $("#iucnChartDiv").height(mHeight-130);
+
+                iucnlist = self.getRedListCounts(rows);
+                iucndata = google.visualization.arrayToDataTable(iucnlist);
+        
+                options = {
+                    width: 605,
+                    height: $("#iucnChartDiv").height(),
+                    backgroundColor: 'transparent',
+                    title: 'Species by IUCN Status',
+                    colors: ['#006666', 
+                             '#88c193', 
+                             '#cc9900', 
+                             '#cc6633', 
+                             '#cc3333', 
+                             '#FFFFFF', 
+                             '#000000'],
+                    chartArea: {left:125, top:25, width:"100%", height:"85%"}
+                };
+        
+                chart = new google.visualization.PieChart(
+                    document.getElementById('iucnChartDiv'));
+                chart.draw(iucndata, options);
+            },
+            
+            /*
              * Creates and populates image gallery tab
              */
-            
             createImageGallery: function (rows, sptotal) {
                 var hasImg = 0,
                     english;
@@ -702,7 +888,6 @@ mol.modules.map.query = function(mol) {
             /*
              * Function to call Wikipedia and EOL image
              */
-            
             callWiki: function(row) {
                 var q,
                     qs,
@@ -851,24 +1036,28 @@ mol.modules.map.query = function(mol) {
                                             z = data.query.pages[x];                          
                                             imgurl = z.imageinfo[0].thumburl;
                                             
-                                            $('<a href="http://en.wikipedia.com/wiki/' +
-                                             qs.replace(/ /g, '_') + 
-                                             '" target="_blank"><img src="' + 
-                                             imgurl + 
-                                             '" style="float:left; margin:0 4px 0 0;"/>')
-                                                .prependTo($(row)
-                                                    .next()
-                                                        .find('td'));
+                                            $('<a href=' + 
+                                            '"http://en.wikipedia.com/wiki/' +
+                                            qs.replace(/ /g, '_') + 
+                                            '" target="_blank"><img src="' + 
+                                            imgurl + 
+                                            '" style="float:left; margin:0 4px 0 0;"/>')
+                                               .prependTo($(row)
+                                                   .next()
+                                                       .find('td'));
                                             $(row).next().find('td div:last')
                                                 .append('' + 
-                                                '... (Text Source:<a href="http://en.wikipedia.com/wiki/' + 
+                                                '... (Text Source:' + 
+                                                '<a href="http://en.wikipedia.com/wiki/' + 
                                                 qs.replace(/ /g, '_') + 
                                                 '" target="_blank">Wikipedia</a>;' + 
-                                                ' Image Source:<a href="http://en.wikipedia.com/wiki/' + 
+                                                ' Image Source:' + 
+                                                '<a href="http://en.wikipedia.com/wiki/' + 
                                                 wikiimg + 
                                                 '" target="_blank">Wikipedia</a>)' + 
                                                 '<p><button class="mapButton" value="' + 
-                                                qs + '">Map</button></p>');
+                                                qs + 
+                                                '">Map</button></p>');
                                         }
                                     }  
                                 }, 'jsonp');
@@ -878,7 +1067,8 @@ mol.modules.map.query = function(mol) {
                             if(eolpage != "null")
                             {
                                 $(row).next().find('td p:last').append('' + 
-                                '<button class="eolButton" value="http://eol.org/pages/' + 
+                                '<button class="eolButton" ' +
+                                'value="http://eol.org/pages/' + 
                                 eolpage + '">Encyclopedia of Life</button>');
                                 
                                 $('button.eolButton[value="http://eol.org/pages/' +
@@ -917,24 +1107,45 @@ mol.modules.map.query = function(mol) {
             init : function(names) {
                 var className = 'mol-Map-QueryDisplay',
                 html = '' +
-                    '<div title="Use this control to select species group and radius. Then right click (Mac Users: \'control-click\') on focal location on map." class="' + className + ' widgetTheme">' +
+                    '<div title="' + 
+                        'Use this control to select species group and radius. ' + 
+                        'Then right click (Mac Users: \'control-click\') ' + 
+                        'on focal location on map." class="' + 
+                        className + ' widgetTheme">' +
                     '   <div class="controls">' +
-                    '     Search Radius <select class="radius">' +
+                    '     Search Radius ' + 
+                    '     <select class="radius">' +
                     '       <option selected value="50">50 km</option>' +
                     '       <option value="100">100 km</option>' +
                     '       <option value="300">300 km</option>' +
                     '     </select>' +
-                    '     Group <select class="class" value="">' +
-                    '       <option selected value=" AND  p.polygonres = 100 ">Birds</option>' +
-                    '       <option value=" AND p.provider = \'fishes\' ">NA Freshwater Fishes</option>' +
-                    '       <option value=" AND p.class=\'reptilia\' ">Reptiles</option>' +
-                    '       <option value=" AND p.class=\'amphibia\' ">Amphibians</option>' +
-                    '       <option value=" AND p.class=\'mammalia\' ">Mammals</option>' +
+                    '     Group ' + 
+                    '     <select class="class" value="">' +
+                    '       <option selected value=" AND  p.polygonres = 100 ">' + 
+                                'Birds</option>' +
+                    '       <option value=" AND p.provider = \'fishes\' ">' + 
+                                'NA Freshwater Fishes</option>' +
+                    '       <option value=" AND p.class=\'reptilia\' ">' + 
+                                'Reptiles</option>' +
+                    '       <option value=" AND p.class=\'amphibia\' ">' + 
+                                'Amphibians</option>' +
+                    '       <option value=" AND p.class=\'mammalia\' ">' + 
+                                'Mammals</option>' +
                     '     </select>' +
-                    '      <span class="types">' +
-                    '           <button class="range selected" value=" AND p.type=\'range\'"><img title="Click to use Expert range maps for query." src="/static/maps/search/range.png"></button>' +
-                    '           <button class="ecoregion" value=" AND p.type=\'ecoregion\' "><img title="Click to use Regional checklists for query." src="/static/maps/search/ecoregion.png"></button>' +
-                    '       </span>'+
+                    '     <span class="types">' +
+                    '          <button class="range selected" ' + 
+                                   'value=" AND p.type=\'range\'">' + 
+                                   '<img ' + 
+                                   'title="Click to use Expert range maps for query." ' + 
+                                   'src="/static/maps/search/range.png">' + 
+                    '          </button>' +
+                    '          <button class="ecoregion" ' + 
+                                    'value=" AND p.type=\'ecoregion\' ">' + 
+                                    '<img ' + 
+                                    'title="Click to use Regional checklists for query." ' + 
+                                    'src="/static/maps/search/ecoregion.png">' + 
+                    '          </button>' +
+                    '      </span>'+
                     '   </div>' +
                     '</div>';
 
@@ -968,8 +1179,14 @@ mol.modules.map.query = function(mol) {
                 '      <li><a href="#dlTab">Download</a></li>' + 
                 '   </ul>' + 
                 '   <div id="listTab" class="ui-tabs-panel">Content.</div>' +
-                '   <div id="imagesTab" class="ui-tabs-panel"><div><span id="imgTotals"></span>Source: <a href="http://eol.org/" target="_blank">Encyclopedia of Life</a></div><ul id="gallery" style="overflow: auto;"></ul></div>' +
-                '   <div id="iucnTab" class="ui-tabs-panel">Highlight of IUCN concern species. Coming Soon.</div>' +
+                '   <div id="imagesTab" class="ui-tabs-panel">' + 
+                '       <div>' + 
+                '           <span id="imgTotals"></span>' + 
+                            'Source: <a href="http://eol.org/" ' + 
+                            'target="_blank">Encyclopedia of Life</a> ' + 
+                '       </div>' + 
+                '       <ul id="gallery" style="overflow: auto;"></ul></div>' +
+                '   <div id="iucnTab" class="ui-tabs-panel">IUCN.</div>' +
                 '   <div id="dlTab" class="ui-tabs-panel">Download.</div>' +
                 '</div>';
             this._super(html);
