@@ -848,37 +848,13 @@ mol.modules.map.query = function(mol) {
                         visible: function(event, api) {                  
                             $("button.mapButton").click(function(event) {
                                 self.bus.fireEvent(new mol.bus.Event('search', {
-                                    term : event.target.value
+                                    term : $.trim(event.target.value)
                                 }));
                             });
                             
                             $('button.eolButton').click(function(event) {
                                 var win = window.open(event.target.value);
                                 win.focus();
-                            });
-                        }
-                    }
-                });
-                
-                $('#gallery li div').qtip({
-                    content: {
-                        text: function(api) {
-                            return '<div>' + $(this).attr('title') + 
-                                '<br/><button class="mapButton" value="' + 
-                                $(this).attr('sci-name') + 
-                                '">Map</button></div>';
-                        }
-                    },
-                    hide: {
-                        fixed: true,
-                        delay: 500
-                    },
-                    events: {
-                        visible: function(event, api) {                  
-                            $("button.mapButton").click(function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('search', {
-                                    term : event.target.value
-                                }));
                             });
                         }
                     }
@@ -920,7 +896,7 @@ mol.modules.map.query = function(mol) {
                     function(data, textStatus, jqXHR) {
                         
                         var wikidata,
-                            wikimg,
+                            wikiimg,
                             prop,
                             a,
                             imgtitle,
@@ -1092,7 +1068,7 @@ mol.modules.map.query = function(mol) {
                         
                         $("button.mapButton").click(function(event) {
                             self.bus.fireEvent(new mol.bus.Event('search', {
-                                term : event.target.value
+                                term : $.trim(event.target.value)
                             }));
                         });
                         
