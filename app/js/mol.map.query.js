@@ -920,7 +920,7 @@ mol.modules.map.query = function(mol) {
                     function(data, textStatus, jqXHR) {
                         
                         var wikidata,
-                            wikimg,
+                            wikiimg,
                             prop,
                             a,
                             imgtitle,
