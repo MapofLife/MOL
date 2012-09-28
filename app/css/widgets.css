@@ -654,41 +654,78 @@ padding: 3px;
     text-align: center;
 }
 
-
-.mol-Dashboard .dashboard table tr td {
-    border-top: 1px solid #CCC;
-    border: 1px solid #CCC;
-    text-align: left;
-    margin: 0;
-    padding: 6px 13px;
-    font-style: normal;
+.mol-Dashboard #dialog {
+    font-weight:normal;
+    font-style:normal;
     font-size: 12px;
+    min-height: 360px;
 }
 
 .mol-Dashboard #dialog .dashboard .title {
     font-weight:bold;
     font-size: 18px;
+    padding-left: 4px;
 }
-
-.mol-Dashboard #dialog .dashboard .subtitle {
-    font-size: 14px;
-    font-style: italic;
+.mol-Dashboard #dialog .summary {
+    padding-top: 5px;
     padding-bottom: 10px;
+    white-space: nowrap;
+    font-size: 14px;
 }
 
-.mol-Dashboard #dialog .class {
-    cursor: pointer;
-    cursor: hand;
+.mol-Dashboard #dialog .summary .label {
+    font-weight:bold;
+    font-size: 14px;
 }
 
-.mol-Dashboard #dialog .type {
-    cursor: pointer;
-    cursor: hand;
+.mol-Dashboard span.filterHeader {
+    font-weight:bold;
+    text-decoration:underline;
+    font-size: 12px;
 }
 
-.mol-Dashboard .ui-dialog-titlebar, .ui-widget-header, .dashboard{
+.mol-Dashboard #dialog div#dashTypeFilter {
+    padding-bottom: 4px;
+    padding-right: 6px;
+    float: left;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter input {
+    margin-left: 0;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter div.chkAndLabel {
+    clear: both;
+    float: none;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter div.chkAndLabel input{
+    float: left;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter div.chkAndLabel label{
+    float: left;
+    margin-top: 3px;
+}
+
+
+.mol-Dashboard #dialog div#dashTypeFilter #dashTitle {
+    font-weight: bold;    
+}
+
+div.mol-Dashboard-TableWindow {
+    font-size: 12px;
+    font-style:normal;
+    font-weight:normal;
+    height: 498px;
+    overflow-y:scroll;
+    overflow-x:hidden;
+}
+
+.mol-Dashboard .ui-dialog-titlebar, .ui-widget-header, .dashboard {
     background: none;
-    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, 
+        rgba(29,43,82,0.75) 57%);
     background-image: -webkit-gradient(
         linear,
         left bottom,
@@ -707,7 +744,8 @@ padding: 3px;
         rgba(29,43,82,0.75) 57%
     );
 
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    filter: progid:DXImageTransform.Microsoft.gradient(
+        startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
     -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
     -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
     box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;

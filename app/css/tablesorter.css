@@ -17,7 +17,7 @@ table.tablesorter div.up {
  * define table skin 
  */
 
-table.tablesorter {
+table.tablesorter, table.dashtable {
     margin: 0;
     padding: 0;
     border-collapse: separate;
@@ -25,50 +25,51 @@ table.tablesorter {
     width: 100%;
 }
 
-table.tablesorter * {
+table.tablesorter *, table.dashtable * {
     font: 11px Arial, Helvetica, sans-serif;
     vertical-align: top;
     text-align: left;
 }
 
-table.tablesorter thead, table.tablersorter .collapsible {
+table.tablesorter thead, table.tablersorter .collapsible, table.dashtable thead,
+table.dashtable .collapsible {
     background-color: #e6edc1;
 }
 
-table.tablesorter th {
+table.tablesorter th, table.dashtable th {
     color: #565770;
     padding: 4px 16px 4px 6px;
     cursor: pointer;
     font-weight: bold;
 } 
 
-table.tablesorter td {
+table.tablesorter td, table.dashtable td {
     color: #565770;
     padding: 4px 6px;
 }
 
-table.tablesorter th.headerSortUp {
+table.tablesorter th.headerSortUp, table.dashtable th.headerSortUp {
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 100% -80px;
 }
 
-table.tablesorter th.headerSortUp span {
+table.tablesorter th.headerSortUp span, table.dashtable th.headerSortUp span {
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 0 -80px;
 }
 
-table.tablesorter th.headerSortDown {
+table.tablesorter th.headerSortDown, table.dashtable th.headerSortDown {
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 100% 2px;
 }
 
-table.tablesorter th.headerSortDown span {
+table.tablesorter th.headerSortDown span,  table.dashtable th.headerSortDown span{
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 0 2px;
 }
 
-table.tablesorter th span {
+table.tablesorter th span, table.dashtable th span {
     padding: 4px 0 4px 6px;
     font-weight: bold;
 }
 
-table.tablesorter tr.master {
+table.tablesorter tr.master,  table.dashtable tr.master {
     background-color: #dadada;
 }
 
@@ -96,6 +97,35 @@ table.tablesorter td div em {
 table.grid .collapsible {
     padding: 0 0 3px 0;
 }
+
+table.dashtable td.provider, table.dashtable td.type {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+table.dashtable td.provider:hover,  table.dashtable td.type:hover {
+    color: blue;
+    text-decoration: underline;
+}
+
+table.dashtable tr.selectedDashRow {
+    background-color: #FFEF93;
+}
+
+
+table.dashtable td.type {
+    width: 105px;
+}
+
+table.dashtable td.provider {
+    width: 115px;
+}
+
+table.dashtable td.spnames {
+    width: 85px;
+}
+
+
 
 /*
  * image gallery
