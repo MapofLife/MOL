@@ -48,7 +48,7 @@ mol.modules.map.metadata = function(mol) {
                         'SELECT title as "Data Type", description AS "Description" FROM types where type = \'{0}\''
 
                 }
-           },
+            },
 
             /**
              * Starts the MenuEngine. Note that the container parameter is
@@ -59,100 +59,215 @@ mol.modules.map.metadata = function(mol) {
                 this.addEventHandlers();
             },
             getLayerMetadata: function (layer) {
-                  var self = this,
-                    sql = this.sql['layer'].format(layer.name, layer.type, layer.source),
-                    params = {sql:sql, key: 'lm-{0}-{1}-{2}-{3}'.format(layer.name, layer.type, layer.source, this.cache_key)},
-                    action = new mol.services.Action('cartodb-sql-query', params),
+                var self = this,
+                    sql = this.sql['layer'].format(
+                            layer.name, layer.type, layer.source),
+                    params = {
+                            sql:sql, 
+                            key: 'lm-{0}-{1}-{2}-{3}'
+                                .format(
+                                    layer.name, 
+                                    layer.type, 
+                                    layer.source, 
+                                    this.cache_key)},
+                    action = new mol.services.Action(
+                                'cartodb-sql-query', 
+                                params),
                     success = function(action, response) {
                         var results = {layer:layer, response:response};
-                        self.bus.fireEvent(new mol.bus.Event('hide-loading-indicator', {source : 'metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)}));
+                        
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : 'metadata-{0}-{1}-{2}'
+                                    .format(
+                                        layer.name, 
+                                        layer.type, 
+                                        layer.source)}));
+                        
                         if(!response.error) {
-                            self.displays['metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)]
+                            self.displays['metadata-{0}-{1}-{2}'
+                                .format(
+                                    layer.name, 
+                                    layer.type, 
+                                    layer.source)] 
                                 = new mol.map.metadata.MetadataDisplay(results);
                         } else {
- //                           self.getMetadata(layer);
+                            //self.getMetadata(layer);
                         }
                     },
                     failure = function(action, response) {
-                        self.bus.fireEvent(new mol.bus.Event('hide-loading-indicator', {source : 'metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)}));
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : 'metadata-{0}-{1}-{2}'
+                                    .format(
+                                        layer.name, 
+                                        layer.type, 
+                                        layer.source)}));
                     };
 
-                if(this.displays['metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)] == undefined) {
-                    self.bus.fireEvent(new mol.bus.Event('show-loading-indicator', {source : 'metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)}));
-                    this.proxy.execute(action, new mol.services.Callback(success, failure));
+                if(this.displays['metadata-{0}-{1}-{2}'
+                    .format(
+                        layer.name, 
+                        layer.type, 
+                        layer.source)] == undefined) {
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'show-loading-indicator', 
+                            {source : 'metadata-{0}-{1}-{2}'
+                                .format(
+                                    layer.name, 
+                                    layer.type, 
+                                    layer.source)}));
+                    this.proxy
+                        .execute(
+                            action, 
+                            new mol.services.Callback(success, failure));
                 } else {
-                    if(this.displays['metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)].dialog("isOpen")) {
-                        this.displays['metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)].dialog("close");
+                    if(this.displays['metadata-{0}-{1}-{2}'
+                        .format(
+                            layer.name, 
+                            layer.type, 
+                            layer.source)].dialog("isOpen")) {
+                        this.displays['metadata-{0}-{1}-{2}'
+                            .format(
+                                layer.name, 
+                                layer.type, 
+                                layer.source)].dialog("close");
                     } else {
-                        this.displays['metadata-{0}-{1}-{2}'.format(layer.name, layer.type, layer.source)].dialog("open");
+                        this.displays['metadata-{0}-{1}-{2}'
+                            .format(
+                                layer.name, 
+                                layer.type, 
+                                layer.source)].dialog("open");
                     }
                 }
 
             },
             getTypeMetadata:function (params) {
-                                 var self = this,
+                var self = this,
                     type = params.type,
                     sql = this.sql['types'].format(type),
-                    params = {sql:sql,key: 'tm-{0}-{1}'.format(type, this.cache_key)},
-                    action = new mol.services.Action('cartodb-sql-query', params),
+                    params = {
+                            sql:sql,
+                            key: 'tm-{0}-{1}'.format(type, this.cache_key)},
+                    action = new mol.services.Action(
+                                'cartodb-sql-query', 
+                                params),
                     success = function(action, response) {
                         var results = {type:type, response:response};
+                        
                         if(!results.response.error) {
                             if(results.response.total_rows > 0) {
-                                self.displays['type-metadata-{0}'.format(type)]  = new mol.map.metadata.MetadataDisplay(results);
+                                self.displays['type-metadata-{0}'.format(type)]  
+                                = new mol.map.metadata.MetadataDisplay(results);
                             }
-
-                        } else {}
+                        }
                     },
                     failure = function(action, response) {
-                        self.bus.fireEvent(new mol.bus.Event('hide-loading-indicator', {source : 'type-metadata-{0}'.format(type)}));
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : 'type-metadata-{0}'.format(type)}));
                     };
 
-                if(this.displays['type-metadata-{0}'.format(type)] == undefined) {
-                    this.proxy.execute(action, new mol.services.Callback(success, failure));
+                if(this.displays['type-metadata-{0}'
+                    .format(type)] == undefined) {
+                    this.proxy
+                        .execute(
+                            action, 
+                            new mol.services.Callback(success, failure));
                 } else {
-                    if(this.displays['type-metadata-{0}'.format(type)].dialog("isOpen")) {
-                        //this.displays['type-metadata-{0}'.format(type)].dialog("close");
+                    if(this.displays['type-metadata-{0}'
+                        .format(type)].dialog("isOpen")) {
+                        this.displays['type-metadata-{0}'
+                            .format(type)].dialog("moveToTop");
                     } else {
-                        this.displays['type-metadata-{0}'.format(type)].dialog("open");
+                        this.displays['type-metadata-{0}'
+                            .format(type)].dialog("open");
                     }
                 }
             },
             getDashboardMetadata: function (params) {
-                  var self = this,
+                var self = this,
                     type = params.type,
                     provider = params.provider,
                     _class = params._class,
                     name = params.name,
-                    sql = this.sql['dashboard'].format(provider, type, _class, name),
-                    params = {sql:sql, key: 'dm0930-{0}-{1}-{2}-{3}'.format(provider, type, _class, name)},
-                    action = new mol.services.Action('cartodb-sql-query', params),
+                    sql = this.sql['dashboard']
+                            .format(provider, type, _class, name),
+                    params = {
+                            sql:sql,
+                            key: 'dm0930-{0}-{1}-{2}-{3}'
+                                .format(provider, type, _class, name)},
+                    action = new mol.services.Action(
+                                'cartodb-sql-query', 
+                                params),
                     success = function(action, response) {
-                        var results = {provider:provider, type:type, _class:_class, response:response};
-                        //self.bus.fireEvent(new mol.bus.Event('hide-loading-indicator', {source : 'dash-metadata-{0}-{1}-{2}'.format(provider, type, _class)}));
+                        var results = {
+                                        provider:provider, 
+                                        type:type, 
+                                        _class:_class, 
+                                        response:response};
+                        /*
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : 'dash-metadata-{0}-{1}-{2}'
+                                    .format(provider, type, _class)}));
+                        */
+                        
                         if(!results.response.error) {
                             if(results.response.total_rows > 0) {
-                                self.displays['dash-metadata-{0}-{1}-{2}-{3}'.format(provider, type, _class, name)]  = new mol.map.metadata.MetadataDisplay(results);
+                                self.displays['dash-metadata-{0}-{1}-{2}-{3}'
+                                    .format(provider, type, _class, name)]  
+                                    = new mol.map.metadata.MetadataDisplay(
+                                        results);
                             }
                         } else {
- //                           self.getDasboardMetadata({provider:provider, type:type, _class:_class});
+                            //self.getDasboardMetadata(
+                                //{provider:provider, 
+                                 //type:type, 
+                                 //_class:_class});
                         }
                     },
                     failure = function(action, response) {
-                        self.bus.fireEvent(new mol.bus.Event('hide-loading-indicator', {source : 'metadata-{0}-{1}-{2}'.format(provider, type, _class)}));
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : 'metadata-{0}-{1}-{2}'
+                                    .format(provider, type, _class)}));
                     };
 
-                if(this.displays['dash-metadata-{0}-{1}-{2}-{3}'.format(provider, type, _class, name)] == undefined) {
-                    //self.bus.fireEvent(new mol.bus.Event('show-loading-indicator', {source : 'metadata-{0}-{1}-{2}'.format(provider, type, _class)}));
-                    this.proxy.execute(action, new mol.services.Callback(success, failure));
+                if(this.displays['dash-metadata-{0}-{1}-{2}-{3}'
+                    .format(provider, type, _class, name)] == undefined) {
+                        
+                    /*    
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'show-loading-indicator', 
+                            {source : 'metadata-{0}-{1}-{2}'
+                                .format(provider, type, _class)}));
+                    */
+                   
+                    this.proxy
+                        .execute(
+                            action, 
+                            new mol.services.Callback(success, failure));
                 } else {
-                    if(this.displays['dash-metadata-{0}-{1}-{2}-{3}'.format(provider, type, _class, name)].dialog("isOpen")) {
-                        //this.displays['dash-metadata-{0}-{1}-{2}'.format(provider, type, _class)].dialog("close");
+                    if(this.displays['dash-metadata-{0}-{1}-{2}-{3}'
+                        .format(provider, type, _class, name)]
+                            .dialog("isOpen")) {
+                        this.displays['dash-metadata-{0}-{1}-{2}-{3}'
+                            .format(provider, type, _class, name)]
+                                .dialog("moveToTop");
                     } else {
-                        this.displays['dash-metadata-{0}-{1}-{2}-{3}'.format(provider, type, _class, name)].dialog("open");
+                        this.displays['dash-metadata-{0}-{1}-{2}-{3}'
+                            .format(provider, type, _class, name)]
+                                .dialog("open");
                     }
                 }
-
             },
 
             addEventHandlers: function() {
@@ -167,7 +282,7 @@ mol.modules.map.metadata = function(mol) {
                     'metadata-toggle',
                     function(event) {
                         var params = event.params;
-                        if(params.layer){
+                        if(params.layer) {
                             self.getLayerMetadata(params.layer);
                         } else if(params.provider && params.type) {
                             self.getDashboardMetadata(params);
@@ -184,13 +299,24 @@ mol.modules.map.metadata = function(mol) {
         {
             init: function(results) {
                 var self = this,
-                    html = '' +
-                        '<div id="dialog">';
+                    html = '<div id="dialog">',
+                    dHtml;
 
                _.each(
                     results.response.rows[0],
                     function(val, key, list) {
-                        html+='<div class="metarow metakey-{0}"><div class="key">{1}</div><div class="values"></div></div>'.format(key.replace(/ /g, '_'),key.replace(/_/g,' '));
+                        dHtml = '<div class="metarow metakey-{0}">' + 
+                                '   <div class="key">{1}</div>' + 
+                                '   <div class="values"></div>' + 
+                                '</div>';
+                                
+                        console.log("at dHtml");
+                        console.log(dHtml);
+                        
+                        html+=dHtml
+                                .format(
+                                    key.replace(/ /g, '_'),
+                                    key.replace(/_/g,' '));
                     }
                 )
 
@@ -204,34 +330,66 @@ mol.modules.map.metadata = function(mol) {
                             col,
                             function(val, key, list) {
                                 if(val != null) {
-                                    $(self).find(".metakey-{0} .values".format(key.replace(/ /g, '_'))).append($('<div class="val">{0}<div>'.format(val)));
+                                    $(self).find(".metakey-{0} .values"
+                                        .format(key.replace(/ /g, '_')))
+                                            .append(
+                                                $('<div class="val">{0}<div>'
+                                                    .format(val)));
                                 }
-                                if($(self).find(".metakey-{0}".format(key.replace(/ /g, '_'))).find(".val").length == 0 ) {
-                                    $(self).find(".metakey-{0}".format(key.replace(/ /g, '_'))).toggle(false);
+                                if($(self).find(".metakey-{0}"
+                                    .format(key.replace(/ /g, '_')))
+                                        .find(".val").length == 0 ) {
+                                    $(self).find(".metakey-{0}"
+                                        .format(key.replace(/ /g, '_')))
+                                            .toggle(false);
                                 } else {
-                                    $(self).find(".metakey-{0}".format(key.replace(/ /g, '_'))).toggle(true);
+                                    $(self).find(".metakey-{0}"
+                                        .format(key.replace(/ /g, '_')))
+                                            .toggle(true);
                                 }
                             }
                         )
                     }
                 );
+                
                 _.each(
                     self.displays,
                     function(dialog) {
                         $(dialog).toggle(false);
                     }
                 );
+                
                 this.dialog(
                     {
                         autoOpen: true,
-
+                        stack: true,
                         dialogClass: "mol-LayerMetadata"
                     }
                 );
+                
                 //set first col widths
-                $(this).find('.key').width(Math.max.apply(Math, $(self).find('.key').map(function(){ return $(this).width(); }).get()));
+                $(this).find('.key')
+                    .width(Math.max.apply(Math, $(self).find('.key')
+                        .map(function(){ 
+                                return $(this).width(); 
+                             }).get()));
+                             
                 //set total width
-                this.dialog("option", "width",Math.max.apply(Math, $(self).find('.key').map(function(){ return $(this).width(); }).get())+Math.max.apply(Math, $(self).find('.values').map(function(){ return $(this).width() }).get())+150);
+                this.dialog(
+                    "option",
+                    "width",
+                    Math.max.apply(
+                        Math, 
+                        $(self).find('.key').map(
+                            function(){ 
+                                return $(this).width(); 
+                            }).get()) + 
+                    Math.max.apply(
+                        Math, 
+                        $(self).find('.values').map(
+                            function(){ 
+                                return $(this).width() 
+                            }).get())+150);
             }
         }
     );

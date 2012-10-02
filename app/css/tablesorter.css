@@ -69,7 +69,7 @@ table.tablesorter th span, table.dashtable th span {
     font-weight: bold;
 }
 
-table.tablesorter tr.master,  table.dashtable tr.master {
+table.tablesorter tr.master, table.dashtable tr.master{
     background-color: #dadada;
 }
 
@@ -98,6 +98,10 @@ table.grid .collapsible {
     padding: 0 0 3px 0;
 }
 
+table.dashtable td {
+    height: 24px;
+}
+
 table.dashtable td.provider, table.dashtable td.type {
     text-decoration: underline;
     cursor: pointer;
@@ -109,9 +113,8 @@ table.dashtable td.provider:hover,  table.dashtable td.type:hover {
 }
 
 table.dashtable tr.selectedDashRow {
-    background-color: #FFEF93;
+    background-color: #CBD5E8;
 }
-
 
 table.dashtable td.type {
     width: 105px;
