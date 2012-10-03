@@ -659,6 +659,7 @@ padding: 3px;
     font-style:normal;
     font-size: 12px;
     min-height: 360px;
+    overflow-y: hidden;
 }
 
 .mol-Dashboard #dialog .dashboard .title {
@@ -719,8 +720,7 @@ div.mol-Dashboard-TableWindow {
     font-size: 12px;
     font-style:normal;
     font-weight:normal;
-    height: 498px;
-    overflow-y:scroll;
+    overflow-y:auto;
     overflow-x:hidden;
 }
 
@@ -1049,17 +1049,31 @@ div.mol-Dashboard-TableWindow {
 .mol-Map-ListQueryRadius {
      pointer-events:none;
 }
-.mol-Map-ListQueryInfoWindow {
+
+.mol-Map-ListDialog #tabs {
+    overflow-y:hidden;
+}
+
+.mol-Map-ListDialogContent.ui-tabs div.ui-tabs-panel {
+    padding:0px;
+}
+
+.mol-Map-ListQuery {
+     margin:4px;
+}
+
+.mol-Map-ListQueryInfo {
      font-size: 12px;
      font-style:normal;
      font-weight:normal;
-     overflow-y:auto;
-     overflow-x:hidden;
-     margin:5px;
-     padding:3px;
 }
 
-.mol-Map-ListQueryInfoWindow .iucn_stats{
+.mol-Map-ListQueryInfoWindow {
+     overflow-y:auto;
+     overflow-x:hidden;
+}
+
+.mol-Map-ListQueryInfo .iucn_stats{
     float:right;
 }
 
@@ -1087,11 +1101,7 @@ div.mol-Dashboard-TableWindow {
         text-overflow:ellipsis;
  }
 
-.mol-Map-ListDialogContent.ui-tabs div.ui-tabs-panel {
-    padding: 0;
-}
-
- .mol-Map-ListQueryEmptyInfoWindow {
+.mol-Map-ListQueryEmptyInfoWindow {
      margin:5px;
      font-size: 14px;
      font-style:normal;

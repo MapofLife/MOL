@@ -128,6 +128,10 @@ table.dashtable td.spnames {
     width: 85px;
 }
 
+table.dashtable td.pctmatch {
+    width: 52px;
+}
+
 
 
 /*
