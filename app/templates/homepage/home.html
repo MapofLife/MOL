@@ -62,17 +62,23 @@
                         }
                     },8000);
                 });
-                
+
                 $('#blog').gFeed({ 
-                    url: 'http://mappinglife.wordpress.com/feed/',
+                    url: 'http://mappinglife.wordpress.com/feed?cat=-2764',
+                    tabs: false,
+                    max: 4
+                }); 
+                $('#press').gFeed({ 
+                    url: 'http://mappinglife.wordpress.com/category/Press/feed/',
                     tabs: false,
                     max: 4
                 }); 
                 $('#code').gFeed({ 
                     url: 'https://github.com/mapoflife/MOL/commits/develop.atom',
                     tabs: false,
-                    max: 4
+                    max: 5
                 }); 
+
             });
         </script>
         <script type="text/javascript">
@@ -125,15 +131,17 @@
                 <div id="content">
                     <div class="wrapper">
                         <div id="left">
+
                             <div class="details">
                                 <div class="pretitle">HIGHLIGHT</div>
                                 <div class="title">MAP OF LIFE BLOG</div>
                                 <div class="description">
-                                    The MOL team is rapidly developing many features and 
-                                    new technologies. While we are not ready to roll out 
-                                    all the features, you can follow our blog to learn 
-                                    what we are up to and provide valuable feedback and 
-                                    insights into the work we are doing.
+                                The MOL team is rapidly developing many features and 
+                                new technologies. We are also rapidly increasing the 
+                                number of species distribution datasets we make available. 
+                                As we roll out new datasetss and features, you can follow 
+                                our blog to learn what we are up to and provide valuable 
+                                feedback and insight into the work we are doing.
                                 </div>
                             </div>
                             <!--
@@ -143,8 +151,23 @@
                             </div>
                             -->
                             <div id="blog"></div>
+                            <div class="all_entries" align="right"><a href="http://mappinglife.wordpress.com/?cat=-2764">All blog posts</a></div>
                         </div>
                         <div id="right">
+                            <div class="details">
+                                <div class="pretitle">HIGHLIGHT</div>
+                                <div class="title">PRESS</div>
+                                <div class="description">
+                                    Map of Life has been covered by newspapers, magazines
+                                    and blogs from around the world. Here are a few selected
+                                    quotes from their articles.
+                                </div>
+                            </div>
+                            <div id="press"></div>
+                            <div class="all_entries" align="right"><a href="http://mappinglife.wordpress.com/category/press">All press articles</a></div>
+                        </div>
+
+                        <div id="fill">
                             <div class="details">
                                 <div class="pretitle">HIGHLIGHT</div>
                                 <div class="title">CODE DEVELOPMENT</div>
@@ -155,6 +178,7 @@
                                 </div>
                             </div>
                             <div id="code"></div>
+                            <div class="all_entries" align="right"><a href="https://github.com/MapofLife/MOL">All recent changes</a></div>
                         </div>
                     </div>
                 </div>

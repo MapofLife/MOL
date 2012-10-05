@@ -412,6 +412,11 @@ div#content .wrapper .details{
     color: #fff;
     height: 140px;
 }
+div#content .wrapper #fill .details {
+    height: auto;
+    margin-bottom: 20px;
+}
+
 div#content .wrapper .details .pretitle{ 
     font-style: italic;
     color: #ccc;
@@ -438,6 +443,18 @@ div#content .recent_updates a {
     color: #B8FD82;
 }
 
+div#content .wrapper #fill { 
+    margin-top: 20px;
+    float: left;
+    width: 785px;
+    padding: 5px;
+    background-color: rgba(33,33,33,0.2); 
+    color: #111; 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+}
+
 div#content .wrapper #left{ 
     float: left;
     width: 495px;
@@ -455,6 +472,17 @@ div#content .wrapper #blog{
 div#content .wrapper #blog a{ 
     color: #b8fd85;
 }
+
+/* The "all entries" link at the bottom. */
+div#content .wrapper .all_entries {
+    padding: 5px;
+    padding-top: 10px;
+}
+
+div#content .wrapper .all_entries a { 
+    color: #b8fd85;
+}
+
 div#content .wrapper #right{ 
     float: left;
     width: 260px;
@@ -466,6 +494,15 @@ div#content .wrapper #right{
     border-radius: 10px;
     overflow-y: hidden;
 }
+div#content .wrapper #press { 
+    height: 285px;
+    color: #fff;
+    overflow: hidden;
+}
+div#content .wrapper #press a{ 
+    color: #b8fd85;
+}
+
 div#content .wrapper #code{ 
     height: 285px;
     color: #fff;
@@ -474,6 +511,7 @@ div#content .wrapper #code{
 div#content .wrapper #code a{ 
     color: #b8fd85;
 }
+
 div#footer {float: left; position: relative; width: 800px; left: 50%; margin-left: -690px; margin-bottom: 0px; height: 40px;}
 div#footer #footer_links { float: right; width: 500px; text-align: left; margin-right: 10px; height: auto; color: #fff; }
 div#footer #footer_links a { font-size: 1.1em; color: #aaa; padding-right: 8px; padding-left: 8px; line-height: 150%; text-decoration: underline;}
