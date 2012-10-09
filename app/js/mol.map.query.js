@@ -427,7 +427,7 @@ mol.modules.map.query = function(mol) {
 
                     //list row collapsible content
                     tablerows.push("" +
-                        "<tr class='expand-child'>" +
+                        "<tr class='tablesorter-childRow'>" +
                         "   <td colspan='7' value='" +
                                 row.scientificname + "'>" +
                         "   </td>" +
@@ -490,7 +490,7 @@ mol.modules.map.query = function(mol) {
                            '.&nbsp;All&nbsp;seasonalities.<br>' +
                     '   </div> ' +
                     '   <div class="mol-Map-ListQueryInfoWindow"> ' +
-                    '       <table class="tablesorter">' +
+                    '       <table class="listtable">' +
                     '           <thead>' +
                     '               <tr>' +
                     '                   <th></th>' +
@@ -708,10 +708,10 @@ mol.modules.map.query = function(mol) {
         createSpeciesListTable: function(lw) {
             var self = this;
 
-            $("table.tablesorter tr:odd").addClass("master");
-            $("table.tablesorter tr:not(.master)").hide();
-            $("table.tablesorter tr:first-child").show();
-            $("table.tablesorter tr.master td.arrowBox").click(
+            $("table.listtable tr:odd").addClass("master");
+            $("table.listtable tr:not(.master)").hide();
+            $("table.listtable tr:first-child").show();
+            $("table.listtable tr.master td.arrowBox").click(
                 function() {
                     $(this).parent().next("tr").toggle();
                     $(this).parent().find(".arrow").toggleClass("up");
@@ -722,7 +722,7 @@ mol.modules.map.query = function(mol) {
                     }
                 }
             );
-            $(".tablesorter", $(lw)).tablesorter({
+            $(".listtable", $(lw)).tablesorter({
                 sortList: [[5,0]]
             });
 

@@ -309,9 +309,6 @@ mol.modules.map.metadata = function(mol) {
                                 '   <div class="key">{1}</div>' + 
                                 '   <div class="values"></div>' + 
                                 '</div>';
-                                
-                        console.log("at dHtml");
-                        console.log(dHtml);
                         
                         html+=dHtml
                                 .format(
