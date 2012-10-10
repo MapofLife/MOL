@@ -3,29 +3,50 @@ mol.modules.map.boot = function(mol) {
     mol.map.boot = {};
 
     mol.map.boot.BootEngine = mol.mvp.Engine.extend({
-        init: function(proxy, bus) {
+        init: function(proxy, bus, map) {
             this.proxy = proxy;
             this.bus = bus;
+            this.map = map;
             this.IE8 = false;
-            this.sql = '' + //TODO replace with postgres function (issue #126)
+            this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
-                '       l.type as type,'+
-                '       t.title as type_title,'+
-                '       l.provider as source, '+
-                '       p.title as source_title,'+
-                '       n.class as _class, ' +
-                '       l.feature_count as feature_count,'+
-                '       n.common_names_eng as names,' +
-                '       CONCAT(\'{"sw":{"lng":\',ST_XMin(l.extent),\', "lat":\',ST_YMin(l.extent),\'} , "ne":{"lng":\',ST_XMax(l.extent),\', "lat":\',ST_YMax(l.extent),\'}}\') as extent ' +
+                    't.type as type,'+
+                    't.sort_order as type_sort_order, ' +
+                    't.title as type_title,' +
+                    't.opacity as opacity, ' +
+                    'CONCAT(l.provider,\'\') as source, '+
+                    'CONCAT(p.title,\'\') as source_title,'+
+                    's.source_type as source_type, ' +
+                    's.title as source_type_title, ' +   
+                    'CONCAT(n.class,\'\') as _class, ' +
+                    'l.feature_count as feature_count, '+
+                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(\'{' +
+                        '"sw":{' +
+                            '"lng":\',ST_XMin(l.extent),\', '+
+                            '"lat":\',ST_YMin(l.extent),\' '+
+                        '}, '+
+                        '"ne":{' +
+                        '"lng":\',ST_XMax(l.extent),\', ' +
+                        '"lat":\',ST_YMax(l.extent),\' ' +
+                        '}}\') as extent, ' +
+                    'l.dataset_id as dataset_id, ' +
+                    'd.style_table as style_table ' +
                 'FROM layer_metadata l ' +
+                'LEFT JOIN data_registry d ON ' +
+                    'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
-                '       l.type = t.type ' +
+                    'l.type = t.type ' +
                 'LEFT JOIN providers p ON ' +
-                '       l.provider = p.provider ' +
+                    'l.provider = p.provider ' +
+                'LEFT JOIN source_types s ON ' +
+                    'p.source_type = s.source_type ' +
                 'LEFT JOIN taxonomy n ON ' +
-                '       l.scientificname = n.scientificname ' +
+                    'l.scientificname = n.scientificname ' +
                 'WHERE ' +
-                "  l.scientificname~*'\\m{0}' OR n.common_names_eng~*'\\m{0}'";
+                    "l.scientificname~*'\\m{0}' " +
+                    "OR n.common_names_eng~*'\\m{0}' " +
+                'ORDER BY name, type_sort_order';
         },
         start: function() {
             this.loadTerm();
@@ -35,11 +56,17 @@ mol.modules.map.boot = function(mol) {
          */
         loadTerm: function() {
             var self = this;
+            
+            // Remove backslashes and replace characters that equal spaces.
+            this.term = unescape(
+                window.location.pathname
+                    .replace(/\//g, '')
+                    .replace(/\+/g, ' ')
+                    .replace(/_/g, ' ')
+            );
 
-            // Remove backslashes and characters that should be counted as spaces
-            this.term = unescape(window.location.pathname.replace(/\//g, '').replace(/\+/g, ' ').replace(/_/g, ' '));
-
-            if ((this.getIEVersion() >= 0 && this.getIEVersion() <= 8) || this.term == '') {
+            if ((this.getIEVersion() >= 0 && this.getIEVersion() <= 8) 
+                || this.term == '') {
                 // If on IE8- or no query params, fire the splash event
                 self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
             } else {
@@ -47,17 +74,19 @@ mol.modules.map.boot = function(mol) {
                 $.post(
                 'cache/get',
                 {
-                    key: 'boot-results-08102012210-{0}'.format(self.term), //number on the key is there to invalidate cache. Using date+time invalidated.
+                    //Number on the key is there to invalidate cache. 
+                    //Using date+time invalidated.
+                    key: 'boot-results-08102012210-{0}'.format(self.term), 
                     sql: this.sql.format(self.term)
                 },
                 function(response) {
-                    var results = mol.services.cartodb.convert(response);
-                    if (Object.keys(results.layers).length == 0) {
+                    var results = response.rows;
+                    if (results.length == 0) {
                         self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
-                        this.map.setCenter(new google.maps.LatLng(0,-50));
+                        self.map.setCenter(new google.maps.LatLng(0,-50));
                     } else {
                         //parse the results
-                        self.loadLayers(self.getLayersWithIds(results.layers));
+                        self.loadLayers(self.getLayersWithIds(results));
                     }
                 },
                 'json'
@@ -65,14 +94,19 @@ mol.modules.map.boot = function(mol) {
             }
         },
         /*
-         * Adds layers to the map if there are fewer than 25 results, or fires the search results widgetif there are more.
+         * Adds layers to the map if there are fewer than 25 results, 
+         * or fires the search results widgetif there are more.
          */
         loadLayers: function(layers) {
             if (Object.keys(layers).length < 25) {
-                this.bus.fireEvent(new mol.bus.Event('add-layers', {layers: layers}));
+                this.bus.fireEvent(
+                    new mol.bus.Event('add-layers', {layers: layers})
+                );
 
             } else if (this.term != null) {
-                this.bus.fireEvent(new mol.bus.Event('search', {term: this.term}));
+                this.bus.fireEvent(
+                    new mol.bus.Event('search', {term: this.term})
+                );
                 this.map.setCenter(new google.maps.LatLng(0,-50));
             }
         },

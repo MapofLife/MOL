@@ -324,287 +324,14 @@ mol.modules.services.cartodb = function(mol) {
         }
     );
 
-    mol.services.cartodb.sqlApi = new mol.services.cartodb.SqlApi('mol', 'cartodb.com');
+    mol.services.cartodb.sqlApi = new mol.services.cartodb.SqlApi(
+        'mol', 'cartodb.com');
 
     mol.services.cartodb.query = function(key, sql, callback) {
         mol.services.cartodb.sqlApi.query(key, sql, callback);
     };
 
-    /**
-     * Converts a CartoDB SQL response to a search profile response.
-     *
-     */
-    mol.services.cartodb.Converter = Class.extend(
-        {
-            init: function() {
-            },
-
-            convert: function(response) {
-                this.response = response;
-                return {
-
-                    "layers": this.getLayers(this.response),
-                    "names": this.genNames(this.response),
-                    "sources": this.genSources(this.response),
-                    "types": this.genTypes(this.response),
-                    "englishnames": this.genEnglishNames(this.response)
-                };
-            },
-
-            /**
-             * Returns an array of unique values in the response. Key value is
-             * name, source, or type.
-             */
-            uniques: function(key, response) {
-                var results = [],
-                row = null;
-
-                for (i in response.rows) {
-                    row = response.rows[i];
-                    switch (key) {
-                    case 'name':
-                        results.push(row.name);
-                        break;
-                    case 'type':
-                        results.push(row.type);
-                        break;
-                    case 'source':
-                        results.push(row.source);
-                        break;
-                    case 'names':
-                        results.push(row.names);
-                        break;
-                    case 'feature_count':
-                        results.push(row.feature_count);
-                        break;
-                    }
-                }
-                return _.uniq(results);
-            },
-
-            /**
-             * Returns the top level names profile object.
-             *
-             * {"name": "types":[], "sources":[], "layers":[]}
-             *
-             */
-            genNames: function(response) {
-                var names = this.uniques('name', response),
-                name = null,
-                profile = {};
-
-                for (i in names) {
-                    name = names[i];
-                    profile[name] = this.getNameProfile(name, response);
-                }
-
-                return profile;
-            },
-
-            /**
-             * Returns the top level types profile object.
-             *
-             * {"type": "names":[], "sources":[], "layers":[]}
-             *
-             */
-            genTypes: function(response) {
-                var types = this.uniques('type', response),
-                type = null,
-                profile = {};
-
-                for (i in types) {
-                    type = types[i];
-                    profile[type] = this.getTypeProfile(type, response);
-                }
-
-                return profile;
-            },
-
-            /**
-             * Returns the top level source profile object.
-             *
-             * {"source": "names":[], "types":[], "layers":[]}
-             *
-             */
-            genSources: function(response) {
-                var sources = this.uniques('source', response),
-                source = null,
-                profile = {};
-
-                for (i in sources) {
-                    source = sources[i];
-                    profile[source] = this.getSourceProfile(source, response);
-                }
-
-                return profile;
-            },
-            /**
-             * Returns the top level english profile object.
-             *
-             * {"source": "names":[], "types":[], "layers":[], "englishnames":[]}
-             *
-             */
-            genEnglishNames: function(response) {
-                var englishnames = this.uniques('englishname', response),
-                englishname = null,
-                profile = {};
-
-                for (i in englishnames) {
-                    englishname = englishnames[i];
-                    profile[englishname] = this.getEnglishNameProfile(englishname, response);
-                }
-
-                return profile;
-            },
-            /**
-             * Returns a profile for a single name.
-             */
-            getNameProfile: function(name, response) {
-                var layers = [],
-                sources = [],
-                types = [],
-                englishnames =[],
-                row = null;
-
-                for (i in response.rows) {
-                    row = response.rows[i];
-                    if (name === row.name) {
-                        layers.push(i + '');
-                        sources.push(row.source);
-                        types.push(row.type);
-                    }
-                }
-                return {
-                    "layers": _.uniq(layers),
-                    "sources" : _.uniq(sources),
-                    "types": _.uniq(types),
-                    "englishnames": _.uniq(englishnames)
-                };
-            },
-
-            /**
-             * Returns a profile for a single source.
-             */
-            getSourceProfile: function(source, response) {
-                var layers = [],
-                names = [],
-                types = [],
-                englishnames = [],
-                row = null;
-
-                for (i in response.rows) {
-                    row = response.rows[i];
-                    if (source === row.source) {
-                        layers.push(i + '');
-                        names.push(row.name);
-                        types.push(row.type);
-                    }
-                }
-                return {
-                    "layers": _.uniq(layers),
-                    "names" : _.uniq(names),
-                    "types": _.uniq(types),
-                    "englishnames": _.uniq(englishnames)
-                };
-            },
-
-            /**
-             * Returns a profile for a single type.
-             */
-            getTypeProfile: function(type, response) {
-                var layers = [],
-                sources = [],
-                names = [],
-                englishnames =[],
-                row = null;
-
-                for (i in response.rows) {
-                    row = response.rows[i];
-                    if (type === row.type) {
-                        layers.push(i + '');
-                        sources.push(row.source);
-                        names.push(row.name);
-                        englishnames.push(row.englishname);
-                    }
-                }
-                return {
-                    "layers": _.uniq(layers),
-                    "sources" : _.uniq(sources),
-                    "names": _.uniq(names),
-                    "englishnames": _.uniq(englishnames)
-                };
-            },
-            /**
-             * Returns a profile for a single english name.
-             */
-            getEnglishNameProfile: function(englishname, response) {
-                var layers = [],
-                sources = [],
-                names = [],
-                types =[],
-                row = null;
-
-                for (i in response.rows) {
-                    row = response.rows[i];
-                    if (englishname === row.englishname) {
-                        layers.push(i + '');
-                        sources.push(row.source);
-                        names.push(row.name);
-                        types.push(row.type);
-                    }
-                }
-                return {
-                    "layers": _.uniq(layers),
-                    "sources" : _.uniq(sources),
-                    "names": _.uniq(names),
-                    "types": _.uniq(types)
-                };
-            },
-
-            /**
-             * Returns the layers profile.
-             */
-            getLayers: function(response) {
-                var rows = response.rows,
-                row = null,
-                key = null,
-                layers = {};
-
-                for (i in rows) {
-                    row = rows[i];
-                    key = i + '';
-                    layers[key] = row;
-                }
-                return layers;
-            },
-
-            /**
-             * Returns an array of coordinate arrays:
-             * [[1, 2], ...]
-             *
-             * @param polygon POLYGON((34.073597 36.393648,34.073597 36.467531,
-             *                         34.140662 36.467531,34.140662 36.393648,
-             *                         34.073597 36.393648))
-             */
-            getExtent: function(polygon) {
-                return _.map(
-                    polygon.split('POLYGON((')[1].split('))')[0].split(','),
-                    function(x) {
-                        var pair = x.split(' ');
-                        return [parseFloat(pair[0]), parseFloat(pair[1])];
-                    }
-                );
-            }
-        }
-    );
-
-    mol.services.cartodb.converter = new mol.services.cartodb.Converter();
-
-    mol.services.cartodb.convert = function(response) {
-        return mol.services.cartodb.converter.convert(response);
-    };
-};
-mol.modules.map = function(mol) {
+};mol.modules.map = function(mol) {
 
     mol.map = {};
 
@@ -1136,21 +863,33 @@ mol.modules.map.layers = function(mol) {
                         _.each(
                             event.layers,
                             function(layer) {
-                                var extent = $.parseJSON(layer.extent);
-                                var layer_bounds = new google.maps.LatLngBounds(
-                                        new google.maps.LatLng(extent.sw.lat,extent.sw.lng),
-                                        new google.maps.LatLng(extent.ne.lat,extent.ne.lng)
-                                     );
-                                if(!bounds) {
-                                    bounds = layer_bounds;
-                                } else {
-                                    bounds.union(layer_bounds)
-                                }
+                                var extent,
+                                    layer_bounds;
+                                try {
+                                    extent = $.parseJSON(layer.extent);
+                                    layer_bounds = new google.maps.LatLngBounds(
+                                        new google.maps.LatLng(
+                                            extent.sw.lat,extent.sw.lng
+                                        ),
+                                        new google.maps.LatLng(
+                                            extent.ne.lat,extent.ne.lng
+                                        )
+                                    );
+                                    if(!bounds) {
+                                        bounds = layer_bounds;
+                                    } else {
+                                        bounds.union(layer_bounds)
+                                    }
+                                } 
+                                catch(e) {
+                                    //bad json
+                                }  
                             }
                         )
                         self.addLayers(event.layers);
-                        self.map.fitBounds(bounds)
-
+                        if(bounds != null) {
+                            self.map.fitBounds(bounds)
+                        }
                     }
                 );
                 this.bus.addHandler(
@@ -1186,38 +925,24 @@ mol.modules.map.layers = function(mol) {
 
             /**
              * Sorts layers so that they're grouped by name. Within each named
-             * group, they are sorted by type: points, protectedarea, range,
-             * ecoregion.
+             * group, they are sorted by type_sort_order set in the types table.
              *
-             * @layers array of layer objects {name, type}
+             * @layers array of layer objects {name, type, ...}
              */
             sortLayers: function(layers) {
-                var sorted = [],
-                    names_map = {};
-
-                _.sortBy( // Layer names sorted alphabetically.
-                    _.each(layers,
-                          function(layer) {
-                              names_map[layer.name] = layer.name; // Gather unique names.
-                          })
-                );
-
-                _.each(_.keys(names_map),
-                       function(name) {
-                           var group = _.groupBy(_.groupBy(layers, "name")[name], "type");
-
-                           _.each(
-                               ['points', 'protectedarea', 'range', 'ecoregion'],
-                               function(type) {
-                                   if (group[type]) {
-                                       sorted.push(group[type][0]);
-                                   }
-                               }
-                           );
-                       });
-
-                return sorted;
-
+                return _.flatten(
+                    _.groupBy(
+                        _.sortBy(
+                            layers,
+                            function(layer) {
+                                return layer.type_sort_order;
+                            }
+                        ),
+                        function(group) {
+                            return(group.name);
+                        }
+                     )
+                 );
             },
 
             /**
@@ -1439,7 +1164,9 @@ mol.modules.map.layers = function(mol) {
                     this
                 );
                 if(first) {
-                    this.display.list.find('.layer')[0].click();
+                    if(this.display.list.find('.layer').length>0) {
+                        this.display.list.find('.layer')[0].click();
+                    }
                 }
             },
 
@@ -1782,453 +1509,534 @@ mol.modules.map.results = function(mol) {
 
     mol.map.results = {};
 
-    mol.map.results.ResultsEngine = mol.mvp.Engine.extend(
-        {
-            /**
-             * @param bus mol.bus.Bus
-             */
-            init: function(proxy, bus, map) {
-                this.proxy = proxy;
-                this.bus = bus;
-                this.map = map;
-            },
+    mol.map.results.ResultsEngine = mol.mvp.Engine.extend({
+        /**
+         * @param bus mol.bus.Bus
+         */
+        init: function(proxy, bus, map) {
+            this.proxy = proxy;
+            this.bus = bus;
+            this.map = map;
+            this.filters = { 
+                'name': {
+                    title: 'Name', 
+                    hasIcon: false, 
+                    title_field : 'name', 
+                    values: {}
+                },
+                'source_type':{ 
+                    title: 'Source', 
+                    hasIcon: true, 
+                    title_field : 'source_type_title', 
+                    values: {}
+                },
+                'type': {
+                    title: 'Type',
+                    hasIcon: true,
+                    title_field : 'type_title',
+                    values: {}
+                }
+            }
+        },
+
+        /**
+         * Starts the SearchEngine. Note that the container parameter is
+         * ignored.
+         */
+        start: function(container) {
+            this.display = new mol.map.results.ResultsDisplay();
+            this.display.toggle(false);
+            this.addEventHandlers();
+            this.fireEvents();
+        },
+
+        /**
+         * Adds a handler for the 'search-display-toggle' event which
+         * controls display visibility. Also adds UI event handlers for the
+         * display.
+         */
+        addEventHandlers: function() {
+            var self = this;
 
             /**
-             * Starts the SearchEngine. Note that the container parameter is
-             * ignored.
+             * Clicking the "select all" link checks all results.
              */
-            start: function(container) {
-                this.display = new mol.map.results.ResultsDisplay();
-                this.display.toggle(false);
-                this.addEventHandlers();
-                this.fireEvents();
-            },
-
+            this.display.selectAllLink.click(
+                function(event) {
+                    self.display.toggleSelections(true);
+                }
+            );
+            this.bus.addHandler(
+                'results-select-all',
+                function(event) {
+                    self.display.selectAllLink.click();
+                }
+            );
+            this.bus.addHandler(
+                'results-map-selected',
+                function(event) {
+                    self.display.addAllButton.click();
+                }
+            );
             /**
-             * Adds a handler for the 'search-display-toggle' event which
-             * controls display visibility. Also adds UI event handlers for the
-             * display.
+             * Clicking the 'map selected layers' button fires an 'add-layers'
+             * event on the bus.
              */
-            addEventHandlers: function() {
-                var self = this;
-
-                /**
-                 * Clicking the "select all" link checks all results.
-                 */
-                this.display.selectAllLink.click(
-                    function(event) {
-                        self.display.toggleSelections(true);
-                    }
-                );
-                this.bus.addHandler(
-                    'results-select-all',
-                    function(event) {
-                        self.display.selectAllLink.click();
-                    }
-                );
-                this.bus.addHandler(
-                    'results-map-selected',
-                    function(event) {
-                        self.display.addAllButton.click();
-                    }
-                );
-                /**
-                 * Clicking the 'map selected layers' button fires an 'add-layers'
-                 * event on the bus.
-                 */
-                this.display.addAllButton.click(
-                    function(event) {
-                        var checkedResults = self.display.getChecked(),
-                        layers = _.map(
-                            checkedResults,
-                            function(result) {
-                                return $.data(result[0],"layer");
-                            }
+            this.display.addAllButton.click(
+                function(event) {
+                    var layers = self.display.getChecked();
+                    if(self.map.overlayMapTypes.length + layers.length > 100) {
+                        alert(
+                            'The map is currently limited to 100 layers ' +
+                            'at a time. Please remove some layers before ' +
+                            ' adding more.'
                         );
-                        if(self.map.overlayMapTypes.length + layers.length > 100) {
-                            alert('The map is currently limited to 100 layers at a time. Please remove some layers before adding more.');
+                    } else {
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'add-layers',
+                                {
+                                    layers: layers
+                                }
+                            )
+                        );
+                    }
+                }
+            );
+            /**
+             * Clicking the "select none" link unchecks all results.
+             */
+            this.display.selectNoneLink.click(
+                function(event) {
+                    self.display.toggleSelections(false);
+                }
+            );
+
+            /**
+             * Callback that toggles the search display visibility. The
+             * event is expected to have the following properties:
+             *
+             *   event.visible - true to show the display, false to hide it,
+             *                   undefined to toggle.
+             *
+             * @param event mol.bus.Event
+             */
+            this.bus.addHandler(
+                'results-display-toggle',
+                function(event) {
+                    if(self.results == undefined) {
+                        self.display.toggle(false);
+                    } else {
+                        if (event.visible === undefined) {
+                            self.display.toggle();
                         } else {
+                            self.display.toggle(event.visible);
+                        }
+                    }
+                }
+            );
+
+            /**
+             * Callback that displays search results.
+             */
+            this.bus.addHandler(
+                'search-results',
+                function(event) {
+                    var response= event.response;
+                    self.bus.fireEvent(new mol.bus.Event('close-autocomplete'));
+                    self.results = response.rows;
+
+                    if (self.getLayersWithIds(self.results).length > 0) {
+                        self.showFilters(self.results);
+                        self.showLayers(self.results);
+                    } else {
+                        self.showNoResults();
+                    }
+                }
+            );
+        },
+
+        /**
+         * Fires the 'add-map-control' event. The mol.map.MapEngine handles
+         * this event and adds the display to the map.
+         */
+        fireEvents: function() {
+            var params = {
+                display: this.display,
+                slot: mol.map.ControlDisplay.Slot.BOTTOM,
+                position: google.maps.ControlPosition.TOP_LEFT
+            },
+            event = new mol.bus.Event('add-map-control', params);
+
+            this.bus.fireEvent(event);
+        },
+
+        /**
+         * Handles layers (results) to display by updating the result list
+         * and filters.
+         *
+         * layers:
+         *    0:
+         *      name: "Coturnix delegorguei"
+         *      source: "eafr"
+         *      type: "points"
+         *
+         * @param layers an array of layers
+         */
+        showLayers: function(layers) {
+            var display = this.display;
+
+            display.clearResults();
+
+            // Set layer results in display.
+             _.each(
+                this.display.setResults(this.getLayersWithIds(layers)), 
+                function(result) {
+                    result.source.click(
+                        function(event) {
                             self.bus.fireEvent(
                                 new mol.bus.Event(
-                                    'add-layers',
+                                    'metadata-toggle',
                                     {
-                                        layers: layers
+                                        params : { 
+                                            type: $.data(result[0],'layer')
+                                                .type,
+                                            provider: $.data(result[0],'layer')
+                                                .source,
+                                            _class: $.data(result[0],'layer')
+                                                ._class,
+                                            name: $.data(result[0],'layer')
+                                                .name 
+                                        }
                                     }
                                 )
                             );
+                            event.stopPropagation();
+                            event.cancelBubble = true;
                         }
-                    }
-                );
-                /**
-                 * Clicking the "select none" link unchecks all results.
-                 */
-                this.display.selectNoneLink.click(
-                    function(event) {
-                        self.display.toggleSelections(false);
-                    }
-                );
-
-                /**
-                 * Callback that toggles the search display visibility. The
-                 * event is expected to have the following properties:
-                 *
-                 *   event.visible - true to show the display, false to hide it,
-                 *                   undefined to toggle.
-                 *
-                 * @param event mol.bus.Event
-                 */
-                this.bus.addHandler(
-                    'results-display-toggle',
-                    function(event) {
-                        if(self.results == undefined) {
-                            self.display.toggle(false);
-                        } else {
-                            if (event.visible === undefined) {
-                                self.display.toggle();
-                            } else {
-                                self.display.toggle(event.visible);
-                            }
+                    );
+                    result.type.click(
+                        function(event) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'metadata-toggle', 
+                                    {
+                                        params : { 
+                                            type: $.data(result[0],'layer')
+                                                .type
+                                        }
+                                    }
+                                )
+                            );
+                            event.stopPropagation();
+                            event.cancelBubble = true;
                         }
-                    }
-                );
-
-                /**
-                 * Callback that displays search results.
-                 */
-                this.bus.addHandler(
-                    'search-results',
-                    function(event) {
-                        var response= event.response;
-                        self.bus.fireEvent(new mol.bus.Event('close-autocomplete'));
-                        self.results = mol.services.cartodb.convert(response);
-                        self.profile = new mol.map.results.SearchProfile(self.results);
-                        if (self.getLayersWithIds(self.results.layers).length > 0) {
-                            self.showFilters(self.profile);
-                            self.showLayers(self.results.layers);
-                        } else {
-                            self.showNoResults();
-                        }
-                    }
-                );
-            },
-
-            /**
-             * Fires the 'add-map-control' event. The mol.map.MapEngine handles
-             * this event and adds the display to the map.
-             */
-            fireEvents: function() {
-                var params = {
-                    display: this.display,
-                    slot: mol.map.ControlDisplay.Slot.BOTTOM,
-                    position: google.maps.ControlPosition.TOP_LEFT
+                    );
                 },
-                event = new mol.bus.Event('add-map-control', params);
+                this
+              );
+            this.display.noResults.hide();
+            this.display.results.show();
+            this.display.toggle(true);
+        },
+        /*
+         * Displays a message when no results are returned 
+         * from the search query.
+         */
+        showNoResults: function() {
+            this.display.clearFilters();
+            this.display.results.hide();
+            this.display.noResults.show();
+            this.display.toggle(true);
+        },
+        /**
+         * Returns an array of layer objects {id, name, type, source}
+         * with their id set given an array of layer objects
+         * {name, type, source}.
+         */
+        getLayersWithIds: function(layers) {
+            return  _.map(
+                layers,
+                function(layer) {
+                    return _.extend(layer, {id: mol.core.getLayerId(layer)});
+                }
+            );
+        },
 
-                this.bus.fireEvent(event);
-            },
-
-            /**
-             * Handles layers (results) to display by updating the result list
-             * and filters.
-             *
-             * layers:
-             *    0:
-             *      name: "Coturnix delegorguei"
-             *      source: "eafr"
-             *      type: "points"
-             *
-             * @param layers an array of layers
-             */
-            showLayers: function(layers) {
-                var display = this.display;
-
-                display.clearResults();
-
-                // Set layer results in display.
-                 _.each(
-                    this.display.setResults(this.getLayersWithIds(layers)), //passing in self so I can fire events in resultdisplay
-                    function(result) {
-                    // TODO: Wire up results.
-                        result.source.click(
-                            function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { type: $.data(result[0],'layer').type, provider: $.data(result[0],'layer').source, _class: $.data(result[0],'layer')._class, name: $.data(result[0],'layer').name }}));
-                                event.stopPropagation();
-                                event.cancelBubble = true;
+        showFilters: function(results) {
+            var display = this.display,
+                filters = this.filters,
+                self = this;
+            
+            //parse result to fill in the filter values
+            _.each(
+                _.keys(filters),
+                //each filter runs on a layer property
+                function(filter) {
+                    _.each(
+                        results,
+                        //for each property, set a filter with a title
+                        function(row) {    
+                            if(row[filter]) {                 
+                                filters[filter]
+                                    .values[row[filter].replace(/ /g, '_')] 
+                                    =  row[filters[filter].title_field];
                             }
-                        );
-                        result.type.click(
-                            function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { type: $.data(result[0],'layer').type}}));
-                                event.stopPropagation();
-                                event.cancelBubble = true;
+                        }
+                    );
+                }     
+            );
+
+            display.clearFilters();
+
+            // Set options in each filter.
+            _.each(
+                _.keys(filters),
+                function(filter) {
+                    _.each(
+                        display.setOptions(
+                            filters[filter].title, 
+                            filter, 
+                            filters[filter].values, 
+                            filters[filter].hasIcon
+                        ),
+                        function(option) {
+                            if(option.click) {
+                                option.click(
+                                    self.optionClickCallback(
+                                        option, 
+                                        filter
+                                    )
+                                );
                             }
-                        );
-                    },
-                    this
-                  );
-                this.display.noResults.hide();
-                this.display.results.show();
-                this.display.toggle(true);
-            },
-            /*
-             * Displays a message when no results are returned from the search query.
-             */
-            showNoResults: function() {
-                this.display.clearFilters();
-                this.display.results.hide();
-                this.display.noResults.show();
-                this.display.toggle(true);
-            },
-            /**
-             * Returns an array of layer objects {id, name, type, source}
-             * with their id set given an array of layer objects
-             * {name, type, source}.
-             */
-            getLayersWithIds: function(layers) {
-                return  _.map(
-                    layers,
-                    function(layer) {
-                        return _.extend(layer, {id: mol.core.getLayerId(layer)});
+                        }
+                    );
+                }
+            );
+        },
+
+        /**
+         * Returns a function that styles the option as selected and removes
+         * the selected styles from all other items. This is what gets fired
+         * when a filter option is clicked.
+         *
+         * @param filter mol.map.results.FilterDisplay
+         * @param option the filter option display
+         */
+        optionClickCallback: function(option, filterName) {
+            var self = this;
+
+            return function(event) {
+                self.updateFilters(option, filterName)
+                self.updateResults();
+            };
+        },
+        /*
+         *  Creates an array of strings that define the current filter state.
+         *  ['type-range,',]
+         */
+        getSelectedFilters: function() {
+            var filters = [];
+            _.each(
+                $(this.display.filters).find('.filter'),
+                function(group) {
+                    var options= [];
+                    _.each(
+                        $(group).find('.selected'),
+                        function(filter) {
+                            _.each(
+                                _.keys($(filter).data()),
+                                function(key) {
+                                    options.push(
+                                        '.{0}-{1}'.format(
+                                            key, 
+                                            $(filter).data(key)
+                                        )
+                                    );
+                                }
+                            );
+                        }
+                    );
+                    if(options.length>0) {
+                        filters.push(options.join(', '));
                     }
-                );
-            },
-
-            showFilters: function(profile) {
-                var display = this.display,
-                layerNames = profile.getKeys('names'),
-                sourceNames = profile.getKeys('sources'),
-                typeNames = profile.getKeys('types');
-
-                display.clearFilters();
-
-                // Set name options in display.
+                }
+            );
+            return filters;
+        },
+        /*
+         *  Updates the result list based on the selected filters.
+         */
+        updateResults: function() {
+            var filters = this.getSelectedFilters(),
+                results = $(this.display).find('.resultContainer'),
+                newResults = []; 
+            
+            if(filters.length > 0) {
+                //hide it all
+                results.hide()
+                //apply the filters
                 _.each(
-                    display.setOptions('Names', layerNames),
-                    function (option) {
-                        option.click(this.optionClickCallback(option, 'Names'));
-                    },
-                    this
-                );
-
-                // Set source options in display.
-                _.each(
-                    display.setOptions('Sources', sourceNames),
-                    function (option) {
-                        option.click(this.optionClickCallback(option, 'Sources'));
-                    },
-                    this
-                );
-
-                // Set type options in display.
-                _.each(
-                    display.setOptions('Types', typeNames),
-                    function (option) {
-                        option.click(this.optionClickCallback(option, 'Types'));
-                    },
-                    this
-                );
-
-            },
-
-            /**
-             * Returns a function that styles the option as selected and removes
-             * the selected styles from all other items. This is what gets fired
-             * when a filter option is clicked.
-             *
-             * @param filter mol.map.results.FilterDisplay
-             * @param option the filter option display
-             */
-            optionClickCallback: function(option, filterName) {
-                var self = this;
-
-                return function(event) {
-                    self.display.clearOptionSelections(filterName);
-                    option.addClass('selected');
-                    self.updateDisplay();
-                };
-            },
-
-            /**
-             * When a filter is clicked, the search display results are
-             * dynamically updated to match name, source, and type. This
-             * is the function that makes that happen. It calculates the
-             * new layers (results) that are viewable and calls the
-             * handleResults() function.
-             *
-             */
-            updateDisplay: function() {
-                var name = this.display.getOptions('Names', true)[0].attr('id'),
-                source = this.display.getOptions('Sources', true)[0].attr('id'),
-                type = this.display.getOptions('Types', true)[0].attr('id'),
-                layers = this.profile.getNewLayers(
-                    name !== 'All' ? name : null,
-                    source !== 'All' ? source : null,
-                    type !== 'All'? type : null);
-
-                this.showLayers(layers);
+                    filters,
+                    function(filter) {
+                        results = results.filter(filter);
+                    }
+                )
+                results.show();
+             } else {
+                results.show();
+            }
+            
+        },
+        /*
+         *  Keeps the 'All' filter toggle states current.
+         */
+        updateFilters: function(option, filterName) {
+            if(option.hasClass('selected')&&$.trim(option.text())!='All') {
+                option.removeClass('selected');
+                if(this.display
+                       .find('.filter .options .{0}'.format(filterName))
+                       .not('.all')
+                       .filter('.selected')
+                       .length == 0
+                  ) {
+                        this.display
+                            .find('.filter .options .{0}'.format(filterName))
+                            .filter('.all')
+                            .addClass('selected');
+                }
+            } else {
+                if($.trim(option.text())=='All') {
+                    $(this.display.filters)
+                        .find('.{0}'.format(filterName))
+                        .removeClass('selected'); 
+                } else {
+                    $(this.display.filters)
+                        .find('.{0} .all'.format(filterName))
+                        .removeClass('selected');
+                }
+                option.addClass('selected');
             }
         }
-    );
+    });
 
     /**
      * The main display for search results. Contains a search box, a search
      * results list, and search result filters. This is the thing that gets
      * added to the map as a control.
      */
-    mol.map.results.ResultsDisplay = mol.mvp.View.extend(
-        {
-            init: function() {
-                var html = '' +
-                    '<div class="mol-LayerControl-Results">' +
-                    '  <div class="filters"></div>' +
-                    '  <div class="searchResults widgetTheme">' +
-                    '    <div class="results">' +
-                    '      <div class="resultHeader">' +
-                    '         Results' +
-                    '         <a href="#" class="selectNone">none</a>' +
-                    '         <a href="#" class="selectAll">all</a>' +
-                    '      </div>' +
-                    '      <ol class="resultList"></ol>' +
-                    '      <div class="pageNavigation">' +
-                    '         <button class="addAll">Map Selected Layers</button>' +
-                    '      </div>' +
-                    '    </div>' +
-                    '    <div class="noresults">' +
-                    '      <h3>No results found.</h3>' +
-                    '    </div>' +
-                    '  </div>' +
-                    '</div>';
+    mol.map.results.ResultsDisplay = mol.mvp.View.extend({
+        init: function() {
+            var html = '' +
+                '<div class="mol-LayerControl-Results">' +
+                '  <div class="filters"></div>' +
+                '  <div class="searchResults widgetTheme">' +
+                '    <div class="results">' +
+                '      <div class="resultHeader">' +
+                '         Results' +
+                '         <a href="#" class="selectNone">none</a>' +
+                '         <a href="#" class="selectAll">all</a>' +
+                '      </div>' +
+                '      <ol class="resultList"></ol>' +
+                '      <div class="pageNavigation">' +
+                '         <button class="addAll">Map Selected Layers</button>' +
+                '      </div>' +
+                '    </div>' +
+                '    <div class="noresults">' +
+                '      <h3>No results found.</h3>' +
+                '    </div>' +
+                '  </div>' +
+                '</div>';
 
-                this._super(html);
-                this.resultList = $(this).find('.resultList');
-                this.filters = $(this).find('.filters');
-                this.selectAllLink = $(this).find('.selectAll');
-                this.selectNoneLink = $(this).find('.selectNone');
-                this.addAllButton = $(this).find('.addAll');
-                this.results = $(this).find('.results');
-                this.noResults = $(this).find('.noresults');
-            },
+            this._super(html);
+            this.resultList = $(this).find('.resultList');
+            this.filters = $(this).find('.filters');
+            this.selectAllLink = $(this).find('.selectAll');
+            this.selectNoneLink = $(this).find('.selectNone');
+            this.addAllButton = $(this).find('.addAll');
+            this.results = $(this).find('.results');
+            this.noResults = $(this).find('.noresults');
+        },
 
-            clearResults: function() {
-                this.resultList.html('');
-            },
+        clearResults: function() {
+            this.resultList.html('');
+        },
 
-            clearFilters: function() {
-                this.filters.html('');
-            },
+        clearFilters: function() {
+            this.filters.html('');
+        },
 
-            /**
-             * Makes all options for a filter unselected.
-             */
-            clearOptionSelections: function(filterName) {
-                _.each(
-                    this.getOptions(filterName),
-                    function(option) {
-                        option.removeClass('selected').addClass('option');
-                    }
-                );
-            },
 
-            toggleSelections: function(showOrHide) {
-                $('.checkbox').each(
-                    function() {
-                        $(this).attr('checked', showOrHide);
-                    }
-                );
-            },
 
-            /**
-             * Returns an array of jquery result objects that are checked.
-             */
-            getChecked: function() {
-                var checked = _.filter(
-                    this.resultList.children(),
-                    function(result) {
-                        if ($(result).find('.checkbox').attr('checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                    this
-                );
+        toggleSelections: function(showOrHide) {
+            $('.checkbox').each(
+                function() {
+                    $(this).attr('checked', showOrHide);
+                }
+            );
+        },
 
-                return _.map(
-                    checked,
-                    function(result) {
-                        return $(result);
-                    }
-                );
-            },
+        /**
+         * Returns an array of layer objects from results that are checked.
+         */
+        getChecked: function() {
+            var checked = [];
+            _.each(
+                this.find('.resultContainer').filter(':visible'),
+                function(result) {
+                    if ($(result).find('.checkbox').attr('checked')) {
+                        checked.push($(result).data('layer'));
+                    } 
+                }
+            );
+            return checked;
+        },
 
-            /**
-             * Sets the results and returns them as an array of JQuery objects.
-             *
-             * @param layers An array of layer objects {id, name, type, source}
-             */
-            setResults: function(layers) {
-                return _.map(
-                    layers,
-                    function(layer) {
-                        var result = new mol.map.results.ResultDisplay(layer);
-                        this.resultList.append(result);
-                        return result;
-                    },
-                    this
-                );
-            },
+        /**
+         * Sets the results and returns them as an array of JQuery objects.
+         *
+         * @param layers An array of layer objects {id, name, type, source}
+         */
+        setResults: function(layers) {
+            return _.map(
+                layers,
+                function(layer) {
+                    var result = new mol.map.results.ResultDisplay(layer);
+                    this.resultList.append(result);
+                    return result;
+                },
+                this
+            );
+        },
 
-            /**
-             * Sets the options for a filter and returns the options as an array
-             * of JQuery objects.
-             */
-            setOptions: function(filterName, optionNames) {
-                var self = this,
-                filter = new mol.map.results.FilterDisplay(filterName),
-                options =  _.map(
-                    optionNames,
-                    function(name) {
-                        var option = new mol.map.results.OptionDisplay(name);
-                        filter.options.append(option);
-                        return option;
-                    }
-                );
+        /**
+         * Sets the options for a filter and returns an array of jQuery objects.
+         */
+        setOptions: function(filterName, filterType, optionNames, hasIcon) {
+            var self = this,
+                filter = new mol.map.results.FilterDisplay(
+                    filterType, 
+                    filterName
+                ),
+                options = [];
+           
+            _.each(
+                _.keys(optionNames),
+                function(name) {
+                    var option = new mol.map.results.OptionDisplay(
+                        name, filterType, optionNames[name], hasIcon);
+                    filter.options.append(option);
+                    options.push(option);
+                }
+            );
+            
+            filter.attr('id', filterName);
+            this.filters.append(filter);
+            return(options);
+        },
 
-                filter.attr('id', filterName);
-                this.filters.append(filter);
-                return _.union([filter.allOption], options);
-            },
-
-            /**
-             * Returns an array of filter options as JQuery objects. If
-             * selected is true, only returns options that are selected.
-             */
-            getOptions: function(filterName, selected) {
-                var filter = this.filters.find('#{0}'.format(filterName)),
-                options =  _.filter(
-                    filter.find('.option'),
-                    function(option) {
-                        var opt = $(option);
-
-                        if (!selected) {
-                            return true;
-                        } else if (opt.hasClass('selected')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                );
-
-                return _.map(
-                    options,
-                    function(option) {
-                        return $(option);
-                    }
-                );
-            }
-        }
-    );
+ 
+    });
     /**
      * The display for a single search result that lives in the result list.
      *
@@ -2238,25 +2046,54 @@ mol.modules.map.results = function(mol) {
         {
             init: function(layer) {
                 var self=this, html = '' +
-                    '<div>' +
-                    '<ul id="{0}" class="result">' +
-                    '<div class="resultSource"><button><img class="source" title="Layer Source: {7}" src="/static/maps/search/{2}.png"></button></div>' +
-                    '<div class="resultType" ><button ><img class="type" title="Layer Type: {6}" src="/static/maps/search/{3}.png"></button></div>' +
-                    '<div class="resultName">' +
-                    '  <div class="resultRecords">{5} features</div>' +
-                    '  <div class="resultNomial">{1}</div>' +
-                    '  <div class="resultEnglishName" title="{4}">{4}</div>' +
-                    '  <div class="resultAuthor"></div>' +
-                    '</div>' +
-                    '<label class="buttonContainer">' +
-                    ' <input type="checkbox" class="checkbox" />' +
-                    '   <span class="customCheck"></span>' +
-                    '</label> ' +
-                    '</ul>' +
-                    '<div class="break"></div>' +
+                     //add filtertype-value as a class for filtering
+                    '<div class="' +
+                    '   resultContainer name-{1} source_type-{3} type-{4}">' +
+                    '   <ul id="{0}" class="result">' +
+                    '       <div class="resultSource">' +
+                    '          <button>' +
+                    '              <img class="source" ' +
+                    '                  title="Layer Source: {8}" ' +
+                    '                  src="/static/maps/search/{3}.png">' +
+                    '          </button>' +
+                    '       </div>' +
+                    '       <div class="resultType">' +
+                    '           <button>'+
+                    '               <img class="type" ' +
+                    '               title="Layer Type: {7}" ' +
+                    '               src="/static/maps/search/{4}.png">' +
+                    '           </button>' +
+                    '       </div>' +
+                    '       <div class="resultName">' +
+                    '           <div class="resultRecords">{6} features</div>' +
+                    '           <div class="resultNomial">{2}</div>' +
+                    '           <div class="resultEnglishName" title="{5}">' +
+                    '               {5}' +
+                    '           </div>' +
+                    '           <div class="resultAuthor"></div>' +
+                    '       </div>' +
+                    '       <label class="buttonContainer">' +
+                    '           <input type="checkbox" class="checkbox" />' +
+                    '           <span class="customCheck"></span>' +
+                    '       </label> ' +
+                    '       </ul>' +
+                    '   <div class="break"></div>' +
                     '</div>';
 
-                this._super(html.format(layer.id, layer.name, layer.source, layer.type, layer.names, layer.feature_count, layer.type_title, layer.source_title));
+                
+                this._super(
+                    html.format(
+                        layer.id,
+                        layer.name.replace(/ /g, '_'),
+                        layer.name, 
+                        layer.source_type, 
+                        layer.type, 
+                        layer.names, 
+                        layer.feature_count, 
+                        layer.type_title, 
+                        layer.source_title
+                    )
+                );
                 $.data(this[0],'layer',layer);
                 this.infoLink = $(this).find('.info');
                 this.nameBox = $(this).find('.resultName');
@@ -2268,22 +2105,27 @@ mol.modules.map.results = function(mol) {
     );
 
     /**
-     * The display for a single search result filter. Allows you to select a name,
-     * source, or type and see only matching search results.
+     * The display for a single search result filter. Allows you to select
+     * a name, source, or type and see only matching search results.
      */
     mol.map.results.FilterDisplay = mol.mvp.View.extend(
         {
-            init: function(name) {
+            init: function(type, title) {
                 var html = '' +
-                    '<div class="filter widgetTheme">' +
-                    '    <div class="filterName">{0}</div>' +
+                    '<div class="filter widgetTheme {0}">' +
+                    '    <div class="filterName">{1}</div>' +
                     '    <div class="options"></div>' +
                     '</div>';
 
-                this._super(html.format(name));
+                this._super(html.format(type, title));
                 this.name = $(this).find('.filterName');
                 this.options = $(this).find('.options');
-                this.allOption = new mol.map.results.OptionDisplay('All');
+                this.allOption = new mol.map.results.OptionDisplay(
+                    'all',
+                     type,
+                    'All', 
+                    false
+                );
                 this.allOption.addClass('selected');
                 this.options.append(this.allOption);
             }
@@ -2291,265 +2133,37 @@ mol.modules.map.results = function(mol) {
     );
 
 
-    mol.map.results.OptionDisplay = mol.mvp.View.extend(
-        {
-            init: function(name) {
-                var name_mappings = {
-                    "gbif": "GBIF",
-                    "wdpa": "Scientist/Literature",
-                    "wwf": "WWF",
-                    "jetz": "Scientist/Literature",
-                    "iucn": "IUCN",
-                    "fishes": "Scientist/Literature",
-                    "points": "Points",
-                    "range": "Expert range maps",
-                    "protectedarea": "Local inventories",
-                    "ecoregion": "Regional checklists"
-                };
-
-                mapped_name = name_mappings[name];
-
-                if(name == "All") {
-                    this._super('<div id="{0}" class="option" style="text-align: right; margin-right: 10px;"><span class="option_text"><strong>all</strong></span></div>'.format(name, mapped_name));
-                } else if(!mapped_name) {
-                    this._super('<div id="{0}" class="option"><span class="option_text">{1}</span></div>'.format(name, name));
-                } else
-                    this._super('<div id="{0}" class="option"><button><img type="source" style="width: 12px; height: 12px; margin: 0.5px;" src="/static/maps/search/{0}.png"></button> <span class="option_text">{1}</span></div>'.format(name, mapped_name));
-
+    mol.map.results.OptionDisplay = mol.mvp.View.extend({
+        init: function(name, type, value, hasIcon) {
+            var base_html = '' +
+                '<div class="option {0}"></div>',
+                button_html = '' +
+                '<button>' +
+                '   <img src="/static/maps/search/{0}.png">'+
+                '</button>',
+                label_html = '' +
+                '   <span class="option_text">{0}</span>';
+                
+            if(name != undefined && value != undefined) {    
+                this._super(base_html.format(type));
+                if(name != 'all') {
+                    this.data(type, name); 
+                } else {
+                    this.addClass('all')
+                }
+                if(hasIcon) {
+                    this.append($(button_html.format(name)));
+                }
+                this.append($(label_html.format(value)));
             }
+            
         }
-    );
-
-
-    /**
-     * This class supports dynamic search result filtering. You give it a name,
-     * source, type, and search profile, and you get back all matching results
-     * that satisfy those constraints. This is the thing that allows you to
-     * click on a name, source, or type and only see those results.
-     *
-     * TODO: This could use a refactor. Lot's of duplicate code. <<< +1 -- j
-     */
-    mol.map.results.SearchProfile = Class.extend(
-        {
-            init: function(response) {
-                this.response = response;
-            },
-
-            /**
-             * Gets layer namesthat satisfy a name, source, and type combined
-             * constraint.
-             *
-             * @param name the layer name
-             * @param source the layer source
-             * @param type the layer type
-             * @param profile the profile to test
-             *
-             */
-            getNewLayers: function(name, source, type, englishname, profile) {
-                var layers = this.getLayers(name, source, type, englishname, profile);
-
-                return _.map(
-                    layers,
-                    function(layer) {
-                        return this.getLayer(parseInt(layer));
-                    },
-                    this
-                );
-            },
-
-            getLayers: function(name, source, type, englishname, profile) {
-                var response = this.response,
-                currentProfile = profile ? profile : 'nameProfile',
-                nameProfile = name ? response.names[name] : null,
-                sourceProfile = source ? response.sources[source] : null,
-                typeProfile = type ? response.types[type] : null,
-                englishnameProfile = englishname ? response.englishnames[englishname] : null,
-                profileSatisfied = false;
-
-                if (!name && !type && !source && !englishname){
-                    var keys = new Array();
-                    for (i in response.layers) {
-                        keys.push(i);
-                    };
-                    return keys;
-                }
-
-                switch (currentProfile) {
-
-                case 'nameProfile':
-                    if (!name) {
-                        return this.getLayers(name, source, type, englishname, 'sourceProfile');
-                    }
-
-                    if (nameProfile) {
-                        if (!source && !type) {
-                            return nameProfile.layers;
-                        }
-                        if (source && type) {
-                            if (this.exists(source, nameProfile.sources) &&
-                                this.exists(type, nameProfile.types)) {
-                                return _.intersect(
-                                    nameProfile.layers,
-                                    this.getLayers(name, source, type, englishname, 'sourceProfile'));
-                            }
-                        }
-                        if (source && !type) {
-                            if (this.exists(source, nameProfile.sources)) {
-                                return _.intersect(
-                                    nameProfile.layers,
-                                    this.getLayers(name, source, type, englishname, 'sourceProfile'));
-                            }
-                        }
-                        if (!source && type) {
-                            if (this.exists(type, nameProfile.types)) {
-                                return _.intersect(
-                                    nameProfile.layers,
-                                    this.getLayers(name, source, type, englishname, 'typeProfile'));
-                            }
-                        }
-                    }
-                    return [];
-
-                case 'sourceProfile':
-                    if (!source) {
-                        return this.getLayers(name, source, type, englishname,'typeProfile');
-                    }
-
-                    if (sourceProfile) {
-                        if (!name && !type) {
-                            return sourceProfile.layers;
-                        }
-                        if (name && type) {
-                            if (this.exists(name, sourceProfile.names) &&
-                                this.exists(type, sourceProfile.types)) {
-                                return _.intersect(
-                                    sourceProfile.layers,
-                                    this.getLayers(name, source, type, englishname,'typeProfile'));
-                            }
-                        }
-                        if (name && !type) {
-                            if (this.exists(name, sourceProfile.names)) {
-                                return sourceProfile.layers;
-                            }
-                        }
-                        if (!name && type) {
-                            if (this.exists(type, sourceProfile.types)) {
-                                return _.intersect(
-                                    sourceProfile.layers,
-                                    this.getLayers(name, source, type, englishname, 'typeProfile'));
-                            }
-                        }
-                    }
-                    return [];
-                /*TODO englishname profile */
-
-                case 'typeProfile':
-                    if (!type) {
-                        return [];
-                    }
-
-                    if (typeProfile) {
-                        if (!name && !source) {
-                            return typeProfile.layers;
-                        }
-                        if (name && source) {
-                            if ( this.exists(name, typeProfile.names) &&
-                                 this.exists(source, typeProfile.sources)) {
-                                return typeProfile.layers;
-                            }
-                        }
-                        if (name && !source) {
-                            if (this.exists(name, typeProfile.names)) {
-                                return typeProfile.layers;
-                            }
-                        }
-                        if (!name && source) {
-                            if (this.exists(source, typeProfile.sources)) {
-                                return typeProfile.layers;
-                            }
-                        }
-                    }
-                    return [];
-
-                }
-                return [];
-            },
-
-            getLayer: function(layer) {
-                return this.response.layers[layer];
-            },
-
-            getKeys: function(id) {
-                var res;
-                switch(id.toLowerCase()){
-                case "types":
-                    res = this.response.types;
-                    break;
-                case "sources":
-                    res = this.response.sources;
-                    break;
-                case "names":
-                    res = this.response.names;
-                    break;
-                case "englishnames":
-                    res = this.response.englishnames;
-                    break;
-                }
-                return _.keys(res);
-            },
-
-            getTypeKeys: function() {
-                var x = this.typeKeys,
-                types = this.response.types;
-                return x ? x : (this.typeKeys = _.keys(types));
-            },
-
-            getType: function(type) {
-                return this.response.types[type];
-            },
-
-            getSourceKeys: function() {
-                var x = this.sourceKeys,
-                sources = this.response.sources;
-                return x ? x : (this.sourceKeys = _.keys(sources));
-            },
-
-            getSource: function(source) {
-                return this.response.sources[source];
-            },
-
-            getNameKeys: function() {
-                var x = this.nameKeys,
-                names = this.response.names;
-                return x ? x : (this.nameKeys = _.keys(names));
-            },
-
-            getName: function(name) {
-                return this.response.names[name];
-            },
-            getEnglishNameKeys: function() {
-                var x = this.englishnameKeys,
-                englishnames = this.response.englishnames;
-                return x ? x : (this.englishnameKeys = _.keys(englishnames));
-            },
-
-            getEnglishName: function(englishname) {
-                return this.response.englishnames[englishname];
-            },
-            /**
-             * Returns true if the name exists in the array, false otherwise.
-             */
-            exists: function(name, array) {
-                return _.indexOf(array, name) != -1;
-            }
-        }
-    );
-};mol.modules.map.search = function(mol) {
+    });
+}mol.modules.map.search = function(mol) {
 
     mol.map.search = {};
 
     mol.map.search.SearchEngine = mol.mvp.Engine.extend({
-
         /**
          * @param bus mol.bus.Bus
          */
@@ -2558,40 +2172,52 @@ mol.modules.map.results = function(mol) {
             this.bus = bus;
             this.searching = {};
             this.names = [];
-            this.url = "" +
-                "http://dtredc0xh764j.cloudfront.net/"+
-                "api/v2/sql?callback=?&q={0}";
-            //TODO replace with postgres function (issue #126)
-            this.search_sql = '' +  
+            this.bornOnDate = Math.random();
+            this.ac_label_html = ''+
+                '<div class="ac-item">' +
+                    '<span class="sci">{0}</span>' +
+                    '<span class="eng">{1}</span>' +
+                '</div>';
+            this.ac_sql = "" +_
+                "SELECT n,v from ac_beta where n~*'\\m{0}' OR v~*'\\m{0}'";
+            this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
-                '       l.type as type,'+
-                '       t.title as type_title,'+
-                '       l.provider as source, '+
-                '       p.title as source_title,'+
-                '       n.class as _class, ' +
-                '       l.feature_count as feature_count,'+
-                '       n.common_names_eng as names,' +
-                '       CONCAT(\'{' +
-                '           "sw":{' +
-                '               "lng":\',ST_XMin(l.extent),\','+
-                '               "lat":\',ST_YMin(l.extent),\'' +
-                '           },' +
-                '           "ne":{' +
-                '               "lng":\',ST_XMax(l.extent),\','+
-                '               "lat":\',ST_YMax(l.extent),\''+
-                '           } ' +
-                '       }\') as extent ' +
+                    't.type as type,'+
+                    't.sort_order as type_sort_order, ' +
+                    't.title as type_title,'+
+                    'CONCAT(l.provider,\'\') as source, '+
+                    'CONCAT(p.title,\'\') as source_title,'+
+                    's.source_type as source_type, ' +
+                    's.title as source_type_title, ' +   
+                    'CONCAT(n.class,\'\') as _class, ' +
+                    'l.feature_count as feature_count, '+
+                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(\'{' +
+                        '"sw":{' +
+                            '"lng":\',ST_XMin(l.extent),\', '+
+                            '"lat":\',ST_YMin(l.extent),\' '+
+                        '}, '+
+                        '"ne":{' +
+                        '"lng":\',ST_XMax(l.extent),\', ' +
+                        '"lat":\',ST_YMax(l.extent),\' ' +
+                        '}}\') as extent, ' +
+                    'l.dataset_id as dataset_id, ' +
+                    'd.style_table as style_table ' +
                 'FROM layer_metadata l ' +
+                'LEFT JOIN data_registry d ON ' +
+                    'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
-                '       l.type = t.type ' +
+                    'l.type = t.type ' +
                 'LEFT JOIN providers p ON ' +
-                '       l.provider = p.provider ' +
+                    'l.provider = p.provider ' +
+                'LEFT JOIN source_types s ON ' +
+                    'p.source_type = s.source_type ' +
                 'LEFT JOIN taxonomy n ON ' +
-                '       l.scientificname = n.scientificname ' +
+                    'l.scientificname = n.scientificname ' +
                 'WHERE ' +
-                "  l.scientificname~*'\\m{0}' OR n.common_names_eng~*'\\m{0}'";
-            this.ac_sql = "" +
-                "SELECT n,v from ac where n~*'\\m{0}' OR v~*'\\m{0}'";
+                    "l.scientificname~*'\\m{0}' " +
+                    "OR n.common_names_eng~*'\\m{0}' " +
+                'ORDER BY name, type_sort_order';
         },
 
         /**
@@ -2605,21 +2231,19 @@ mol.modules.map.results = function(mol) {
             this.addEventHandlers();
             this.fireEvents();
         },
-
         /*
          * Initialize autocomplate functionality
          */
         initAutocomplete: function() {
             this.populateAutocomplete(null, null);
-            //From StackOverflow http://goo.gl/03gtt 
+
+            //http://stackoverflow.com/questions/2435964/jqueryui-how-can-i-custom-format-the-autocomplete-plug-in-results
             $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+
                 item.label = item.label.replace(
-                    new RegExp(
-                        "(?![^&;]+;)(?!<[^<>]*)(" +
-                        $.ui.autocomplete.escapeRegex(this.term) +
-                        ")(?![^<>]*>)(?![^&;]+;)", 
-                        "gi"
-                    ),
+                    new RegExp("(?![^&;]+;)(?!<[^<>]*)(" +
+                       $.ui.autocomplete.escapeRegex(this.term) +
+                       ")(?![^<>]*>)(?![^&;]+;)", "gi"), 
                     "<strong>$1</strong>"
                 );
                 return $("<li></li>")
@@ -2634,47 +2258,84 @@ mol.modules.map.results = function(mol) {
          */
         populateAutocomplete : function(action, response) {
             var self = this;
-            $(this.display.searchBox).autocomplete({
-                minLength: 3, 
-                source: function(request, response) {
-                    $.getJSON(
-                        self.url.format(self.ac_sql.format(request.term)),
-                        function (json) {
-                            response(self.formatAutocompleteResults(json));
-                        }
-                    );
-                },
+            $(this.display.searchBox).autocomplete(
+                {
+                    minLength: 3, 
+                    source: function(request, response) {
+                        $.post(
+                            'cache/get',
+                            {
+                                key: 'ac-beta-{0}-{1}'
+                                    .format(request.term,self.bornOnDate),
+                                sql: self.ac_sql.format(request.term)
+                            },
+                            function (json) {
+                                var names = [],scinames=[];
+                                _.each (
+                                    json.rows,
+                                    function(row) {
+                                        var sci, eng;
+                                        if(row.n != undefined){
+                                            sci = row.n;
+                                            eng = (row.v == null || 
+                                                row.v == '') ? 
+                                                    '' :
+                                                    ', {0}'.format(
+                                                        row.v.replace(
+                                                            /'S/g, "'s"
+                                                        )
+                                                    );
+                                            names.push({
+                                                label:self.ac_label_html
+                                                    .format(sci, eng), 
+                                                value:sci
+                                            });
+                                            scinames.push(sci);
+                                       }
+                                   }
+                                );
+                                if(scinames.length>0) {
+                                    self.names=scinames;
+                                }
+                                response(names);
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'hide-loading-indicator', 
+                                        {source : "autocomplete"}
+                                    )
+                                );
+                             },
+                             'json'
+                        );
+                    },
+                    select: function(event, ui) {
+                        self.searching[ui.item.value] = false;
+                        self.names = [ui.item.value];
+                        self.search(ui.item.value);
+                    },
+                    close: function(event,ui) {
 
-                select: function(event, ui) {
-                    self.searching[ui.item.value] = false;
-                    self.names = [ui.item.value];
-                    self.search(ui.item.value);
-                },
-
-                close: function(event,ui) {
-                },
-
-                search: function(event, ui) {
-                    self.searching[$(this).val()] = true;
-                    self.names=[];
-                    self.bus.fireEvent(
-                        new mol.bus.Event(
-                            'show-loading-indicator',
-                            {source : "autocomplete"}
-                        )
-                    );
-                },
-
-                open: function(event, ui) {
-                    self.searching[$(this).val()] = false;
-                    self.bus.fireEvent(
-                       new mol.bus.Event(
-                           'hide-loading-indicator',
-                            {source : "autocomplete"}
-                        )
-                    );
-                }
-            });
+                    },
+                    search: function(event, ui) {
+                        self.searching[$(this).val()] = true;
+                        self.names=[];
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'show-loading-indicator', 
+                                {source : "autocomplete"}
+                            )
+                        );
+                    },
+                    open: function(event, ui) {
+                        self.searching[$(this).val()] = false;
+                        self.bus.fireEvent(
+                             new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : "autocomplete"}
+                            )
+                        );
+                    }
+              });
         },
 
         addEventHandlers: function() {
@@ -2693,12 +2354,14 @@ mol.modules.map.results = function(mol) {
                 function(event) {
                     var params = {},
                         e = null;
+
                     if (event.visible === undefined) {
                         self.display.toggle();
                         params = {visible: self.display.is(':visible')};
                     } else {
                         self.display.toggle(event.visible);
                     }
+
                     e = new mol.bus.Event('results-display-toggle', params);
                     self.bus.fireEvent(e);
                 }
@@ -2723,12 +2386,14 @@ mol.modules.map.results = function(mol) {
                                 )
                             );
                         }
+
                         self.search(event.term);
+
                         if (self.display.searchBox.val()=='') {
                             self.display.searchBox.val(event.term);
                         }
                     }
-                }
+               }
             );
 
             /**
@@ -2736,7 +2401,7 @@ mol.modules.map.results = function(mol) {
              */
             this.display.goButton.click(
                 function(event) {
-                    self.search(self.display.searchBox.val());
+                          self.search(self.display.searchBox.val());
                 }
             );
 
@@ -2746,14 +2411,13 @@ mol.modules.map.results = function(mol) {
              */
             this.display.cancelButton.click(
                 function(event) {
-                    var params = {visible: false};
+                    var params = {
+                        visible: false
+                    };
+
                     self.display.toggle(false);
                     self.bus.fireEvent(
-                        new mol.bus.Event(
-                            'results-display-toggle',
-                            params
-                        )
-                    );
+                        new mol.bus.Event('results-display-toggle', params));
                 }
             );
 
@@ -2766,7 +2430,7 @@ mol.modules.map.results = function(mol) {
                         $(this).autocomplete("close");
                         self.bus.fireEvent(
                             new mol.bus.Event(
-                                'hide-loading-indicator',
+                                'hide-loading-indicator', 
                                 {source : "autocomplete"}
                             )
                         );
@@ -2787,53 +2451,12 @@ mol.modules.map.results = function(mol) {
                     position: google.maps.ControlPosition.TOP_LEFT
                 },
                 event = new mol.bus.Event('add-map-control', params);
+
             this.bus.fireEvent(event);
         },
 
-        formatAutocompleteResults: function (json) {
-            var names = [], 
-                scinames = [],
-                self = this;
-
-            //Parse and style the autocomplete response
-            _.each(json.rows, 
-                function(row) {
-                    var sci, 
-                        eng,
-                        html = '' +
-                            '<div class="ac-item">' + 
-                            '   <span class="sci">{0}</span>' +
-                            '   <span class="eng">{1}</span>' +
-                            '</div>';
-                    if (row.n != undefined) {
-                        sci = row.n;
-                        eng = (row.v == null || row.v == '') ? '' : ', {0}'
-                            .format(row.v.replace(/'S/g, "'s"));
-                        names.push({
-                            label: html.format(sci, eng),
-                            value: sci
-                        });
-                        scinames.push(sci);
-                    }
-                }
-            );
-
-            //Update names for search button or enter keyup events
-            if (scinames.length > 0) {
-                this.names = scinames;
-            }               
-
-            this.bus.fireEvent(
-                new mol.bus.Event(
-                    'hide-loading-indicator', 
-                    {source: "autocomplete"}
-                )
-            );
-            return names;
-        },
-
         /**
-         * Searches CartoDB via proxy using a term from the search box. Fires
+         * Searches CartoDB using a term from the search box. Fires
          * a search event on the bus. The success callback fires a 
          * search-results event on the bus.
          *
@@ -2841,50 +2464,52 @@ mol.modules.map.results = function(mol) {
          */
         search: function(term) {
             var self = this;
-
-            self.bus.fireEvent(
-                new mol.bus.Event(
-                    'show-loading-indicator', 
-                    {source: "search-{0}".format(term)}
-                )
-            );
-            self.bus.fireEvent(
-                new mol.bus.Event(
-                    'results-display-toggle', 
-                    {visible: false}
-                )
-            );
-            $(self.display.searchBox).autocomplete('disable');
-            $(self.display.searchBox).autocomplete('enable');
-
-            if (term.length < 3) {
-                alert('Please enter at least 3 characters in the search box.');
-            } else {
-                $(self.display.searchBox).val(term);
-
-                $.getJSON(
-                    this.url.format(this.search_sql.format(term)), 
-                    function(response) {
-                        var results = {
-                            term: term,
-                            response: response
-                        };
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                'hide-loading-indicator', 
-                                {source: "search-{0}".format(term)}
-                            )
-                        );
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                'search-results', 
-                                results
-                            )
-                        );
-                    }
+                self.bus.fireEvent(
+                    new mol.bus.Event(
+                        'show-loading-indicator', 
+                        {source : "search-{0}".format(term)}
+                    )
                 );
+                self.bus.fireEvent(
+                    new mol.bus.Event(
+                        'results-display-toggle',
+                        {visible : false}
+                    )
+                );
+                $(self.display.searchBox).autocomplete('disable');
+                $(self.display.searchBox).autocomplete('enable');
+                if(term.length<3) {
+                    alert('' +
+                        'Please enter at least 3 characters in the search box.'
+                    );
+                } else {
+                    $(self.display.searchBox).val(term);
+                    $.post(
+                            'cache/get',
+                            {
+                                key:'search-{0}-{1}'
+                                    .format(term,this.bornOnDate),
+                                sql:this.sql.format(term)
+                            },
+                            function (response) {
+                                var results = {term:term, response:response};
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'hide-loading-indicator', 
+                                        {source : "search-{0}".format(term)}
+                                    )
+                                );
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'search-results', 
+                                        results
+                                    )
+                                );
+                            },
+                            'json'
+                    );
+               }
 
-            }
         }
     });
 
@@ -2893,23 +2518,23 @@ mol.modules.map.results = function(mol) {
             var html = '' +
                 '<div class="mol-LayerControl-Search widgetTheme">' +
                 '    <div class="title ui-autocomplete-input">Search:</div>' +
-                '    <input class="value" type="text" '+
-                '        placeholder="Search by species name">' +
+                '    <input class="value" type="text" ' +
+                        'placeholder="Search by species name">' +
                 '    <button class="execute">Go</button>' +
                 '    <button class="cancel">&nbsp;</button>' +
                 '</div>';
+
             this._super(html);
             this.goButton = $(this).find('.execute');
             this.cancelButton = $(this).find('.cancel');
             this.searchBox = $(this).find('.value');
         },
+
         clear: function() {
             this.searchBox.html('');
         }
     });
-
-};
-/**
+};/**
  * This module handles add-layers events and layer-toggle events. tI basically
  * proxies the CartoDB JavaScript API for adding and removing CartoDB layers
  * to and from the map.
@@ -2924,28 +2549,27 @@ mol.modules.map.tiles = function(mol) {
      *
      * @see http://developers.cartodb.com/gallery/maps/densitygrid.html
      */
-    mol.map.tiles.TileEngine = mol.mvp.Engine.extend(
-        {
-            init: function(proxy, bus, map) {
-                this.proxy = proxy;
-                this.bus = bus;
-                this.map = map;
-                this.gmap_events = [];
-                this.addEventHandlers();
-            },
+    mol.map.tiles.TileEngine = mol.mvp.Engine.extend({
+        init: function(proxy, bus, map) {
+            this.proxy = proxy;
+            this.bus = bus;
+            this.map = map;
+            this.gmap_events = [];
+            this.addEventHandlers();
+        },
 
-            addEventHandlers: function() {
-                var self = this;
+        addEventHandlers: function() {
+            var self = this;
 
-                /**
-                 * Handler for when the layer-toggle event is fired. This renders
-                 * the layer on the map if visible, and removes it if not visible.
-                 *  The event.layer is a layer object {id, name, type, source}. event.showing
-                 * is true if visible, false otherwise.
-                 */
-                this.bus.addHandler(
-                    'layer-toggle',
-                    function(event) {
+            /**
+             * Handler for when the layer-toggle event is fired. This renders
+             * the layer on the map if visible, and removes it if not visible.
+             * The event.layer is a layer object {id, name, type, source}. event.showing
+             * is true if visible, false otherwise.
+             */
+             this.bus.addHandler(
+                'layer-toggle',
+                function(event) {
                         var showing = event.showing,
                             layer = event.layer,
                             params = null,
@@ -2953,11 +2577,11 @@ mol.modules.map.tiles = function(mol) {
 
                         if (showing) {
                             self.map.overlayMapTypes.forEach(
-                                function(maptype, index) {
-                                    if ((maptype != undefined) && (maptype.name == layer.id)) {
+                                function(mt, index) {
+                                    if (mt != undefined && mt.name == layer.id) {
                                         params = {
                                             layer: layer,
-                                            opacity: maptype.opacity_visible
+                                            opacity: mt.opacity_visible
                                         };
                                         e = new mol.bus.Event('layer-opacity', params);
                                         self.bus.fireEvent(e);
@@ -2972,18 +2596,21 @@ mol.modules.map.tiles = function(mol) {
                             //self.renderTiles([layer]);
                         } else { // Remove layer from map.
                             self.map.overlayMapTypes.forEach(
-                                function(maptype, index) {
-                                    if ((maptype != undefined) && (maptype.name == layer.id)) {
-                                        maptype.opacity_visible = maptype.opacity;
+                                function(mt, index) {
+                                    if (mt != undefined && mt.name == layer.id) {
+                                        mt.opacity_visible = mt.opacity;
                                         params = {
                                             layer: layer,
                                             opacity: 0
                                         };
-                                        e = new mol.bus.Event('layer-opacity', params);
+                                        e = new mol.bus.Event(
+                                            'layer-opacity', 
+                                            params
+                                        );
                                         self.bus.fireEvent(e);
-                                        if(maptype.interaction != undefined) {
-                                            maptype.interaction.remove();
-                                            maptype.interaction.clickAction="";
+                                        if(mt.interaction != undefined) {
+                                            mt.interaction.remove();
+                                            mt.interaction.clickAction="";
                                         }
                                         //self.map.overlayMapTypes.removeAt(index);
                                     }
@@ -3031,46 +2658,6 @@ mol.modules.map.tiles = function(mol) {
                 );
 
                 /**
-                 * Handler for applying cartocss style to a layer.
-                 */
-                this.bus.addHandler(
-                    'apply-layer-style',
-                    function(event) {
-                        var layer = event.layer,
-                            style = event.style;
-
-                        if(layer.type == 'points') {
-                            return;
-                        }
-
-                        self.map.overlayMapTypes.forEach(
-                            function(maptype, index) {
-                                //find the overlaymaptype to style
-                                if (maptype.name === layer.id) {
-                                    //remove it from the map
-                                    self.map.overlayMapTypes.removeAt(index);
-                                    //add the style
-                                    layer.tile_style = style;
-                                    //make the layer
-                                    self.getTile(layer);
-                                    //fix the layer order
-                                    self.map.overlayMapTypes.forEach(
-                                        function(newmaptype, newindex) {
-                                            var mt;
-                                            if(newmaptype.name === layer.id) {
-                                                mt = self.map.overlayMapTypes.removeAt(newindex);
-                                                self.map.overlayMapTypes.insertAt(index, mt);
-                                                return
-                                            }
-                                        }
-                                    );
-                                }
-                            }
-                        );
-                    }
-                );
-
-                /**
                  * Handler for when the add-layers event is fired. This renders
                  * the layers on the map by firing a add-map-layer event. The
                  * event.layers is an array of layer objects {name:, type:}.
@@ -3087,7 +2674,7 @@ mol.modules.map.tiles = function(mol) {
                  * functions removes all layers from the Google Map. The
                  * event.layers is an array of layer objects {id}.
                  */
-				    this.bus.addHandler(
+                    this.bus.addHandler(
                     'remove-layers',
                     function(event) {
                         var layers = event.layers,
@@ -3098,8 +2685,8 @@ mol.modules.map.tiles = function(mol) {
                             function(layer) { // "lid" is short for layer id.
                                 var lid = layer.id;
                                 mapTypes.forEach(
-                                    function(mt, index) { // "mt" is short for map type.
-                                        if ((mt != undefined) && (mt.name === lid)) {
+                                    function(mt, index) { 
+                                        if (mt != undefined && mt.name === lid) {
                                             if(mt.interaction != undefined) {
                                                 mt.interaction.remove();
                                             }
@@ -3112,31 +2699,33 @@ mol.modules.map.tiles = function(mol) {
                     }
                 );
 
-				    /**
-				     * Handler for when the reorder-layers event is fired. This renders
-				     * the layers according to the list of layers provided
-				     */
-				    this.bus.addHandler(
-					     'reorder-layers',
-					     function(event) {
-						      var layers = event.layers,
+                    /**
+                     * Handler for when the reorder-layers event is fired. This 
+                     * renders the layers according to the list of layers 
+                     * provided
+                     */
+                    this.bus.addHandler(
+                         'reorder-layers',
+                         function(event) {
+                              var layers = event.layers,
                             mapTypes = self.map.overlayMapTypes;
 
-						      _.each(
-							       layers,
-							       function(lid) { // "lid" is short for layerId.
-								        mapTypes.forEach(
-									         function(mt, index) { // "mt" is short for maptype.
-										          if ((mt != undefined) && (mt.name === lid)) {
-											           mapTypes.removeAt(index);
-											           mapTypes.insertAt(0, mt);
-										          }
-									         }
-								        );
-							       }
-						      );
-					     }
-				    );
+                              _.each(
+                                   layers,
+                                   function(lid) { // "lid" is short for layerId.
+                                        mapTypes.forEach(
+                                             function(mt, index) { 
+                                                  if ((mt != undefined) && 
+                                                      (mt.name === lid)) {
+                                                      mapTypes.removeAt(index);
+                                                      mapTypes.insertAt(0, mt);
+                                                  }
+                                             }
+                                        );
+                                   }
+                              );
+                         }
+                    );
             },
 
             /**
@@ -3158,7 +2747,8 @@ mol.modules.map.tiles = function(mol) {
                 );
             },
             /**
-             * Returns an array of layer objects that are not already on the map.
+             * Returns an array of layer objects that are not already on the 
+             * map.
              *
              * @param layers an array of layer object {id, name, type, source}.
              * @params overlays an array of wax connectors.
@@ -3188,36 +2778,43 @@ mol.modules.map.tiles = function(mol) {
             },
 
             /**
-             * Closure around the layer that returns the ImageMapType for the tile.
+             * Closure around the layer that returns the ImageMapType for the 
+             * tile.
              */
             getTile: function(layer) {
                 var name = layer.name,
                     type = layer.type,
                     self = this,
-                    maptype = null;
-
-
-                switch (type) {
-                case 'points':
-                    maptype = new mol.map.tiles.CartoDbTile(layer, 'gbif_import', this.map);
-                    break;
-                case 'polygon':
-                case 'range':
-                case 'ecoregion':
-                case 'protectedarea':
-                    maptype = new mol.map.tiles.CartoDbTile(layer, 'polygons', this.map);
-                    break;
-                }
-                maptype.layer.params.layer.onbeforeload = function (){self.bus.fireEvent(new mol.bus.Event("show-loading-indicator",{source : layer.id}))};
-                maptype.layer.params.layer.onafterload = function (){self.bus.fireEvent(new mol.bus.Event("hide-loading-indicator",{source : layer.id}))};
-                return maptype.layer;
+                    maptype = new mol.map.tiles.CartoDbTile(
+                                layer, 
+                                layer.style_table, 
+                                this.map
+                            );
+                           
+                
+                maptype.layer.params.layer.onbeforeload = function (){
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            "show-loading-indicator",
+                            {source : layer.id}
+                        )
+                    )
+                };
+                maptype.layer.params.layer.onafterload = function (){
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            "hide-loading-indicator",
+                            {source : layer.id}
+                        )
+                    )
+                };
             },
 
             /**
              * Zooms and pans the map to the full extent of the layer. The layer is an
              * object {id, name, source, type}.
              */
-	         zoomToExtent: function(layer) {
+             zoomToExtent: function(layer) {
                 var self = this,
                     points_sql = "SELECT ST_Extent(the_geom) FROM {0} WHERE lower(scientificname)='{1}'",
                     polygons_sql = "SELECT ST_Extent(the_geom) FROM {0} WHERE scientificname='{1}'",
@@ -3244,47 +2841,46 @@ mol.modules.map.tiles = function(mol) {
                         sw = new google.maps.LatLng(coor1[1],coor1[0]);
                         ne = new google.maps.LatLng(coor2[1],coor2[0]);
                         bounds = new google.maps.LatLngBounds(sw, ne);
-		                  self.map.fitBounds(bounds);
-		                  self.map.panToBounds(bounds);
-		              },
-		              failure = function(action, response) {
+                          self.map.fitBounds(bounds);
+                          self.map.panToBounds(bounds);
+                      },
+                      failure = function(action, response) {
                         console.log('Error: {0}'.format(response));
                     };
-                this.proxy.execute(action, new mol.services.Callback(success, failure));
-		      }
+                this.proxy.execute(
+                    action, 
+                    new mol.services.Callback(
+                        success, 
+                        failure
+                    )
+                );
+              }
         }
-	 );
+     );
 
     mol.map.tiles.CartoDbTile = Class.extend(
         {
             init: function(layer, table, map) {
-                var sql =  "SELECT * FROM {0} where scientificname = '{1}' and type = '{2}' and provider = '{3}'",
-                    opacity = layer.opacity && table !== 'points' ? layer.opacity : null,
-                    hostname = 'dtredc0xh764j.cloudfront.net',//window.location.hostname,
-                    style_table_name = table,
-                    info_query = sql,
-                    infowindow = true;
+                var sql =  "" +
+                    "SELECT * FROM " +
+                    " get_mol_tile('{0}','{1}','{2}','{3}')".format(
+                        layer.source, 
+                        layer.type, 
+                        layer.name, 
+                        layer.dataset_id
+                    ),
+                    hostname = 'mol.cartodb.com',//window.location.hostname,
+                    style_table_name = layer.style_table;
+                    info_query = sql; 
+                    meta_query = "" +
+                        "SELECT * FROM get_feature_metadata(TEXT('{0}'))",
+                    tile_style =  null,
+                    infowindow = true,
+                    hostname = (hostname === 'localhost') ? 
+                       '{0}:8080'.format(hostname) : hostname;
 
-                if (layer.type === 'points') {
-                    sql = "SELECT cartodb_id, st_transform(the_geom, 3785) AS the_geom_webmercator, identifier " +
-                        "FROM {0} WHERE lower(scientificname)='{1}'".format("gbif_import", layer.name.toLowerCase());
-                    table = 'gbif_import';
-                    style_table_name = 'names_old';
-                    info_query = "SELECT cartodb_id, st_transform(the_geom, 3785) AS the_geom_webmercator FROM {0} WHERE lower(scientificname)='{1}'".format("gbif_import", layer.name.toLowerCase());
-                    infowindow = true;
-                } else {
-                    info_query = sql = sql.format(table, layer.name, layer.type, layer.source);
-
-                    //info_query = ''; //sql
-                    infowindow = true;;
-                }
-
-                hostname = (hostname === 'localhost') ? '{0}:8080'.format(hostname) : hostname;
-
-                this.layer = new google.maps.CartoDBLayer(
-                    {
+                this.layer = new google.maps.CartoDBLayer({
                         tile_name: layer.id,
-                        tile_style: layer.tile_style,
                         hostname: hostname,
                         map_canvas: 'map_container',
                         map: map,
@@ -3294,16 +2890,16 @@ mol.modules.map.tiles = function(mol) {
                         style_table_name: style_table_name,
                         query: sql,
                         info_query: info_query,
+                        meta_query: meta_query,
+                        tile_style: tile_style,
                         map_style: false,
                         infowindow: infowindow,
-                        opacity: layer.opacity
-                    }
-                );
+                        opacity: 0.5
+                });
             }
         }
     );
-};
-mol.modules.map.dashboard = function(mol) {
+};mol.modules.map.dashboard = function(mol) {
 
     mol.map.dashboard = {};
 
@@ -5821,29 +5417,49 @@ mol.modules.map.boot = function(mol) {
     mol.map.boot = {};
 
     mol.map.boot.BootEngine = mol.mvp.Engine.extend({
-        init: function(proxy, bus) {
+        init: function(proxy, bus, map) {
             this.proxy = proxy;
             this.bus = bus;
+            this.map = map;
             this.IE8 = false;
-            this.sql = '' + //TODO replace with postgres function (issue #126)
+            this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
-                '       l.type as type,'+
-                '       t.title as type_title,'+
-                '       l.provider as source, '+
-                '       p.title as source_title,'+
-                '       n.class as _class, ' +
-                '       l.feature_count as feature_count,'+
-                '       n.common_names_eng as names,' +
-                '       CONCAT(\'{"sw":{"lng":\',ST_XMin(l.extent),\', "lat":\',ST_YMin(l.extent),\'} , "ne":{"lng":\',ST_XMax(l.extent),\', "lat":\',ST_YMax(l.extent),\'}}\') as extent ' +
+                    't.type as type,'+
+                    't.sort_order as type_sort_order, ' +
+                    't.title as type_title,'+
+                    'CONCAT(l.provider,\'\') as source, '+
+                    'CONCAT(p.title,\'\') as source_title,'+
+                    's.source_type as source_type, ' +
+                    's.title as source_type_title, ' +   
+                    'CONCAT(n.class,\'\') as _class, ' +
+                    'l.feature_count as feature_count, '+
+                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(\'{' +
+                        '"sw":{' +
+                            '"lng":\',ST_XMin(l.extent),\', '+
+                            '"lat":\',ST_YMin(l.extent),\' '+
+                        '}, '+
+                        '"ne":{' +
+                        '"lng":\',ST_XMax(l.extent),\', ' +
+                        '"lat":\',ST_YMax(l.extent),\' ' +
+                        '}}\') as extent, ' +
+                    'l.dataset_id as dataset_id, ' +
+                    'd.style_table as style_table ' +
                 'FROM layer_metadata l ' +
+                'LEFT JOIN data_registry d ON ' +
+                    'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
-                '       l.type = t.type ' +
+                    'l.type = t.type ' +
                 'LEFT JOIN providers p ON ' +
-                '       l.provider = p.provider ' +
+                    'l.provider = p.provider ' +
+                'LEFT JOIN source_types s ON ' +
+                    'p.source_type = s.source_type ' +
                 'LEFT JOIN taxonomy n ON ' +
-                '       l.scientificname = n.scientificname ' +
+                    'l.scientificname = n.scientificname ' +
                 'WHERE ' +
-                "  l.scientificname~*'\\m{0}' OR n.common_names_eng~*'\\m{0}'";
+                    "l.scientificname~*'\\m{0}' " +
+                    "OR n.common_names_eng~*'\\m{0}' " +
+                'ORDER BY name, type_sort_order';
         },
         start: function() {
             this.loadTerm();
@@ -5853,11 +5469,17 @@ mol.modules.map.boot = function(mol) {
          */
         loadTerm: function() {
             var self = this;
+            
+            // Remove backslashes and replace characters that equal spaces.
+            this.term = unescape(
+                window.location.pathname
+                    .replace(/\//g, '')
+                    .replace(/\+/g, ' ')
+                    .replace(/_/g, ' ')
+            );
 
-            // Remove backslashes and characters that should be counted as spaces
-            this.term = unescape(window.location.pathname.replace(/\//g, '').replace(/\+/g, ' ').replace(/_/g, ' '));
-
-            if ((this.getIEVersion() >= 0 && this.getIEVersion() <= 8) || this.term == '') {
+            if ((this.getIEVersion() >= 0 && this.getIEVersion() <= 8) 
+                || this.term == '') {
                 // If on IE8- or no query params, fire the splash event
                 self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
             } else {
@@ -5865,17 +5487,19 @@ mol.modules.map.boot = function(mol) {
                 $.post(
                 'cache/get',
                 {
-                    key: 'boot-results-08102012210-{0}'.format(self.term), //number on the key is there to invalidate cache. Using date+time invalidated.
+                    //Number on the key is there to invalidate cache. 
+                    //Using date+time invalidated.
+                    key: 'boot-results-08102012210-{0}'.format(self.term), 
                     sql: this.sql.format(self.term)
                 },
                 function(response) {
-                    var results = mol.services.cartodb.convert(response);
-                    if (Object.keys(results.layers).length == 0) {
+                    var results = response.rows;
+                    if (results.length == 0) {
                         self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
-                        this.map.setCenter(new google.maps.LatLng(0,-50));
+                        self.map.setCenter(new google.maps.LatLng(0,-50));
                     } else {
                         //parse the results
-                        self.loadLayers(self.getLayersWithIds(results.layers));
+                        self.loadLayers(self.getLayersWithIds(results));
                     }
                 },
                 'json'
@@ -5883,14 +5507,19 @@ mol.modules.map.boot = function(mol) {
             }
         },
         /*
-         * Adds layers to the map if there are fewer than 25 results, or fires the search results widgetif there are more.
+         * Adds layers to the map if there are fewer than 25 results, 
+         * or fires the search results widgetif there are more.
          */
         loadLayers: function(layers) {
             if (Object.keys(layers).length < 25) {
-                this.bus.fireEvent(new mol.bus.Event('add-layers', {layers: layers}));
+                this.bus.fireEvent(
+                    new mol.bus.Event('add-layers', {layers: layers})
+                );
 
             } else if (this.term != null) {
-                this.bus.fireEvent(new mol.bus.Event('search', {term: this.term}));
+                this.bus.fireEvent(
+                    new mol.bus.Event('search', {term: this.term})
+                );
                 this.map.setCenter(new google.maps.LatLng(0,-50));
             }
         },

@@ -129,7 +129,7 @@
                 ie = new env.map.images.ImagesEngine(proxy, bus)
                 ie.start()
              }
-             be = new env.map.boot.BootEngine(proxy, bus)
+             be = new env.map.boot.BootEngine(proxy, bus, me.display.map)
              be.start()
           });
           {% else %}
@@ -172,7 +172,7 @@
                 ie = new env.map.images.ImagesEngine(proxy, bus)
                 ie.start()
              }
-             be = new env.map.boot.BootEngine(proxy, bus)
+             be = new env.map.boot.BootEngine(proxy, bus, me.display.map)
              be.start()
           });
           {% endif %}

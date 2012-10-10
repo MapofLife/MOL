@@ -3,7 +3,6 @@ mol.modules.map.search = function(mol) {
     mol.map.search = {};
 
     mol.map.search.SearchEngine = mol.mvp.Engine.extend({
-
         /**
          * @param bus mol.bus.Bus
          */
@@ -12,40 +11,53 @@ mol.modules.map.search = function(mol) {
             this.bus = bus;
             this.searching = {};
             this.names = [];
-            this.url = "" +
-                "http://dtredc0xh764j.cloudfront.net/"+
-                "api/v2/sql?callback=?&q={0}";
-            //TODO replace with postgres function (issue #126)
-            this.search_sql = '' +  
+            this.bornOnDate = Math.random();
+            this.ac_label_html = ''+
+                '<div class="ac-item">' +
+                    '<span class="sci">{0}</span>' +
+                    '<span class="eng">{1}</span>' +
+                '</div>';
+            this.ac_sql = "" +_
+                "SELECT n,v from ac_beta where n~*'\\m{0}' OR v~*'\\m{0}'";
+            this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
-                '       l.type as type,'+
-                '       t.title as type_title,'+
-                '       l.provider as source, '+
-                '       p.title as source_title,'+
-                '       n.class as _class, ' +
-                '       l.feature_count as feature_count,'+
-                '       n.common_names_eng as names,' +
-                '       CONCAT(\'{' +
-                '           "sw":{' +
-                '               "lng":\',ST_XMin(l.extent),\','+
-                '               "lat":\',ST_YMin(l.extent),\'' +
-                '           },' +
-                '           "ne":{' +
-                '               "lng":\',ST_XMax(l.extent),\','+
-                '               "lat":\',ST_YMax(l.extent),\''+
-                '           } ' +
-                '       }\') as extent ' +
+                    't.type as type,'+
+                    't.sort_order as type_sort_order, ' +
+                    't.title as type_title, '+
+                    't.opacity as opacity, ' +
+                    'CONCAT(l.provider,\'\') as source, '+
+                    'CONCAT(p.title,\'\') as source_title,'+
+                    's.source_type as source_type, ' +
+                    's.title as source_type_title, ' +   
+                    'CONCAT(n.class,\'\') as _class, ' +
+                    'l.feature_count as feature_count, '+
+                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(\'{' +
+                        '"sw":{' +
+                            '"lng":\',ST_XMin(l.extent),\', '+
+                            '"lat":\',ST_YMin(l.extent),\' '+
+                        '}, '+
+                        '"ne":{' +
+                        '"lng":\',ST_XMax(l.extent),\', ' +
+                        '"lat":\',ST_YMax(l.extent),\' ' +
+                        '}}\') as extent, ' +
+                    'l.dataset_id as dataset_id, ' +
+                    'd.style_table as style_table ' +
                 'FROM layer_metadata l ' +
+                'LEFT JOIN data_registry d ON ' +
+                    'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
-                '       l.type = t.type ' +
+                    'l.type = t.type ' +
                 'LEFT JOIN providers p ON ' +
-                '       l.provider = p.provider ' +
+                    'l.provider = p.provider ' +
+                'LEFT JOIN source_types s ON ' +
+                    'p.source_type = s.source_type ' +
                 'LEFT JOIN taxonomy n ON ' +
-                '       l.scientificname = n.scientificname ' +
+                    'l.scientificname = n.scientificname ' +
                 'WHERE ' +
-                "  l.scientificname~*'\\m{0}' OR n.common_names_eng~*'\\m{0}'";
-            this.ac_sql = "" +
-                "SELECT n,v from ac where n~*'\\m{0}' OR v~*'\\m{0}'";
+                    "l.scientificname~*'\\m{0}' " +
+                    "OR n.common_names_eng~*'\\m{0}' " +
+                'ORDER BY name, type_sort_order';
         },
 
         /**
@@ -59,21 +71,19 @@ mol.modules.map.search = function(mol) {
             this.addEventHandlers();
             this.fireEvents();
         },
-
         /*
          * Initialize autocomplate functionality
          */
         initAutocomplete: function() {
             this.populateAutocomplete(null, null);
-            //From StackOverflow http://goo.gl/03gtt 
+
+            //http://stackoverflow.com/questions/2435964/jqueryui-how-can-i-custom-format-the-autocomplete-plug-in-results
             $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+
                 item.label = item.label.replace(
-                    new RegExp(
-                        "(?![^&;]+;)(?!<[^<>]*)(" +
-                        $.ui.autocomplete.escapeRegex(this.term) +
-                        ")(?![^<>]*>)(?![^&;]+;)", 
-                        "gi"
-                    ),
+                    new RegExp("(?![^&;]+;)(?!<[^<>]*)(" +
+                       $.ui.autocomplete.escapeRegex(this.term) +
+                       ")(?![^<>]*>)(?![^&;]+;)", "gi"), 
                     "<strong>$1</strong>"
                 );
                 return $("<li></li>")
@@ -88,47 +98,84 @@ mol.modules.map.search = function(mol) {
          */
         populateAutocomplete : function(action, response) {
             var self = this;
-            $(this.display.searchBox).autocomplete({
-                minLength: 3, 
-                source: function(request, response) {
-                    $.getJSON(
-                        self.url.format(self.ac_sql.format(request.term)),
-                        function (json) {
-                            response(self.formatAutocompleteResults(json));
-                        }
-                    );
-                },
+            $(this.display.searchBox).autocomplete(
+                {
+                    minLength: 3, 
+                    source: function(request, response) {
+                        $.post(
+                            'cache/get',
+                            {
+                                key: 'ac-beta-{0}-{1}'
+                                    .format(request.term,self.bornOnDate),
+                                sql: self.ac_sql.format(request.term)
+                            },
+                            function (json) {
+                                var names = [],scinames=[];
+                                _.each (
+                                    json.rows,
+                                    function(row) {
+                                        var sci, eng;
+                                        if(row.n != undefined){
+                                            sci = row.n;
+                                            eng = (row.v == null || 
+                                                row.v == '') ? 
+                                                    '' :
+                                                    ', {0}'.format(
+                                                        row.v.replace(
+                                                            /'S/g, "'s"
+                                                        )
+                                                    );
+                                            names.push({
+                                                label:self.ac_label_html
+                                                    .format(sci, eng), 
+                                                value:sci
+                                            });
+                                            scinames.push(sci);
+                                       }
+                                   }
+                                );
+                                if(scinames.length>0) {
+                                    self.names=scinames;
+                                }
+                                response(names);
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'hide-loading-indicator', 
+                                        {source : "autocomplete"}
+                                    )
+                                );
+                             },
+                             'json'
+                        );
+                    },
+                    select: function(event, ui) {
+                        self.searching[ui.item.value] = false;
+                        self.names = [ui.item.value];
+                        self.search(ui.item.value);
+                    },
+                    close: function(event,ui) {
 
-                select: function(event, ui) {
-                    self.searching[ui.item.value] = false;
-                    self.names = [ui.item.value];
-                    self.search(ui.item.value);
-                },
-
-                close: function(event,ui) {
-                },
-
-                search: function(event, ui) {
-                    self.searching[$(this).val()] = true;
-                    self.names=[];
-                    self.bus.fireEvent(
-                        new mol.bus.Event(
-                            'show-loading-indicator',
-                            {source : "autocomplete"}
-                        )
-                    );
-                },
-
-                open: function(event, ui) {
-                    self.searching[$(this).val()] = false;
-                    self.bus.fireEvent(
-                       new mol.bus.Event(
-                           'hide-loading-indicator',
-                            {source : "autocomplete"}
-                        )
-                    );
-                }
-            });
+                    },
+                    search: function(event, ui) {
+                        self.searching[$(this).val()] = true;
+                        self.names=[];
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'show-loading-indicator', 
+                                {source : "autocomplete"}
+                            )
+                        );
+                    },
+                    open: function(event, ui) {
+                        self.searching[$(this).val()] = false;
+                        self.bus.fireEvent(
+                             new mol.bus.Event(
+                                'hide-loading-indicator', 
+                                {source : "autocomplete"}
+                            )
+                        );
+                    }
+              });
         },
 
         addEventHandlers: function() {
@@ -147,12 +194,14 @@ mol.modules.map.search = function(mol) {
                 function(event) {
                     var params = {},
                         e = null;
+
                     if (event.visible === undefined) {
                         self.display.toggle();
                         params = {visible: self.display.is(':visible')};
                     } else {
                         self.display.toggle(event.visible);
                     }
+
                     e = new mol.bus.Event('results-display-toggle', params);
                     self.bus.fireEvent(e);
                 }
@@ -177,12 +226,14 @@ mol.modules.map.search = function(mol) {
                                 )
                             );
                         }
+
                         self.search(event.term);
+
                         if (self.display.searchBox.val()=='') {
                             self.display.searchBox.val(event.term);
                         }
                     }
-                }
+               }
             );
 
             /**
@@ -190,7 +241,7 @@ mol.modules.map.search = function(mol) {
              */
             this.display.goButton.click(
                 function(event) {
-                    self.search(self.display.searchBox.val());
+                          self.search(self.display.searchBox.val());
                 }
             );
 
@@ -200,14 +251,13 @@ mol.modules.map.search = function(mol) {
              */
             this.display.cancelButton.click(
                 function(event) {
-                    var params = {visible: false};
+                    var params = {
+                        visible: false
+                    };
+
                     self.display.toggle(false);
                     self.bus.fireEvent(
-                        new mol.bus.Event(
-                            'results-display-toggle',
-                            params
-                        )
-                    );
+                        new mol.bus.Event('results-display-toggle', params));
                 }
             );
 
@@ -220,7 +270,7 @@ mol.modules.map.search = function(mol) {
                         $(this).autocomplete("close");
                         self.bus.fireEvent(
                             new mol.bus.Event(
-                                'hide-loading-indicator',
+                                'hide-loading-indicator', 
                                 {source : "autocomplete"}
                             )
                         );
@@ -241,53 +291,12 @@ mol.modules.map.search = function(mol) {
                     position: google.maps.ControlPosition.TOP_LEFT
                 },
                 event = new mol.bus.Event('add-map-control', params);
+
             this.bus.fireEvent(event);
         },
 
-        formatAutocompleteResults: function (json) {
-            var names = [], 
-                scinames = [],
-                self = this;
-
-            //Parse and style the autocomplete response
-            _.each(json.rows, 
-                function(row) {
-                    var sci, 
-                        eng,
-                        html = '' +
-                            '<div class="ac-item">' + 
-                            '   <span class="sci">{0}</span>' +
-                            '   <span class="eng">{1}</span>' +
-                            '</div>';
-                    if (row.n != undefined) {
-                        sci = row.n;
-                        eng = (row.v == null || row.v == '') ? '' : ', {0}'
-                            .format(row.v.replace(/'S/g, "'s"));
-                        names.push({
-                            label: html.format(sci, eng),
-                            value: sci
-                        });
-                        scinames.push(sci);
-                    }
-                }
-            );
-
-            //Update names for search button or enter keyup events
-            if (scinames.length > 0) {
-                this.names = scinames;
-            }               
-
-            this.bus.fireEvent(
-                new mol.bus.Event(
-                    'hide-loading-indicator', 
-                    {source: "autocomplete"}
-                )
-            );
-            return names;
-        },
-
         /**
-         * Searches CartoDB via proxy using a term from the search box. Fires
+         * Searches CartoDB using a term from the search box. Fires
          * a search event on the bus. The success callback fires a 
          * search-results event on the bus.
          *
@@ -295,50 +304,52 @@ mol.modules.map.search = function(mol) {
          */
         search: function(term) {
             var self = this;
-
-            self.bus.fireEvent(
-                new mol.bus.Event(
-                    'show-loading-indicator', 
-                    {source: "search-{0}".format(term)}
-                )
-            );
-            self.bus.fireEvent(
-                new mol.bus.Event(
-                    'results-display-toggle', 
-                    {visible: false}
-                )
-            );
-            $(self.display.searchBox).autocomplete('disable');
-            $(self.display.searchBox).autocomplete('enable');
-
-            if (term.length < 3) {
-                alert('Please enter at least 3 characters in the search box.');
-            } else {
-                $(self.display.searchBox).val(term);
-
-                $.getJSON(
-                    this.url.format(this.search_sql.format(term)), 
-                    function(response) {
-                        var results = {
-                            term: term,
-                            response: response
-                        };
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                'hide-loading-indicator', 
-                                {source: "search-{0}".format(term)}
-                            )
-                        );
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                'search-results', 
-                                results
-                            )
-                        );
-                    }
+                self.bus.fireEvent(
+                    new mol.bus.Event(
+                        'show-loading-indicator', 
+                        {source : "search-{0}".format(term)}
+                    )
                 );
+                self.bus.fireEvent(
+                    new mol.bus.Event(
+                        'results-display-toggle',
+                        {visible : false}
+                    )
+                );
+                $(self.display.searchBox).autocomplete('disable');
+                $(self.display.searchBox).autocomplete('enable');
+                if(term.length<3) {
+                    alert('' +
+                        'Please enter at least 3 characters in the search box.'
+                    );
+                } else {
+                    $(self.display.searchBox).val(term);
+                    $.post(
+                            'cache/get',
+                            {
+                                key:'search-{0}-{1}'
+                                    .format(term,this.bornOnDate),
+                                sql:this.sql.format(term)
+                            },
+                            function (response) {
+                                var results = {term:term, response:response};
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'hide-loading-indicator', 
+                                        {source : "search-{0}".format(term)}
+                                    )
+                                );
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'search-results', 
+                                        results
+                                    )
+                                );
+                            },
+                            'json'
+                    );
+               }
 
-            }
         }
     });
 
@@ -347,19 +358,20 @@ mol.modules.map.search = function(mol) {
             var html = '' +
                 '<div class="mol-LayerControl-Search widgetTheme">' +
                 '    <div class="title ui-autocomplete-input">Search:</div>' +
-                '    <input class="value" type="text" '+
-                '        placeholder="Search by species name">' +
+                '    <input class="value" type="text" ' +
+                        'placeholder="Search by species name">' +
                 '    <button class="execute">Go</button>' +
                 '    <button class="cancel">&nbsp;</button>' +
                 '</div>';
+
             this._super(html);
             this.goButton = $(this).find('.execute');
             this.cancelButton = $(this).find('.cancel');
             this.searchBox = $(this).find('.value');
         },
+
         clear: function() {
             this.searchBox.html('');
         }
     });
-
 };
