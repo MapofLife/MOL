@@ -1171,7 +1171,7 @@ mol.modules.map.query = function(mol) {
                     '               value=" AND p.type=\'ecoregion\' ">' +
                     '               <img ' +
                     '                   title="Click to use Regional' +
-                    '                       checklists for query." ' +
+                                        ' checklists for query." ' +
                     '                   src="/static/maps/search/' +
                                             'ecoregion.png">' +
                     '           </button>' +
