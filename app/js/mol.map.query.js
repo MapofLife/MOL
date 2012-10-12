@@ -450,7 +450,7 @@ mol.modules.map.query = function(mol) {
 
                     //list row collapsible content
                     tablerows.push("" +
-                        "<tr class='expand-child'>" +
+                        "<tr class='tablesorter-childRow'>" +
                         "   <td colspan='7' value='" +
                                 row.scientificname + "'>" +
                         "   </td>" +
@@ -506,14 +506,14 @@ mol.modules.map.query = function(mol) {
 
             if (speciestotal > 0) {
                 content = $('' +
-                    '<div class="mol-Map-ListQueryInfoWindow">' +
-                    '   <div>' +
+                    '<div class="mol-Map-ListQueryInfo">' +
+                    '   <div class="mol-Map-ListQuery">' +
                            'Data type/source:&nbsp;' +
                            providers.join(', ') +
                            '.&nbsp;All&nbsp;seasonalities.<br>' +
                     '   </div> ' +
-                    '   <div> ' +
-                    '       <table class="tablesorter">' +
+                    '   <div class="mol-Map-ListQueryInfoWindow"> ' +
+                    '       <table class="listtable">' +
                     '           <thead>' +
                     '               <tr>' +
                     '                   <th></th>' +
@@ -533,7 +533,7 @@ mol.modules.map.query = function(mol) {
                     '</div>');
 
                 dlContent = $('' +
-                    '<div class="mol-Map-ListQueryInfoWindow">' +
+                    '<div class="mol-Map-ListQuery">' +
                     '   <div>' +
                     '       <a href="http://mol.cartodb.com/api/v2/sql?q=' +
                                 sqlurl + '&format=csv"' +
@@ -543,7 +543,7 @@ mol.modules.map.query = function(mol) {
                     '</div>');
 
                 iucnContent = $('' +
-                    '<div class="mol-Map-ListQueryInfoWindow">' +
+                    '<div class="mol-Map-ListQuery mol-Map-ListQueryInfo">' +
                     '    <div id="iucnChartDiv"></div>'+
                     '    <div class="iucn_stats">' + stats + '</div>' +
                     '</div>');
@@ -624,7 +624,10 @@ mol.modules.map.query = function(mol) {
 
             $(".mol-Map-ListDialog").parent().bind("resize", function() {
                 $(".mol-Map-ListQueryInfoWindow")
-                    .height($(".mol-Map-ListDialog").height()-115);
+                    .height($(".mol-Map-ListDialog").height()-125);
+                    
+                $("#gallery")
+                    .height($(".mol-Map-ListDialog").height()-125);
             });
 
             //tabs() function needs document ready to
@@ -641,7 +644,8 @@ mol.modules.map.query = function(mol) {
 
                 $(".mol-Map-ListQueryDownload").button();
                 mmlHeight = $(".mol-Map-ListDialog").height();
-                $(".mol-Map-ListQueryInfoWindow").height(mmlHeight-115);
+                $(".mol-Map-ListQueryInfoWindow").height(mmlHeight-125);
+                $("#gallery").height(mmlHeight-125);
 
                 //list table creation
                 self.createSpeciesListTable(listWindow);
@@ -729,10 +733,10 @@ mol.modules.map.query = function(mol) {
         createSpeciesListTable: function(lw) {
             var self = this;
 
-            $("table.tablesorter tr:odd").addClass("master");
-            $("table.tablesorter tr:not(.master)").hide();
-            $("table.tablesorter tr:first-child").show();
-            $("table.tablesorter tr.master td.arrowBox").click(
+            $("table.listtable tr:odd").addClass("master");
+            $("table.listtable tr:not(.master)").hide();
+            $("table.listtable tr:first-child").show();
+            $("table.listtable tr.master td.arrowBox").click(
                 function() {
                     $(this).parent().next("tr").toggle();
                     $(this).parent().find(".arrow").toggleClass("up");
@@ -743,7 +747,7 @@ mol.modules.map.query = function(mol) {
                     }
                 }
             );
-            $(".tablesorter", $(lw)).tablesorter({
+            $(".listtable", $(lw)).tablesorter({
                 sortList: [[5,0]]
             });
 
