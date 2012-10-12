@@ -659,6 +659,7 @@ padding: 3px;
     font-style:normal;
     font-size: 12px;
     min-height: 360px;
+    overflow-y:hidden;
 }
 
 .mol-Dashboard #dialog .dashboard .title {
@@ -693,7 +694,9 @@ padding: 3px;
 }
 
 .mol-Dashboard #dialog div#dashTypeFilter input {
-    margin-left: 0;
+    padding-bottom: 4px;
+    padding-right: 6px;
+    float:left;
 }
 
 .mol-Dashboard #dialog div#dashTypeFilter div.chkAndLabel {
@@ -719,8 +722,7 @@ div.mol-Dashboard-TableWindow {
     font-size: 12px;
     font-style:normal;
     font-weight:normal;
-    height: 498px;
-    overflow-y:scroll;
+    overflow-y:auto;
     overflow-x:hidden;
 }
 
@@ -1058,57 +1060,70 @@ div.mol-Dashboard-TableWindow {
     padding:0px;
 }
 
+
 .mol-Map-ListQueryRadius {
      pointer-events:none;
 }
-.mol-Map-ListQueryInfoWindow {
+
+.mol-Map-ListDialog #tabs {
+    overflow-y:hidden;
+}
+
+.mol-Map-ListDialogContent.ui-tabs div.ui-tabs-panel {
+    padding:0px;
+}
+
+.mol-Map-ListQuery {
+     margin:4px;
+}
+
+.mol-Map-ListQueryInfo {
      font-size: 12px;
      font-style:normal;
      font-weight:normal;
-     overflow-y:auto;
-     overflow-x:hidden;
-     margin:5px;
-     padding:3px;
 }
 
-.mol-Map-ListQueryInfoWindow .iucn_stats{
+.mol-Map-ListQueryInfoWindow {
+     overflow-y:auto;
+     overflow-x:hidden;
+}
+
+.mol-Map-ListQueryInfo .iucn_stats{
     float:right;
 }
 
-.mol-Map-ListQueryInfoWindow td.wiki:hover, .mol-Map-ListQueryInfoWindow td.iucn:hover{
-        cursor: pointer;
-        color: blue;
-        text-decoration: underline;
- }
-
-.mol-Map-ListQueryInfoWindow tr.iucnvu td{
-        background: #cc9900;
- }
-
- .mol-Map-ListQueryInfoWindow tr.iucnen td{
-        background: #cc6633;
- }
-
- .mol-Map-ListQueryInfoWindow tr.iucncr td{
-        background: #cc3333;
- }
-
-.mol-Map-ListQueryInfoWindow .english{
-        max-width: 150px;
-        overflow: hidden;
-        text-overflow:ellipsis;
- }
-
-.mol-Map-ListDialogContent.ui-tabs div.ui-tabs-panel {
-    padding: 0;
+.mol-Map-ListQueryInfoWindow td.wiki:hover, 
+    .mol-Map-ListQueryInfoWindow td.iucn:hover{
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
 }
 
- .mol-Map-ListQueryEmptyInfoWindow {
+.mol-Map-ListQueryInfoWindow tr.iucnvu td{
+    background: #cc9900;
+}
+
+ .mol-Map-ListQueryInfoWindow tr.iucnen td{
+    background: #cc6633;
+}
+
+ .mol-Map-ListQueryInfoWindow tr.iucncr td{
+    background: #cc3333;
+}
+
+.mol-Map-ListQueryInfoWindow .english{
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
+
+.mol-Map-ListQueryEmptyInfoWindow {
      margin:5px;
      font-size: 14px;
      font-style:normal;
      font-weight:normal;
- }
+}
+
 
 .mol-Map-LegendDisplay {
     display: none;
@@ -1146,7 +1161,7 @@ div.mol-Dashboard-TableWindow {
       background-color:#6A0085;
       border:1px solid #000000;
 }
-.mol-Map-LegendDisplay . {
+.mol-Map-LegendDisplay {
       background-color:#99CC00
 }
 .mol-Map-LegendDisplay .seasonality1 {

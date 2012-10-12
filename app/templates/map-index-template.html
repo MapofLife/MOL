@@ -9,18 +9,20 @@
     <link rel="stylesheet" href="../../../css/cartodb.css">
     <link rel="stylesheet" href="../../../css/widgets.css">
     <link rel="stylesheet" href="../../../css/tablesorter.css">
+    <link rel="stylesheet" href="../../../css/theme.blue.css">
     <link rel="stylesheet" href="../../../css/jquery.qtip.min.css">
 
-	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-	<script type="text/javascript">
-		google.load("visualization", "1", {packages:["corechart"]});
-	</script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["corechart"]});
+    </script>
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
     <script type="text/javascript" src="../../../js/lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="../../../js/lib/jquery.numeric.js"></script>
     <script type="text/javascript" src="../../../js/lib/jquery/js/jquery-ui-1.8.18.custom.min.js"></script>
     <script type="text/javascript" src="../../../js/lib/jquery.imagesloaded.js"></script>
-    <script type="text/javascript" src="../../../js/lib/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="../../../js/lib/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="../../../js/lib/jquery.tablesorter.widgets.js"></script>
     <script type="text/javascript" src="../../../js/lib/jquery.qtip.min.js"></script>
     <script type="text/javascript" src="../../../js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="../../../js/lib/backbone-min.js"></script>
@@ -92,23 +94,23 @@
           <!-- Production, so load app without logging and run it. -->
           mol(function(env) {
             bus = env.bus.Bus()
-	         proxy = new env.services.Proxy(bus)
-	         me = new env.map.MapEngine(proxy, bus)
-	         me.start('body');
-		     spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
+             proxy = new env.services.Proxy(bus)
+             me = new env.map.MapEngine(proxy, bus)
+             me.start('body');
+             spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
              spe.start()
              if(!spe.IE8) {
-	           se = new env.map.search.SearchEngine(proxy, bus)
-	           se.start(null)
-	           te = new env.map.tiles.TileEngine(proxy, bus, me.display.map)
-	           te.start()
-	           le = new env.map.layers.LayerEngine(proxy, bus, me.display.map)
-	           le.start()
-	           re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
-	           re.start()
-	           ne = new env.map.menu.MenuEngine(proxy, bus)
-	           ne.start()
-	           le = new env.map.loading.LoadingEngine(proxy, bus)
+               se = new env.map.search.SearchEngine(proxy, bus)
+               se.start(null)
+               te = new env.map.tiles.TileEngine(proxy, bus, me.display.map)
+               te.start()
+               le = new env.map.layers.LayerEngine(proxy, bus, me.display.map)
+               le.start()
+               re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
+               re.start()
+               ne = new env.map.menu.MenuEngine(proxy, bus)
+               ne.start()
+               le = new env.map.loading.LoadingEngine(proxy, bus)
                 le.start()
                 de = new env.map.dashboard.DashboardEngine(proxy, bus)
                 de.start()
@@ -135,23 +137,23 @@
           {% else %}
           env = mol(function(env) {
             bus = env.bus.Bus()
-	         proxy = new env.services.Proxy(bus)
-	         me = new env.map.MapEngine(proxy, bus)
-	         me.start('body');
-		     spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
-           	 spe.start()
-           	 if(!spe.IE8) {
-	           se = new env.map.search.SearchEngine(proxy, bus)
-	           se.start(null)
-	           te = new env.map.tiles.TileEngine(proxy, bus, me.display.map)
-	           te.start()
-	           le = new env.map.layers.LayerEngine(proxy, bus, me.display.map)
-	           le.start()
-	           re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
-	           re.start()
-	           ne = new env.map.menu.MenuEngine(proxy, bus)
-	           ne.start()
-	           le = new env.map.loading.LoadingEngine(proxy, bus)
+             proxy = new env.services.Proxy(bus)
+             me = new env.map.MapEngine(proxy, bus)
+             me.start('body');
+             spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
+             spe.start()
+             if(!spe.IE8) {
+               se = new env.map.search.SearchEngine(proxy, bus)
+               se.start(null)
+               te = new env.map.tiles.TileEngine(proxy, bus, me.display.map)
+               te.start()
+               le = new env.map.layers.LayerEngine(proxy, bus, me.display.map)
+               le.start()
+               re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
+               re.start()
+               ne = new env.map.menu.MenuEngine(proxy, bus)
+               ne.start()
+               le = new env.map.loading.LoadingEngine(proxy, bus)
                 le.start()
                 de = new env.map.dashboard.DashboardEngine(proxy, bus);
                  de.start()

@@ -1,23 +1,8 @@
 /*
  * species list table
  */
-
-table.tablesorter div.arrow {
-    background: transparent url(../static/arrows.png) no-repeat scroll 0px -16px;
-    width: 16px;
-    height: 16px;
-    display: block;
-    cursor: pointer;
-}
-table.tablesorter div.up {
-    background-position: 0px 0px;
-}
-     
-/* 
- * define table skin 
- */
-
-table.tablesorter {
+   
+table.listtable {
     margin: 0;
     padding: 0;
     border-collapse: separate;
@@ -25,76 +10,147 @@ table.tablesorter {
     width: 100%;
 }
 
-table.tablesorter * {
+table.listable * {
     font: 11px Arial, Helvetica, sans-serif;
     vertical-align: top;
     text-align: left;
 }
 
-table.tablesorter thead, table.tablersorter .collapsible {
+table.listtable div.arrow {
+    background: transparent url(../static/arrows.png) no-repeat scroll 0px -16px;
+    width: 16px;
+    height: 16px;
+    display: block;
+    cursor: pointer;
+}
+table.listtable div.up {
+    background-position: 0px 0px;
+}
+
+table.listtable thead, table.listtable .collapsible {
     background-color: #e6edc1;
 }
 
-table.tablesorter th {
+table.listtable th {
     color: #565770;
     padding: 4px 16px 4px 6px;
     cursor: pointer;
     font-weight: bold;
 } 
 
-table.tablesorter td {
+table.listtable td {
     color: #565770;
     padding: 4px 6px;
 }
 
-table.tablesorter th.headerSortUp {
+table.listtable th.tablesorter-headerSortUp {
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 100% -80px;
 }
 
-table.tablesorter th.headerSortUp span {
+table.listtable th.tablesorter-headerSortUp span {
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 0 -80px;
 }
 
-table.tablesorter th.headerSortDown {
+table.listtable th.tablesorter-headerSortDown {
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 100% 2px;
 }
 
-table.tablesorter th.headerSortDown span {
+table.listtable th.tablesorter-headerSortDown span {
     background: #e6edc1 url(../static/tablesorter_bkgrd.png) no-repeat 0 2px;
 }
 
-table.tablesorter th span {
+table.listtable th span {
     padding: 4px 0 4px 6px;
     font-weight: bold;
 }
 
-table.tablesorter tr.master {
+table.listtable tr.master, table.dashtable tr.master{
     background-color: #dadada;
 }
 
-table.tablesorter td p {
+table.listtable td p {
     margin: 4px 0 4px 0;
 }
 
-table.tablesorter td p:nth-child(2) {
+table.listtable td p:nth-child(2) {
     margin: 0 0 4px 0;
     
 }
 
-table.tablesorter td p:last-child {
+table.listtable td p:last-child {
     margin: 4px 0 0 0;
 }
 
-table.tablesorter td div strong {
+table.listtable td div strong {
     font-weight: bold;
 }
 
-table.tablesorter td div em {
+table.listtable td div em {
     font-style: italic;
 }
 
 table.grid .collapsible {
     padding: 0 0 3px 0;
+}
+
+/*
+ * Dashboard Table
+ */
+
+
+table.tablesorter.dashtable {
+    margin:0;
+    padding:0;
+    width:100%;
+}
+
+table.dashtable tr.master td.selectedDashRow {
+    background-color: #CBD5E8 !important;
+}
+
+table.dashtable td {
+    height: 24px;
+}
+
+table.dashtable td.provider, table.dashtable td.type {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+table.dashtable td.provider:hover,  table.dashtable td.type:hover {
+    color: blue;
+    text-decoration: underline;
+}
+
+table.dashtable td.table {
+    width:21%;
+}
+
+table.dashtable td.type {
+    width:15%;
+}
+
+table.dashtable td.provider {
+    width:15%;
+}
+
+table.dashtable td.class {
+    width:15%;
+}
+
+table.dashtable td.spnames {
+    width:13%;
+    text-align:right;
+}
+
+table.dashtable td.records {
+    width:13%;
+    text-align:right;
+}
+
+table.dashtable td.pctmatch {
+    width:8%;
+    text-align:right;
 }
 
 /*
