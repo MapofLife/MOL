@@ -15,7 +15,11 @@ mol.modules.map.menu = function(mol) {
              */
             start: function() {
                 this.display = new mol.map.menu.MenuDisplay();
+                this.bottomdisplay = new mol.map.menu.BottomMenuDisplay();
+                
                 this.display.toggle(true);
+                this.bottomdisplay.toggle(true);
+                
                 this.addEventHandlers();
                 this.fireEvents();
             },
@@ -41,26 +45,56 @@ mol.modules.map.menu = function(mol) {
                             new mol.bus.Event('search-display-toggle'));
                     }
                 );
-                this.display.legendItem.click(
-                    function(event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('legend-display-toggle'));
-                    }
-                );
-                this.display.speciesListItem.click(
-                    function(event) {
-                        self.bus.fireEvent(new mol.bus.Event('species-list-tool-toggle'));
-                    }
-                );
                 this.display.layersToggle.click(
                     function(event) {
-                        if(self.display.layersToggle[0].src.indexOf('collapse.png')>0)  {
-                            self.bus.fireEvent(new mol.bus.Event('layer-display-toggle',{visible : false}));
-                            self.display.layersToggle[0].src = '/static/maps/layers/expand.png';
+                        if(self.display.layersToggle[0].src
+                                .indexOf('collapse.png') > 0)  {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'layer-display-toggle',
+                                    {visible : false}));
+                            self.display.layersToggle[0].src = 
+                                '/static/maps/layers/expand.png';
                         } else {
-                            self.bus.fireEvent(new mol.bus.Event('layer-display-toggle',{visible : true}));
-                            self.display.layersToggle[0].src = '/static/maps/layers/collapse.png';
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'layer-display-toggle',
+                                    {visible : true}));
+                            self.display.layersToggle[0].src = 
+                                '/static/maps/layers/collapse.png';
                         }
+                    }
+                );
+
+                this.bus.addHandler(
+                    'add-legend-toggle-button',
+                    function(event) {
+                        $(self.bottomdisplay).prepend(event.button);
+                        self.bottomdisplay.legendItem = 
+                            $(self.bottomdisplay).find('#legend');
+                            
+                        self.bottomdisplay.legendItem.click(
+                            function(event) {
+                                self.bus.fireEvent(
+                                    new mol.bus.Event('legend-display-toggle'));
+                            }
+                        );
+                    }
+                );
+                
+                this.bus.addHandler(
+                    'add-query-toggle-button',
+                    function(event) {
+                        $(self.bottomdisplay).prepend(event.button);
+                        self.bottomdisplay.queryItem = 
+                            $(self.bottomdisplay).find('#list');
+                            
+                        self.bottomdisplay.queryItem.click(
+                            function(event) {
+                                self.bus.fireEvent(
+                                    new mol.bus.Event('species-list-tool-toggle'));
+                            }
+                        );
                     }
                 );
 
@@ -102,9 +136,18 @@ mol.modules.map.menu = function(mol) {
                         slot: mol.map.ControlDisplay.Slot.FIRST,
                         position: google.maps.ControlPosition.TOP_RIGHT
                     },
-                    event = new mol.bus.Event('add-map-control', params);
+                    bottomparams = {
+                        display: this.bottomdisplay,
+                        slot: mol.map.ControlDisplay.Slot.LAST,
+                        position: google.maps.ControlPosition.RIGHT_BOTTOM  
+                    },
+                    event = new mol.bus.Event('add-map-control', params),
+                    bottomevent = new mol.bus.Event(
+                                    'add-map-control', bottomparams);
 
                 this.bus.fireEvent(event);
+                this.bus.fireEvent(bottomevent);
+                              
             }
         }
     );
@@ -113,26 +156,48 @@ mol.modules.map.menu = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<div class="mol-LayerControl-Menu ">' +
-                    '    <div class="label">' +
-                    '       <img class="layersToggle" height="21px" width="24px" src="/static/maps/layers/collapse.png">' +
+                    '<div id="topRightMenu" class="mol-LayerControl-Menu ">' +
+                    '  <div class="label">' +
+                    '    <img ' + 
+                            'class="layersToggle" ' + 
+                            'height="21px" ' + 
+                            'width="24px" ' + 
+                            'src="/static/maps/layers/collapse.png">' +
                     '    </div>' +
-                    '    <div title="Toggle taxonomy dashboard." id="dashboard" class="widgetTheme search button">Dashboard</div>' +
-                    '    <div title="Toggle map legend." id="legend" class="widgetTheme legend button">Legend</div>' +
-                    '    <div title="Toggle species list radius tool (right-click to use)" id="list" class="widgetTheme legend button">Species&nbsp;Lists</div>' +
-                    '    <div title="Toggle layer search tools." id="search" class="widgetTheme search button">Search</div>' +
+                    '    <div ' + 
+                            'title="Toggle taxonomy dashboard." ' + 
+                            'id="dashboard" ' + 
+                            'class="widgetTheme search button">' +
+                            'Dashboard' + 
+                    '    </div>' +
+                    '    <div ' + 
+                            'title="Toggle layer search tools." ' + 
+                            'id="search" ' + 
+                            'class="widgetTheme search button">' + 
+                            'Search' + 
+                    '  </div>' +
                     '</div>';
 
                 this._super(html);
                 this.searchItem = $(this).find('#search');
-                this.legendItem = $(this).find('#legend');
                 this.dashboardItem = $(this).find('#dashboard');
-                this.speciesListItem = $(this).find('#list');
                 this.layersToggle = $(this).find('.layersToggle');
             }
         }
     );
+    
+    mol.map.menu.BottomMenuDisplay = mol.mvp.View.extend(
+        {
+            init: function() {
+                var html = '' +
+                    '<div ' + 
+                        'id="bottomRightMenu" ' + 
+                        'class="mol-LayerControl-Menu">' +
+                    '</div>';
+
+                this._super(html);
+            }
+        }
+    );
 };
-
-
 

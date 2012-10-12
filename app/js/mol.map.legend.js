@@ -11,8 +11,25 @@ mol.modules.map.legend = function(mol) {
         },
 
         start : function() {
+            this.addLegendMenuButton();
             this.addLegendDisplay();
             this.addEventHandlers();
+        },
+        
+        addLegendMenuButton : function() {
+           var html = '' +
+                '  <div ' + 
+                    'title="Toggle map legend." ' + 
+                    'id="legend" ' + 
+                    'class="widgetTheme legend button">' + 
+                    'Legend' + 
+                '  </div>',
+                params = {
+                    button: html
+                },
+                event = new mol.bus.Event('add-legend-toggle-button', params);
+                
+           this.bus.fireEvent(event);
         },
 
         /*
@@ -40,7 +57,7 @@ mol.modules.map.legend = function(mol) {
              *   event.visible - true to show the display, false to hide it.
              *
              * @param event mol.bus.Event
-             */
+             */     
              this.bus.addHandler(
                 'legend-display-toggle',
                 function(event) {

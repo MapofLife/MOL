@@ -83,10 +83,28 @@ mol.modules.map.query = function(mol) {
         },
 
         start : function() {
+            this.addQueryMenuButton();
             this.addQueryDisplay();
             this.addEventHandlers();
         },
-
+        
+        addQueryMenuButton : function() {
+           var html = '' +
+                '  <div ' + 
+                    'title="Toggle species list radius tool ' + 
+                    '(right-click to use)" ' + 
+                    'id="list" ' + 
+                    'class="widgetTheme legend button">' + 
+                    'Species&nbsp;Lists' + 
+                '  </div>',
+                params = {
+                    button: html
+                },
+                event = new mol.bus.Event('add-query-toggle-button', params);
+                
+           this.bus.fireEvent(event); 
+        },
+        
         /*
          *  Add the species list tool controls to the map.
          */
@@ -96,6 +114,7 @@ mol.modules.map.query = function(mol) {
                 slot: mol.map.ControlDisplay.Slot.BOTTOM,
                 position: google.maps.ControlPosition.RIGHT_BOTTOM
             };
+            
             this.bus.fireEvent(new mol.bus.Event('register-list-click'));
             this.enabled=true;
             this.features={};
@@ -173,6 +192,7 @@ mol.modules.map.query = function(mol) {
                     );
                 }
             );
+            
             /*
              *  Map click handler that starts a list tool request.
              */
