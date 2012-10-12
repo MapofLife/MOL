@@ -1033,13 +1033,21 @@ div.mol-Dashboard-TableWindow {
     padding: 2px;
     padding-left:6px;
     padding-right:6px;
-    padding-bottom:8px;
+    padding-bottom:6px;
     margin: 2px;
     pointer-events:auto;
 }
 
-.mol-Map-QueryDisplay button{
+.mol-Map-QueryDisplay .types button{
     width: 22px;
+    height: 22px;
+    color: #fff;
+    padding: 3px;
+
+}
+
+.mol-Map-QueryDisplay button.toggleBtn {
+    width:35px;
     height: 22px;
     color: #fff;
     padding: 3px;

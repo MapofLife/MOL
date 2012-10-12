@@ -86,6 +86,16 @@ mol.modules.map.query = function(mol) {
             this.addQueryMenuButton();
             this.addQueryDisplay();
             this.addEventHandlers();
+            
+            //disable all map clicks
+            this.toggleMapLayerClicks(true);
+            
+        },
+        
+        toggleMapLayerClicks : function(boo) {            
+            //true to disable
+            this.bus.fireEvent(
+                new mol.bus.Event('layer-click-toggle', {disable: boo}));          
         },
         
         addQueryMenuButton : function() {
@@ -194,6 +204,56 @@ mol.modules.map.query = function(mol) {
             );
             
             /*
+             * Toggle Click Handler for Species List Clicking
+             */
+            this.display.queryButton.click(
+                function() {
+                    $(self.display.queryButton).toggleClass('selected');
+                    
+                    if($(self.display.queryButton).hasClass('selected')) {
+                        $(self.display.queryButton).html("ON");
+                        self.toggleMapLayerClicks(true);
+                    } else {
+                        $(self.display.queryButton).html("OFF");
+                        self.toggleMapLayerClicks(false);
+                    } 
+                    
+                    //TODO
+                    //change cursor
+                }
+            );
+            this.bus.addHandler(
+                'dialog-closed-click',
+                function(event) {                    
+                    if($.cookie('mol_species_list_query_tip') == null) {
+                        $(self.display).qtip({
+                            content: 'Species querying enabled! ' + 
+                                     'Click the map to generate a list. ' + 
+                                     'Toggle this button to disable.',
+                            position: {
+                                my: 'bottom right',
+                                at: 'top left'
+                            },
+                            show: {
+                                event: false,
+                                ready: true
+                                    
+                            },
+                            hide: {
+                                fixed: false,
+                                event: 'mouseenter'
+                            }
+                        });
+                        
+                        $.cookie(
+                            'mol_species_list_query_tip', 
+                            'tip_seen',
+                            {expires: 30});
+                    }
+                }
+            );
+            
+            /*
              *  Map click handler that starts a list tool request.
              */
             this.bus.addHandler(
@@ -204,8 +264,14 @@ mol.modules.map.query = function(mol) {
                             $(".selected", $(self.display.types)).val(),
                         className =  $("option:selected",
                             $(self.display.classInput)).text();
+                    
+                    if($(self.display).data('qtip')) {
+                        $(self.display).qtip('destroy');
+                    }
 
-                    if (self.enabled) {
+                    if (self.enabled 
+                            && 
+                            $(self.display.queryButton).hasClass('selected')) {
                         listradius = new google.maps.Circle(
                             {
                                 map: event.map,
@@ -242,6 +308,8 @@ mol.modules.map.query = function(mol) {
                     }
                 }
             );
+
+
 
             /*
              *  Assembles HTML for an species list given results from
@@ -300,6 +368,7 @@ mol.modules.map.query = function(mol) {
                         self.listradius.setMap(null);
                     }
                     if (self.enabled == true) {
+                        console.log("showing species list");
                         $(self.display).show();
                         _.each(
                             self.features,
@@ -308,7 +377,11 @@ mol.modules.map.query = function(mol) {
                                 feature.listWindow.setMap(self.map);
                             }
                         );
+                        $(self.display.queryButton).addClass('selected');
+                        $(self.display.queryButton).html("ON");
+                        self.toggleMapLayerClicks(true);
                     } else {
+                        console.log("hiding species list");
                         $(self.display).hide();
                         _.each(
                             self.features,
@@ -319,6 +392,9 @@ mol.modules.map.query = function(mol) {
                                 feature.listradius.setMap(null);
                             }
                         );
+                        $(self.display.queryButton).removeClass('selected');
+                        $(self.display.queryButton).html("OFF");
+                        self.toggleMapLayerClicks(false);
                     }
                 }
             );
@@ -347,6 +423,8 @@ mol.modules.map.query = function(mol) {
                             .toggle(false);
                         $(self.display.types).find('.ecoregion')
                             .removeClass('selected');
+                        $(self.display.types).find('.range')
+                            .toggle(false);
                         if ($(self.display.types).find('.range')
                             .hasClass('selected')) {
                                 alert('Available for North America only.');
@@ -357,6 +435,8 @@ mol.modules.map.query = function(mol) {
                             .toggle(true);
                         $(self.display.types).find('.ecoregion')
                             .removeClass('selected');
+                        $(self.display.types).find('.range')
+                            .toggle(true);
                         if ($(self.display.types).find('.range')
                             .hasClass('selected')) {
                                 alert('Available for North America only.');
@@ -365,7 +445,7 @@ mol.modules.map.query = function(mol) {
                         $(self.display.types).find('.ecoregion')
                             .toggle(false);
                         $(self.display.types).find('.range')
-                            .toggle(true);
+                            .toggle(false);
                         $(self.display.types).find('.range')
                             .addClass('selected');
                     }
@@ -1157,9 +1237,17 @@ mol.modules.map.query = function(mol) {
                     '   "Use this control to select species group and radius.' +
                     '   Then right click (Mac Users: \'control-click\')' +
                     '   on focal location on map." class="' + className +
-                    '   widgetTheme">' +
+                    '   widgetTheme">' +                    
                     '   <div class="controls">' +
-                    '       Search Radius ' +
+                    '     <span>' + 
+                    '       <button id="speciesListButton" ' + 
+                             'class="toggleBtn selected" ' +
+                    '         title="Click to activate species' + 
+                                    ' list querying.">' +
+                              'ON' +
+                    '       </button>' + 
+                    '     </span>' +
+                    '       Radius ' +
                     '       <select class="radius">' +
                     '           <option selected value="50">50 km</option>' +
                     '           <option value="100">100 km</option>' +
@@ -1204,7 +1292,10 @@ mol.modules.map.query = function(mol) {
             this.radiusInput=$(this).find('.radius');
             this.classInput=$(this).find('.class');
             this.types=$(this).find('.types');
+            this.queryButton=$(this).find('#speciesListButton');
+            
             $(this.types).find('.ecoregion').toggle(false);
+            $(this.types).find('.range').toggle(false);
         }
     });
 

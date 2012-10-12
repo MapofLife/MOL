@@ -157,10 +157,15 @@ mol.modules.map = function(mol) {
                     function(event) {
                             google.maps.event.addListener(
                             self.display.map,
-                            "rightclick",
+                            "click",
                             function(event) {
-                                var params = { gmaps_event : event, map : self.display.map}
-                                self.bus.fireEvent(new mol.bus.Event('species-list-query-click',params));
+                                var params = { 
+                                    gmaps_event : event, 
+                                    map : self.display.map}
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'species-list-query-click',
+                                        params));
                             }
                         );
                     }

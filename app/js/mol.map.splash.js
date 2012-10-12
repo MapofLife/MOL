@@ -72,6 +72,9 @@ mol.modules.map.splash = function(mol) {
                 width: 800,
                 height: 580,
                 DialogClass: "mol-splash",
+                close: function() {
+                    self.bus.fireEvent(new mol.bus.Event('dialog-closed-click'));
+                }
             //modal: true
             });
             $(this.display).width('98%');

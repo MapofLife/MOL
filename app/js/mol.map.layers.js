@@ -8,6 +8,7 @@ mol.modules.map.layers = function(mol) {
                 this.proxy = proxy;
                 this.bus = bus;
                 this.map = map;
+                this.clickDisabled = false;
             },
 
             start: function() {
@@ -121,6 +122,43 @@ mol.modules.map.layers = function(mol) {
                             self.display.toggle(event.visible);
                         }
                     }
+                );
+                this.bus.addHandler(
+                    'layer-click-toggle',
+                    function(event) {
+                        self.clickDisabled = event.disable;
+                        
+                        //true to disable
+                        if(event.disable) {
+                            self.map.overlayMapTypes.forEach(
+                              function(mt) {
+                                  mt.interaction.remove();
+                                  mt.interaction.clickAction = "";
+                               }
+                            );
+                        } else {                            
+                            _.each(
+                                $(self.display.list).children(),
+                                function(layer) {
+                                    self.map.overlayMapTypes.forEach(
+                                        function(mt) {
+                                            if(mt.name == $(layer).attr('id') 
+                                                && $(layer).find('.layer')
+                                                    .hasClass('selected')) {
+                                                mt.interaction.add();
+                                                mt.interaction.clickAction 
+                                                    = "full";
+                                            } else {
+                                                mt.interaction.remove();
+                                                mt.interaction.clickAction = "";
+                                            }
+                                            
+                                        }
+                                    );
+                                }
+                            );                            
+                        }
+                    }  
                 );
             },
 
@@ -290,8 +328,13 @@ mol.modules.map.layers = function(mol) {
                                 self.map.overlayMapTypes.forEach(
                                     function(mt) {
                                         if(mt.name == layer.id && $(l.layer).hasClass('selected')) {
-                                            mt.interaction.add();
-                                            mt.interaction.clickAction = "full"
+                                            if(!self.clickDisabled) {
+                                               mt.interaction.add();
+                                               mt.interaction.clickAction = "full" 
+                                            } else {
+                                               mt.interaction.remove();
+                                               mt.interaction.clickAction = "";
+                                            }
                                         } else {
                                             mt.interaction.remove();
                                             mt.interaction.clickAction = "";
