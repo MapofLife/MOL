@@ -76,7 +76,7 @@ mol.modules.map.boot = function(mol) {
                 {
                     //Number on the key is there to invalidate cache. 
                     //Using date+time invalidated.
-                    key: 'boot-results-08102012210-{0}'.format(self.term), 
+                    key: 'boot-results-10102012210-{0}'.format(self.term), 
                     sql: this.sql.format(self.term)
                 },
                 function(response) {

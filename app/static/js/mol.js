@@ -1219,7 +1219,7 @@ mol.modules.map.layers = function(mol) {
                     '  <div class="break"></div>' +
                     '</div>';
 
-                this._super(html.format(layer.source, layer.type, layer.name, layer.names, layer.feature_count, layer.source_title, layer.type_title));
+                this._super(html.format(layer.source_type, layer.type, layer.name, layer.names, layer.feature_count, layer.source_title, layer.type_title));
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();
@@ -5484,7 +5484,7 @@ mol.modules.map.boot = function(mol) {
                 {
                     //Number on the key is there to invalidate cache. 
                     //Using date+time invalidated.
-                    key: 'boot-results-08102012210-{0}'.format(self.term), 
+                    key: 'boot-results-10102012210-{0}'.format(self.term), 
                     sql: this.sql.format(self.term)
                 },
                 function(response) {

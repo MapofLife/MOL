@@ -426,78 +426,28 @@ var CartoDB = CartoDB || {};
 
   CartoDB.Infowindow.prototype.open = function(feature,latlng){
     var that = this
-      , infowindow_sql = 'SELECT contact, provider, scientificname, seasonality, type FROM ' + this.params_.table_name + ' WHERE cartodb_id=' + feature;
+      , infowindow_sql = this.params_.meta_query.format(feature);
     that.feature_ = feature;
-
-    if (this.params_.table_name == 'gbif_import') {
-          infowindow_sql = "SELECT  " +
-            "'Point observation' AS \"Type\", " +
-            "'GBIF' AS \"Source\", " +
-            "scientificname AS  \"Species name\", " +
-            "CollectionID AS \"Collection\", " +
-            "CONCAT('<a target=\"_gbif\" onclick=\"window.open(this.href)\" href=\"http://data.gbif.org/occurrences/',identifier,'\">',identifier, '</a>') as \"Source ID\", " +
-            "SurveyStartDate as \"Observed on\", " +
-            "identifier as oid " +
-            "FROM {0} WHERE cartodb_id={1}".format("gbif_import", feature);
-    } else {
-            infowindow_sql = "SELECT  " +
-            "   p.scientificname AS  \"Species name\", " +
-            "   pv.title AS \"Source\", " +
-            "   t.title AS \"Type\", " +
-            "   CASE WHEN p.seasonality = Null THEN 'unknown' ELSE TEXT(p.seasonality) END AS \"Seasonality\", " +
-            "   p.regionname AS \"Region\", " +
-            "   e.ecoregion_code AS \"Ecoregion Code\", " +
-            "   CASE WHEN p.provider = 'iucn' THEN p.bibliographiccitation ELSE Null END AS \"Citation\", " +
-            "   pv.pubdate as \"Date\" " +
-            "   FROM polygons p " +
-            "LEFT JOIN types t " +
-            "    ON p.type=t.type " +
-            "LEFT JOIN providers pv " +
-            "   ON p.provider = pv.provider " +
-            "LEFT JOIN ecoregion_species e " +
-            "   ON p.ecoregion_list_id = e.id " +
-            "WHERE p.cartodb_id={0}".format(feature);
-    }
 
     // If the table is private, you can't run any api methods
     if (this.params_.feature!=true) {
       infowindow_sql = encodeURIComponent(this.params_.feature.replace('{{feature}}',feature));
     }
 
-    if(this.params_.table_name == 'gbif_import'){
-        $.post(
-            'cache/get',
-            {sql: infowindow_sql, key: 'infowindow-'+feature},
+
+    $.post(
+        'cache/get',
+         {sql: infowindow_sql, key: 'cdbinfo-'+feature+Math.random()},
             function(result) {
-                getGbifInfo(result.rows[0],latlng);
-            }
-        );
-    } else {
-        $.post(
-            'cache/get',
-            {sql: infowindow_sql, key: 'infowindow-'+feature},
-            function(result) {
-                positionateInfowindow(result.rows[0],latlng);
-            }
-        );
-    }
-
-    function getGbifInfo (variables, center) {
-        $.post(
-            'gbif/occurrence',
-            {oid : variables.oid},
-            function(xml) {
-                var institutionCode = $((new window.DOMParser()).parseFromString(xml, "text/xml")).find('institutionCode').text();
-
-
-                delete variables.oid;
-                if(institutionCode != '' && institutionCode != null) {
-                    variables['Institution Code'] = institutionCode;
+                var content;
+                if(!result.error) {
+                    content = $.parseJSON(
+                        result.rows[0]['get_feature_metadata']
+                    );
+                    positionateInfowindow(content, latlng);
                 }
-                positionateInfowindow(variables, center);
             }
-        );
-    }
+    );
 
     function positionateInfowindow(variables,center) {
       if (that.div_) {
