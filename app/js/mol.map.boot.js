@@ -31,6 +31,7 @@ mol.modules.map.boot = function(mol) {
                         '"lat":\',ST_YMax(l.extent),\' ' +
                         '}}\') as extent, ' +
                     'l.dataset_id as dataset_id, ' +
+                    'd.dataset_title as dataset_title, ' +
                     'd.style_table as style_table ' +
                 'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
@@ -76,7 +77,7 @@ mol.modules.map.boot = function(mol) {
                 {
                     //Number on the key is there to invalidate cache. 
                     //Using date+time invalidated.
-                    key: 'boot-results-10102012210-{0}'.format(self.term), 
+                    key: 'boot-results-10152012210-{0}'.format(self.term), 
                     sql: this.sql.format(self.term)
                 },
                 function(response) {

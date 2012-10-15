@@ -42,6 +42,7 @@ mol.modules.map.search = function(mol) {
                         '"lat":\',ST_YMax(l.extent),\' ' +
                         '}}\') as extent, ' +
                     'l.dataset_id as dataset_id, ' +
+                    'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                 'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +

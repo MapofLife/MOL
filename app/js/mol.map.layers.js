@@ -346,15 +346,6 @@ mol.modules.map.layers = function(mol) {
 
                             }
                         );
-
-                        // Click handler for info button fires 'metadata-toggle'
-                        l.info.click(
-                            function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { layer: layer}}));
-                                event.stopPropagation();
-                                event.cancelBubble = true;
-                            }
-                        );
                         l.toggle.attr('checked', true);
 
                         // Click handler for the toggle button.
@@ -374,14 +365,30 @@ mol.modules.map.layers = function(mol) {
                         );
                         l.source.click(
                             function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { provider: layer.source, type: layer.type, _class: layer._class, name: layer.name}}));
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'metadata-toggle', 
+                                        {params : { 
+                                            dataset_id: layer.dataset_id, 
+                                            title: layer.dataset_title
+                                        }}
+                                    )
+                                );
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }
                         );
                         l.type.click(
                             function(event) {
-                                self.bus.fireEvent(new mol.bus.Event('metadata-toggle', {params : { type: layer.type}}));
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'metadata-toggle', 
+                                        {params : { 
+                                            type: layer.type,
+                                            title: layer.type_title
+                                        }}
+                                    )
+                                );
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }

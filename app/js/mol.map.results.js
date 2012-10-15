@@ -193,18 +193,13 @@ mol.modules.map.results = function(mol) {
                             self.bus.fireEvent(
                                 new mol.bus.Event(
                                     'metadata-toggle',
-                                    {
-                                        params : { 
-                                            type: $.data(result[0],'layer')
-                                                .type,
-                                            provider: $.data(result[0],'layer')
-                                                .source,
-                                            _class: $.data(result[0],'layer')
-                                                ._class,
-                                            name: $.data(result[0],'layer')
-                                                .name 
-                                        }
-                                    }
+                                    {params : { 
+                                        dataset_id: $.data(result[0],'layer')
+                                            .dataset_id,
+                                        title: $.data(result[0],'layer')
+                                            .dataset_title 
+                                    }}
+                                    
                                 )
                             );
                             event.stopPropagation();
@@ -219,7 +214,9 @@ mol.modules.map.results = function(mol) {
                                     {
                                         params : { 
                                             type: $.data(result[0],'layer')
-                                                .type
+                                                .type,
+                                            title: $.data(result[0],'layer')
+                                                .type_title,
                                         }
                                     }
                                 )
