@@ -55,7 +55,7 @@ mol.modules.map.metadata = function(mol) {
                 )
             );
             $.getJSON(
-                this.url.format(sql),
+                mol.services.cartodb.sqlApi.jsonp_url.format(sql),
                 function(response) {
                     if(self.display) {
                         self.display.dialog('close');

@@ -161,27 +161,10 @@ mol.modules.map.dashboard = function(mol) {
                     '      <span class="names">' + 
                     '      </span>' +
                     '      <span class="label">' + 
-                             'Names in MOL taxonomy:' + 
-                    '      </span>' +
-                    '      <span class="taxon_total">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy:' + 
+                             'Accepted species names:' + 
                     '      </span>' +
                     '      <span class="all_matches">' + 
                     '      </span>' + 
-                    '      <br>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy directly:' + 
-                    '      </span>' +
-                    '      <span class="direct_matches">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                            'Names matching MOL taxonomy' + 
-                            ' through a known synonym:' + 
-                    '      </span>' +
-                    '      <span class="syn_matches">' + 
-                    '      </span>' +
                     '      <span class="label">' + 
                              'Total records:' + 
                     '      </span>' +
@@ -198,7 +181,7 @@ mol.modules.map.dashboard = function(mol) {
                     '          <th><b>Taxon</b></th>' +
                     '          <th><b>Species Names</b></th>' +
                     '          <th><b>Records</b></th>' +
-                    //'          <th><b>% Match</b></th>' +
+                    //'          <th><b>% Match</b></th>' + //WIP
                     '        </tr>' +
                     '       </thead>' +
                     '       <tbody class="tablebody"></tbody>' +
@@ -207,7 +190,7 @@ mol.modules.map.dashboard = function(mol) {
                     '  <div>' +
                     '</div>  ',
                     self = this;
-                    //this.numsets = 0;
+                   
 
                 this._super(html);
                 _.each(
@@ -283,7 +266,7 @@ mol.modules.map.dashboard = function(mol) {
                         '<td class="class {4}">{5}</td>' +
                         '<td class="spnames">{6}</td>' +
                         '<td class="records">{7}</td>' +
-                        //'<td class="pctmatch">{9}</td>' +
+                        //'<td class="pctmatch">{9}</td>' + //WIP
                     '</tr>',
                     self = this;
                     

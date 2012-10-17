@@ -492,7 +492,7 @@ mol.modules.map.layers = function(mol) {
                     '    <button class="source" title="Layer Source: {5}"><img src="/static/maps/search/{0}.png"></button>' +
                     '    <button class="type" title="Layer Type: {6}"><img src="/static/maps/search/{1}.png"></button>' +
                     '    <div class="layerName">' +
-                    '        <div class="layerRecords">{4} features</div>' +
+                    '        <div class="layerRecords">{4}</div>' +
                     '        <div title="{2}" class="layerNomial">{2}</div>' +
                     '        <div title="{3}" class="layerEnglishName">{3}</div>' +
                     '    </div>' +
@@ -506,7 +506,18 @@ mol.modules.map.layers = function(mol) {
                     '  <div class="break"></div>' +
                     '</div>';
 
-                this._super(html.format(layer.source_type, layer.type, layer.name, layer.names, layer.feature_count, layer.source_title, layer.type_title));
+                this._super(
+                    html.format(
+                        layer.source_type, 
+                        layer.type, 
+                        layer.name, 
+                        layer.names, 
+                        (layer.feature_count != null) ? 
+                            '{0} features'.format(layer.feature_count) : '',
+                        layer.source_title, 
+                        layer.type_title
+                    )
+                );
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();

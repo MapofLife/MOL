@@ -435,10 +435,9 @@ var CartoDB = CartoDB || {};
     }
 
 
-    $.post(
-        'cache/get',
-         {sql: infowindow_sql, key: 'cdbinfo-'+feature+Math.random()},
-            function(result) {
+    $.getJSON(
+         'http://mol.cartodb.com/api/v2/sql?q={0}&callback=?'.format(infowindow_sql),
+          function(result) {
                 var content;
                 if(!result.error) {
                     content = $.parseJSON(
@@ -446,7 +445,7 @@ var CartoDB = CartoDB || {};
                     );
                     positionateInfowindow(content, latlng);
                 }
-            }
+          }
     );
 
     function positionateInfowindow(variables,center) {

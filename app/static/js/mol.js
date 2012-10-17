@@ -405,6 +405,11 @@ mol.modules.services.cartodb = function(mol) {
                 this.ctlBottom = new ControlDisplay('LeftBottomControl');
                 controls[ControlPosition.BOTTOM_LEFT].clear();
                 controls[ControlPosition.BOTTOM_LEFT].push(this.ctlBottom.element);
+                
+                // Add bottom center map control.
+                this.ctlBottomCenter = new ControlDisplay('BottomCenterControl');
+                controls[ControlPosition.BOTTOM_CENTER].clear();
+                controls[ControlPosition.BOTTOM_CENTER].push(this.ctlBottomCenter.element);
 
                 // Add bottom right map control.
                 this.ctlRightBottom = new ControlDisplay('RightBottomControl');
@@ -438,8 +443,11 @@ mol.modules.services.cartodb = function(mol) {
                 case ControlPosition.BOTTOM_LEFT:
                     control = this.ctlBottom;
                     break;
-                 case ControlPosition.RIGHT_BOTTOM:
+                case ControlPosition.RIGHT_BOTTOM:
                     control = this.ctlRightBottom;
+                    break;
+                case ControlPosition.BOTTOM_CENTER:
+                    control = this.ctlBottomCenter;
                     break;
                 }
 
@@ -580,6 +588,9 @@ mol.modules.services.cartodb = function(mol) {
                     minLat: -85,
                     maxLat: 85,
                     mapTypeControl: false,
+                    panControl: false,
+                    zoomControl: false,
+                    streetViewControl: false,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     styles: [
                       {
@@ -1288,7 +1299,7 @@ mol.modules.map.layers = function(mol) {
                     '    <button class="source" title="Layer Source: {5}"><img src="/static/maps/search/{0}.png"></button>' +
                     '    <button class="type" title="Layer Type: {6}"><img src="/static/maps/search/{1}.png"></button>' +
                     '    <div class="layerName">' +
-                    '        <div class="layerRecords">{4} features</div>' +
+                    '        <div class="layerRecords">{4}</div>' +
                     '        <div title="{2}" class="layerNomial">{2}</div>' +
                     '        <div title="{3}" class="layerEnglishName">{3}</div>' +
                     '    </div>' +
@@ -1302,7 +1313,18 @@ mol.modules.map.layers = function(mol) {
                     '  <div class="break"></div>' +
                     '</div>';
 
-                this._super(html.format(layer.source_type, layer.type, layer.name, layer.names, layer.feature_count, layer.source_title, layer.type_title));
+                this._super(
+                    html.format(
+                        layer.source_type, 
+                        layer.type, 
+                        layer.name, 
+                        layer.names, 
+                        (layer.feature_count != null) ? 
+                            '{0} features'.format(layer.feature_count) : '',
+                        layer.source_title, 
+                        layer.type_title
+                    )
+                );
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();
@@ -1480,12 +1502,6 @@ mol.modules.map.menu = function(mol) {
                     }
                 );
 
-                this.display.searchItem.click(
-                    function(event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('search-display-toggle'));
-                    }
-                );
                 this.display.layersToggle.click(
                     function(event) {
                         if(self.display.layersToggle[0].src
@@ -1611,12 +1627,6 @@ mol.modules.map.menu = function(mol) {
                             'class="widgetTheme search button">' +
                             'Dashboard' + 
                     '    </div>' +
-                    '    <div ' + 
-                            'title="Toggle layer search tools." ' + 
-                            'id="search" ' + 
-                            'class="widgetTheme search button">' + 
-                            'Search' + 
-                    '  </div>' +
                     '</div>';
 
                 this._super(html);
@@ -1768,9 +1778,23 @@ mol.modules.map.results = function(mol) {
                         self.display.toggle(false);
                     } else {
                         if (event.visible === undefined) {
-                            self.display.toggle();
-                        } else {
-                            self.display.toggle(event.visible);
+                            self.display.toggle(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (event.visible && self.display.not(':visible')) {
+                            self.display.show(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (self.display.is(':visible')){
+                            self.display.hide(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
                         }
                     }
                 }
@@ -1792,6 +1816,12 @@ mol.modules.map.results = function(mol) {
                     } else {
                         self.showNoResults();
                     }
+                    //self.bus.fireEvent(
+                    //    new mol.bus.Event(
+                    //        'results-display-toggle', {visible: true}
+                    //    )
+                    //)
+                    
                 }
             );
         },
@@ -2206,7 +2236,7 @@ mol.modules.map.results = function(mol) {
                     '           </button>' +
                     '       </div>' +
                     '       <div class="resultName">' +
-                    '           <div class="resultRecords">{6} features</div>' +
+                    '           <div class="resultRecords">{6}</div>' +
                     '           <div class="resultNomial">{2}</div>' +
                     '           <div class="resultEnglishName" title="{5}">' +
                     '               {5}' +
@@ -2230,7 +2260,8 @@ mol.modules.map.results = function(mol) {
                         layer.source_type, 
                         layer.type, 
                         layer.names, 
-                        layer.feature_count, 
+                        (layer.feature_count != null) ? 
+                            '{0} features'.format(layer.feature_count) : '', 
                         layer.type_title, 
                         layer.source_title
                     )
@@ -2314,15 +2345,16 @@ mol.modules.map.search = function(mol) {
             this.bus = bus;
             this.searching = {};
             this.names = [];
-            this.bornOnDate = Math.random();
+            this.url = '' +
+                'http://mol.cartodb.com/api/v2/sql?q={0}&callback=?';
             this.ac_label_html = ''+
                 '<div class="ac-item">' +
                     '<span class="sci">{0}</span>' +
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v from ac_beta where n~*'\\m{0}' OR v~*'\\m{0}'";
-            this.sql = '' +
+                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+            this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
                     't.sort_order as type_sort_order, ' +
@@ -2332,9 +2364,8 @@ mol.modules.map.search = function(mol) {
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
                     's.title as source_type_title, ' +   
-                    'CONCAT(n.class,\'\') as _class, ' +
                     'l.feature_count as feature_count, '+
-                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(n.v,\'\') as names, ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
                             '"lng":\',ST_XMin(l.extent),\', '+
@@ -2356,11 +2387,10 @@ mol.modules.map.search = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN taxonomy n ON ' +
-                    'l.scientificname = n.scientificname ' +
+                'LEFT JOIN ac n ON ' +
+                    'l.scientificname = n.n ' +
                 'WHERE ' +
-                    "l.scientificname~*'\\m{0}' " +
-                    "OR n.common_names_eng~*'\\m{0}' " +
+                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
                 'ORDER BY name, type_sort_order';
         },
 
@@ -2406,13 +2436,12 @@ mol.modules.map.search = function(mol) {
                 {
                     minLength: 3, 
                     source: function(request, response) {
-                        $.post(
-                            'cache/get',
-                            {
-                                key: 'ac-beta-{0}-{1}'
-                                    .format(request.term,self.bornOnDate),
-                                sql: self.ac_sql.format(request.term)
-                            },
+                        $.getJSON(
+                            self.url.format(self.ac_sql.format(
+                                    $.trim(request.term)
+                                    .replace(/ /g, ' ')
+                                )
+                            ),
                             function (json) {
                                 var names = [],scinames=[];
                                 _.each (
@@ -2545,7 +2574,7 @@ mol.modules.map.search = function(mol) {
              */
             this.display.goButton.click(
                 function(event) {
-                          self.search(self.display.searchBox.val());
+                    self.search(self.display.searchBox.val());
                 }
             );
 
@@ -2553,13 +2582,23 @@ mol.modules.map.search = function(mol) {
              * Clicking the cancel button hides the search display and fires
              * a cancel-search event on the bus.
              */
-            this.display.cancelButton.click(
+            this.display.toggleButton.click(
                 function(event) {
                     var params = {
                         visible: false
-                    };
-
-                    self.display.toggle(false);
+                    }, that = this;
+                    
+                    if(self.display.searchDisplay.is(':visible')) {
+                        self.display.searchDisplay.hide();
+                        $(this).text('▶');
+                        params.visible = false;
+                    } else {
+                        
+                        self.display.searchDisplay.show();
+                        $(this).text('◀');
+                        params.visible = true;
+                    }
+                    
                     self.bus.fireEvent(
                         new mol.bus.Event('results-display-toggle', params));
                 }
@@ -2614,12 +2653,7 @@ mol.modules.map.search = function(mol) {
                         {source : "search-{0}".format(term)}
                     )
                 );
-                self.bus.fireEvent(
-                    new mol.bus.Event(
-                        'results-display-toggle',
-                        {visible : false}
-                    )
-                );
+                
                 $(self.display.searchBox).autocomplete('disable');
                 $(self.display.searchBox).autocomplete('enable');
                 if(term.length<3) {
@@ -2628,29 +2662,28 @@ mol.modules.map.search = function(mol) {
                     );
                 } else {
                     $(self.display.searchBox).val(term);
-                    $.post(
-                            'cache/get',
-                            {
-                                key:'search-{0}-{1}'
-                                    .format(term,this.bornOnDate),
-                                sql:this.sql.format(term)
-                            },
-                            function (response) {
-                                var results = {term:term, response:response};
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'hide-loading-indicator', 
-                                        {source : "search-{0}".format(term)}
-                                    )
-                                );
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'search-results', 
-                                        results
-                                    )
-                                );
-                            },
-                            'json'
+                    $.getJSON(
+                        this.url.format(
+                            this.search_sql.format(
+                                $.trim(term)
+                                .replace(/ /g, ' ')
+                            )
+                        ),
+                        function (response) {
+                            var results = {term:term, response:response};
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'hide-loading-indicator', 
+                                    {source : "search-{0}".format(term)}
+                                )
+                            );
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'search-results', 
+                                    results
+                                )
+                            );
+                        }
                     );
                }
 
@@ -2661,16 +2694,19 @@ mol.modules.map.search = function(mol) {
         init: function() {
             var html = '' +
                 '<div class="mol-LayerControl-Search widgetTheme">' +
-                '    <div class="title ui-autocomplete-input">Search:</div>' +
-                '    <input class="value" type="text" ' +
-                        'placeholder="Search by species name">' +
-                '    <button class="execute">Go</button>' +
-                '    <button class="cancel">&nbsp;</button>' +
+                '    <div class="title">Search</div>' +
+                '    <div class="searchDisplay">' +
+                '       <input class="value ui-autocomplete-input" type="text" ' +
+                            'placeholder="Search by species name">' +
+                '       <button class="execute">Go</button>' +
+                '   </div>'+
+                '   <button class="toggle">◀</button>' +
                 '</div>';
 
             this._super(html);
             this.goButton = $(this).find('.execute');
-            this.cancelButton = $(this).find('.cancel');
+            this.toggleButton = $(this).find('.toggle');
+            this.searchDisplay = $(this).find('.searchDisplay');
             this.searchBox = $(this).find('.value');
         },
 
@@ -3057,9 +3093,9 @@ mol.modules.map.tiles = function(mol) {
                     'SELECT DISTINCT * ' +
                     'FROM get_dashboard_summary()';
                 this.dashboard_sql = '' +
-                    'SELECT DISTINCT *, 100 as pct_in_tax ' +
+                    'SELECT DISTINCT * ' +
                     'FROM dash_cache ' +
-                    'ORDER BY provider, classes;';
+                    'ORDER BY dataset_title asc';
                 this.summary = null;
                 this.types = {};
                 this.sources = {};
@@ -3206,27 +3242,10 @@ mol.modules.map.tiles = function(mol) {
                     '      <span class="names">' + 
                     '      </span>' +
                     '      <span class="label">' + 
-                             'Names in MOL taxonomy:' + 
-                    '      </span>' +
-                    '      <span class="taxon_total">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy:' + 
+                             'Accepted species names:' + 
                     '      </span>' +
                     '      <span class="all_matches">' + 
                     '      </span>' + 
-                    '      <br>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy directly:' + 
-                    '      </span>' +
-                    '      <span class="direct_matches">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                            'Names matching MOL taxonomy' + 
-                            ' through a known synonym:' + 
-                    '      </span>' +
-                    '      <span class="syn_matches">' + 
-                    '      </span>' +
                     '      <span class="label">' + 
                              'Total records:' + 
                     '      </span>' +
@@ -3243,7 +3262,7 @@ mol.modules.map.tiles = function(mol) {
                     '          <th><b>Taxon</b></th>' +
                     '          <th><b>Species Names</b></th>' +
                     '          <th><b>Records</b></th>' +
-                    '          <th><b>% Match</b></th>' +
+                    //'          <th><b>% Match</b></th>' + //WIP
                     '        </tr>' +
                     '       </thead>' +
                     '       <tbody class="tablebody"></tbody>' +
@@ -3252,7 +3271,7 @@ mol.modules.map.tiles = function(mol) {
                     '  <div>' +
                     '</div>  ',
                     self = this;
-                    //this.numsets = 0;
+                   
 
                 this._super(html);
                 _.each(
@@ -3264,7 +3283,7 @@ mol.modules.map.tiles = function(mol) {
 
                 this.dashtable = $(this).find('.dashtable');
                 this.dashtable.tablesorter({
-                    sortList: [[1,1]],
+                    sortList: [[0,0]],
                     widthFixed: true,
                     theme: "blue",
                     widgets: ["filter","zebra"]
@@ -3328,7 +3347,7 @@ mol.modules.map.tiles = function(mol) {
                         '<td class="class {4}">{5}</td>' +
                         '<td class="spnames">{6}</td>' +
                         '<td class="records">{7}</td>' +
-                        '<td class="pctmatch">{9}</td>' +
+                        //'<td class="pctmatch">{9}</td>' + //WIP
                     '</tr>',
                     self = this;
                     
@@ -3342,8 +3361,8 @@ mol.modules.map.tiles = function(mol) {
                         row.classes.split(',').join(', '),
                         this.format(row.species_count),
                         this.format(row.feature_count),
-                        row.dataset_title,
-                        row.pct_in_tax
+                        row.dataset_title
+                        //row.pct_in_tax
                     )
                 );
                 //store some data in each dataset/row   
@@ -5217,11 +5236,9 @@ mol.map.metadata.MetadataDisplay = mol.mvp.View.extend(
                             }
                         ).get())+150
             );
-            //this.dialog.moveToTop();
-            //return(this);
+            this.dialog.moveToTop();
         }
-    }
-    );
+    });
 
 };
 
@@ -5583,7 +5600,7 @@ mol.modules.map.sidebar = function(mol) {
             fireEvents: function() {
                 var params = {
                         display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.FIRST,
+                        slot: mol.map.ControlDisplay.Slot.LAST,
                         position: google.maps.ControlPosition.LEFT_CENTER
                     },
                     event = new mol.bus.Event('add-map-control', params);

@@ -72,6 +72,11 @@ mol.modules.map = function(mol) {
                 this.ctlBottom = new ControlDisplay('LeftBottomControl');
                 controls[ControlPosition.BOTTOM_LEFT].clear();
                 controls[ControlPosition.BOTTOM_LEFT].push(this.ctlBottom.element);
+                
+                // Add bottom center map control.
+                this.ctlBottomCenter = new ControlDisplay('BottomCenterControl');
+                controls[ControlPosition.BOTTOM_CENTER].clear();
+                controls[ControlPosition.BOTTOM_CENTER].push(this.ctlBottomCenter.element);
 
                 // Add bottom right map control.
                 this.ctlRightBottom = new ControlDisplay('RightBottomControl');
@@ -105,8 +110,11 @@ mol.modules.map = function(mol) {
                 case ControlPosition.BOTTOM_LEFT:
                     control = this.ctlBottom;
                     break;
-                 case ControlPosition.RIGHT_BOTTOM:
+                case ControlPosition.RIGHT_BOTTOM:
                     control = this.ctlRightBottom;
+                    break;
+                case ControlPosition.BOTTOM_CENTER:
+                    control = this.ctlBottomCenter;
                     break;
                 }
 

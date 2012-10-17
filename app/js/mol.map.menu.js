@@ -39,12 +39,6 @@ mol.modules.map.menu = function(mol) {
                     }
                 );
 
-                this.display.searchItem.click(
-                    function(event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('search-display-toggle'));
-                    }
-                );
                 this.display.layersToggle.click(
                     function(event) {
                         if(self.display.layersToggle[0].src
@@ -170,12 +164,6 @@ mol.modules.map.menu = function(mol) {
                             'class="widgetTheme search button">' +
                             'Dashboard' + 
                     '    </div>' +
-                    '    <div ' + 
-                            'title="Toggle layer search tools." ' + 
-                            'id="search" ' + 
-                            'class="widgetTheme search button">' + 
-                            'Search' + 
-                    '  </div>' +
                     '</div>';
 
                 this._super(html);

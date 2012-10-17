@@ -124,9 +124,23 @@ mol.modules.map.results = function(mol) {
                         self.display.toggle(false);
                     } else {
                         if (event.visible === undefined) {
-                            self.display.toggle();
-                        } else {
-                            self.display.toggle(event.visible);
+                            self.display.toggle(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (event.visible && self.display.not(':visible')) {
+                            self.display.show(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (self.display.is(':visible')){
+                            self.display.hide(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
                         }
                     }
                 }
@@ -148,6 +162,12 @@ mol.modules.map.results = function(mol) {
                     } else {
                         self.showNoResults();
                     }
+                    //self.bus.fireEvent(
+                    //    new mol.bus.Event(
+                    //        'results-display-toggle', {visible: true}
+                    //    )
+                    //)
+                    
                 }
             );
         },
@@ -562,7 +582,7 @@ mol.modules.map.results = function(mol) {
                     '           </button>' +
                     '       </div>' +
                     '       <div class="resultName">' +
-                    '           <div class="resultRecords">{6} features</div>' +
+                    '           <div class="resultRecords">{6}</div>' +
                     '           <div class="resultNomial">{2}</div>' +
                     '           <div class="resultEnglishName" title="{5}">' +
                     '               {5}' +
@@ -586,7 +606,8 @@ mol.modules.map.results = function(mol) {
                         layer.source_type, 
                         layer.type, 
                         layer.names, 
-                        layer.feature_count, 
+                        (layer.feature_count != null) ? 
+                            '{0} features'.format(layer.feature_count) : '', 
                         layer.type_title, 
                         layer.source_title
                     )

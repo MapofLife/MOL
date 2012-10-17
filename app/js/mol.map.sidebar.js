@@ -69,7 +69,7 @@ mol.modules.map.sidebar = function(mol) {
             fireEvents: function() {
                 var params = {
                         display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.FIRST,
+                        slot: mol.map.ControlDisplay.Slot.LAST,
                         position: google.maps.ControlPosition.LEFT_CENTER
                     },
                     event = new mol.bus.Event('add-map-control', params);
