@@ -58,7 +58,7 @@ mol.modules.map.dashboard = function(mol) {
                             dataset_title = $(dataset).data('dataset_title'),
                             type_title = $(dataset).data('type');
 
-                        $(dataset).find('.provider').click (
+                        $(dataset).find('.table').click (
                             function(event) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(

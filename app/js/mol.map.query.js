@@ -368,7 +368,6 @@ mol.modules.map.query = function(mol) {
                         self.listradius.setMap(null);
                     }
                     if (self.enabled == true) {
-                        console.log("showing species list");
                         $(self.display).show();
                         _.each(
                             self.features,
@@ -381,7 +380,6 @@ mol.modules.map.query = function(mol) {
                         $(self.display.queryButton).html("ON");
                         self.toggleMapLayerClicks(true);
                     } else {
-                        console.log("hiding species list");
                         $(self.display).hide();
                         _.each(
                             self.features,
@@ -893,6 +891,7 @@ mol.modules.map.query = function(mol) {
                          '#cc3333',
                          '#FFFFFF',
                          '#000000'],
+                pieSliceText: 'none',
                 chartArea: {left:125, top:25, width:"100%", height:"85%"}
             };
 

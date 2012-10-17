@@ -112,12 +112,12 @@ table.dashtable td {
     height: 24px;
 }
 
-table.dashtable td.provider, table.dashtable td.type {
+table.dashtable td.table, table.dashtable td.type {
     text-decoration: underline;
     cursor: pointer;
 }
 
-table.dashtable td.provider:hover,  table.dashtable td.type:hover {
+table.dashtable td.table:hover,  table.dashtable td.type:hover {
     color: blue;
     text-decoration: underline;
 }
