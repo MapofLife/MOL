@@ -75,22 +75,6 @@ mol.modules.map.menu = function(mol) {
                         );
                     }
                 );
-                
-                this.bus.addHandler(
-                    'add-query-toggle-button',
-                    function(event) {
-                        $(self.bottomdisplay).prepend(event.button);
-                        self.bottomdisplay.queryItem = 
-                            $(self.bottomdisplay).find('#list');
-                            
-                        self.bottomdisplay.queryItem.click(
-                            function(event) {
-                                self.bus.fireEvent(
-                                    new mol.bus.Event('species-list-tool-toggle'));
-                            }
-                        );
-                    }
-                );
 
                 this.bus.addHandler(
                     'hide-layer-display-toggle',
@@ -127,7 +111,7 @@ mol.modules.map.menu = function(mol) {
             fireEvents: function() {
                 var params = {
                         display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.FIRST,
+                        slot: mol.map.ControlDisplay.Slot.MIDDLE,
                         position: google.maps.ControlPosition.TOP_RIGHT
                     },
                     bottomparams = {

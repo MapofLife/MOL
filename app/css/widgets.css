@@ -1045,20 +1045,20 @@ div.mol-Dashboard-TableWindow {
     bottom: 10px;
     right: 15px;
 }
+
+/*
+ * Start Query Bar 
+ */
 .mol-Map-QueryDisplay {
-    clear:both;
-    height: 25px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    text-align: right;
-    font-size: 0.8em;
+    float: right;
+    display: table-cell;
+    height: 26px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
     white-space: nowrap;
-    padding: 2px;
-    padding-left:6px;
-    padding-right:6px;
-    padding-bottom:6px;
-    margin: 2px;
+    padding: 3px 5px 2px 5px;
     pointer-events:auto;
+    
 }
 
 .mol-Map-QueryDisplay .types button{
@@ -1066,7 +1066,7 @@ div.mol-Dashboard-TableWindow {
     height: 22px;
     color: #fff;
     padding: 3px;
-
+    margin: 0px;
 }
 
 .mol-Map-QueryDisplay button.toggleBtn {
@@ -1074,13 +1074,11 @@ div.mol-Dashboard-TableWindow {
     height: 22px;
     color: #fff;
     padding: 3px;
-
 }
 
 .mol-Map-QueryDisplay button img{
     width: 16px;
     height: 16px;
-
 }
 
 .mol-Map-QueryDisplay button.selected {
@@ -1090,6 +1088,32 @@ div.mol-Dashboard-TableWindow {
     -ms-border-radius:5px;
     padding:0px;
 }
+
+.mol-Map-QueryDisplay span.title {
+    float: left;
+    line-height: 25px;
+    font-size: 1.1em;
+    margin-right: 2px;
+    -moz-user-select: none;
+    padding-left: 2px;
+}
+
+.mol-Map-QueryDisplay button.toggle {
+    float: left;
+    height: 20px;
+    width: 23px;
+    margin-left: 4px;
+}
+
+.mol-Map-QueryDisplay div.speciesDisplay {
+    float: left;
+    line-height: 25px;
+    font-size: 0.8em;
+    margin-right: 2px;
+    -moz-user-select: none;
+}
+
+
 
 
 .mol-Map-ListQueryRadius {
