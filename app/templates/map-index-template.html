@@ -56,7 +56,6 @@
      <script type="text/javascript" src="../../../js/mol.map.metadata.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.splash.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.help.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.sidebar.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.status.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.images.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.boot.js"></script>
@@ -125,8 +124,6 @@
                 mde.start()
                 hd = new env.map.help.HelpDialog(proxy, bus)
                 hd.start()
-                sb = new env.map.sidebar.SidebarEngine(proxy, bus)
-                sb.start()
                 st = new env.map.status.StatusEngine(proxy, bus)
                 st.start()
                 ie = new env.map.images.ImagesEngine(proxy, bus)
@@ -168,8 +165,6 @@
                 mde.start()
                 hd = new env.map.help.HelpDialog(proxy, bus)
                 hd.start()
-                sb = new env.map.sidebar.SidebarEngine(proxy, bus)
-                sb.start()
                 st = new env.map.status.StatusEngine(proxy, bus)
                 st.start()
                 ie = new env.map.images.ImagesEngine(proxy, bus)

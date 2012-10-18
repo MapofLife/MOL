@@ -1252,21 +1252,19 @@ mol.modules.map.query = function(mol) {
                     '  <button class="toggle">▶</button>' +
                     '  <span class="title">Species List</span>' +
                     '  <div class="speciesDisplay">' +
-                    '    <span>' + 
-                    '      <button id="speciesListButton" ' + 
+                    '    <button id="speciesListButton" ' + 
                              'class="toggleBtn selected" ' +
                              'title="Click to activate species' + 
                                  ' list querying.">' +
                              'ON' +
-                    '      </button>' + 
-                    '    </span>' +
-                    '    <span>Radius </span>' +
+                    '    </button>' + 
+                         'Radius </span>' +
                     '    <select class="radius">' +
                     '      <option selected value="50">50 km</option>' +
                     '      <option value="100">100 km</option>' +
                     '      <option value="300">300 km</option>' +
                     '    </select>' +
-                    '    Group ' +
+                         'Group ' +
                     '    <select class="class" value="">' +
                     '      <option selected value=" AND p.polygonres=100 ">' +
                     '        Birds</option>' +
@@ -1279,7 +1277,7 @@ mol.modules.map.query = function(mol) {
                     '      <option value=" AND p.class=\'mammalia\' ">' +
                     '        Mammals</option>' +
                     '    </select>' +
-                    '    <span class="types">' +
+                    '    <div class="types">' +
                     '      <button class="range selected" ' +
                              'value=" AND p.type=\'range\'">' +
                     '        <img title="Click to use Expert range maps' +
@@ -1292,7 +1290,7 @@ mol.modules.map.query = function(mol) {
                                ' checklists for query." ' +
                                'src="/static/maps/search/ecoregion.png">' +
                     '      </button>' +
-                    '    </span>' +
+                    '    </div>' +
                     '  </div>' +
 
 

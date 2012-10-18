@@ -16,7 +16,6 @@ mol.modules.map = function(mol) {
             'metadata',
             'splash',
             'help',
-            'sidebar',
             'status',
             'images',
             'boot'
@@ -69,10 +68,10 @@ mol.modules.map = function(mol) {
 
 
                 // Add bottom left map control.
-                this.ctlBottom = new ControlDisplay('LeftBottomControl');
+                this.ctlLeftBottom = new ControlDisplay('LeftBottomControl');
                 controls[ControlPosition.BOTTOM_LEFT].clear();
-                controls[ControlPosition.BOTTOM_LEFT].push(this.ctlBottom.element);
-                
+                controls[ControlPosition.BOTTOM_LEFT].push(this.ctlLeftBottom.element);
+
                 // Add bottom center map control.
                 this.ctlBottomCenter = new ControlDisplay('BottomCenterControl');
                 controls[ControlPosition.BOTTOM_CENTER].clear();
@@ -107,8 +106,8 @@ mol.modules.map = function(mol) {
                 case ControlPosition.LEFT_CENTER:
                     control = this.ctlLeftCenter;
                     break;
-                case ControlPosition.BOTTOM_LEFT:
-                    control = this.ctlBottom;
+                case ControlPosition.LEFT_BOTTOM:
+                    control = this.ctlLeftBottom;
                     break;
                 case ControlPosition.RIGHT_BOTTOM:
                     control = this.ctlRightBottom;
@@ -167,8 +166,8 @@ mol.modules.map = function(mol) {
                             self.display.map,
                             "click",
                             function(event) {
-                                var params = { 
-                                    gmaps_event : event, 
+                                var params = {
+                                    gmaps_event : event,
                                     map : self.display.map}
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
@@ -342,17 +341,16 @@ mol.modules.map = function(mol) {
                     className = 'mol-Map-' + name,
                     html = '' +
                     '<div class="' + className + '">' +
-                    '    <div class="TOP"></div>' +
-                    '    <div class="MIDDLE"></div>' +
-                    '    <div class="BOTTOM"></div>' +
+                        '<div class="TOP"></div>' +
+                        '<div class="MIDDLE"></div>' +
+                        '<div class="BOTTOM"></div>' +
                     '</div>';
 
                 this._super(html);
-                //this.selectable({disabled: true});
 
-                    $(this).find(Slot.TOP).removeClass('ui-selectee');
-                    $(this).find(Slot.MIDDLE).removeClass('ui-selectee');
-                    $(this).find(Slot.BOTTOM).removeClass('ui-selectee');
+                $(this).find(Slot.TOP).removeClass('ui-selectee');
+                $(this).find(Slot.MIDDLE).removeClass('ui-selectee');
+                $(this).find(Slot.BOTTOM).removeClass('ui-selectee');
 
             },
 
