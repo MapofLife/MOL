@@ -23,15 +23,16 @@ mol.modules.map.status = function(mol) {
                 this.display.dialog(
                     {
                         autoOpen: true,
-			width: 680,
-			height: 390,
-			dialogClass: "mol-status",
-			modal: true
+            			width: 680,
+            			height: 390,
+            			dialogClass: "mol-status",
+            			modal: true
                     }
                 );
-                 $(this.display).width('98%');
-
+                
+                $(this.display).width('98%');
             },
+            
             addEventHandlers : function () {
                  var self = this;
                  this.bus.addHandler(
@@ -49,16 +50,20 @@ mol.modules.map.status = function(mol) {
             init: function() {
                 var html = '' +
                 '<div>' +
-	            '  <iframe class="mol-status iframe_content ui-dialog-content" style="height:600px; width: 98%; margin-left: -18px; margin-right: auto; display: block;" src="/static/status/index.html"></iframe>' +
+	            '  <iframe ' + 
+	                   'class="mol-status iframe_content ui-dialog-content" ' + 
+	                   'style="height:600px; ' + 
+	                           'width: 98%; ' + 
+	                           'margin-left: -18px; ' + 
+	                           'margin-right: auto; ' + 
+	                           'display: block;" ' + 
+                       'src="/static/status/index.html">' + 
+                '  </iframe>' +
                 '</div>';
 
                 this._super(html);
                 this.iframe_content = $(this).find('.iframe_content');
-		this.mesg = $(this).find('.message');
-
-
-
-
+		        this.mesg = $(this).find('.message');
             }
         }
     );
