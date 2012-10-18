@@ -115,7 +115,7 @@ mol.modules.map.menu = function(mol) {
         fireEvents: function() {
             var params = {
                     display: this.display,
-                    slot: mol.map.ControlDisplay.Slot.LAST,
+                    slot: mol.map.ControlDisplay.Slot.BOTTOM,
                     position: google.maps.ControlPosition.RIGHT_BOTTOM
             };
             this.bus.fireEvent(new mol.bus.Event('add-map-control', params));

@@ -1277,7 +1277,7 @@ mol.modules.map.query = function(mol) {
                     '      <option value=" AND p.class=\'mammalia\' ">' +
                     '        Mammals</option>' +
                     '    </select>' +
-                    '    <div class="types">' +
+                    '    <span class="types">' +
                     '      <button class="range selected" ' +
                              'value=" AND p.type=\'range\'">' +
                     '        <img title="Click to use Expert range maps' +
@@ -1290,7 +1290,7 @@ mol.modules.map.query = function(mol) {
                                ' checklists for query." ' +
                                'src="/static/maps/search/ecoregion.png">' +
                     '      </button>' +
-                    '    </div>' +
+                    '    </span>' +
                     '  </div>' +
 
 
