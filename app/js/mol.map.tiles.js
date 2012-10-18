@@ -107,6 +107,46 @@ mol.modules.map.tiles = function(mol) {
                         );
                     }
                 );
+                
+                /**
+                 * Handler for applying cartocss style to a layer.
+                 */
+                this.bus.addHandler(
+                    'apply-layer-style',
+                    function(event) {
+                        var layer = event.layer,
+                            style = event.style;
+
+                        if(layer.type == 'points') {
+                            return;
+                        }
+
+                        self.map.overlayMapTypes.forEach(
+                            function(maptype, index) {
+                                //find the overlaymaptype to style
+                                if (maptype.name === layer.id) {
+                                    //remove it from the map
+                                    self.map.overlayMapTypes.removeAt(index);
+                                    //add the style
+                                    layer.tile_style = style;
+                                    //make the layer
+                                    self.getTile(layer);
+                                    //fix the layer order
+                                    self.map.overlayMapTypes.forEach(
+                                        function(newmaptype, newindex) {
+                                            var mt;
+                                            if(newmaptype.name === layer.id) {
+                                                mt = self.map.overlayMapTypes.removeAt(newindex);
+                                                self.map.overlayMapTypes.insertAt(index, mt);
+                                                return
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        );
+                    }
+                );
 
                 /**
                  * Handler for when the add-layers event is fired. This renders
@@ -241,8 +281,7 @@ mol.modules.map.tiles = function(mol) {
                                 layer.style_table, 
                                 this.map
                             );
-                           
-                
+
                 maptype.layer.params.layer.onbeforeload = function (){
                     self.bus.fireEvent(
                         new mol.bus.Event(
@@ -251,6 +290,7 @@ mol.modules.map.tiles = function(mol) {
                         )
                     )
                 };
+                
                 maptype.layer.params.layer.onafterload = function (){
                     self.bus.fireEvent(
                         new mol.bus.Event(
@@ -286,6 +326,7 @@ mol.modules.map.tiles = function(mol) {
 
                 this.layer = new google.maps.CartoDBLayer({
                         tile_name: layer.id,
+                        tile_style: layer.tile_style,
                         hostname: hostname,
                         map_canvas: 'map_container',
                         map: map,
@@ -299,7 +340,7 @@ mol.modules.map.tiles = function(mol) {
                         tile_style: tile_style,
                         map_style: false,
                         infowindow: infowindow,
-                        opacity: 0.5
+                        opacity: layer.opacity
                 });
             }
         }
