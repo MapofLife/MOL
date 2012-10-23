@@ -197,10 +197,7 @@ mol.modules.map.query = function(mol) {
                     } else {
                         $(self.display.queryButton).html("OFF");
                         self.toggleMapLayerClicks(false);
-                    } 
-                    
-                    //TODO
-                    //change cursor
+                    }
                 }
             );
             this.bus.addHandler(
@@ -341,7 +338,7 @@ mol.modules.map.query = function(mol) {
 
             this.bus.addHandler(
                 'species-list-tool-toggle',
-                function(event, params) {                    
+                function(event, params) {                                      
                     if(event.visible == true) {
                         self.enabled = true;
                     } else {
@@ -443,8 +440,6 @@ mol.modules.map.query = function(mol) {
                         visible: false
                         }, 
                         that = this;
-                    
-                    console.log("toggleButton click");
                     
                     if(self.display.speciesDisplay.is(':visible')) {
                         self.display.speciesDisplay.hide();

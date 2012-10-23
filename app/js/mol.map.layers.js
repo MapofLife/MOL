@@ -149,7 +149,7 @@ mol.modules.map.layers = function(mol) {
                     'layer-click-toggle',
                     function(event) {
                         self.clickDisabled = event.disable;
-
+                        
                         //true to disable
                         if(event.disable) {
                             self.map.overlayMapTypes.forEach(
@@ -159,24 +159,28 @@ mol.modules.map.layers = function(mol) {
                                }
                             );
                         } else {
-                            _.each(
-                                $(self.display.list).children(),
+                            _.any($(self.display.list).children(),
                                 function(layer) {
-                                    self.map.overlayMapTypes.forEach(
-                                        function(mt) {
-                                            if(mt.name == $(layer).attr('id')
-                                                && $(layer).find('.layer')
-                                                    .hasClass('selected')) {
-                                                mt.interaction.add();
-                                                mt.interaction.clickAction
-                                                    = "full";
-                                            } else {
-                                                mt.interaction.remove();
-                                                mt.interaction.clickAction = "";
+                                    if($(layer).find('.layer')
+                                            .hasClass('selected')) {
+                                        self.map.overlayMapTypes.forEach(
+                                            function(mt) {
+                                                if(mt.name == $(layer)
+                                                                .attr('id')) {      
+                                                    mt.interaction.add();
+                                                    mt.interaction.clickAction
+                                                        = "full";
+                                                } else {
+                                                    mt.interaction.remove();
+                                                    mt.interaction.clickAction 
+                                                        = "";
+                                                }
+    
                                             }
-
-                                        }
-                                    );
+                                        );
+                                        
+                                        return true;     
+                                    }
                                 }
                             );
                         }
