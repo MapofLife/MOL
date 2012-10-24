@@ -8,6 +8,7 @@ mol.modules.map.boot = function(mol) {
             this.bus = bus;
             this.map = map;
             this.IE8 = false;
+            this.maxLayers = ($.browser.chrome) ? 6 : 25;
             this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
@@ -72,25 +73,19 @@ mol.modules.map.boot = function(mol) {
                 self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
             } else {
                 // Otherwise, try and get a result using term
-                $.post(
-                'cache/get',
-                {
-                    //Number on the key is there to invalidate cache. 
-                    //Using date+time invalidated.
-                    key: 'boot-results-10152012210-{0}'.format(self.term), 
-                    sql: this.sql.format(self.term)
-                },
-                function(response) {
-                    var results = response.rows;
-                    if (results.length == 0) {
-                        self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
-                        self.map.setCenter(new google.maps.LatLng(0,-50));
-                    } else {
-                        //parse the results
-                        self.loadLayers(self.getLayersWithIds(results));
-                    }
-                },
-                'json'
+                $.getJSON(
+                    mol.services.cartodb.sqlApi.jsonp_url.format(this.sql.format(self.term)),
+                    function(response) {
+                        var results = response.rows;
+                        if (results.length == 0) {
+                            self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
+                            self.map.setCenter(new google.maps.LatLng(0,-50));
+                        } else {
+                            //parse the results
+                            self.loadLayers(self.getLayersWithIds(results));
+                        }
+                    },
+                    'json'
                 );
             }
         },
@@ -99,7 +94,7 @@ mol.modules.map.boot = function(mol) {
          * or fires the search results widgetif there are more.
          */
         loadLayers: function(layers) {
-            if (Object.keys(layers).length < 25) {
+            if (Object.keys(layers).length <= this.maxLayers) {
                 this.bus.fireEvent(
                     new mol.bus.Event('add-layers', {layers: layers})
                 );

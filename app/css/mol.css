@@ -8,9 +8,9 @@ body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;
 /* Set up RightControl defaults */
 .mol-Map-RightControl { margin-right: 5px; width: 500px; font-family: Arial, sans-serif;
     font-weight:700;}
-.mol-Map-RightControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; font-size: 14px}
-.mol-Map-RightControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; font-size: 14px}
-.mol-Map-RightControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; font-size: 14px}
+.mol-Map-RightControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-RightControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px;}
+.mol-Map-RightControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px;}
 
 /* Set up CenterControl defaults */
 .mol-Map-CenterTopControl { margin-right: -50px; width: 465px; font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@ body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;
 .mol-Map-CenterTopControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
 
 /* Set up LeftControl defaults */
-.mol-Map-LeftBottomControl { margin-left: 5px; margin-bottom: 2px; width: 290px; font-family: Arial, sans-serif;
+.mol-Map-LeftBottomControl { position:absolute; left:0px; width: 500px; font-family: Arial, sans-serif;
     font-weight:700; }
 .mol-Map-LeftBottomControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
 .mol-Map-LeftBottomControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
@@ -33,7 +33,6 @@ body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;
     font-family: Arial, sans-serif;
     font-weight:700;
     color: #141414;
-    font-size: 14px;
 }
 
 .mol-Map-LoadingWidget {

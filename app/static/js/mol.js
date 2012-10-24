@@ -83,9 +83,9 @@ mol.modules.core = function(mol) {
         var name = $.trim(layer.name.toLowerCase()).replace(/ /g, "_"),
             type = $.trim(layer.type.toLowerCase()).replace(/ /g, "_"),
             source = $.trim(layer.source.toLowerCase()).replace(/,/g, "").replace(/ /g, "_"),
-            data_table = $.trim(layer.data_table).replace(/,/g, "").replace(/ /g, "_");
+            dataset_id = $.trim(layer.dataset_id).replace(/,/g, "").replace(/ /g, "_");
 
-        return 'layer--{0}--{1}--{2}--{3}'.format(name, type, source, data_table);
+        return 'layer--{0}--{1}--{2}--{3}'.format(name, type, source, dataset_id);
     };
 }
 mol.modules.bus = function(mol) {
@@ -285,53 +285,28 @@ mol.modules.mvp = function(mol) {
     );
 };
 mol.modules.services.cartodb = function(mol) {
-
     mol.services.cartodb = {};
-
     mol.services.cartodb.SqlApi = Class.extend(
         {
-            init: function(user, host) {
-                this.user = user;
-                this.host = host;
-                this.url = 'https://{0}.{1}/api/v2/sql';
-                this.cache = '/cache/get';
-            },
-
-            query: function(key, sql, callback) {
-                var data, xhr;
-
-                if(key) {
-                    data = {key:key, sql:sql};
-                    xhr = $.post(this.cache, data);
-                } else {
-                    data = {q:sql}
-                    xhr = $.post(this.url.format(this.user,this.host), data );
-                }
-
-
-                xhr.success(
-                    function(response) {
-                        callback.success(response);
-                    }
-                );
-
-                xhr.error(
-                    function(response) {
-                        callback.failure(response);
-                    }
-                );
+            init: function() {          
+                this.jsonp_url = '' +
+                    'http://d3dvrpov25vfw0.cloudfront.net/' +
+                    'api/v2/sql?callback=?&q={0}';
             }
         }
     );
-
-    mol.services.cartodb.sqlApi = new mol.services.cartodb.SqlApi(
-        'mol', 'cartodb.com');
-
-    mol.services.cartodb.query = function(key, sql, callback) {
-        mol.services.cartodb.sqlApi.query(key, sql, callback);
-    };
-
-};mol.modules.map = function(mol) {
+    mol.services.cartodb.TileApi = Class.extend(
+        {
+            init: function() {          
+                this.host = '' +
+                    'd3dvrpov25vfw0.cloudfront.net';
+            }
+        }
+    );
+    mol.services.cartodb.sqlApi = new mol.services.cartodb.SqlApi();
+    mol.services.cartodb.tileApi = new mol.services.cartodb.TileApi();
+};
+mol.modules.map = function(mol) {
 
     mol.map = {};
 
@@ -349,7 +324,6 @@ mol.modules.services.cartodb = function(mol) {
             'metadata',
             'splash',
             'help',
-            'sidebar',
             'status',
             'images',
             'boot'
@@ -402,9 +376,14 @@ mol.modules.services.cartodb = function(mol) {
 
 
                 // Add bottom left map control.
-                this.ctlBottom = new ControlDisplay('LeftBottomControl');
+                this.ctlLeftBottom = new ControlDisplay('LeftBottomControl');
                 controls[ControlPosition.BOTTOM_LEFT].clear();
-                controls[ControlPosition.BOTTOM_LEFT].push(this.ctlBottom.element);
+                controls[ControlPosition.BOTTOM_LEFT].push(this.ctlLeftBottom.element);
+
+                // Add bottom center map control.
+                this.ctlBottomCenter = new ControlDisplay('BottomCenterControl');
+                controls[ControlPosition.BOTTOM_CENTER].clear();
+                controls[ControlPosition.BOTTOM_CENTER].push(this.ctlBottomCenter.element);
 
                 // Add bottom right map control.
                 this.ctlRightBottom = new ControlDisplay('RightBottomControl');
@@ -435,11 +414,14 @@ mol.modules.services.cartodb = function(mol) {
                 case ControlPosition.LEFT_CENTER:
                     control = this.ctlLeftCenter;
                     break;
-                case ControlPosition.BOTTOM_LEFT:
-                    control = this.ctlBottom;
+                case ControlPosition.LEFT_BOTTOM:
+                    control = this.ctlLeftBottom;
                     break;
-                 case ControlPosition.RIGHT_BOTTOM:
+                case ControlPosition.RIGHT_BOTTOM:
                     control = this.ctlRightBottom;
+                    break;
+                case ControlPosition.BOTTOM_CENTER:
+                    control = this.ctlBottomCenter;
                     break;
                 }
 
@@ -492,8 +474,8 @@ mol.modules.services.cartodb = function(mol) {
                             self.display.map,
                             "click",
                             function(event) {
-                                var params = { 
-                                    gmaps_event : event, 
+                                var params = {
+                                    gmaps_event : event,
                                     map : self.display.map}
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
@@ -580,6 +562,9 @@ mol.modules.services.cartodb = function(mol) {
                     minLat: -85,
                     maxLat: 85,
                     mapTypeControl: false,
+                    panControl: false,
+                    zoomControl: true,
+                    streetViewControl: false,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     styles: [
                       {
@@ -664,17 +649,16 @@ mol.modules.services.cartodb = function(mol) {
                     className = 'mol-Map-' + name,
                     html = '' +
                     '<div class="' + className + '">' +
-                    '    <div class="TOP"></div>' +
-                    '    <div class="MIDDLE"></div>' +
-                    '    <div class="BOTTOM"></div>' +
+                        '<div class="TOP"></div>' +
+                        '<div class="MIDDLE"></div>' +
+                        '<div class="BOTTOM"></div>' +
                     '</div>';
 
                 this._super(html);
-                //this.selectable({disabled: true});
 
-                    $(this).find(Slot.TOP).removeClass('ui-selectee');
-                    $(this).find(Slot.MIDDLE).removeClass('ui-selectee');
-                    $(this).find(Slot.BOTTOM).removeClass('ui-selectee');
+                $(this).find(Slot.TOP).removeClass('ui-selectee');
+                $(this).find(Slot.MIDDLE).removeClass('ui-selectee');
+                $(this).find(Slot.BOTTOM).removeClass('ui-selectee');
 
             },
 
@@ -834,6 +818,34 @@ mol.modules.map.layers = function(mol) {
                         );
                     }
                 );
+                this.display.layersToggle.click(
+                    function(event) {
+                        var that = this;
+                        if(self.display.expanded) {
+                            self.display.layersWrapper.animate(
+                                {height: self.display.layersHeader.height()+18},
+                                1000,
+                                  function() {
+                                    $(that).text('▼');
+                                    self.display.expanded = false;
+                                }
+                            );
+
+
+                        } else {
+                            self.display.layersWrapper.animate(
+                                {height:self.display.layersHeader.height()
+                                    +self.display.layersContainer.height()+35},
+                                1000,
+                                function() {
+                                    $(that).text('▲');
+                                    self.display.expanded = true;
+                                }
+                            );
+
+                        }
+                    }
+                );
                 this.bus.addHandler(
                     'layer-opacity',
                     function(event) {
@@ -846,7 +858,8 @@ mol.modules.map.layers = function(mol) {
                         if (opacity === undefined) {
                             params = {
                                 layer: layer,
-                                opacity: parseFloat(l.find('.opacity').slider("value"))
+                                opacity: parseFloat(l.find('.opacity')
+                                    .slider("value"))
                             },
                             e = new mol.bus.Event('layer-opacity', params);
                             self.bus.fireEvent(e);
@@ -886,17 +899,10 @@ mol.modules.map.layers = function(mol) {
                                     } else {
                                         bounds.union(layer_bounds)
                                     }
-                                } 
+                                }
                                 catch(e) {
-                                    console.log(
-                                        '[Invalid extent for {0} \'{1}\'] {2}'
-                                        .format(
-                                            layer.dataset_id,
-                                            layer.name,
-                                            layer.extent
-                                        )
-                                    );
-                                }  
+                                    //invalid extent
+                                }
                             }
                         )
                         self.addLayers(event.layers);
@@ -923,7 +929,7 @@ mol.modules.map.layers = function(mol) {
                     'layer-click-toggle',
                     function(event) {
                         self.clickDisabled = event.disable;
-                        
+
                         //true to disable
                         if(event.disable) {
                             self.map.overlayMapTypes.forEach(
@@ -932,29 +938,29 @@ mol.modules.map.layers = function(mol) {
                                   mt.interaction.clickAction = "";
                                }
                             );
-                        } else {                            
+                        } else {
                             _.each(
                                 $(self.display.list).children(),
                                 function(layer) {
                                     self.map.overlayMapTypes.forEach(
                                         function(mt) {
-                                            if(mt.name == $(layer).attr('id') 
+                                            if(mt.name == $(layer).attr('id')
                                                 && $(layer).find('.layer')
                                                     .hasClass('selected')) {
                                                 mt.interaction.add();
-                                                mt.interaction.clickAction 
+                                                mt.interaction.clickAction
                                                     = "full";
                                             } else {
                                                 mt.interaction.remove();
                                                 mt.interaction.clickAction = "";
                                             }
-                                            
+
                                         }
                                     );
                                 }
-                            );                            
+                            );
                         }
-                    }  
+                    }
                 );
             },
 
@@ -965,7 +971,7 @@ mol.modules.map.layers = function(mol) {
             fireEvents: function() {
                 var params = {
                         display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.TOP,
+                        slot: mol.map.ControlDisplay.Slot.BOTTOM,
                         position: google.maps.ControlPosition.TOP_RIGHT
                     },
                     event = new mol.bus.Event('add-map-control', params);
@@ -1041,7 +1047,7 @@ mol.modules.map.layers = function(mol) {
                         self.bus.fireEvent(
                             new mol.bus.Event('show-layer-display-toggle')
                         );
-                        
+
                         //set this correctly
                         //disable interactivity to start
                         self.map.overlayMapTypes.forEach(
@@ -1126,7 +1132,7 @@ mol.modules.map.layers = function(mol) {
                                         if(mt.name == layer.id && $(l.layer).hasClass('selected')) {
                                             if(!self.clickDisabled) {
                                                mt.interaction.add();
-                                               mt.interaction.clickAction = "full" 
+                                               mt.interaction.clickAction = "full"
                                             } else {
                                                mt.interaction.remove();
                                                mt.interaction.clickAction = "";
@@ -1163,9 +1169,9 @@ mol.modules.map.layers = function(mol) {
                             function(event) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
-                                        'metadata-toggle', 
-                                        {params : { 
-                                            dataset_id: layer.dataset_id, 
+                                        'metadata-toggle',
+                                        {params : {
+                                            dataset_id: layer.dataset_id,
                                             title: layer.dataset_title
                                         }}
                                     )
@@ -1178,8 +1184,8 @@ mol.modules.map.layers = function(mol) {
                             function(event) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
-                                        'metadata-toggle', 
-                                        {params : { 
+                                        'metadata-toggle',
+                                        {params : {
                                             type: layer.type,
                                             title: layer.type_title
                                         }}
@@ -1212,7 +1218,7 @@ mol.modules.map.layers = function(mol) {
                     },
                     this
                 );
-                
+
                 if(first) {
                     if(this.display.list.find('.layer').length > 0) {
                         this.display.list.find('.layer')[0].click();
@@ -1230,7 +1236,7 @@ mol.modules.map.layers = function(mol) {
                         if(wasSelected.length > 0) {
                             this.map.overlayMapTypes.forEach(
                                 function(mt) {
-                                    if(mt.name == 
+                                    if(mt.name ==
                                         wasSelected.parent().attr("id")) {
                                         mt.interaction.add();
                                         mt.interaction.clickAction = "full";
@@ -1284,25 +1290,45 @@ mol.modules.map.layers = function(mol) {
             init: function(layer) {
                 var html = '' +
                     '<div class="layerContainer">' +
-                    '  <div class="layer">' +
-                    '    <button class="source" title="Layer Source: {5}"><img src="/static/maps/search/{0}.png"></button>' +
-                    '    <button class="type" title="Layer Type: {6}"><img src="/static/maps/search/{1}.png"></button>' +
-                    '    <div class="layerName">' +
-                    '        <div class="layerRecords">{4} features</div>' +
-                    '        <div title="{2}" class="layerNomial">{2}</div>' +
-                    '        <div title="{3}" class="layerEnglishName">{3}</div>' +
-                    '    </div>' +
-                    '    <input class="keycatcher" type="text" />' +
-                    '    <button title="Remove layer." class="close">x</button>' +
-                    '    <button title="Zoom to layer extent." class="zoom">z</button>' +
-                  /*'    <button title="Layer styler." class="styler">s</button>' + */
-                    '    <label class="buttonContainer"><input class="toggle" type="checkbox"><span title="Toggle layer visibility." class="customCheck"></span></label>' +
-                    '    <div class="opacityContainer"><div class="opacity"/></div>' +
-                    '  </div>' +
-                    '  <div class="break"></div>' +
+                        '<div class="layer">' +
+                            '<button class="source" title="Layer Source: {5}">' +
+                                '<img src="/static/maps/search/{0}.png">' +
+                            '</button>' +
+                            '<button class="type" title="Layer Type: {6}">' +
+                                '<img src="/static/maps/search/{1}.png">' +
+                            '</button>' +
+                        '<div class="layerName">' +
+                            '<div class="layerRecords">{4}</div>' +
+                            '<div title="{2}" class="layerNomial">{2}</div>' +
+                            '<div title="{3}" class="layerEnglishName">{3}</div>' +
+                        '</div>' +
+                        '<input class="keycatcher" type="text" />' +
+                        '<button title="Remove layer." class="close">x</button>' +
+                        '<button title="Zoom to layer extent." class="zoom">' +
+                            'z' +
+                        '</button>' +
+                        '<label class="buttonContainer">' +
+                            '<input class="toggle" type="checkbox">' +
+                            '<span title="Toggle layer visibility." ' +
+                                'class="customCheck"></span></label>' +
+                        '<div class="opacityContainer">' +
+                            '<div class="opacity"/></div>' +
+                        '</div>' +
+                        '<div class="break"></div>' +
                     '</div>';
 
-                this._super(html.format(layer.source_type, layer.type, layer.name, layer.names, layer.feature_count, layer.source_title, layer.type_title));
+                this._super(
+                    html.format(
+                        layer.source_type,
+                        layer.type,
+                        layer.name,
+                        layer.names,
+                        (layer.feature_count != null) ?
+                            '{0} features'.format(layer.feature_count) : '',
+                        layer.source_title,
+                        layer.type_title
+                    )
+                );
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();
@@ -1325,22 +1351,27 @@ mol.modules.map.layers = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<div class="mol-LayerControl-Layers widgetTheme">' +
-                    '   <div class="layers">' +
-                    '       <div class="layersHeader">' +
-                    '           Layers ' +
-                   /* '           <a href="#" class="selectNone">none</a>' +
-                    '           <a href="#" class="selectAll">all</a>' +*/
-                    '       </div>' +
-                    '       <div class="scrollContainer">' +
-                    '           <div id="sortable">' +
-                    '           </div>' +
-                    '       </div>' +
-                    '       <div class="pageNavigation">' +
-                    '           <button class="removeAll">Remove All Layers</button>' +
-                    '           <button class="toggleAll">Toggle All Layers</button>' +
-                    '       </div>' +
-                    '   </div>' +
+                    '<div class="mol-LayerControl-Layers">' +
+                        '<div class="layers widgetTheme">' +
+                            '<div class="layersHeader">' +
+                                '<button class="layersToggle button">▲</button>' +
+                                'Layers' +
+                            '</div>' +
+                            '<div class="layersContainer">' +
+                                '<div class="scrollContainer">' +
+                                    '<div id="sortable">' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="pageNavigation">' +
+                                    '<button class="removeAll">' +
+                                        'Remove All Layers' +
+                                    '</button>' +
+                                    '<button class="toggleAll">' +
+                                        'Toggle All Layers' +
+                                    '</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>';
 
                 this._super(html);
@@ -1350,6 +1381,11 @@ mol.modules.map.layers = function(mol) {
                 this.open = false;
                 this.views = {};
                 this.layers = [];
+                this.layersToggle = $(this).find(".layersToggle");
+                this.layersWrapper = $(this).find(".layers");
+                this.layersContainer = $(this).find(".layersContainer");
+                this.layersHeader = $(this).find(".layersHeader");
+                this.expanded = true;
 
             },
 
@@ -1443,203 +1479,149 @@ mol.modules.map.menu = function(mol) {
 
     mol.map.menu = {};
 
-    mol.map.menu.MenuEngine = mol.mvp.Engine.extend(
-        {
-            init: function(proxy, bus) {
-                this.proxy = proxy;
-                this.bus = bus;
-            },
+    mol.map.menu.MenuEngine = mol.mvp.Engine.extend({
+        init: function(proxy, bus) {
+            this.proxy = proxy;
+            this.bus = bus;
+        },
 
-            /**
-             * Starts the MenuEngine. Note that the container parameter is
-             * ignored.
-             */
-            start: function() {
-                this.display = new mol.map.menu.MenuDisplay();
-                this.bottomdisplay = new mol.map.menu.BottomMenuDisplay();
-                
-                this.display.toggle(true);
-                this.bottomdisplay.toggle(true);
-                
-                this.addEventHandlers();
-                this.fireEvents();
-            },
+        /**
+         * Starts the MenuEngine. Note that the container parameter is
+         * ignored.
+         */
+        start: function() {
 
-            /**
-             * Adds a handler for the 'search-display-toggle' event which
-             * controls display visibility. Also adds UI event handlers for the
-             * display.
-             */
-            addEventHandlers: function() {
-                var self = this;
+            this.display = new mol.map.menu.BottomMenuDisplay();
+            this.display.toggle(true);
 
-                this.display.dashboardItem.click(
-                    function(event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('taxonomy-dashboard-toggle'));
-                    }
-                );
+            this.addEventHandlers();
+            this.fireEvents();
+        },
 
-                this.display.searchItem.click(
-                    function(event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('search-display-toggle'));
-                    }
-                );
-                this.display.layersToggle.click(
-                    function(event) {
-                        if(self.display.layersToggle[0].src
-                                .indexOf('collapse.png') > 0)  {
+        /**
+         * Adds a handler for the 'search-display-toggle' event which
+         * controls display visibility. Also adds UI event handlers for the
+         * display.
+         */
+        addEventHandlers: function() {
+            var self = this;
+
+
+            this.display.about.click(
+                function(Event) {
+                    window.open('/about/');
+                }
+            );
+
+            this.display.help.click(
+                function(Event) {
+                    self.bus.fireEvent(
+                        new mol.bus.Event('help-display-dialog')
+                    );
+                }
+            );
+
+            this.display.status.click(
+                function(Event) {
+                    self.bus.fireEvent(
+                        new mol.bus.Event('status-display-dialog')
+                    );
+                }
+            );
+
+            this.display.feedback.click(
+                function(Event) {
+                    self.bus.fireEvent(
+                        new mol.bus.Event('feedback-display-toggle')
+                    );
+                }
+            );
+
+            this.bus.addHandler(
+                'add-legend-toggle-button',
+                function(event) {
+                    $(self.display).prepend(event.button);
+                    self.display.legendItem =
+                        $(self.display).find('#legend');
+
+                    self.display.legendItem.click(
+                        function(event) {
                             self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    'layer-display-toggle',
-                                    {visible : false}));
-                            self.display.layersToggle[0].src = 
-                                '/static/maps/layers/expand.png';
-                        } else {
+                                new mol.bus.Event('legend-display-toggle'));
+                        }
+                    );
+                }
+            );
+
+            this.bus.addHandler(
+                'add-dashboard-toggle-button',
+                function(event) {
+                    $(self.display).prepend(event.button);
+                    self.display.dashboardItem =
+                        $(self.display).find('#dashboard');
+
+                    self.display.dashboardItem.click(
+                        function(event) {
                             self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    'layer-display-toggle',
-                                    {visible : true}));
-                            self.display.layersToggle[0].src = 
-                                '/static/maps/layers/collapse.png';
+                                new mol.bus.Event('taxonomy-dashboard-toggle'));
                         }
-                    }
-                );
+                    );
+                }
+            );
 
-                this.bus.addHandler(
-                    'add-legend-toggle-button',
-                    function(event) {
-                        $(self.bottomdisplay).prepend(event.button);
-                        self.bottomdisplay.legendItem = 
-                            $(self.bottomdisplay).find('#legend');
-                            
-                        self.bottomdisplay.legendItem.click(
-                            function(event) {
-                                self.bus.fireEvent(
-                                    new mol.bus.Event('legend-display-toggle'));
-                            }
-                        );
-                    }
-                );
-                
-                this.bus.addHandler(
-                    'add-query-toggle-button',
-                    function(event) {
-                        $(self.bottomdisplay).prepend(event.button);
-                        self.bottomdisplay.queryItem = 
-                            $(self.bottomdisplay).find('#list');
-                            
-                        self.bottomdisplay.queryItem.click(
-                            function(event) {
-                                self.bus.fireEvent(
-                                    new mol.bus.Event('species-list-tool-toggle'));
-                            }
-                        );
-                    }
-                );
+            this.bus.addHandler(
+                'menu-display-toggle',
+                function(event) {
+                    var params = null,
+                    e = null;
 
-                this.bus.addHandler(
-                    'hide-layer-display-toggle',
-                    function(event) {
-                        self.display.layersToggle[0].style.visibility="hidden";
+                    if (event.visible === undefined) {
+                        self.display.toggle();
+                        params = {visible: self.display.is(':visible')};
+                    } else {
+                        self.display.toggle(event.visible);
                     }
-                );
-                this.bus.addHandler(
-                    'show-layer-display-toggle',
-                    function(event) {
-                        self.display.layersToggle[0].style.visibility="visible";
-                    }
-                );
-                this.bus.addHandler(
-                    'menu-display-toggle',
-                    function(event) {
-                        var params = null,
-                        e = null;
+                }
+            );
+        },
 
-                        if (event.visible === undefined) {
-                            self.display.toggle();
-                            params = {visible: self.display.is(':visible')};
-                        } else {
-                            self.display.toggle(event.visible);
-                        }
-                    }
-                );
-            },
-
-            /**
-             * Fires the 'add-map-control' event. The mol.map.MapEngine handles
-             * this event and adds the display to the map.
-             */
-            fireEvents: function() {
-                var params = {
-                        display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.FIRST,
-                        position: google.maps.ControlPosition.TOP_RIGHT
-                    },
-                    bottomparams = {
-                        display: this.bottomdisplay,
-                        slot: mol.map.ControlDisplay.Slot.LAST,
-                        position: google.maps.ControlPosition.RIGHT_BOTTOM  
-                    },
-                    event = new mol.bus.Event('add-map-control', params),
-                    bottomevent = new mol.bus.Event(
-                                    'add-map-control', bottomparams);
-
-                this.bus.fireEvent(event);
-                this.bus.fireEvent(bottomevent);
-                              
-            }
+        /**
+         * Fires the 'add-map-control' event. The mol.map.MapEngine handles
+         * this event and adds the display to the map.
+         */
+        fireEvents: function() {
+            var params = {
+                    display: this.display,
+                    slot: mol.map.ControlDisplay.Slot.BOTTOM,
+                    position: google.maps.ControlPosition.RIGHT_BOTTOM
+            };
+            this.bus.fireEvent(new mol.bus.Event('add-map-control', params));
         }
-    );
+    });
 
-    mol.map.menu.MenuDisplay = mol.mvp.View.extend(
-        {
-            init: function() {
-                var html = '' +
-                    '<div id="topRightMenu" class="mol-LayerControl-Menu ">' +
-                    '  <div class="label">' +
-                    '    <img ' + 
-                            'class="layersToggle" ' + 
-                            'height="21px" ' + 
-                            'width="24px" ' + 
-                            'src="/static/maps/layers/collapse.png">' +
-                    '    </div>' +
-                    '    <div ' + 
-                            'title="Toggle taxonomy dashboard." ' + 
-                            'id="dashboard" ' + 
-                            'class="widgetTheme search button">' +
-                            'Dashboard' + 
-                    '    </div>' +
-                    '    <div ' + 
-                            'title="Toggle layer search tools." ' + 
-                            'id="search" ' + 
-                            'class="widgetTheme search button">' + 
-                            'Search' + 
-                    '  </div>' +
-                    '</div>';
 
-                this._super(html);
-                this.searchItem = $(this).find('#search');
-                this.dashboardItem = $(this).find('#dashboard');
-                this.layersToggle = $(this).find('.layersToggle');
-            }
+    mol.map.menu.BottomMenuDisplay = mol.mvp.View.extend({
+        init: function() {
+            var html = '' +
+                '<div class="mol-BottomRightMenu">' +
+                    '<div title="Current known issues." ' +
+                    ' class="widgetTheme button status">Status</div>' +
+                    '<div title="About the Map of Life Project." ' +
+                        'class="widgetTheme button  about">About' +
+                '    </div>' +
+                    '<div title="Submit feedback." ' +
+                        'class="widgetTheme button feedback">Feedback</div>' +
+                    '<div title="Get help." ' +
+                        'class="widgetTheme button help">Help</div>' +
+                '</div>';
+
+            this._super(html);
+            this.about = $(this).find('.about');
+            this.help = $(this).find('.help');
+            this.feedback = $(this).find('.feedback');
+            this.status = $(this).find('.status');
         }
-    );
-    
-    mol.map.menu.BottomMenuDisplay = mol.mvp.View.extend(
-        {
-            init: function() {
-                var html = '' +
-                    '<div ' + 
-                        'id="bottomRightMenu" ' + 
-                        'class="mol-LayerControl-Menu">' +
-                    '</div>';
-
-                this._super(html);
-            }
-        }
-    );
+    });
 };
 
 /**
@@ -1657,6 +1639,7 @@ mol.modules.map.results = function(mol) {
             this.proxy = proxy;
             this.bus = bus;
             this.map = map;
+            this.maxLayers = ($.browser.chrome) ? 6 : 100;
             this.filters = { 
                 'name': {
                     title: 'Name', 
@@ -1689,7 +1672,12 @@ mol.modules.map.results = function(mol) {
             this.addEventHandlers();
             this.fireEvents();
         },
-
+        clearResults: function() {
+            this.display.toggle(false);
+            this.display.clearResults();
+            this.display.clearFilters();
+            delete(this.results);
+        },
         /**
          * Adds a handler for the 'search-display-toggle' event which
          * controls display visibility. Also adds UI event handlers for the
@@ -1713,6 +1701,12 @@ mol.modules.map.results = function(mol) {
                 }
             );
             this.bus.addHandler(
+                'clear-results',
+                function(event) {
+                    self.clearResults();
+                }
+            );
+            this.bus.addHandler(
                 'results-map-selected',
                 function(event) {
                     self.display.addAllButton.click();
@@ -1724,13 +1718,25 @@ mol.modules.map.results = function(mol) {
              */
             this.display.addAllButton.click(
                 function(event) {
-                    var layers = self.display.getChecked();
-                    if(self.map.overlayMapTypes.length + layers.length > 100) {
-                        alert(
-                            'The map is currently limited to 100 layers ' +
-                            'at a time. Please remove some layers before ' +
-                            'adding more.'
-                        );
+                    var layers = self.display.getChecked(), clearResults = false;
+                    if(self.display.find('.result').filter(':visible').length == layers.length) {
+                        clearResults = true;
+                    } 
+                    if(self.map.overlayMapTypes.length + layers.length > self.maxLayers) {
+                        if(!$.browser.chrome) {
+                            alert(
+                                'The map is currently limited to {0}'.format(self.maxLayers) +
+                                ' layers at a time. Please remove some layers ' +
+                                ' before adding more.'
+                            );
+                            
+                        } else {
+                            alert(
+                                'An issue with Google Chrome currently limits the number '+
+                                ' of active layers in Map of Life to {0}'.format(self.maxLayers) +
+                                ' layers at a time. Other browsers may display up to 100 layers.'
+                            )
+                        }
                     } else {
                         self.bus.fireEvent(
                             new mol.bus.Event(
@@ -1740,6 +1746,10 @@ mol.modules.map.results = function(mol) {
                                 }
                             )
                         );
+                        if(clearResults) {
+                            self.clearResults();
+                            
+                        }
                     }
                 }
             );
@@ -1768,9 +1778,23 @@ mol.modules.map.results = function(mol) {
                         self.display.toggle(false);
                     } else {
                         if (event.visible === undefined) {
-                            self.display.toggle();
-                        } else {
-                            self.display.toggle(event.visible);
+                            self.display.toggle(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (event.visible && self.display.not(':visible')) {
+                            self.display.show(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (self.display.is(':visible')){
+                            self.display.hide(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
                         }
                     }
                 }
@@ -2110,7 +2134,7 @@ mol.modules.map.results = function(mol) {
 
 
         toggleSelections: function(showOrHide) {
-            $('.checkbox').each(
+            $(this).find('.checkbox').each(
                 function() {
                     $(this).attr('checked', showOrHide);
                 }
@@ -2206,7 +2230,7 @@ mol.modules.map.results = function(mol) {
                     '           </button>' +
                     '       </div>' +
                     '       <div class="resultName">' +
-                    '           <div class="resultRecords">{6} features</div>' +
+                    '           <div class="resultRecords">{6}</div>' +
                     '           <div class="resultNomial">{2}</div>' +
                     '           <div class="resultEnglishName" title="{5}">' +
                     '               {5}' +
@@ -2230,7 +2254,8 @@ mol.modules.map.results = function(mol) {
                         layer.source_type, 
                         layer.type, 
                         layer.names, 
-                        layer.feature_count, 
+                        (layer.feature_count != null) ? 
+                            '{0} features'.format(layer.feature_count) : '', 
                         layer.type_title, 
                         layer.source_title
                     )
@@ -2314,15 +2339,14 @@ mol.modules.map.search = function(mol) {
             this.bus = bus;
             this.searching = {};
             this.names = [];
-            this.bornOnDate = Math.random();
             this.ac_label_html = ''+
                 '<div class="ac-item">' +
                     '<span class="sci">{0}</span>' +
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v from ac_beta where n~*'\\m{0}' OR v~*'\\m{0}'";
-            this.sql = '' +
+                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+            this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
                     't.sort_order as type_sort_order, ' +
@@ -2332,9 +2356,8 @@ mol.modules.map.search = function(mol) {
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
                     's.title as source_type_title, ' +   
-                    'CONCAT(n.class,\'\') as _class, ' +
                     'l.feature_count as feature_count, '+
-                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(n.v,\'\') as names, ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
                             '"lng":\',ST_XMin(l.extent),\', '+
@@ -2356,11 +2379,10 @@ mol.modules.map.search = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN taxonomy n ON ' +
-                    'l.scientificname = n.scientificname ' +
+                'LEFT JOIN ac n ON ' +
+                    'l.scientificname = n.n ' +
                 'WHERE ' +
-                    "l.scientificname~*'\\m{0}' " +
-                    "OR n.common_names_eng~*'\\m{0}' " +
+                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
                 'ORDER BY name, type_sort_order';
         },
 
@@ -2406,13 +2428,13 @@ mol.modules.map.search = function(mol) {
                 {
                     minLength: 3, 
                     source: function(request, response) {
-                        $.post(
-                            'cache/get',
-                            {
-                                key: 'ac-beta-{0}-{1}'
-                                    .format(request.term,self.bornOnDate),
-                                sql: self.ac_sql.format(request.term)
-                            },
+                        $.getJSON(
+                            mol.services.cartodb.sqlApi.jsonp_url.format(
+                                    self.ac_sql.format(
+                                        $.trim(request.term)
+                                            .replace(/ /g, ' ')
+                                    )
+                            ),
                             function (json) {
                                 var names = [],scinames=[];
                                 _.each (
@@ -2545,7 +2567,7 @@ mol.modules.map.search = function(mol) {
              */
             this.display.goButton.click(
                 function(event) {
-                          self.search(self.display.searchBox.val());
+                    self.search(self.display.searchBox.val());
                 }
             );
 
@@ -2553,13 +2575,23 @@ mol.modules.map.search = function(mol) {
              * Clicking the cancel button hides the search display and fires
              * a cancel-search event on the bus.
              */
-            this.display.cancelButton.click(
+            this.display.toggleButton.click(
                 function(event) {
                     var params = {
                         visible: false
-                    };
-
-                    self.display.toggle(false);
+                    }, that = this;
+                    
+                    if(self.display.searchDisplay.is(':visible')) {
+                        self.display.searchDisplay.hide();
+                        $(this).text('▶');
+                        params.visible = false;
+                    } else {
+                        
+                        self.display.searchDisplay.show();
+                        $(this).text('◀');
+                        params.visible = true;
+                    }
+                    
                     self.bus.fireEvent(
                         new mol.bus.Event('results-display-toggle', params));
                 }
@@ -2608,49 +2640,49 @@ mol.modules.map.search = function(mol) {
          */
         search: function(term) {
             var self = this;
-                self.bus.fireEvent(
-                    new mol.bus.Event(
-                        'show-loading-indicator', 
-                        {source : "search-{0}".format(term)}
-                    )
-                );
-                self.bus.fireEvent(
-                    new mol.bus.Event(
-                        'results-display-toggle',
-                        {visible : false}
-                    )
-                );
+                
+                
                 $(self.display.searchBox).autocomplete('disable');
                 $(self.display.searchBox).autocomplete('enable');
                 if(term.length<3) {
-                    alert('' +
-                        'Please enter at least 3 characters in the search box.'
-                    );
+                    if ($.trim(term).length==0) {
+                        self.bus.fireEvent(new mol.bus.Event('clear-results'));
+                    } else {
+                        alert('' +
+                            'Please enter at least 3 characters ' +
+                            'in the search box.'
+                        );
+                    }
                 } else {
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'show-loading-indicator', 
+                            {source : "search-{0}".format(term)}
+                        )
+                    );
                     $(self.display.searchBox).val(term);
-                    $.post(
-                            'cache/get',
-                            {
-                                key:'search-{0}-{1}'
-                                    .format(term,this.bornOnDate),
-                                sql:this.sql.format(term)
-                            },
-                            function (response) {
-                                var results = {term:term, response:response};
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'hide-loading-indicator', 
-                                        {source : "search-{0}".format(term)}
-                                    )
-                                );
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'search-results', 
-                                        results
-                                    )
-                                );
-                            },
-                            'json'
+                    $.getJSON(
+                        mol.services.cartodb.sqlApi.jsonp_url.format(
+                            this.search_sql.format(
+                                $.trim(term)
+                                .replace(/ /g, ' ')
+                            )
+                        ),
+                        function (response) {
+                            var results = {term:term, response:response};
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'hide-loading-indicator', 
+                                    {source : "search-{0}".format(term)}
+                                )
+                            );
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'search-results', 
+                                    results
+                                )
+                            );
+                        }
                     );
                }
 
@@ -2661,16 +2693,19 @@ mol.modules.map.search = function(mol) {
         init: function() {
             var html = '' +
                 '<div class="mol-LayerControl-Search widgetTheme">' +
-                '    <div class="title ui-autocomplete-input">Search:</div>' +
-                '    <input class="value" type="text" ' +
-                        'placeholder="Search by species name">' +
-                '    <button class="execute">Go</button>' +
-                '    <button class="cancel">&nbsp;</button>' +
+                '    <div class="title">Search</div>' +
+                '    <div class="searchDisplay">' +
+                '       <input class="value ui-autocomplete-input" type="text" ' +
+                            'placeholder="Search by species name">' +
+                '       <button class="execute">Go</button>' +
+                '   </div>'+
+                '   <button class="toggle">◀</button>' +
                 '</div>';
 
             this._super(html);
             this.goButton = $(this).find('.execute');
-            this.cancelButton = $(this).find('.cancel');
+            this.toggleButton = $(this).find('.toggle');
+            this.searchDisplay = $(this).find('.searchDisplay');
             this.searchBox = $(this).find('.value');
         },
 
@@ -2763,19 +2798,6 @@ mol.modules.map.tiles = function(mol) {
                         }
                     }
                 );
-
-                /**
-                 * Handler for zoom to extent events. The event has a layer
-                 * object {id, name, source, type}.
-                 */
-                this.bus.addHandler(
-                    'layer-zoom-extent',
-                    function(event) {
-                        var layer = event.layer;
-                        self.zoomToExtent(layer);
-                    }
-                );
-
                 /**
                  * Handler for changing layer opacity. The event.opacity is a
                  * number between 0 and 1.0 and the event.layer is an object
@@ -2952,53 +2974,7 @@ mol.modules.map.tiles = function(mol) {
                         )
                     )
                 };
-            },
-
-            /**
-             * Zooms and pans the map to the full extent of the layer. The layer is an
-             * object {id, name, source, type}.
-             */
-             zoomToExtent: function(layer) {
-                var self = this,
-                    points_sql = "SELECT ST_Extent(the_geom) FROM {0} WHERE lower(scientificname)='{1}'",
-                    polygons_sql = "SELECT ST_Extent(the_geom) FROM {0} WHERE scientificname='{1}'",
-                    table = layer.type === 'points' ? 'gbif_import' : 'polygons',
-                    params = {
-                        sql: table === 'gbif_import' ? points_sql.format(table, layer.name.toLowerCase()) : polygons_sql.format(table, layer.name),
-                        key: 'extent-{0}-{1}-{2}'.format(layer.source, layer.type, layer.name)
-                    },
-                    action = new mol.services.Action('cartodb-sql-query', params),
-                    success = function(action, response) {
-                        if (response.rows[0].st_extent === null) {
-                            console.log("No extent for {0}".format(layer.name));
-                            self.bus.fireEvent(new mol.bus.Event("hide-loading-indicator", {source : "extentquery"}));
-                            return;
-                        }
-                        var extent = response.rows[0].st_extent,
-                            c = extent.replace('BOX(','').replace(')','').split(','),
-                            coor1 = c[0].split(' '),
-                            coor2 = c[1].split(' '),
-                            sw = null,
-                            ne = null,
-                            bounds = null;
-
-                        sw = new google.maps.LatLng(coor1[1],coor1[0]);
-                        ne = new google.maps.LatLng(coor2[1],coor2[0]);
-                        bounds = new google.maps.LatLngBounds(sw, ne);
-                          self.map.fitBounds(bounds);
-                          self.map.panToBounds(bounds);
-                      },
-                      failure = function(action, response) {
-                        console.log('Error: {0}'.format(response));
-                    };
-                this.proxy.execute(
-                    action, 
-                    new mol.services.Callback(
-                        success, 
-                        failure
-                    )
-                );
-              }
+            }
         }
      );
 
@@ -3013,7 +2989,7 @@ mol.modules.map.tiles = function(mol) {
                         layer.name, 
                         layer.dataset_id
                     ),
-                    hostname = 'mol.cartodb.com',//window.location.hostname,
+                    hostname =  mol.services.cartodb.tileApi.host,
                     style_table_name = layer.style_table;
                     info_query = sql; 
                     meta_query = "" +
@@ -3052,21 +3028,38 @@ mol.modules.map.tiles = function(mol) {
             init: function(proxy, bus) {
                 this.proxy = proxy;
                 this.bus = bus;
-                this.url = "http://mol.cartodb.com/api/v2/sql?callback=?&q={0}";
                 this.summary_sql = '' +
                     'SELECT DISTINCT * ' +
                     'FROM get_dashboard_summary()';
                 this.dashboard_sql = '' +
-                    'SELECT DISTINCT *, 100 as pct_in_tax ' +
+                    'SELECT DISTINCT * ' +
                     'FROM dash_cache ' +
-                    'ORDER BY provider, classes;';
+                    'ORDER BY dataset_title asc';
                 this.summary = null;
                 this.types = {};
                 this.sources = {};
 
             },
+
             start: function() {
                 this.initDialog();
+                this.addDashboardMenuButton();
+            },
+
+            addDashboardMenuButton : function() {
+               var html = '' +
+                    '<div ' +
+                        'title="Toggle dashboard." ' +
+                        'id="dashboard" ' +
+                        'class="widgetTheme dash button">' +
+                        'Dashboard' +
+                    '</div>',
+                    params = {
+                        button: html
+                    },
+                    event = new mol.bus.Event('add-dashboard-toggle-button', params);
+
+               this.bus.fireEvent(event);
             },
 
             addEventHandlers: function() {
@@ -3103,7 +3096,7 @@ mol.modules.map.tiles = function(mol) {
                             dataset_title = $(dataset).data('dataset_title'),
                             type_title = $(dataset).data('type');
 
-                        $(dataset).find('.provider').click (
+                        $(dataset).find('.table').click (
                             function(event) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
@@ -3135,7 +3128,7 @@ mol.modules.map.tiles = function(mol) {
                 var self = this;
 
                 $.getJSON(
-                    this.url.format(this.dashboard_sql),
+                    mol.services.cartodb.sqlApi.jsonp_url.format(this.dashboard_sql),
                     function(response) {
                         self.display = new mol.map.dashboard.DashboardDisplay(
                             response.rows, self.summary
@@ -3154,14 +3147,14 @@ mol.modules.map.tiles = function(mol) {
                                      $(".mol-Dashboard-TableWindow")
                                         .height(
                                             $(".mol-Dashboard").height()-95);
-                                     
-                                     //need this to force zebra on the table   
+
+                                     //need this to force zebra on the table
                                      self.display.dashtable
                                         .trigger("update", true);
                                 }
                             }
                         );
-                        
+
                         $(".mol-Dashboard").parent().bind("resize", function() {
                             $(".mol-Dashboard-TableWindow")
                                 .height($(".mol-Dashboard").height()-95);
@@ -3169,9 +3162,9 @@ mol.modules.map.tiles = function(mol) {
                         self.addEventHandlers();
                     }
                 );
-                
+
                 $.getJSON(
-                    this.url.format(this.summary_sql),
+                    mol.services.cartodb.sqlApi.jsonp_url.format(this.summary_sql),
                     function(response) {
                         self.summary = response.rows[0];
                         if(self.display) {
@@ -3190,47 +3183,30 @@ mol.modules.map.tiles = function(mol) {
                     '<div id="dialog">' +
                     '  <div >' +
                     '    <div class="summary">' +
-                    '      <span class="label">' + 
-                             'Data sources:' + 
+                    '      <span class="label">' +
+                             'Data sources:' +
                     '      </span>' +
-                    '      <span class="providers">' + 
+                    '      <span class="providers">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Datasets:' + 
+                    '      <span class="label">' +
+                             'Datasets:' +
                     '      </span>' +
-                    '      <span class="datasets">' + 
+                    '      <span class="datasets">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Species names in source data:' + 
+                    '      <span class="label">' +
+                             'Species names in source data:' +
                     '      </span>' +
-                    '      <span class="names">' + 
+                    '      <span class="names">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Names in MOL taxonomy:' + 
+                    '      <span class="label">' +
+                             'Accepted species names:' +
                     '      </span>' +
-                    '      <span class="taxon_total">' + 
+                    '      <span class="all_matches">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy:' + 
+                    '      <span class="label">' +
+                             'Total records:' +
                     '      </span>' +
-                    '      <span class="all_matches">' + 
-                    '      </span>' + 
-                    '      <br>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy directly:' + 
-                    '      </span>' +
-                    '      <span class="direct_matches">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                            'Names matching MOL taxonomy' + 
-                            ' through a known synonym:' + 
-                    '      </span>' +
-                    '      <span class="syn_matches">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                             'Total records:' + 
-                    '      </span>' +
-                    '      <span class="records_total">' + 
+                    '      <span class="records_total">' +
                     '      </span>' +
                     '    </div>' +
                     '    <div class="mol-Dashboard-TableWindow">' +
@@ -3252,7 +3228,7 @@ mol.modules.map.tiles = function(mol) {
                     '  <div>' +
                     '</div>  ',
                     self = this;
-                    //this.numsets = 0;
+
 
                 this._super(html);
                 _.each(
@@ -3264,13 +3240,13 @@ mol.modules.map.tiles = function(mol) {
 
                 this.dashtable = $(this).find('.dashtable');
                 this.dashtable.tablesorter({
-                    sortList: [[1,1]],
+                    sortList: [[0,0]],
                     widthFixed: true,
                     theme: "blue",
                     widgets: ["filter","zebra"]
                 });
                 this.datasets = $(this).find('.dataset');
-               
+
                 this.dashtable.find("tr.master")
                     .click(function() {
                         $(this).parent().find('tr').each(
@@ -3304,7 +3280,7 @@ mol.modules.map.tiles = function(mol) {
                 $(this).find('.tablebody').append(
                     new mol.map.dashboard.DashboardRowDisplay(row));
             },
-            
+
             fillSummary: function(summary) {
                 var self = this;
                 _.each(
@@ -3316,7 +3292,7 @@ mol.modules.map.tiles = function(mol) {
             }
         }
     );
-    
+
     mol.map.dashboard.DashboardRowDisplay = mol.mvp.View.extend(
         {
             init: function(row) {
@@ -3331,7 +3307,7 @@ mol.modules.map.tiles = function(mol) {
                         '<td class="pctmatch">{9}</td>' +
                     '</tr>',
                     self = this;
-                    
+
                 self._super(
                     html.format(
                         row.type_id,
@@ -3346,7 +3322,7 @@ mol.modules.map.tiles = function(mol) {
                         row.pct_in_tax
                     )
                 );
-                //store some data in each dataset/row   
+                //store some data in each dataset/row
                  _.each(
                      _.keys(row),
                      function(key) {
@@ -3354,26 +3330,26 @@ mol.modules.map.tiles = function(mol) {
                      }
                 );
             },
-            
-            format: function(number, comma, period) {                
+
+            format: function(number, comma, period) {
                 var reg = /(\d+)(\d{3})/;
                 var split = number.toString().split('.');
                 var numeric = split[0];
                 var decimal;
-                
+
                 comma = comma || ',';
                 period = period || '.';
                 decimal = split.length > 1 ? period + split[1] : '';
-                
+
                 while (reg.test(numeric)) {
                   numeric = numeric.replace(reg, '$1' + comma + '$2');
                 }
-                
+
                 return numeric + decimal;
             }
          }
     );
-    
+
 
 
 };mol.modules.map.query = function(mol) {
@@ -3461,13 +3437,11 @@ mol.modules.map.tiles = function(mol) {
         },
 
         start : function() {
-            this.addQueryMenuButton();
             this.addQueryDisplay();
             this.addEventHandlers();
             
             //disable all map clicks
             this.toggleMapLayerClicks(true);
-            
         },
         
         toggleMapLayerClicks : function(boo) {            
@@ -3476,31 +3450,14 @@ mol.modules.map.tiles = function(mol) {
                 new mol.bus.Event('layer-click-toggle', {disable: boo}));          
         },
         
-        addQueryMenuButton : function() {
-           var html = '' +
-                '  <div ' + 
-                    'title="Toggle species list radius tool ' + 
-                    '(right-click to use)" ' + 
-                    'id="list" ' + 
-                    'class="widgetTheme legend button">' + 
-                    'Species&nbsp;Lists' + 
-                '  </div>',
-                params = {
-                    button: html
-                },
-                event = new mol.bus.Event('add-query-toggle-button', params);
-                
-           this.bus.fireEvent(event); 
-        },
-        
         /*
          *  Add the species list tool controls to the map.
          */
         addQueryDisplay : function() {
             var params = {
                 display: null,
-                slot: mol.map.ControlDisplay.Slot.BOTTOM,
-                position: google.maps.ControlPosition.RIGHT_BOTTOM
+                slot: mol.map.ControlDisplay.Slot.TOP,
+                position: google.maps.ControlPosition.TOP_RIGHT
             };
             
             this.bus.fireEvent(new mol.bus.Event('register-list-click'));
@@ -3687,8 +3644,6 @@ mol.modules.map.tiles = function(mol) {
                 }
             );
 
-
-
             /*
              *  Assembles HTML for an species list given results from
              *  an AJAX call made in getList.
@@ -3740,14 +3695,18 @@ mol.modules.map.tiles = function(mol) {
 
             this.bus.addHandler(
                 'species-list-tool-toggle',
-                function(event) {
-                    self.enabled = !self.enabled;
+                function(event, params) {                    
+                    if(event.visible == true) {
+                        self.enabled = true;
+                    } else {
+                        self.enabled = false;
+                    }
+                    
                     if (self.listradius) {
                         self.listradius.setMap(null);
                     }
+                    
                     if (self.enabled == true) {
-                        console.log("showing species list");
-                        $(self.display).show();
                         _.each(
                             self.features,
                             function(feature) {
@@ -3759,8 +3718,6 @@ mol.modules.map.tiles = function(mol) {
                         $(self.display.queryButton).html("ON");
                         self.toggleMapLayerClicks(true);
                     } else {
-                        console.log("hiding species list");
-                        $(self.display).hide();
                         _.each(
                             self.features,
                             function(feature) {
@@ -3827,6 +3784,35 @@ mol.modules.map.tiles = function(mol) {
                         $(self.display.types).find('.range')
                             .addClass('selected');
                     }
+                }
+            );
+            
+            /**
+             * Clicking the cancel button hides the search display and fires
+             * a cancel-search event on the bus.
+             */
+            this.display.toggleButton.click(
+                function(event) {
+                    var params = {
+                        visible: false
+                        }, 
+                        that = this;
+                    
+                    console.log("toggleButton click");
+                    
+                    if(self.display.speciesDisplay.is(':visible')) {
+                        self.display.speciesDisplay.hide();
+                        $(this).text('◀');
+                        params.visible = false;
+                    } else {
+                        
+                        self.display.speciesDisplay.show();
+                        $(this).text('▶');
+                        params.visible = true;
+                    }
+                   
+                    self.bus.fireEvent(
+                        new mol.bus.Event('species-list-tool-toggle', params));
                 }
             );
         },
@@ -3993,7 +3979,7 @@ mol.modules.map.tiles = function(mol) {
                 dlContent = $('' +
                     '<div class="mol-Map-ListQuery">' +
                     '   <div>' +
-                    '       <a href="http://mol.cartodb.com/api/v2/sql?q=' +
+                    '       <a href="http://dtredc0xh764j.cloudfront.net/api/v2/sql?q=' +
                                 sqlurl + '&format=csv"' +
                     '           class="mol-Map-ListQueryDownload">' +
                     '               download csv</a>' +
@@ -4271,6 +4257,7 @@ mol.modules.map.tiles = function(mol) {
                          '#cc3333',
                          '#FFFFFF',
                          '#000000'],
+                pieSliceText: 'none',
                 chartArea: {left:125, top:25, width:"100%", height:"85%"}
             };
 
@@ -4612,57 +4599,55 @@ mol.modules.map.tiles = function(mol) {
             var className = 'mol-Map-QueryDisplay',
                 html = '' +
                     '<div title=' +
-                    '   "Use this control to select species group and radius.' +
-                    '   Then right click (Mac Users: \'control-click\')' +
-                    '   on focal location on map." class="' + className +
-                    '   widgetTheme">' +                    
-                    '   <div class="controls">' +
-                    '     <span>' + 
-                    '       <button id="speciesListButton" ' + 
+                    '  "Use this control to select species group and radius.' +
+                    '  Then right click (Mac Users: \'control-click\')' +
+                    '  on focal location on map." class="' + className +
+                    '  widgetTheme">' +
+                    '  <button class="toggle">▶</button>' +
+                    '  <span class="title">Species List</span>' +
+                    '  <div class="speciesDisplay">' +
+                    '    <button id="speciesListButton" ' + 
                              'class="toggleBtn selected" ' +
-                    '         title="Click to activate species' + 
-                                    ' list querying.">' +
-                              'ON' +
-                    '       </button>' + 
-                    '     </span>' +
-                    '       Radius ' +
-                    '       <select class="radius">' +
-                    '           <option selected value="50">50 km</option>' +
-                    '           <option value="100">100 km</option>' +
-                    '           <option value="300">300 km</option>' +
-                    '       </select>' +
-                    '       Group ' +
-                    '       <select class="class" value="">' +
-                    '           <option selected' +
-                    '               value=" AND p.polygonres=100 ">' +
-                    '               Birds</option>' +
-                    '           <option value=" AND p.provider=\'fishes\' ">' +
-                    '               NA Freshwater Fishes</option>' +
-                    '           <option value=" AND p.class=\'reptilia\' ">' +
-                    '               Reptiles</option>' +
-                    '           <option value=" AND p.class=\'amphibia\' ">' +
-                    '               Amphibians</option>' +
-                    '           <option value=" AND p.class=\'mammalia\' ">' +
-                    '               Mammals</option>' +
-                    '       </select>' +
-                    '       <span class="types">' +
-                    '           <button class="range selected" ' +
-                    '               value=" AND p.type=\'range\'">' +
-                    '               <img ' +
-                    '                   title="Click to use Expert range maps' +
-                                            ' for query."' +
-                    '                   src="/static/maps/search/range.png">' +
-                    '           </button>' +
-                    '           <button class="ecoregion" ' +
-                    '               value=" AND p.type=\'ecoregion\' ">' +
-                    '               <img ' +
-                    '                   title="Click to use Regional' +
-                                            ' checklists for query." ' +
-                    '                   src="/static/maps/search/' +
-                                            'ecoregion.png">' +
-                    '           </button>' +
-                    '       </span>'+
-                    '   </div>' +
+                             'title="Click to activate species' + 
+                                 ' list querying.">' +
+                             'ON' +
+                    '    </button>' + 
+                         'Radius </span>' +
+                    '    <select class="radius">' +
+                    '      <option selected value="50">50 km</option>' +
+                    '      <option value="100">100 km</option>' +
+                    '      <option value="300">300 km</option>' +
+                    '    </select>' +
+                         'Group ' +
+                    '    <select class="class" value="">' +
+                    '      <option selected value=" AND p.polygonres=100 ">' +
+                    '        Birds</option>' +
+                    '      <option value=" AND p.provider=\'fishes\' ">' +
+                    '        NA Freshwater Fishes</option>' +
+                    '      <option value=" AND p.class=\'reptilia\' ">' +
+                    '        NA Reptiles</option>' +
+                    '      <option value=" AND p.class=\'amphibia\' ">' +
+                    '        Amphibians</option>' +
+                    '      <option value=" AND p.class=\'mammalia\' ">' +
+                    '        Mammals</option>' +
+                    '    </select>' +
+                    '    <span class="types">' +
+                    '      <button class="range selected" ' +
+                             'value=" AND p.type=\'range\'">' +
+                    '        <img title="Click to use Expert range maps' +
+                               ' for query."' +
+                    '          src="/static/maps/search/range.png">' +
+                    '      </button>' +
+                    '      <button class="ecoregion" ' +
+                    '        value=" AND p.type=\'ecoregion\' ">' +
+                    '        <img title="Click to use Regional' +
+                               ' checklists for query." ' +
+                               'src="/static/maps/search/ecoregion.png">' +
+                    '      </button>' +
+                    '    </span>' +
+                    '  </div>' +
+
+
                     '</div>';
 
             this._super(html);
@@ -4671,6 +4656,8 @@ mol.modules.map.tiles = function(mol) {
             this.classInput=$(this).find('.class');
             this.types=$(this).find('.types');
             this.queryButton=$(this).find('#speciesListButton');
+            this.toggleButton = $(this).find('.toggle');
+            this.speciesDisplay = $(this).find('.speciesDisplay');
             
             $(this.types).find('.ecoregion').toggle(false);
             $(this.types).find('.range').toggle(false);
@@ -4726,20 +4713,20 @@ mol.modules.map.legend = function(mol) {
             this.addLegendDisplay();
             this.addEventHandlers();
         },
-        
+
         addLegendMenuButton : function() {
            var html = '' +
-                '  <div ' + 
-                    'title="Toggle map legend." ' + 
-                    'id="legend" ' + 
-                    'class="widgetTheme legend button">' + 
-                    'Legend' + 
-                '  </div>',
+                '<div ' +
+                    'title="Toggle map legend." ' +
+                    'id="legend" ' +
+                    'class="widgetTheme legend button">' +
+                    'Legend' +
+                '</div>',
                 params = {
                     button: html
                 },
                 event = new mol.bus.Event('add-legend-toggle-button', params);
-                
+
            this.bus.fireEvent(event);
         },
 
@@ -4768,7 +4755,7 @@ mol.modules.map.legend = function(mol) {
              *   event.visible - true to show the display, false to hide it.
              *
              * @param event mol.bus.Event
-             */     
+             */
              this.bus.addHandler(
                 'legend-display-toggle',
                 function(event) {
@@ -4797,6 +4784,7 @@ mol.modules.map.legend = function(mol) {
                         '           Type' +
                         '           <div class="legendRow"><div class="ecoregion legendItem"></div> Regional checklist</div>' +
                         '           <div class="legendRow"><div class="protectedarea legendItem"></div> Local inventory</div>' +
+                        '           <div class="legendRow"><div class="griddedsurvey legendItem"></div> Gridded survey</div>' +
                         '           <div class="legendRow"><div class="seasonality1 legendItem narrow"></div><div class="seasonality2 legendItem narrow"></div><div class="seasonality3 legendItem narrow"></div><div class="seasonality4 legendItem narrow"></div><div class="seasonality5 legendItem narrow"></div> Expert range map</div>' +
                         '           <div class="legendRow"><div class="legendItem"><img class="point" src="/static/maps/placemarks/mol_sprite.png"></div> Point observation</div>' +
                         '       </div>' +
@@ -4819,207 +4807,202 @@ mol.modules.map.basemap = function(mol) {
 
     mol.map.basemap = {};
 
-    mol.map.basemap.BaseMapEngine = mol.mvp.Engine.extend(
-        {
-            init: function(proxy, bus, map) {
-                this.proxy = proxy;
-                this.bus = bus;
-                this.map = map;
-            },
+    mol.map.basemap.BaseMapEngine = mol.mvp.Engine.extend({
+        init: function(proxy, bus, map) {
+            this.proxy = proxy;
+            this.bus = bus;
+            this.map = map;
+        },
 
-            /**
-             * Starts the MenuEngine. Note that the container parameter is
-             * ignored.
-             */
-            start: function() {
-                this.display = new mol.map.basemap.BaseMapControlDisplay();
-                this.display.toggle(true);
-                this.addEventHandlers();
-                this.fireEvents();
-            },
+        /**
+         * Starts the MenuEngine. Note that the container parameter is
+         * ignored.
+         */
+        start: function() {
+            this.display = new mol.map.basemap.BaseMapControlDisplay();
+            this.display.toggle(true);
+            this.addEventHandlers();
+            this.fireEvents();
+        },
 
-            setBaseMap: function(type) {
-                    switch(type) {
-                        case "Roadmap" :
-                            this.map.setOptions({styles:null});
-                            break;
-
-                        case "Basic":
-                            type="ROADMAP";
-                            this.map.setOptions({styles: [
-                                {
-                                    featureType: "administrative",
-                                    stylers: [
-                                     { visibility: "off" }
-                                    ]
-                                },
-                                 {
-                                   featureType: "landscape",
-                                 stylers: [
-                                   { visibility: "off" }
-                                   ]
-                                 },
-                                 {
-                                 featureType: "road",
-                                 stylers: [
-                                   { visibility: "off" }
-                                   ]
-                                },
-                                 {
-                                 featureType: "poi",
-                                 stylers: [
-                                   { visibility: "off" }
-                                 ]
-                               },{
-                                    featureType: "water",
-                                    labels: "off",
-                                  stylers: [
-                                    { visibility: "on" },
-                                    { saturation: -65 },
-                                    { lightness: -15 },
-                                   { gamma: 0.83 },
-
-                                    ]
-                                  },{
-                                    featureType: "water",
-                                    elementType: "labels",
-                                    stylers: [
-                                       { visibility: "off" }
-                                    ]
-                                  },
-                               {
-                                  featureType: "transit",
-                                 stylers: [
-                                      { visibility: "off" }
-                                    ]
-                                 }
-                            ]});
+        setBaseMap: function(type) {
+                switch(type) {
+                    case "Roadmap" :
+                        this.map.setOptions({styles:null});
                         break;
-                        case 'Political' :
+
+                    case "Basic":
+                        type="ROADMAP";
+                        this.map.setOptions({styles: [
+                            {
+                                featureType: "administrative",
+                                stylers: [
+                                 { visibility: "off" }
+                                ]
+                            },
+                             {
+                               featureType: "landscape",
+                             stylers: [
+                               { visibility: "off" }
+                               ]
+                             },
+                             {
+                             featureType: "road",
+                             stylers: [
+                               { visibility: "off" }
+                               ]
+                            },
+                             {
+                             featureType: "poi",
+                             stylers: [
+                               { visibility: "off" }
+                             ]
+                           },{
+                                featureType: "water",
+                                labels: "off",
+                              stylers: [
+                                { visibility: "on" },
+                                { saturation: -65 },
+                                { lightness: -15 },
+                               { gamma: 0.83 },
+
+                                ]
+                              },{
+                                featureType: "water",
+                                elementType: "labels",
+                                stylers: [
+                                   { visibility: "off" }
+                                ]
+                              },
+                           {
+                              featureType: "transit",
+                             stylers: [
+                                  { visibility: "off" }
+                                ]
+                             }
+                        ]});
+                    break;
+                    case 'Political' :
                         this.map.setOptions({styles : [
                             {
-featureType: "administrative.country",
-stylers: [
-{ visibility: "on" }
-]
-},{
-featureType: "administrative.locality",
-stylers: [
-{ visibility: "off" }
-]
-},{
-featureType: "road",
-stylers: [
-{ visibility: "off" }
-]
-},{
-featureType: "administrative.province",
-stylers: [
-{ visibility: "on" }
-]
-},{
-featureType: "poi",
-stylers: [
-{ visibility: "off" }
-]
-},{
-featureType: "landscape",
-stylers: [
-{ visibility: "off" }
-]
-},{
-featureType: "water",
-stylers: [
-{ visibility: "simplified" }
-]
-},{
-featureType: "water",
-stylers: [
-{ gamma: 0.21 }
-]
-},{
-featureType: "landscape",
-stylers: [
-{ gamma: 0.99 },
-{ lightness: 65 }
-]
-},{
-}
-]});
-                    type='ROADMAP';
-                    break;
-                    }
-                    this.map.setMapTypeId(google.maps.MapTypeId[type.toUpperCase()])
-            },
-            /**
-             * Adds a handler for the 'search-display-toggle' event which
-             * controls display visibility. Also adds UI event handlers for the
-             * display.
-             */
-            addEventHandlers: function() {
-                var self = this;
-                _.each(
-                    $(this.display).find(".button"),
-                    function(button) {
-                        $(button).click(
-                            function(event) {
-                                self.setBaseMap($(this).text());
-                            }
-                        );
-                    }
-                );
-
-                this.bus.addHandler(
-                    'basemap-display-toggle',
-                    function(event) {
-                        var params = null,
-                        e = null;
-
-                        if (event.visible === undefined) {
-                            self.display.toggle();
-                            params = {visible: self.display.is(':visible')};
-                        } else {
-                            self.display.toggle(event.visible);
+                        featureType: "administrative.country",
+                        stylers: [
+                        { visibility: "on" }
+                        ]
+                        },{
+                        featureType: "administrative.locality",
+                        stylers: [
+                        { visibility: "off" }
+                        ]
+                        },{
+                        featureType: "road",
+                        stylers: [
+                        { visibility: "off" }
+                        ]
+                        },{
+                        featureType: "administrative.province",
+                        stylers: [
+                        { visibility: "on" }
+                        ]
+                        },{
+                        featureType: "poi",
+                        stylers: [
+                        { visibility: "off" }
+                        ]
+                        },{
+                        featureType: "landscape",
+                        stylers: [
+                        { visibility: "off" }
+                        ]
+                        },{
+                        featureType: "water",
+                        stylers: [
+                        { visibility: "simplified" }
+                        ]
+                        },{
+                        featureType: "water",
+                        stylers: [
+                        { gamma: 0.21 }
+                        ]
+                        },{
+                        featureType: "landscape",
+                        stylers: [
+                        { gamma: 0.99 },
+                        { lightness: 65 }
+                        ]
+                        },{
                         }
+                        ]});
+                   type='ROADMAP';
+                   break;
+                }
+                this.map.setMapTypeId(google.maps.MapTypeId[type.toUpperCase()])
+        },
+        /**
+         * Adds a handler for the 'search-display-toggle' event which
+         * controls display visibility. Also adds UI event handlers for the
+         * display.
+         */
+        addEventHandlers: function() {
+            var self = this;
+            _.each(
+                $(this.display).find(".button"),
+                function(button) {
+                    $(button).click(
+                        function(event) {
+                            self.setBaseMap($(this).text());
+                        }
+                    );
+                }
+            );
+
+            this.bus.addHandler(
+                'basemap-display-toggle',
+                function(event) {
+                    var params = null,
+                    e = null;
+
+                    if (event.visible === undefined) {
+                        self.display.toggle();
+                        params = {visible: self.display.is(':visible')};
+                    } else {
+                        self.display.toggle(event.visible);
                     }
-                );
-            },
+                }
+            );
+        },
 
-            /**
-             * Fires the 'add-map-control' event. The mol.map.MapEngine handles
-             * this event and adds the display to the map.
-             */
-            fireEvents: function() {
-                var params = {
-                        display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.FIRST,
-                        position: google.maps.ControlPosition.BOTTOM_LEFT
-                    },
-                    event = new mol.bus.Event('add-map-control', params);
+        /**
+         * Fires the 'add-map-control' event. The mol.map.MapEngine handles
+         * this event and adds the display to the map.
+         */
+        fireEvents: function() {
+            var params = {
+                    display: this.display,
+                    slot: mol.map.ControlDisplay.Slot.FIRST,
+                    position: google.maps.ControlPosition.LEFT_BOTTOM
+            };
 
-                this.bus.fireEvent(event);
-            }
+            this.bus.fireEvent(new mol.bus.Event('add-map-control', params));
         }
-    );
+    });
 
-    mol.map.basemap.BaseMapControlDisplay = mol.mvp.View.extend(
-        {
-            init: function() {
-                var html = '' +
-                    '<div class="mol-BaseMapControl">' +
-                        '<div class="label">Base Map:</div>' +
-                        '<div title="Basic Base Map (water and boundaries only)" class="widgetTheme button">Basic</div>' +
-                        '<div title="Road Base Map" class="widgetTheme button">Political</div>' +
-                        '<div title="Political boundaries." class="widgetTheme button">Roadmap</div>' +
-                        '<div title="Topographic Base Map" class="widgetTheme button">Terrain</div>' +
-                        '<div title="Satellite Base Map" class="widgetTheme button">Satellite</div>' +
-                    '</div>';
+    mol.map.basemap.BaseMapControlDisplay = mol.mvp.View.extend({
+        init: function() {
+            var html = '' +
+                '<div class="mol-BaseMapControl">' +
+                    '<div class="label">Base Map:</div>' +
+                    '<div title="Basic Base Map (water and boundaries only)" class="widgetTheme button">Basic</div>' +
+                    '<div title="Road Base Map" class="widgetTheme button">Political</div>' +
+                    '<div title="Political boundaries." class="widgetTheme button">Roadmap</div>' +
+                    '<div title="Topographic Base Map" class="widgetTheme button">Terrain</div>' +
+                    '<div title="Satellite Base Map" class="widgetTheme button">Satellite</div>' +
+                '</div>';
 
-                this._super(html);
+            this._super(html);
 
-            }
         }
-    );
+    });
 };
 
 
@@ -5081,7 +5064,7 @@ mol.modules.map.metadata = function(mol) {
                 )
             );
             $.getJSON(
-                this.url.format(sql),
+                mol.services.cartodb.sqlApi.jsonp_url.format(sql),
                 function(response) {
                     if(self.display) {
                         self.display.dialog('close');
@@ -5217,11 +5200,10 @@ mol.map.metadata.MetadataDisplay = mol.mvp.View.extend(
                             }
                         ).get())+150
             );
-            //this.dialog.moveToTop();
-            //return(this);
+            
+            this.dialog("moveToTop");
         }
-    }
-    );
+    });
 
 };
 
@@ -5463,22 +5445,22 @@ mol.modules.map.splash = function(mol) {
                 this.helpDisplay.dialog(
                     {
                         autoOpen: false,
-			dialogClass: "mol-help",
+			            dialogClass: "mol-help",
                         height: 550,
-                        width: 850
+                        width: 700,
+                        modal: true
                     }
                 );
 
                 this.feedbackDisplay.dialog(
                     {
                         autoOpen: false,
-			dialogClass: "mol-help",
+			            dialogClass: "mol-help",
                         height: 550,
-                        width: 850
+                        width: 850,
+                        modal: true,
                     }
                 );
-
-
             }
         }
     );
@@ -5487,7 +5469,10 @@ mol.modules.map.splash = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<iframe id="help_dialog" class="mol-help iframe_content" src="/static/help/index.html"></iframe>';
+                    '<iframe id="help_dialog" ' + 
+                        'class="mol-help iframe_content" ' + 
+                        'src="/static/help/index.html">' + 
+                    '</iframe>';
 
                 this._super(html);
 
@@ -5500,115 +5485,21 @@ mol.modules.map.splash = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<iframe id="feedback_dialog" src="https://docs.google.com/spreadsheet/embeddedform?formkey=dC10Y2ZWNkJXbU5RQWpWbXpJTzhGWEE6MQ" width="760" height="625" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>';
+                    '<iframe id="feedback_dialog" ' + 
+                        'src="https://docs.google.com/' + 
+                        'spreadsheet/embeddedform?' + 
+                        'formkey=dC10Y2ZWNkJXbU5RQWpWbXpJTzhGWEE6MQ" ' + 
+                        'width="760" ' + 
+                        'height="625" ' + 
+                        'frameborder="0" ' + 
+                        'marginheight="0" ' + 
+                        'marginwidth="0">' + 
+                        'Loading...' + 
+                    '</iframe>';
 
                 this._super(html);
 
                 // this.iframe_content = $(this).find('.iframe_content');
-            }
-        }
-    );
-};
-
-
-
-mol.modules.map.sidebar = function(mol) {
-
-    mol.map.sidebar = {};
-
-    mol.map.sidebar.SidebarEngine = mol.mvp.Engine.extend(
-        {
-            init: function(proxy, bus) {
-                this.proxy = proxy;
-                this.bus = bus;
-            },
-
-            /**
-             * Starts the MenuEngine. Note that the container parameter is
-             * ignored.
-             */
-            start: function() {
-                this.display = new mol.map.sidebar.SidebarDisplay();
-                this.display.toggle(true);
-                this.addEventHandlers();
-                this.fireEvents();
-            },
-
-            /**
-             * Adds a handler for the 'search-display-toggle' event which
-             * controls display visibility. Also adds UI event handlers for the
-             * display.
-             */
-            addEventHandlers: function() {
-                var self = this;
-
-                this.display.about.click(
-                    function(Event) {
-                        window.open('/about/');
-                    }
-                );
-
-
-                this.display.help.click(
-                    function(Event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('help-display-dialog')
-                        );
-                    }
-                );
-
-                this.display.status.click(
-                    function(Event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('status-display-dialog')
-                        );
-                    }
-                );
-
-                this.display.feedback.click(
-                    function(Event) {
-                        self.bus.fireEvent(
-                            new mol.bus.Event('feedback-display-toggle')
-                        );
-                    }
-                );
-
-
-            },
-
-            /**
-             * Fires the 'add-map-control' event. The mol.map.MapEngine handles
-             * this event and adds the display to the map.
-             */
-            fireEvents: function() {
-                var params = {
-                        display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.FIRST,
-                        position: google.maps.ControlPosition.LEFT_CENTER
-                    },
-                    event = new mol.bus.Event('add-map-control', params);
-
-                this.bus.fireEvent(event);
-            }
-        }
-    );
-     mol.map.sidebar.SidebarDisplay = mol.mvp.View.extend(
-        {
-            init: function() {
-                var html = '' +
-                    '<div class="mol-Sidebar">' +
-                    '    <div title="Current known issues." class="widgetTheme status button"><img src="/static/buttons/status_fr.png"></div>' +
-                    '    <div title="About the Map of Life Project." class="widgetTheme about button"><img src="/static/buttons/about_fr.png"></div>' +
-                    '    <div title="Submit feedback." class="widgetTheme feedback button"><img src="/static/buttons/feedback_fr_2.png"></div>' +
-                    '    <div title="Get help." class="widgetTheme help button"><img src="/static/buttons/help_fr.png"></div>' +
-                    '</div>';
-
-                this._super(html);
-                this.about = $(this).find('.about');
-                this.help = $(this).find('.help');
-                this.feedback = $(this).find('.feedback');
-                this.status = $(this).find('.status');
-
             }
         }
     );
@@ -5641,15 +5532,16 @@ mol.modules.map.status = function(mol) {
                 this.display.dialog(
                     {
                         autoOpen: true,
-			width: 680,
-			height: 390,
-			dialogClass: "mol-status",
-			modal: true
+            			width: 680,
+            			height: 390,
+            			dialogClass: "mol-status",
+            			modal: true
                     }
                 );
-                 $(this.display).width('98%');
-
+                
+                $(this.display).width('98%');
             },
+            
             addEventHandlers : function () {
                  var self = this;
                  this.bus.addHandler(
@@ -5667,16 +5559,20 @@ mol.modules.map.status = function(mol) {
             init: function() {
                 var html = '' +
                 '<div>' +
-	            '  <iframe class="mol-status iframe_content ui-dialog-content" style="height:600px; width: 98%; margin-left: -18px; margin-right: auto; display: block;" src="/static/status/index.html"></iframe>' +
+	            '  <iframe ' + 
+	                   'class="mol-status iframe_content ui-dialog-content" ' + 
+	                   'style="height:600px; ' + 
+	                           'width: 98%; ' + 
+	                           'margin-left: -18px; ' + 
+	                           'margin-right: auto; ' + 
+	                           'display: block;" ' + 
+                       'src="/static/status/index.html">' + 
+                '  </iframe>' +
                 '</div>';
 
                 this._super(html);
                 this.iframe_content = $(this).find('.iframe_content');
-		this.mesg = $(this).find('.message');
-
-
-
-
+		        this.mesg = $(this).find('.message');
             }
         }
     );
@@ -5794,6 +5690,7 @@ mol.modules.map.boot = function(mol) {
             this.bus = bus;
             this.map = map;
             this.IE8 = false;
+            this.maxLayers = ($.browser.chrome) ? 6 : 25;
             this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
@@ -5858,25 +5755,19 @@ mol.modules.map.boot = function(mol) {
                 self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
             } else {
                 // Otherwise, try and get a result using term
-                $.post(
-                'cache/get',
-                {
-                    //Number on the key is there to invalidate cache. 
-                    //Using date+time invalidated.
-                    key: 'boot-results-10152012210-{0}'.format(self.term), 
-                    sql: this.sql.format(self.term)
-                },
-                function(response) {
-                    var results = response.rows;
-                    if (results.length == 0) {
-                        self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
-                        self.map.setCenter(new google.maps.LatLng(0,-50));
-                    } else {
-                        //parse the results
-                        self.loadLayers(self.getLayersWithIds(results));
-                    }
-                },
-                'json'
+                $.getJSON(
+                    mol.services.cartodb.sqlApi.jsonp_url.format(this.sql.format(self.term)),
+                    function(response) {
+                        var results = response.rows;
+                        if (results.length == 0) {
+                            self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
+                            self.map.setCenter(new google.maps.LatLng(0,-50));
+                        } else {
+                            //parse the results
+                            self.loadLayers(self.getLayersWithIds(results));
+                        }
+                    },
+                    'json'
                 );
             }
         },
@@ -5885,7 +5776,7 @@ mol.modules.map.boot = function(mol) {
          * or fires the search results widgetif there are more.
          */
         loadLayers: function(layers) {
-            if (Object.keys(layers).length < 25) {
+            if (Object.keys(layers).length <= this.maxLayers) {
                 this.bus.fireEvent(
                     new mol.bus.Event('add-layers', {layers: layers})
                 );

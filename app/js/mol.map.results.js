@@ -13,6 +13,7 @@ mol.modules.map.results = function(mol) {
             this.proxy = proxy;
             this.bus = bus;
             this.map = map;
+            this.maxLayers = ($.browser.chrome) ? 6 : 100;
             this.filters = { 
                 'name': {
                     title: 'Name', 
@@ -45,7 +46,12 @@ mol.modules.map.results = function(mol) {
             this.addEventHandlers();
             this.fireEvents();
         },
-
+        clearResults: function() {
+            this.display.toggle(false);
+            this.display.clearResults();
+            this.display.clearFilters();
+            delete(this.results);
+        },
         /**
          * Adds a handler for the 'search-display-toggle' event which
          * controls display visibility. Also adds UI event handlers for the
@@ -69,6 +75,12 @@ mol.modules.map.results = function(mol) {
                 }
             );
             this.bus.addHandler(
+                'clear-results',
+                function(event) {
+                    self.clearResults();
+                }
+            );
+            this.bus.addHandler(
                 'results-map-selected',
                 function(event) {
                     self.display.addAllButton.click();
@@ -80,13 +92,25 @@ mol.modules.map.results = function(mol) {
              */
             this.display.addAllButton.click(
                 function(event) {
-                    var layers = self.display.getChecked();
-                    if(self.map.overlayMapTypes.length + layers.length > 100) {
-                        alert(
-                            'The map is currently limited to 100 layers ' +
-                            'at a time. Please remove some layers before ' +
-                            'adding more.'
-                        );
+                    var layers = self.display.getChecked(), clearResults = false;
+                    if(self.display.find('.result').filter(':visible').length == layers.length) {
+                        clearResults = true;
+                    } 
+                    if(self.map.overlayMapTypes.length + layers.length > self.maxLayers) {
+                        if(!$.browser.chrome) {
+                            alert(
+                                'The map is currently limited to {0}'.format(self.maxLayers) +
+                                ' layers at a time. Please remove some layers ' +
+                                ' before adding more.'
+                            );
+                            
+                        } else {
+                            alert(
+                                'An issue with Google Chrome currently limits the number '+
+                                ' of active layers in Map of Life to {0}'.format(self.maxLayers) +
+                                ' layers at a time. Other browsers may display up to 100 layers.'
+                            )
+                        }
                     } else {
                         self.bus.fireEvent(
                             new mol.bus.Event(
@@ -96,6 +120,10 @@ mol.modules.map.results = function(mol) {
                                 }
                             )
                         );
+                        if(clearResults) {
+                            self.clearResults();
+                            
+                        }
                     }
                 }
             );
@@ -124,9 +152,23 @@ mol.modules.map.results = function(mol) {
                         self.display.toggle(false);
                     } else {
                         if (event.visible === undefined) {
-                            self.display.toggle();
-                        } else {
-                            self.display.toggle(event.visible);
+                            self.display.toggle(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (event.visible && self.display.not(':visible')) {
+                            self.display.show(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
+                        } else if (self.display.is(':visible')){
+                            self.display.hide(
+                                "slide",
+                                {direction: "left"},
+                                1000
+                            );
                         }
                     }
                 }
@@ -466,7 +508,7 @@ mol.modules.map.results = function(mol) {
 
 
         toggleSelections: function(showOrHide) {
-            $('.checkbox').each(
+            $(this).find('.checkbox').each(
                 function() {
                     $(this).attr('checked', showOrHide);
                 }
@@ -562,7 +604,7 @@ mol.modules.map.results = function(mol) {
                     '           </button>' +
                     '       </div>' +
                     '       <div class="resultName">' +
-                    '           <div class="resultRecords">{6} features</div>' +
+                    '           <div class="resultRecords">{6}</div>' +
                     '           <div class="resultNomial">{2}</div>' +
                     '           <div class="resultEnglishName" title="{5}">' +
                     '               {5}' +
@@ -586,7 +628,8 @@ mol.modules.map.results = function(mol) {
                         layer.source_type, 
                         layer.type, 
                         layer.names, 
-                        layer.feature_count, 
+                        (layer.feature_count != null) ? 
+                            '{0} features'.format(layer.feature_count) : '', 
                         layer.type_title, 
                         layer.source_title
                     )

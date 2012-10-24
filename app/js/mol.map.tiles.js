@@ -83,19 +83,6 @@ mol.modules.map.tiles = function(mol) {
                         }
                     }
                 );
-
-                /**
-                 * Handler for zoom to extent events. The event has a layer
-                 * object {id, name, source, type}.
-                 */
-                this.bus.addHandler(
-                    'layer-zoom-extent',
-                    function(event) {
-                        var layer = event.layer;
-                        self.zoomToExtent(layer);
-                    }
-                );
-
                 /**
                  * Handler for changing layer opacity. The event.opacity is a
                  * number between 0 and 1.0 and the event.layer is an object
@@ -312,55 +299,7 @@ mol.modules.map.tiles = function(mol) {
                         )
                     )
                 };
-                
-                return maptype.layer;
-            },
-
-            /**
-             * Zooms and pans the map to the full extent of the layer. The layer is an
-             * object {id, name, source, type}.
-             */
-             zoomToExtent: function(layer) {
-                var self = this,
-                    points_sql = "SELECT ST_Extent(the_geom) FROM {0} WHERE lower(scientificname)='{1}'",
-                    polygons_sql = "SELECT ST_Extent(the_geom) FROM {0} WHERE scientificname='{1}'",
-                    table = layer.type === 'points' ? 'gbif_import' : 'polygons',
-                    params = {
-                        sql: table === 'gbif_import' ? points_sql.format(table, layer.name.toLowerCase()) : polygons_sql.format(table, layer.name),
-                        key: 'extent-{0}-{1}-{2}'.format(layer.source, layer.type, layer.name)
-                    },
-                    action = new mol.services.Action('cartodb-sql-query', params),
-                    success = function(action, response) {
-                        if (response.rows[0].st_extent === null) {
-                            console.log("No extent for {0}".format(layer.name));
-                            self.bus.fireEvent(new mol.bus.Event("hide-loading-indicator", {source : "extentquery"}));
-                            return;
-                        }
-                        var extent = response.rows[0].st_extent,
-                            c = extent.replace('BOX(','').replace(')','').split(','),
-                            coor1 = c[0].split(' '),
-                            coor2 = c[1].split(' '),
-                            sw = null,
-                            ne = null,
-                            bounds = null;
-
-                        sw = new google.maps.LatLng(coor1[1],coor1[0]);
-                        ne = new google.maps.LatLng(coor2[1],coor2[0]);
-                        bounds = new google.maps.LatLngBounds(sw, ne);
-                          self.map.fitBounds(bounds);
-                          self.map.panToBounds(bounds);
-                      },
-                      failure = function(action, response) {
-                        console.log('Error: {0}'.format(response));
-                    };
-                this.proxy.execute(
-                    action, 
-                    new mol.services.Callback(
-                        success, 
-                        failure
-                    )
-                );
-              }
+            }
         }
      );
 
@@ -375,7 +314,7 @@ mol.modules.map.tiles = function(mol) {
                         layer.name, 
                         layer.dataset_id
                     ),
-                    hostname = 'mol.cartodb.com',//window.location.hostname,
+                    hostname =  mol.services.cartodb.tileApi.host,
                     style_table_name = layer.style_table;
                     info_query = sql; 
                     meta_query = "" +

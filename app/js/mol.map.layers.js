@@ -38,6 +38,34 @@ mol.modules.map.layers = function(mol) {
                         );
                     }
                 );
+                this.display.layersToggle.click(
+                    function(event) {
+                        var that = this;
+                        if(self.display.expanded) {
+                            self.display.layersWrapper.animate(
+                                {height: self.display.layersHeader.height()+18},
+                                1000,
+                                  function() {
+                                    $(that).text('▼');
+                                    self.display.expanded = false;
+                                }
+                            );
+
+
+                        } else {
+                            self.display.layersWrapper.animate(
+                                {height:self.display.layersHeader.height()
+                                    +self.display.layersContainer.height()+35},
+                                1000,
+                                function() {
+                                    $(that).text('▲');
+                                    self.display.expanded = true;
+                                }
+                            );
+
+                        }
+                    }
+                );
                 this.bus.addHandler(
                     'layer-opacity',
                     function(event) {
@@ -50,7 +78,8 @@ mol.modules.map.layers = function(mol) {
                         if (opacity === undefined) {
                             params = {
                                 layer: layer,
-                                opacity: parseFloat(l.find('.opacity').slider("value"))
+                                opacity: parseFloat(l.find('.opacity')
+                                    .slider("value"))
                             },
                             e = new mol.bus.Event('layer-opacity', params);
                             self.bus.fireEvent(e);
@@ -90,17 +119,10 @@ mol.modules.map.layers = function(mol) {
                                     } else {
                                         bounds.union(layer_bounds)
                                     }
-                                } 
+                                }
                                 catch(e) {
-                                    console.log(
-                                        '[Invalid extent for {0} \'{1}\'] {2}'
-                                        .format(
-                                            layer.dataset_id,
-                                            layer.name,
-                                            layer.extent
-                                        )
-                                    );
-                                }  
+                                    //invalid extent
+                                }
                             }
                         )
                         self.addLayers(event.layers);
@@ -136,29 +158,33 @@ mol.modules.map.layers = function(mol) {
                                   mt.interaction.clickAction = "";
                                }
                             );
-                        } else {                            
-                            _.each(
-                                $(self.display.list).children(),
+                        } else {
+                            _.any($(self.display.list).children(),
                                 function(layer) {
-                                    self.map.overlayMapTypes.forEach(
-                                        function(mt) {
-                                            if(mt.name == $(layer).attr('id') 
-                                                && $(layer).find('.layer')
-                                                    .hasClass('selected')) {
-                                                mt.interaction.add();
-                                                mt.interaction.clickAction 
-                                                    = "full";
-                                            } else {
-                                                mt.interaction.remove();
-                                                mt.interaction.clickAction = "";
+                                    if($(layer).find('.layer')
+                                            .hasClass('selected')) {
+                                        self.map.overlayMapTypes.forEach(
+                                            function(mt) {
+                                                if(mt.name == $(layer)
+                                                                .attr('id')) {      
+                                                    mt.interaction.add();
+                                                    mt.interaction.clickAction
+                                                        = "full";
+                                                } else {
+                                                    mt.interaction.remove();
+                                                    mt.interaction.clickAction 
+                                                        = "";
+                                                }
+    
                                             }
-                                            
-                                        }
-                                    );
+                                        );
+                                        
+                                        return true;     
+                                    }
                                 }
-                            );                            
+                            );
                         }
-                    }  
+                    }
                 );
             },
 
@@ -169,7 +195,7 @@ mol.modules.map.layers = function(mol) {
             fireEvents: function() {
                 var params = {
                         display: this.display,
-                        slot: mol.map.ControlDisplay.Slot.TOP,
+                        slot: mol.map.ControlDisplay.Slot.BOTTOM,
                         position: google.maps.ControlPosition.TOP_RIGHT
                     },
                     event = new mol.bus.Event('add-map-control', params);
@@ -245,7 +271,7 @@ mol.modules.map.layers = function(mol) {
                         self.bus.fireEvent(
                             new mol.bus.Event('show-layer-display-toggle')
                         );
-                        
+
                         //set this correctly
                         //disable interactivity to start
                         self.map.overlayMapTypes.forEach(
@@ -330,7 +356,7 @@ mol.modules.map.layers = function(mol) {
                                         if(mt.name == layer.id && $(l.layer).hasClass('selected')) {
                                             if(!self.clickDisabled) {
                                                mt.interaction.add();
-                                               mt.interaction.clickAction = "full" 
+                                               mt.interaction.clickAction = "full"
                                             } else {
                                                mt.interaction.remove();
                                                mt.interaction.clickAction = "";
@@ -367,9 +393,9 @@ mol.modules.map.layers = function(mol) {
                             function(event) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
-                                        'metadata-toggle', 
-                                        {params : { 
-                                            dataset_id: layer.dataset_id, 
+                                        'metadata-toggle',
+                                        {params : {
+                                            dataset_id: layer.dataset_id,
                                             title: layer.dataset_title
                                         }}
                                     )
@@ -382,8 +408,8 @@ mol.modules.map.layers = function(mol) {
                             function(event) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
-                                        'metadata-toggle', 
-                                        {params : { 
+                                        'metadata-toggle',
+                                        {params : {
                                             type: layer.type,
                                             title: layer.type_title
                                         }}
@@ -416,7 +442,7 @@ mol.modules.map.layers = function(mol) {
                     },
                     this
                 );
-                
+
                 if(first) {
                     if(this.display.list.find('.layer').length > 0) {
                         this.display.list.find('.layer')[0].click();
@@ -434,7 +460,7 @@ mol.modules.map.layers = function(mol) {
                         if(wasSelected.length > 0) {
                             this.map.overlayMapTypes.forEach(
                                 function(mt) {
-                                    if(mt.name == 
+                                    if(mt.name ==
                                         wasSelected.parent().attr("id")) {
                                         mt.interaction.add();
                                         mt.interaction.clickAction = "full";
@@ -488,25 +514,45 @@ mol.modules.map.layers = function(mol) {
             init: function(layer) {
                 var html = '' +
                     '<div class="layerContainer">' +
-                    '  <div class="layer">' +
-                    '    <button class="source" title="Layer Source: {5}"><img src="/static/maps/search/{0}.png"></button>' +
-                    '    <button class="type" title="Layer Type: {6}"><img src="/static/maps/search/{1}.png"></button>' +
-                    '    <div class="layerName">' +
-                    '        <div class="layerRecords">{4} features</div>' +
-                    '        <div title="{2}" class="layerNomial">{2}</div>' +
-                    '        <div title="{3}" class="layerEnglishName">{3}</div>' +
-                    '    </div>' +
-                    '    <input class="keycatcher" type="text" />' +
-                    '    <button title="Remove layer." class="close">x</button>' +
-                    '    <button title="Zoom to layer extent." class="zoom">z</button>' +
-                  /*'    <button title="Layer styler." class="styler">s</button>' + */
-                    '    <label class="buttonContainer"><input class="toggle" type="checkbox"><span title="Toggle layer visibility." class="customCheck"></span></label>' +
-                    '    <div class="opacityContainer"><div class="opacity"/></div>' +
-                    '  </div>' +
-                    '  <div class="break"></div>' +
+                        '<div class="layer">' +
+                            '<button class="source" title="Layer Source: {5}">' +
+                                '<img src="/static/maps/search/{0}.png">' +
+                            '</button>' +
+                            '<button class="type" title="Layer Type: {6}">' +
+                                '<img src="/static/maps/search/{1}.png">' +
+                            '</button>' +
+                        '<div class="layerName">' +
+                            '<div class="layerRecords">{4}</div>' +
+                            '<div title="{2}" class="layerNomial">{2}</div>' +
+                            '<div title="{3}" class="layerEnglishName">{3}</div>' +
+                        '</div>' +
+                        '<input class="keycatcher" type="text" />' +
+                        '<button title="Remove layer." class="close">x</button>' +
+                        '<button title="Zoom to layer extent." class="zoom">' +
+                            'z' +
+                        '</button>' +
+                        '<label class="buttonContainer">' +
+                            '<input class="toggle" type="checkbox">' +
+                            '<span title="Toggle layer visibility." ' +
+                                'class="customCheck"></span></label>' +
+                        '<div class="opacityContainer">' +
+                            '<div class="opacity"/></div>' +
+                        '</div>' +
+                        '<div class="break"></div>' +
                     '</div>';
 
-                this._super(html.format(layer.source_type, layer.type, layer.name, layer.names, layer.feature_count, layer.source_title, layer.type_title));
+                this._super(
+                    html.format(
+                        layer.source_type,
+                        layer.type,
+                        layer.name,
+                        layer.names,
+                        (layer.feature_count != null) ?
+                            '{0} features'.format(layer.feature_count) : '',
+                        layer.source_title,
+                        layer.type_title
+                    )
+                );
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();
@@ -529,22 +575,27 @@ mol.modules.map.layers = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<div class="mol-LayerControl-Layers widgetTheme">' +
-                    '   <div class="layers">' +
-                    '       <div class="layersHeader">' +
-                    '           Layers ' +
-                   /* '           <a href="#" class="selectNone">none</a>' +
-                    '           <a href="#" class="selectAll">all</a>' +*/
-                    '       </div>' +
-                    '       <div class="scrollContainer">' +
-                    '           <div id="sortable">' +
-                    '           </div>' +
-                    '       </div>' +
-                    '       <div class="pageNavigation">' +
-                    '           <button class="removeAll">Remove All Layers</button>' +
-                    '           <button class="toggleAll">Toggle All Layers</button>' +
-                    '       </div>' +
-                    '   </div>' +
+                    '<div class="mol-LayerControl-Layers">' +
+                        '<div class="layers widgetTheme">' +
+                            '<div class="layersHeader">' +
+                                '<button class="layersToggle button">▲</button>' +
+                                'Layers' +
+                            '</div>' +
+                            '<div class="layersContainer">' +
+                                '<div class="scrollContainer">' +
+                                    '<div id="sortable">' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="pageNavigation">' +
+                                    '<button class="removeAll">' +
+                                        'Remove All Layers' +
+                                    '</button>' +
+                                    '<button class="toggleAll">' +
+                                        'Toggle All Layers' +
+                                    '</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>';
 
                 this._super(html);
@@ -554,6 +605,11 @@ mol.modules.map.layers = function(mol) {
                 this.open = false;
                 this.views = {};
                 this.layers = [];
+                this.layersToggle = $(this).find(".layersToggle");
+                this.layersWrapper = $(this).find(".layers");
+                this.layersContainer = $(this).find(".layersContainer");
+                this.layersHeader = $(this).find(".layersHeader");
+                this.expanded = true;
 
             },
 

@@ -1,5 +1,4 @@
 /* BEGIN Shared Styles */
-
 /* sets defaults for units within a widget background greed fade theme,
  * as well as min-height and 100% width */
 .FIRST {
@@ -18,6 +17,7 @@
     pointer-events: none;
 }
 .widgetTheme{
+    behavior: url(/css/pie/PIE.htc);
     background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
     background-image: -webkit-gradient(
         linear,
@@ -49,10 +49,11 @@
     -ms-user-select: none;
     user-select: none;
 }
+
 button{
+    behavior: url(/css/pie/PIE.htc);
     width: auto;
     margin: 2px;
-    font-size: 1.1em;
     font-weight:700;
     color: rgb(240, 240, 260);
     background-color: rgba(25, 25, 25, 0.75);
@@ -60,6 +61,7 @@ button{
     -moz-box-shadow: 2px 2px 5px #000;
     -webkit-box-shadow: 2px 2px 5px #000;
     box-shadow: 2px 2px 5px #222;
+    -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
     border: none;
@@ -103,6 +105,10 @@ button:hover{
         left: -3px;
         top: -50px;
 }
+
+.mol-Bottombar  {
+        white-space: nowrap;
+}
 .mol-Sidebar .button {
     background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
     background-image: -webkit-gradient(
@@ -127,12 +133,14 @@ button:hover{
 }
 
 .mol-Sidebar .status {
+    behavior: url(/css/pie/PIE.htc);
     -moz-border-radius-topleft: 3px;
     border-top-left-radius: 3px;
     -moz-border-radius-topright: 3px;
     border-top-right-radius: 3px;
 }
 .mol-Sidebar .help {
+    behavior: url(/css/pie/PIE.htc);
     -moz-border-radius-bottomright: 3px;
     border-bottom-right-radius: 3px;
     -moz-border-radius-bottomleft: 3px;
@@ -144,31 +152,57 @@ button:hover{
 
 }
 
-.mol-LayerControl-Menu {
+.mol-BottomRightMenu {
+    behavior: url(/css/pie/PIE.htc);
     width: 100%;
-    float: left;
-    list-style-type: none;
-    font-size: 0.8em;
+    float: right;
     pointer-events: auto;
     border-radius: 3px;
 }
+.mol-BottomRightMenu div:first-child{
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+}
+.mol-BottomRightMenu div:last-child{
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+}
+.mol-BottomRightMenu div {
+    display: inline-block;
+    text-align: center;
+    padding: 5px;
+    margin: 0px;
+}
+
+.mol-BottomRightMenu .button:hover {
+color: white;
+cursor: pointer;
+}
+
+.mol-BottomRightMenu {
+list-style-type: none;
+font-size: 0.8em;
+white-space: nowrap;
+}
+
 .mol-LayerControl-Menu .button:hover{
     color: #FFF;
     cursor: pointer;
 }
-.mol-LayerControl-Menu div{
-    float: right;
-    text-align: center;
-    padding: 5px;
-    width: 90px;
-}
+
 .mol-LayerControl-Menu div:last-child{
+    behavior: url(/css/pie/PIE.htc);
     -moz-border-radius-topleft: 3px;
     border-top-left-radius: 3px;
     -moz-border-radius-bottomleft: 3px;
     border-bottom-left-radius: 3px;
 }
 .mol-LayerControl-Menu div.label{
+    behavior: url(/css/pie/PIE.htc);
     width: 20px;
     -moz-border-radius-bottomright: 3px;
     border-bottom-right-radius: 3px;
@@ -223,34 +257,59 @@ button:hover{
 .mol-LayerControl-Menu div.label {
     padding-left: 14px;
 }
-.mol-LayerControl-Menu .layersToggle {
-    visibility:hidden;
-
-}
 
 .mol-LayerControl-Layers{
+    font-size:0.8em;
     max-height: 475px;
-    margin: 5px;
-    padding: 5px;
-    padding-top: 10px;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
-    -ms-border-radius: 3px;
-    pointer-events:auto;
-    cursor:default;
 }
+
+.mol-LayerControl-Layers .layers {
+    float:right;
+    width:500px;
+}
+
 
 .mol-LayerControl-Layers .scrollContainer{
     max-height:380px;
     overflow-y: auto;
     overflow-x: hidden;
-    margin-top: 0;
+    margin-top: 0.5em;
     margin-bottom:0;
+}
+
+.mol-LayerControl-Layers .layersToggle{
+    float:right;
 }
 
 .mol-LayerControl-Layers .layerContainer {
     height:38px;
     cursor:inherit;
+}
+.mol-LayerControl-Layers .layersHeader {
+    margin: 5px;
+    margin-bottom: 0px;
+    padding: 5px;
+    line-height: 25px;
+}
+
+.mol-LayerControl-Layers .layers {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    overflow: hidden;
+}
+
+.mol-LayerControl-Layers .layersContainer {
+    margin: 5px;
+    margin-top: 0px;
+    padding: 5px;
+    padding-top: 10px;
+    border-bottom-left-radius:3px;
+    border-bottom-right-radius:3px;
+    -moz-border-radius-bottomleft: 3px;
+    -moz-border-radius-bottomright: 3px;
+    pointer-events:auto;
+    cursor:default;
 }
 
 .mol-LayerControl-Layers .keycatcher {
@@ -307,7 +366,7 @@ button:hover{
 }
 .mol-LayerControl-Layers .layerRecords {
     float: right;
-    font-size: 0.6em;
+    font-size: 0.8em;
 }
 .mol-LayerControl-Layers .staticLink{
     display: none;
@@ -353,14 +412,13 @@ button:hover{
 }
 .mol-LayerControl-Layers .layer .layerNomial {
     display: block;
-    font-size: 14px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 .mol-LayerControl-Layers .layerEnglishName {
     display: block;
-    font-size: 0.6em;
+    font-size: 0.8em;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -522,13 +580,16 @@ button:hover{
 .mol-LayerControl-Layers .pageNavigation button {
 float: right;
 margin-right: 4px;
-font-size: 1.1em;
 padding: 3px;
 }
 
 /* BEGIN SEARCH UI
  * search, results
  */
+.mol-LayerControl-Search {
+    white-space: nowrap;
+}
+
 
 .mol-LayerControl-Search, .mol-LayerControl-Add {
     display: table-cell;
@@ -543,16 +604,25 @@ padding: 3px;
     -moz-user-select: text;
 }
 .mol-LayerControl-Search .title{
-    display:inline-block;
+    float:left;
     line-height: 25px;
-    font-size: 1.1em;
+    font-size: 0.8em;
+    margin-right: 2px;
+    -moz-user-select: none;
+}
+.mol-LayerControl-Search .searchDisplay{
+    float:left;
+    line-height: 25px;
+    font-size: 0.8em;
     margin-right: 2px;
     -moz-user-select: none;
 }
 .mol-LayerControl-Search .value{
     display:inline-block;
     margin-right: 5px;
-    /*width: 55%;*/
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
 }
 
 .ui-autocomplete {
@@ -570,7 +640,7 @@ padding: 3px;
     }
 .ui-autocomplete .ac-item {
     text-indent:-0.5em;
-    padding-left:1.0em;
+    padding-left:1.1em;
 }
 
 .ui-autocomplete .sci {
@@ -588,15 +658,15 @@ padding: 3px;
     width: 50px;
     height:20px;
 }
-.mol-LayerControl-Search .cancel{
-    display:inline;
+.mol-LayerControl-Search .toggle{
+    float:left;
     height: 20px;
-    width: 20px;
+    width: 23px;
     margin-left: 4px;
-    background-image:url('/static/maps/search/cancel.png');
+    /*background-image:url('/static/maps/search/cancel.png');
     background-size:14px 14px;
     background-repeat:no-repeat;
-    background-position:center;
+    background-position:center;*/
 }
 
 .mol-LayerControl-Search .cancel img{
@@ -619,7 +689,7 @@ padding: 3px;
 
 .mol-LayerControl-Results .resultRecords{
     float: right;
-    font-size: 0.6em;
+    font-size: 0.8em;
 }
 
 .mol-LayerControl-Results ::-webkit-scrollbar {
@@ -645,7 +715,7 @@ padding: 3px;
     display: none;
 }
 .mol-LayerControl-Results ::-webkit-scrollbar-thumb:vertical {
-    height: 50px;
+    height: 25px;
     background-color: white;
     border: 1px solid black;
 }
@@ -767,6 +837,10 @@ div.mol-Dashboard-TableWindow {
     -ms-border-radius: 3px;
 }
 
+.mol-LayerControl-Results {
+    font-size:0.8em;
+}
+
 .mol-LayerControl-Results .filters{
     float: left;
     width: 30%;
@@ -778,19 +852,17 @@ div.mol-Dashboard-TableWindow {
 .mol-LayerControl-Results .filters .filter{
     padding: 4px;
     margin: 0px 0px 5px 0px;
-    font-size: 12px;
     -moz-border-radius: 3px;
     border-radius: 3px;
     pointer-events: auto;
 }
 
 .mol-LayerControl-Results .filters .filter .options{
-    max-height: 125px;
+    max-height: 150px;
     overflow-y: auto;
 }
 .mol-LayerControl-Results .filters .filter .filterName{
     margin-bottom: 5px;
-    font-size: 1.1em;
 }
 
 .mol-LayerControl-Results .filters .filter .option a{
@@ -805,15 +877,15 @@ div.mol-Dashboard-TableWindow {
 }
 
 .mol-LayerControl-Results .filters .filter .all {
-    text-align: right; 
+    text-align: right;
     margin-right: 10px;
 }
 
 .mol-LayerControl-Results .filters .filter .option img{
     width: 12px;
-    height: 12px; 
+    height: 12px;
     margin: 0.5px;
-    
+
 }
 .mol-LayerControl-Results .filters .filter .option.selected {
     cursor: pointer;
@@ -874,7 +946,7 @@ div.mol-Dashboard-TableWindow {
     overflow-y: auto;
 }
 .mol-LayerControl-Results .resultEnglishName {
-    font-size: 0.6em;
+    font-size: 0.8em;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -901,9 +973,10 @@ div.mol-Dashboard-TableWindow {
     height: 16px;
 }
 .mol-LayerControl-Results .result div.resultName{
-    width: 70%;
+    width: 62%;
     display:inline-block;
     margin-left: 4px;
+    text-overflow: ellipsis;
 }
 .mol-LayerControl-Results .result .resultAuthor{
     font-size: 0.8em;
@@ -968,7 +1041,6 @@ div.mol-Dashboard-TableWindow {
 .mol-LayerControl-Results .searchResults .pageNavigation button{
     float: right;
     margin-right: 4px;
-    font-size: 1.1em;
     padding: 3px;
 }
 
@@ -1000,7 +1072,7 @@ div.mol-Dashboard-TableWindow {
     clear:both;
     float:left;
     font-weight:normal;
-    font-size: 15px;
+    font-size: 0.8em;
     padding: 0 0 11px 10px;
 }
 .mol-LayerControl-Add .cancel{
@@ -1022,42 +1094,40 @@ div.mol-Dashboard-TableWindow {
     bottom: 10px;
     right: 15px;
 }
+
+/*
+ * Start Query Bar
+ */
 .mol-Map-QueryDisplay {
-    clear:both;
-    height: 25px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    text-align: right;
-    font-size: 0.8em;
+    float: right;
+    display: table-cell;
+    height: 26px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
     white-space: nowrap;
-    padding: 2px;
-    padding-left:6px;
-    padding-right:6px;
-    padding-bottom:6px;
-    margin: 2px;
+    padding: 2px 3px 2px 3px;
     pointer-events:auto;
+
 }
 
 .mol-Map-QueryDisplay .types button{
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     color: #fff;
     padding: 3px;
-
+    margin: 0px;
 }
 
 .mol-Map-QueryDisplay button.toggleBtn {
-    width:35px;
+    width:32px;
     height: 22px;
     color: #fff;
     padding: 3px;
-
 }
 
 .mol-Map-QueryDisplay button img{
-    width: 16px;
-    height: 16px;
-
+    width: 14px;
+    height: 14px;
 }
 
 .mol-Map-QueryDisplay button.selected {
@@ -1067,6 +1137,44 @@ div.mol-Dashboard-TableWindow {
     -ms-border-radius:5px;
     padding:0px;
 }
+
+.mol-Map-QueryDisplay span.title {
+    float: left;
+    line-height: 25px;
+    font-size: 0.8em;
+    margin-right: 2px;
+    -moz-user-select: none;
+    padding-left: 2px;
+}
+
+.mol-Map-QueryDisplay button.toggle {
+    float: left;
+    height: 20px;
+    width: 23px;
+    margin-left: 4px;
+}
+
+.mol-Map-QueryDisplay span.types {
+    display:inline-block;
+    height:14px;
+}
+
+.mol-Map-QueryDisplay div.speciesDisplay {
+    float: left;
+    _float: none;
+    font-size: 0.7em;
+    margin-right: 2px;
+    -moz-user-select: none;
+}
+
+.mol-Map-QueryDisplay div.speciesDisplay select {
+    font-size: 0.9em;
+}
+
+.mol-Map-QueryDisplay div.speciesDisplay select.radius {
+    margin-right:2px;
+}
+
 
 
 .mol-Map-ListQueryRadius {
@@ -1100,7 +1208,7 @@ div.mol-Dashboard-TableWindow {
     float:right;
 }
 
-.mol-Map-ListQueryInfoWindow td.wiki:hover, 
+.mol-Map-ListQueryInfoWindow td.wiki:hover,
     .mol-Map-ListQueryInfoWindow td.iucn:hover{
     cursor: pointer;
     color: blue;
@@ -1155,37 +1263,41 @@ div.mol-Dashboard-TableWindow {
 .mol-Map-LegendDisplay .point {
      position:relative;
      left:5px;
-     bottom:6px;
+     bottom:4px;
 }
 .mol-Map-LegendDisplay .narrow {
      width: 3px;
 }
 .mol-Map-LegendDisplay .ecoregion {
       background-color:#000000;
-      opacity:0.50;
+      opacity:0.25;
       border: 1px solid #000000;
 }
+.mol-Map-LegendDisplay .griddedsurvey {
+    background-image: url(/static/maps/legend/griddedsurvey.png);
+    opacity: 0.5;
+}
+
+    
 .mol-Map-LegendDisplay .protectedarea {
       background-color:#6A0085;
       border:1px solid #000000;
 }
-.mol-Map-LegendDisplay {
-      background-color:#99CC00
-}
+
 .mol-Map-LegendDisplay .seasonality1 {
-      background-color:#99CC00
+      background-color:#99CC00;
 }
 .mol-Map-LegendDisplay .seasonality2 {
-      background-color:#FFCC00
+      background-color:#FFCC00;
 }
 .mol-Map-LegendDisplay .seasonality3 {
-      background-color:#006BB4
+      background-color:#006BB4;
 }
 .mol-Map-LegendDisplay .seasonality4 {
-      background-color:#FF9900
+      background-color:#FF9900;
 }
 .mol-Map-LegendDisplay .seasonality5 {
-      background-color:#E25B5B
+      background-color:#E25B5B;
 }
 .mol-BaseMapControl {
     list-style-type: none;
@@ -1254,7 +1366,7 @@ div.mol-Dashboard-TableWindow {
     clear:both;
     float:left;
     padding: 5px;
-    font-size:10pt;
+    font-size:0.8em;
     font-weight:700;
 }
 .mol-LayerMetadata .val {

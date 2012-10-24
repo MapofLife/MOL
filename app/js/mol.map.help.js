@@ -70,22 +70,22 @@ mol.modules.map.help = function(mol) {
                 this.helpDisplay.dialog(
                     {
                         autoOpen: false,
-			dialogClass: "mol-help",
+			            dialogClass: "mol-help",
                         height: 550,
-                        width: 850
+                        width: 700,
+                        modal: true
                     }
                 );
 
                 this.feedbackDisplay.dialog(
                     {
                         autoOpen: false,
-			dialogClass: "mol-help",
+			            dialogClass: "mol-help",
                         height: 550,
-                        width: 850
+                        width: 850,
+                        modal: true,
                     }
                 );
-
-
             }
         }
     );
@@ -94,7 +94,10 @@ mol.modules.map.help = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<iframe id="help_dialog" class="mol-help iframe_content" src="/static/help/index.html"></iframe>';
+                    '<iframe id="help_dialog" ' + 
+                        'class="mol-help iframe_content" ' + 
+                        'src="/static/help/index.html">' + 
+                    '</iframe>';
 
                 this._super(html);
 
@@ -107,7 +110,17 @@ mol.modules.map.help = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<iframe id="feedback_dialog" src="https://docs.google.com/spreadsheet/embeddedform?formkey=dC10Y2ZWNkJXbU5RQWpWbXpJTzhGWEE6MQ" width="760" height="625" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>';
+                    '<iframe id="feedback_dialog" ' + 
+                        'src="https://docs.google.com/' + 
+                        'spreadsheet/embeddedform?' + 
+                        'formkey=dC10Y2ZWNkJXbU5RQWpWbXpJTzhGWEE6MQ" ' + 
+                        'width="760" ' + 
+                        'height="625" ' + 
+                        'frameborder="0" ' + 
+                        'marginheight="0" ' + 
+                        'marginwidth="0">' + 
+                        'Loading...' + 
+                    '</iframe>';
 
                 this._super(html);
 

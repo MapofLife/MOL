@@ -198,7 +198,7 @@ var CartoDB = CartoDB || {};
           removeOldLayer(params.map,params.layer);
 
           // Setup new wax
-          params.tilejson.grids = wax.util.addUrlData(params.tilejson.grids_base,  'cache_buster=' + params.cache_buster);
+          params.tilejson.grids = wax.util.addUrlData(params.tilejson.grids_base, 'cache_buster=' + params.cache_buster);
 
           // Add map tiles
           params.layer = new wax.g.connector(params.tilejson);
@@ -237,7 +237,7 @@ var CartoDB = CartoDB || {};
       function generateTileJson(params) {
         var core_url = 'http://' + params.hostname;
         var base_url = core_url + '/tiles/' + params.style_table_name + '/{z}/{x}/{y}';
-        var tile_url = base_url + '.png?cache_buster=0';
+        var tile_url = base_url + '.png';
         var grid_url = base_url + '.grid.json';
 
         // SQL?
@@ -435,10 +435,9 @@ var CartoDB = CartoDB || {};
     }
 
 
-    $.post(
-        'cache/get',
-         {sql: infowindow_sql, key: 'cdbinfo-'+feature+Math.random()},
-            function(result) {
+    $.getJSON(
+         'http://mol.cartodb.com/api/v2/sql?q={0}&callback=?'.format(infowindow_sql),
+          function(result) {
                 var content;
                 if(!result.error) {
                     content = $.parseJSON(
@@ -446,7 +445,7 @@ var CartoDB = CartoDB || {};
                     );
                     positionateInfowindow(content, latlng);
                 }
-            }
+          }
     );
 
     function positionateInfowindow(variables,center) {

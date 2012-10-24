@@ -7,7 +7,6 @@ mol.modules.map.dashboard = function(mol) {
             init: function(proxy, bus) {
                 this.proxy = proxy;
                 this.bus = bus;
-                this.url = "http://mol.cartodb.com/api/v2/sql?callback=?&q={0}";
                 this.summary_sql = '' +
                     'SELECT DISTINCT * ' +
                     'FROM get_dashboard_summary()';
@@ -20,8 +19,26 @@ mol.modules.map.dashboard = function(mol) {
                 this.sources = {};
 
             },
+
             start: function() {
                 this.initDialog();
+                this.addDashboardMenuButton();
+            },
+
+            addDashboardMenuButton : function() {
+               var html = '' +
+                    '<div ' +
+                        'title="Toggle dashboard." ' +
+                        'id="dashboard" ' +
+                        'class="widgetTheme dash button">' +
+                        'Dashboard' +
+                    '</div>',
+                    params = {
+                        button: html
+                    },
+                    event = new mol.bus.Event('add-dashboard-toggle-button', params);
+
+               this.bus.fireEvent(event);
             },
 
             addEventHandlers: function() {
@@ -90,7 +107,7 @@ mol.modules.map.dashboard = function(mol) {
                 var self = this;
 
                 $.getJSON(
-                    this.url.format(this.dashboard_sql),
+                    mol.services.cartodb.sqlApi.jsonp_url.format(this.dashboard_sql),
                     function(response) {
                         self.display = new mol.map.dashboard.DashboardDisplay(
                             response.rows, self.summary
@@ -109,14 +126,14 @@ mol.modules.map.dashboard = function(mol) {
                                      $(".mol-Dashboard-TableWindow")
                                         .height(
                                             $(".mol-Dashboard").height()-95);
-                                     
-                                     //need this to force zebra on the table   
+
+                                     //need this to force zebra on the table
                                      self.display.dashtable
                                         .trigger("update", true);
                                 }
                             }
                         );
-                        
+
                         $(".mol-Dashboard").parent().bind("resize", function() {
                             $(".mol-Dashboard-TableWindow")
                                 .height($(".mol-Dashboard").height()-95);
@@ -124,9 +141,9 @@ mol.modules.map.dashboard = function(mol) {
                         self.addEventHandlers();
                     }
                 );
-                
+
                 $.getJSON(
-                    this.url.format(this.summary_sql),
+                    mol.services.cartodb.sqlApi.jsonp_url.format(this.summary_sql),
                     function(response) {
                         self.summary = response.rows[0];
                         if(self.display) {
@@ -145,47 +162,30 @@ mol.modules.map.dashboard = function(mol) {
                     '<div id="dialog">' +
                     '  <div >' +
                     '    <div class="summary">' +
-                    '      <span class="label">' + 
-                             'Data sources:' + 
+                    '      <span class="label">' +
+                             'Data sources:' +
                     '      </span>' +
-                    '      <span class="providers">' + 
+                    '      <span class="providers">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Datasets:' + 
+                    '      <span class="label">' +
+                             'Datasets:' +
                     '      </span>' +
-                    '      <span class="datasets">' + 
+                    '      <span class="datasets">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Species names in source data:' + 
+                    '      <span class="label">' +
+                             'Species names in source data:' +
                     '      </span>' +
-                    '      <span class="names">' + 
+                    '      <span class="names">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Names in MOL taxonomy:' + 
+                    '      <span class="label">' +
+                             'Accepted species names:' +
                     '      </span>' +
-                    '      <span class="taxon_total">' + 
+                    '      <span class="all_matches">' +
                     '      </span>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy:' + 
+                    '      <span class="label">' +
+                             'Total records:' +
                     '      </span>' +
-                    '      <span class="all_matches">' + 
-                    '      </span>' + 
-                    '      <br>' +
-                    '      <span class="label">' + 
-                             'Names matching MOL taxonomy directly:' + 
-                    '      </span>' +
-                    '      <span class="direct_matches">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                            'Names matching MOL taxonomy' + 
-                            ' through a known synonym:' + 
-                    '      </span>' +
-                    '      <span class="syn_matches">' + 
-                    '      </span>' +
-                    '      <span class="label">' + 
-                             'Total records:' + 
-                    '      </span>' +
-                    '      <span class="records_total">' + 
+                    '      <span class="records_total">' +
                     '      </span>' +
                     '    </div>' +
                     '    <div class="mol-Dashboard-TableWindow">' +
@@ -198,7 +198,7 @@ mol.modules.map.dashboard = function(mol) {
                     '          <th><b>Taxon</b></th>' +
                     '          <th><b>Species Names</b></th>' +
                     '          <th><b>Records</b></th>' +
-                    //'          <th><b>% Match</b></th>' +
+                    '          <th><b>% Match</b></th>' +
                     '        </tr>' +
                     '       </thead>' +
                     '       <tbody class="tablebody"></tbody>' +
@@ -207,7 +207,7 @@ mol.modules.map.dashboard = function(mol) {
                     '  <div>' +
                     '</div>  ',
                     self = this;
-                    //this.numsets = 0;
+
 
                 this._super(html);
                 _.each(
@@ -225,7 +225,7 @@ mol.modules.map.dashboard = function(mol) {
                     widgets: ["filter","zebra"]
                 });
                 this.datasets = $(this).find('.dataset');
-               
+
                 this.dashtable.find("tr.master")
                     .click(function() {
                         $(this).parent().find('tr').each(
@@ -259,7 +259,7 @@ mol.modules.map.dashboard = function(mol) {
                 $(this).find('.tablebody').append(
                     new mol.map.dashboard.DashboardRowDisplay(row));
             },
-            
+
             fillSummary: function(summary) {
                 var self = this;
                 _.each(
@@ -271,7 +271,7 @@ mol.modules.map.dashboard = function(mol) {
             }
         }
     );
-    
+
     mol.map.dashboard.DashboardRowDisplay = mol.mvp.View.extend(
         {
             init: function(row) {
@@ -283,10 +283,10 @@ mol.modules.map.dashboard = function(mol) {
                         '<td class="class {4}">{5}</td>' +
                         '<td class="spnames">{6}</td>' +
                         '<td class="records">{7}</td>' +
-                        //'<td class="pctmatch">{9}</td>' +
+                        '<td class="pctmatch">{9}</td>' +
                     '</tr>',
                     self = this;
-                    
+
                 self._super(
                     html.format(
                         row.type_id,
@@ -297,11 +297,11 @@ mol.modules.map.dashboard = function(mol) {
                         row.classes.split(',').join(', '),
                         this.format(row.species_count),
                         this.format(row.feature_count),
-                        row.dataset_title
-                        //row.pct_in_tax
+                        row.dataset_title,
+                        row.pct_in_tax
                     )
                 );
-                //store some data in each dataset/row   
+                //store some data in each dataset/row
                  _.each(
                      _.keys(row),
                      function(key) {
@@ -309,26 +309,26 @@ mol.modules.map.dashboard = function(mol) {
                      }
                 );
             },
-            
-            format: function(number, comma, period) {                
+
+            format: function(number, comma, period) {
                 var reg = /(\d+)(\d{3})/;
                 var split = number.toString().split('.');
                 var numeric = split[0];
                 var decimal;
-                
+
                 comma = comma || ',';
                 period = period || '.';
                 decimal = split.length > 1 ? period + split[1] : '';
-                
+
                 while (reg.test(numeric)) {
                   numeric = numeric.replace(reg, '$1' + comma + '$2');
                 }
-                
+
                 return numeric + decimal;
             }
          }
     );
-    
+
 
 
 };
