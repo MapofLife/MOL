@@ -579,32 +579,34 @@ mol.modules.map.layers = function(mol) {
             init: function(layer) {
                 var html = '' +
                     '<div class="layerContainer">' +
-                        '<div class="layer">' +
-                            '<button class="source" title="Layer Source: {5}">' +
-                                '<img src="/static/maps/search/{0}.png">' +
-                            '</button>' +
-                            '<button class="type" title="Layer Type: {6}">' +
-                                '<img src="/static/maps/search/{1}.png">' +
-                            '</button>' +
-                        '<div class="layerName">' +
-                            '<div class="layerRecords">{4}</div>' +
-                            '<div title="{2}" class="layerNomial">{2}</div>' +
-                            '<div title="{3}" class="layerEnglishName">{3}</div>' +
-                        '</div>' +
-                        '<input class="keycatcher" type="text" />' +
-                        '<button title="Remove layer." class="close">x</button>' +
-                        '<button title="Zoom to layer extent." class="zoom">' +
-                            'z' +
-                        '</button>' +
-                        '<button title="Layer styler." class="styler">s</button>' +
-                        '<label class="buttonContainer">' +
-                            '<input class="toggle" type="checkbox">' +
-                            '<span title="Toggle layer visibility." ' +
-                                'class="customCheck"></span></label>' +
-                        '<div class="opacityContainer">' +
-                            '<div class="opacity"/></div>' +
-                        '</div>' +
-                        '<div class="break"></div>' +
+                    '  <div class="layer">' +
+                    '    <button class="source" title="Layer Source: {5}">' +
+                    '      <img src="/static/maps/search/{0}.png">' +
+                    '    </button>' +
+                    '    <button class="type" title="Layer Type: {6}">' +
+                    '      <img src="/static/maps/search/{1}.png">' +
+                    '    </button>' +
+                    '    <div class="layerName">' +
+                    '      <div class="layerRecords">{4}</div>' +
+                    '      <div title="{2}" class="layerNomial">{2}</div>' +
+                    '      <div title="{3}" class="layerEnglishName">{3}</div>' +
+                    '    </div>' +
+                    '    <input class="keycatcher" type="text" />' +
+                    '    <button title="Remove layer." class="close">x</button>' +
+                    '    <button title="Zoom to layer extent." class="zoom">' +
+                           'z' +
+                    '    </button>' +
+                    '    <button title="Layer styler." class="styler">s</button>' +
+                    '    <label class="buttonContainer">' +
+                    '       <input class="toggle" type="checkbox">' +
+                    '       <span title="Toggle layer visibility." ' +
+                            'class="customCheck"></span>' + 
+                    '    </label>' +
+                    '   <div class="opacityContainer">' +
+                    '      <div class="opacity"/></div>' +
+                    '   </div>' +
+                    '   <div class="break"></div>' +
+                    '  </div>' +
                     '</div>';
 
                 this._super(
