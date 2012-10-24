@@ -580,6 +580,9 @@ mol.modules.map.layers = function(mol) {
                 var html = '' +
                     '<div class="layerContainer">' +
                     '  <div class="layer">' +
+                    '    <button title="Layer styler." class="styler">' + 
+                           's' + 
+                    '    </button>' +
                     '    <button class="source" title="Layer Source: {5}">' +
                     '      <img src="/static/maps/search/{0}.png">' +
                     '    </button>' +
@@ -591,12 +594,12 @@ mol.modules.map.layers = function(mol) {
                     '      <div title="{2}" class="layerNomial">{2}</div>' +
                     '      <div title="{3}" class="layerEnglishName">{3}</div>' +
                     '    </div>' +
-                    '    <input class="keycatcher" type="text" />' +
-                    '    <button title="Remove layer." class="close">x</button>' +
+                    '    <button title="Remove layer." class="close">' + 
+                           'x' + 
+                    '    </button>' +
                     '    <button title="Zoom to layer extent." class="zoom">' +
                            'z' +
                     '    </button>' +
-                    '    <button title="Layer styler." class="styler">s</button>' +
                     '    <label class="buttonContainer">' +
                     '       <input class="toggle" type="checkbox">' +
                     '       <span title="Toggle layer visibility." ' +
@@ -636,10 +639,7 @@ mol.modules.map.layers = function(mol) {
                 this.type = $(this).find('.type');
                 this.source = $(this).find('.source');
                 this.layer = $(this).find('.layer');
-                this.keycatcher = $(this).find('.keycatcher');
                 this.layerObj = layer;
-
-
             }
         }
     );
