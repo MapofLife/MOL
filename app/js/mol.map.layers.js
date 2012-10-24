@@ -272,7 +272,8 @@ mol.modules.map.layers = function(mol) {
                 var all = [],
                     layerIds = [],
                     sortedLayers = this.sortLayers(layers),
-                    first = (this.display.find('.layer').length==0) ? true : false,
+                    first = (this.display.find('.layer').length==0) 
+                                ? true : false,
                     wasSelected = this.display.find('.layer.selected');
 
                 _.each(
@@ -290,25 +291,34 @@ mol.modules.map.layers = function(mol) {
                             }
                         );
 
-                        // Hack so that at the end we can fire opacity event with all layers.
+                        //Hack so that at the end 
+                        //we can fire opacity event with all layers
                         all.push({layer:layer, l:l, opacity:opacity});
 
-                        // Opacity slider change handler.
+                        //Opacity slider change handler.
                         l.opacity.bind("slide",self.opacityHandler(layer, l));
                         l.opacity.slider("value",layer.opacity);
 
-                        // Close handler for x button fires a 'remove-layers' event.
+                        //Close handler for x button 
+                        //fires a 'remove-layers' event.
                         l.close.click(
                             function(event) {
                                 var params = {
                                       layers: [layer]
                                     },
-                                    e = new mol.bus.Event('remove-layers', params);
+                                    e = new mol.bus.Event(
+                                            'remove-layers', 
+                                            params);
 
                                 self.bus.fireEvent(e);
                                 l.remove();
-                                // Hide the layer widget toggle in the main menu if no layers exist
+                                
+                                //Hide the layer widget toggle in the main menu 
+                                //if no layers exist
                                 if(self.map.overlayMapTypes.length == 0) {
+                                    self.bus.fireEvent(
+                                        new mol.bus.Event(
+                                            'hide-layer-display-toggle'));
                                     self.display.toggle(false);
                                 }
                                 event.stopPropagation();
@@ -316,16 +326,23 @@ mol.modules.map.layers = function(mol) {
                             }
                         );
 
-                        // Click handler for zoom button fires 'layer-zoom-extent'
-                        // and 'show-loading-indicator' events.
+                        //Click handler for zoom button fires 'layer-zoom-extent'
+                        //and 'show-loading-indicator' events.
                         l.zoom.click(
                             function(event) {
                                 var params = {
                                         layer: layer,
                                         auto_bound: true
-                                },
+                                    },
                                     extent = eval('({0})'.format(layer.extent)),
-                                    bounds = new google.maps.LatLngBounds(new google.maps.LatLng(extent.sw.lat, extent.sw.lng), new google.maps.LatLng(extent.ne.lat, extent.ne.lng));
+                                    bounds = new google.maps.LatLngBounds(
+                                                new google.maps.LatLng(
+                                                    extent.sw.lat, 
+                                                    extent.sw.lng), 
+                                                new google.maps.LatLng(
+                                                    extent.ne.lat, 
+                                                    extent.ne.lng));
+                                                    
                                 if(!$(l.layer).hasClass('selected')){
                                     l.layer.click();
                                 }
@@ -335,20 +352,31 @@ mol.modules.map.layers = function(mol) {
                                 event.cancelBubble = true;
                             }
                         );
-                        // Click handler for style toggle button fires 'apply-layer-style'
+                        
+                        // Click handler for style toggle 
+                        // button fires 'apply-layer-style'
                         //TODO replace with a style picker widget (issue #124)
                         l.styler.click(
                             function(event) {
                                 var params = {
                                         layer: layer,
-                                        style: (layer.style) ? '' : '#polygons {polygon-fill:gray}' //turns the layer gray, or goes back to default style.
-                                };
-                                self.bus.fireEvent(new mol.bus.Event('apply-layer-style', params));
-                                layer.style = params.style; // keep the style around for later
+                                        style: (layer.style) ? '' : 
+                                                '#polygons {polygon-fill:gray}' 
+                                                //turns the layer gray, 
+                                                //or goes back to default style.
+                                    };
+                                self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'apply-layer-style', 
+                                        params));
+                                
+                                //keep the style around for later        
+                                layer.style = params.style; 
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }
                         );
+                        
                         l.layer.click(
                             function(event) {
                                 $(l.layer).focus();
