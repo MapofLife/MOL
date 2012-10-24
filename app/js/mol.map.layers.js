@@ -273,7 +273,6 @@ mol.modules.map.layers = function(mol) {
                             new mol.bus.Event('show-layer-display-toggle')
                         );
 
-                        //set this correctly
                         //disable interactivity to start
                         self.map.overlayMapTypes.forEach(
                             function(mt) {
@@ -281,6 +280,9 @@ mol.modules.map.layers = function(mol) {
                                 mt.interaction.clickAction = "";
                             }
                         );
+                        
+                        console.log("addLayers");
+                        console.log
 
                         //Hack so that at the end 
                         //we can fire opacity event with all layers
@@ -349,13 +351,28 @@ mol.modules.map.layers = function(mol) {
                         //TODO replace with a style picker widget (issue #124)
                         l.styler.click(
                             function(event) {
-                                var params = {
+                                var table_name,
+                                    style_desc, 
+                                    params = {
                                         layer: layer,
-                                        style: (layer.style) ? '' : 
+                                        style: null
+                                    };
+                                    
+                                /*
+                                 * (layer.style) ? '' : 
                                                 '#polygons {polygon-fill:gray}' 
                                                 //turns the layer gray, 
                                                 //or goes back to default style.
-                                    };
+                                 */
+                                    
+                                table_name = layer.dataset_id;
+                                style_desc = '#' + table_name + '{polygon-fill:#FF0000}'
+                                    
+                                params.style = style_desc;
+                                    
+                                console.log("styler click");
+                                console.log(params.style);    
+                                    
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
                                         'apply-layer-style', 
@@ -558,6 +575,7 @@ mol.modules.map.layers = function(mol) {
                         '<button title="Zoom to layer extent." class="zoom">' +
                             'z' +
                         '</button>' +
+                        '<button title="Layer styler." class="styler">s</button>' +
                         '<label class="buttonContainer">' +
                             '<input class="toggle" type="checkbox">' +
                             '<span title="Toggle layer visibility." ' +

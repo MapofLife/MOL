@@ -120,11 +120,16 @@ mol.modules.map.tiles = function(mol) {
                         if(layer.type == 'points') {
                             return;
                         }
+                        
+                        console.log("apply-layer-style");
+                        console.log(style);
 
                         self.map.overlayMapTypes.forEach(
                             function(maptype, index) {
                                 //find the overlaymaptype to style
                                 if (maptype.name === layer.id) {
+                                    console.log("match");
+                                    
                                     //remove it from the map
                                     self.map.overlayMapTypes.removeAt(index);
                                     //add the style
@@ -145,6 +150,9 @@ mol.modules.map.tiles = function(mol) {
                                 }
                             }
                         );
+                        
+                        
+                        
                     }
                 );
 
@@ -319,10 +327,15 @@ mol.modules.map.tiles = function(mol) {
                     info_query = sql; 
                     meta_query = "" +
                         "SELECT * FROM get_feature_metadata(TEXT('{0}'))",
-                    tile_style =  null,
                     infowindow = true,
                     hostname = (hostname === 'localhost') ? 
                        '{0}:8080'.format(hostname) : hostname;
+                       
+                //jeremy's original code got rid of tile_style variable
+                //used layer.tile_style
+                
+                console.log("CartoDbTile");
+                console.log(layer.dataset_id);
 
                 this.layer = new google.maps.CartoDBLayer({
                         tile_name: layer.id,
@@ -333,11 +346,10 @@ mol.modules.map.tiles = function(mol) {
                         user_name: 'mol',
                         table_name: table,
                         mol_layer: layer,
-                        style_table_name: style_table_name,
+                        style_table_name: layer.dataset_id,
                         query: sql,
                         info_query: info_query,
                         meta_query: meta_query,
-                        tile_style: tile_style,
                         map_style: false,
                         infowindow: infowindow,
                         opacity: layer.opacity
