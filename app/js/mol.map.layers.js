@@ -581,7 +581,9 @@ mol.modules.map.layers = function(mol) {
                     '<div class="layerContainer">' +
                     '  <div class="layer">' +
                     '    <button title="Layer styler." class="styler">' + 
-                           's' + 
+                    '      <div class="legend-point"></div> ' +
+                    '      <div class="legend-polygon"></div> ' +
+                    '      <div class="legend-seasonal"></div> ' +
                     '    </button>' +
                     '    <button class="source" title="Layer Source: {5}">' +
                     '      <img src="/static/maps/search/{0}.png">' +
@@ -624,6 +626,17 @@ mol.modules.map.layers = function(mol) {
                         layer.type_title
                     )
                 );
+                
+                /*
+                 * Types of legend icons needed
+                 */
+                
+                //1. Single color polygon (fill and border)
+                //2. Seasonally colored polygons (multiple fills, one border)
+                //3. Points
+                
+                //determined by data and provider types
+                
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider(
                     {value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"}
@@ -640,6 +653,64 @@ mol.modules.map.layers = function(mol) {
                 this.source = $(this).find('.source');
                 this.layer = $(this).find('.layer');
                 this.layerObj = layer;
+                
+                //legend items
+                this.pointLegend = $(this).find('.legend-point');
+                this.polygonLegend = $(this).find('.legend-polygon');
+                this.seasonalLegend = $(this).find('.legend-seasonal');
+                
+                console.log("layer source_type");
+                console.log(layer.source_type);
+                
+                console.log("layer type");
+                console.log(layer.type);
+                
+                //types
+                //point (point)
+                //range (polygon or seasonal)
+                //regionalchecklist (polygon)
+                //griddedrangeatlas (polygon)
+                //localinv (polygon)
+                
+                //providers
+                //scilit
+                //iucn
+                //gbif
+                //wwf
+                
+                                //seasonal 
+                //source type = iucn && jetz (but sci lit?)
+                //type = range
+                
+                //points
+                //type = points
+                
+                //polygons
+                //everything else by provider type
+                
+                
+                if(layer.type == "points") {
+                    console.log("points");
+                    this.polygonLegend.hide();
+                    this.seasonalLegend.hide();
+                } else {
+                    
+                    this.pointLegend.hide();
+                    
+                    if(layer.source_type == "iucn" 
+                    || layer.source_type == "scilit") {
+                        console.log("seasonal");
+                        this.polygonLegend.hide();
+                    } else {
+                        console.log("polygon");
+                        this.seasonalLegend.hide();
+                    }
+                }
+                
+                
+
+                
+                
             }
         }
     );

@@ -455,12 +455,22 @@ white-space: nowrap;
 }
 .mol-LayerControl-Layers .layer .styler{
     float: left;
-    text-align: center;
     width: 24px;
     height: 24px;
     padding: 0px;
-    padding-top: 2px;
 }
+
+.mol-LayerControl-Layers .layer .styler div{
+    background-color: #FF0000;
+    height: 20px;
+    width: 20px;
+    margin: 0px auto;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+}
+
 
 .mol-LayerControl-Layers .layer .type img,
 .mol-LayerControl-Layers .layer .source img {
@@ -545,6 +555,7 @@ white-space: nowrap;
     font-size: 1.2em;
     height: 24px;
 }
+
 
 
 /*
