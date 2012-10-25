@@ -378,9 +378,39 @@ mol.modules.map.layers = function(mol) {
                                                 //turns the layer gray, 
                                                 //or goes back to default style.
                                  */
-                                    
+                                
+                                //will want to popup a window
+                                //where the selection is made
+                                
+                                //qtip
+                                //1. popup only on click
+                                //2. stay open unti closed
+                                //3. others disappear if another is opened
+                                
+                                console.log("this");
+                                console.log(this);
+                                
+                                $(this).qtip({
+                                    content: "will go here",
+                                    position: {
+                                        at: 'left center',
+                                        my: 'right center'
+                                    },
+                                    show: {
+                                        event: 'click',
+                                        ready: true,
+                                        solo: true
+                                    },
+                                    hide: {
+                                        fixed: true
+                                    }
+                                })
+                                
+                                
                                 table_name = layer.dataset_id;
-                                style_desc = '#' + table_name + '{polygon-fill:#FF0000}'
+                                style_desc = '#' + 
+                                             table_name + 
+                                             '{polygon-fill:#FF0000}';
                                     
                                 params.style = style_desc;
                                     
@@ -391,6 +421,8 @@ mol.modules.map.layers = function(mol) {
                                     new mol.bus.Event(
                                         'apply-layer-style', 
                                         params));
+                                  
+                                    
                                 
                                 //keep the style around for later        
                                 layer.style = params.style; 
@@ -583,7 +615,13 @@ mol.modules.map.layers = function(mol) {
                     '    <button title="Layer styler." class="styler">' + 
                     '      <div class="legend-point"></div> ' +
                     '      <div class="legend-polygon"></div> ' +
-                    '      <div class="legend-seasonal"></div> ' +
+                    '      <div class="legend-seasonal">' +
+                    '        <div class="seasonal s1"></div>' +
+                    '        <div class="seasonal s2"></div>' +
+                    '        <div class="seasonal s3"></div>' +
+                    '        <div class="seasonal s4"></div>' +
+                    '        <div class="seasonal s5"></div>' +
+                    '      </div> ' +
                     '    </button>' +
                     '    <button class="source" title="Layer Source: {5}">' +
                     '      <img src="/static/maps/search/{0}.png">' +
@@ -612,7 +650,8 @@ mol.modules.map.layers = function(mol) {
                     '   </div>' +
                     '   <div class="break"></div>' +
                     '  </div>' +
-                    '</div>';
+                    '</div>',
+                    self = this;
 
                 this._super(
                     html.format(
@@ -659,12 +698,6 @@ mol.modules.map.layers = function(mol) {
                 this.polygonLegend = $(this).find('.legend-polygon');
                 this.seasonalLegend = $(this).find('.legend-seasonal');
                 
-                console.log("layer source_type");
-                console.log(layer.source_type);
-                
-                console.log("layer type");
-                console.log(layer.type);
-                
                 //types
                 //point (point)
                 //range (polygon or seasonal)
@@ -678,7 +711,7 @@ mol.modules.map.layers = function(mol) {
                 //gbif
                 //wwf
                 
-                                //seasonal 
+                //seasonal 
                 //source type = iucn && jetz (but sci lit?)
                 //type = range
                 
@@ -688,29 +721,148 @@ mol.modules.map.layers = function(mol) {
                 //polygons
                 //everything else by provider type
                 
+                //griddedatlas?
                 
                 if(layer.type == "points") {
-                    console.log("points");
                     this.polygonLegend.hide();
                     this.seasonalLegend.hide();
+                    
+                    this.pointLegend.css(
+                        this.getDefaultStyle(
+                            layer.type, 
+                            layer.source,
+                            layer.source_type
+                        )
+                    );
                 } else {
                     
                     this.pointLegend.hide();
                     
-                    if(layer.source_type == "iucn" 
-                    || layer.source_type == "scilit") {
+                    if(layer.source == "iucn") {
                         console.log("seasonal");
                         this.polygonLegend.hide();
+                        
+                        _.each(
+                            $(this.seasonalLegend).find('.seasonal'),
+                            function(leg) {
+                                  $(leg).css(
+                                      self.getSeasonalStyle(layer.source, leg));
+                            }
+                        );                        
+                    } else if (layer.source == "jetz") {    
+                        this.polygonLegend.hide();
+                        $(this.seasonalLegend).find('.s5').hide();
+                        
+                        _.each(
+                            $(this.seasonalLegend).find('.seasonal'),
+                            function(leg) {
+                                  $(leg).css(
+                                      self.getSeasonalStyle(layer.source, leg));
+                            }
+                        );
                     } else {
                         console.log("polygon");
                         this.seasonalLegend.hide();
+                        this.polygonLegend.css(
+                            this.getDefaultStyle(
+                                layer.type,
+                                layer.source,
+                                layer.source_type
+                            )
+                        );
                     }
                 }
                 
+                //style initially
+                //call another function
+                //this is where I'm bringin in the hardcoded styling
+                //how do i dig the existing styles out of
+                //polygons_style
+                //points_style
+            },
+            
+            getDefaultStyle: function(layerType,layerProvider,layerSource) {
+                var style;
                 
-
+                if(layerType == "points" || layerType == "localinv") {
+                    if(layerType != "localinv") {
+                        style = {'background-color':'#a62a16',
+                                 'border-color':'#FFFFFF',
+                                 'border-style':'solid',
+                                 'border-width':'2px'};
+                    } else {
+                        style = {'background-color':'#6A0085',
+                                 'border-color':'#000000',
+                                 'border-style':'solid',
+                                 'border-width':'2px'};
+                    }
+                } else {
+                    if(layerType == 'regionalchecklist') {
+                        style = {'background-color':'#000000',
+                                 'border-color':'#000000',
+                                 'border-style':'solid',
+                                 'border-width':'1px'};
+                    } else if(layerType == 'localinv') {
+                        style = {'background-color':'#6A0085',
+                                 'border-color':'#000000',
+                                 'border-style':'solid',
+                                 'border-width':'1px'};
+                    } else {
+                        if(layerSource != 'jetz' && layerSource != 'iucn') {
+                            //other polygons
+                            style = {'background-color':'#FF6600',
+                                     'border':'none'};
+                        }
+                    }
+                }
                 
+                return style;
+            },
+            
+            getSeasonalStyle: function(layerSource, legend) {
+                var style = {};
                 
+                if(layerSource == 'jetz') {
+                    //jetz
+                    if($(legend).hasClass('s1')) {
+                        style = {'background-color':'#FFCC00',
+                                     'border':'none',
+                                     'height':'5px'};
+                    } else if($(legend).hasClass('s2')) {
+                        style = {'background-color':'#99CC00',
+                                     'border':'none',
+                                     'height':'5px'};
+                    } else if($(legend).hasClass('s3')) {
+                        style = {'background-color':'#006BB4',
+                                     'border':'none',
+                                     'height':'5px'};
+                    } else if($(legend).hasClass('s4')) {
+                        style = {'background-color':'#E25B5B',
+                                     'border':'none',
+                                     'height':'5px'};
+                    }
+                    
+                } else {
+                    //iucn
+                    if($(legend).hasClass('s1')) {
+                        style = {'background-color':'#99CC00',
+                                     'border':'none'};
+                    } else if($(legend).hasClass('s2')) {
+                        style = {'background-color':'#FFCC00',
+                                     'border':'none'};
+                    } else if($(legend).hasClass('s3')) {
+                        style = {'background-color':'#006BB4',
+                                     'border':'none'};
+                    } else if($(legend).hasClass('s4')) {
+                        style = {'background-color':'#E39C5B',
+                                     'border':'none'};
+                    } else if($(legend).hasClass('s5')) {
+                        style = {'background-color':'#E25B5B',
+                                     'border':'none'};
+                    }
+                }
+                
+                return style;
             }
         }
     );
