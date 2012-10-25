@@ -281,9 +281,6 @@ mol.modules.map.layers = function(mol) {
                             }
                         );
                         
-                        console.log("addLayers");
-                        console.log
-
                         //Hack so that at the end 
                         //we can fire opacity event with all layers
                         all.push({layer:layer, l:l, opacity:opacity});
@@ -356,7 +353,8 @@ mol.modules.map.layers = function(mol) {
                                     params = {
                                         layer: layer,
                                         style: null
-                                    };
+                                    },
+                                    styler;
                                     
                                 /*
                                  * (layer.style) ? '' : 
@@ -376,23 +374,40 @@ mol.modules.map.layers = function(mol) {
                                 console.log("this");
                                 console.log(this);
                                 
+                                styler = '' + 
+                                       '<div>' +
+                                       '  <div>Fill: <input type="text"' +
+                                               'id="showPaletteOnly"/>' 
+                                       '</div>';
+                                
+                                $(this).removeData('qtip');
                                 $(this).qtip({
-                                    content: "will go here",
+                                    content: {
+                                        text: styler,
+                                        title: {
+                                            text: 'Layer Style',
+                                            button: true
+                                        }
+                                    },
                                     position: {
                                         at: 'left center',
                                         my: 'right center'
                                     },
                                     show: {
                                         event: 'click',
+                                        delay: 0,
                                         ready: true,
                                         solo: true
                                     },
-                                    hide: {
-                                        fixed: true
+                                    hide: false,
+                                    events: {
+                                        show: function(event, api) {
+                                            $('#showPaletteOnly').spectrum({color:"f00"});
+                                        }
                                     }
-                                })
+                                });
                                 
-                                
+                                /*
                                 table_name = layer.dataset_id;
                                 style_desc = '#' + 
                                              table_name + 
@@ -407,6 +422,7 @@ mol.modules.map.layers = function(mol) {
                                     new mol.bus.Event(
                                         'apply-layer-style', 
                                         params));
+                                */
                                   
                                     
                                 
@@ -645,16 +661,6 @@ mol.modules.map.layers = function(mol) {
                     )
                 );
                 
-                /*
-                 * Types of legend icons needed
-                 */
-                
-                //1. Single color polygon (fill and border)
-                //2. Seasonally colored polygons (multiple fills, one border)
-                //3. Points
-                
-                //determined by data and provider types
-                
                 this.attr('id', layer.id);
                 this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();
@@ -670,31 +676,6 @@ mol.modules.map.layers = function(mol) {
                 this.pointLegend = $(this).find('.legend-point');
                 this.polygonLegend = $(this).find('.legend-polygon');
                 this.seasonalLegend = $(this).find('.legend-seasonal');
-                
-                //types
-                //point (point)
-                //range (polygon or seasonal)
-                //regionalchecklist (polygon)
-                //griddedrangeatlas (polygon)
-                //localinv (polygon)
-                
-                //providers
-                //scilit
-                //iucn
-                //gbif
-                //wwf
-                
-                //seasonal 
-                //source type = iucn && jetz (but sci lit?)
-                //type = range
-                
-                //points
-                //type = points
-                
-                //polygons
-                //everything else by provider type
-                
-                //griddedatlas?
                 
                 if(layer.type == "points") {
                     this.polygonLegend.hide();
@@ -719,13 +700,6 @@ mol.modules.map.layers = function(mol) {
                         this.polygonLegend.addClass(layer.type);
                     }
                 }
-                
-                //style initially
-                //call another function
-                //this is where I'm bringin in the hardcoded styling
-                //how do i dig the existing styles out of
-                //polygons_style
-                //points_style
             }
         }
     );
