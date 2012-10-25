@@ -471,6 +471,21 @@ white-space: nowrap;
     border: none;
 }
 
+.mol-LayerControl-Layers .layer .styler div.legend-seasonal {
+    background-color:transparent;
+}
+
+.mol-LayerControl-Layers .layer .styler .legend-seasonal div.seasonal {
+    background-color: #FF0000;
+    height: 4px;
+    width: 20px;
+    margin: 0px auto;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+}
+
 
 .mol-LayerControl-Layers .layer .type img,
 .mol-LayerControl-Layers .layer .source img {
