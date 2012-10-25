@@ -727,13 +727,7 @@ mol.modules.map.layers = function(mol) {
                     this.polygonLegend.hide();
                     this.seasonalLegend.hide();
                     
-                    this.pointLegend.css(
-                        this.getDefaultStyle(
-                            layer.type, 
-                            layer.source,
-                            layer.source_type
-                        )
-                    );
+                    this.pointLegend.addClass(layer.type);
                 } else {
                     
                     this.pointLegend.hide();
@@ -741,35 +735,15 @@ mol.modules.map.layers = function(mol) {
                     if(layer.source == "iucn") {
                         console.log("seasonal");
                         this.polygonLegend.hide();
-                        
-                        _.each(
-                            $(this.seasonalLegend).find('.seasonal'),
-                            function(leg) {
-                                  $(leg).css(
-                                      self.getSeasonalStyle(layer.source, leg));
-                            }
-                        );                        
+                        this.seasonalLegend.addClass(layer.source);                       
                     } else if (layer.source == "jetz") {    
                         this.polygonLegend.hide();
                         $(this.seasonalLegend).find('.s5').hide();
-                        
-                        _.each(
-                            $(this.seasonalLegend).find('.seasonal'),
-                            function(leg) {
-                                  $(leg).css(
-                                      self.getSeasonalStyle(layer.source, leg));
-                            }
-                        );
+                        this.seasonalLegend.addClass(layer.source);
                     } else {
                         console.log("polygon");
                         this.seasonalLegend.hide();
-                        this.polygonLegend.css(
-                            this.getDefaultStyle(
-                                layer.type,
-                                layer.source,
-                                layer.source_type
-                            )
-                        );
+                        this.polygonLegend.addClass(layer.type);
                     }
                 }
                 
@@ -779,90 +753,6 @@ mol.modules.map.layers = function(mol) {
                 //how do i dig the existing styles out of
                 //polygons_style
                 //points_style
-            },
-            
-            getDefaultStyle: function(layerType,layerProvider,layerSource) {
-                var style;
-                
-                if(layerType == "points" || layerType == "localinv") {
-                    if(layerType != "localinv") {
-                        style = {'background-color':'#a62a16',
-                                 'border-color':'#FFFFFF',
-                                 'border-style':'solid',
-                                 'border-width':'2px'};
-                    } else {
-                        style = {'background-color':'#6A0085',
-                                 'border-color':'#000000',
-                                 'border-style':'solid',
-                                 'border-width':'2px'};
-                    }
-                } else {
-                    if(layerType == 'regionalchecklist') {
-                        style = {'background-color':'#000000',
-                                 'border-color':'#000000',
-                                 'border-style':'solid',
-                                 'border-width':'1px'};
-                    } else if(layerType == 'localinv') {
-                        style = {'background-color':'#6A0085',
-                                 'border-color':'#000000',
-                                 'border-style':'solid',
-                                 'border-width':'1px'};
-                    } else {
-                        if(layerSource != 'jetz' && layerSource != 'iucn') {
-                            //other polygons
-                            style = {'background-color':'#FF6600',
-                                     'border':'none'};
-                        }
-                    }
-                }
-                
-                return style;
-            },
-            
-            getSeasonalStyle: function(layerSource, legend) {
-                var style = {};
-                
-                if(layerSource == 'jetz') {
-                    //jetz
-                    if($(legend).hasClass('s1')) {
-                        style = {'background-color':'#FFCC00',
-                                     'border':'none',
-                                     'height':'5px'};
-                    } else if($(legend).hasClass('s2')) {
-                        style = {'background-color':'#99CC00',
-                                     'border':'none',
-                                     'height':'5px'};
-                    } else if($(legend).hasClass('s3')) {
-                        style = {'background-color':'#006BB4',
-                                     'border':'none',
-                                     'height':'5px'};
-                    } else if($(legend).hasClass('s4')) {
-                        style = {'background-color':'#E25B5B',
-                                     'border':'none',
-                                     'height':'5px'};
-                    }
-                    
-                } else {
-                    //iucn
-                    if($(legend).hasClass('s1')) {
-                        style = {'background-color':'#99CC00',
-                                     'border':'none'};
-                    } else if($(legend).hasClass('s2')) {
-                        style = {'background-color':'#FFCC00',
-                                     'border':'none'};
-                    } else if($(legend).hasClass('s3')) {
-                        style = {'background-color':'#006BB4',
-                                     'border':'none'};
-                    } else if($(legend).hasClass('s4')) {
-                        style = {'background-color':'#E39C5B',
-                                     'border':'none'};
-                    } else if($(legend).hasClass('s5')) {
-                        style = {'background-color':'#E25B5B',
-                                     'border':'none'};
-                    }
-                }
-                
-                return style;
             }
         }
     );
