@@ -628,6 +628,7 @@ white-space: nowrap;
     height: 24px;
 }
 
+
 .mol-LayerControl-Layers .layer .opacityContainer {
     float: right;
     position: relative;
@@ -635,6 +636,44 @@ white-space: nowrap;
     height: 24px;
     margin-right: 5px;
 }
+
+
+
+.ui-tooltip-content .pointSlider {
+    padding-top:6px;
+    padding-bottom:4px;
+}
+
+.ui-tooltip-content .stylerLabel {
+    width: 50px;
+}
+
+.ui-tooltip-content .sliderLabel {
+    float: left;
+}
+
+.ui-tooltip-content .pointSizeContainer {
+    float: left;
+    position: relative;
+    width: 50%;
+    margin-right: 6px;
+    margin-left: 6px;
+}
+
+.ui-tooltip-content .pointSizeContainer .sizer {
+    height: 5px;
+    margin-top: 2px;
+}
+
+.ui-tooltip-content .pointSizeContainer .sizer .ui-slider-handle{
+    width: 8px;
+    height: 11px;
+}
+
+
+
+
+
 .mol-LayerControl-Layers .layer .opacity  {
     position: absolute;
     top: 50%;

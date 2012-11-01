@@ -358,90 +358,11 @@ mol.modules.map.layers = function(mol) {
                         );
                         
                         // Click handler for style toggle 
-                        // button fires 'apply-layer-style'
                         //TODO replace with a style picker widget (issue #124)
                         l.styler.click(
-                            function(event) {
-                                var table_name,
-                                    style_desc, 
-                                    params = {
-                                        layer: layer,
-                                        style: null
-                                    },
-                                    styler;
-                                    
-                                /*
-                                 * (layer.style) ? '' : 
-                                                '#polygons {polygon-fill:gray}' 
-                                                //turns the layer gray, 
-                                                //or goes back to default style.
-                                 */
+                            function(event) {   
+                                self.displayLayerStyler(this, layer);
                                 
-                                //will want to popup a window
-                                //where the selection is made
-                                
-                                //qtip
-                                //1. popup only on click
-                                //2. stay open unti closed
-                                //3. others disappear if another is opened
-                                
-                                console.log("this");
-                                console.log(this);
-                                
-                                styler = '' + 
-                                       '<div>' +
-                                       '  <div>Fill: <input type="text"' +
-                                               'id="showPaletteOnly"/>' 
-                                       '</div>';
-                                
-                                $(this).removeData('qtip');
-                                $(this).qtip({
-                                    content: {
-                                        text: styler,
-                                        title: {
-                                            text: 'Layer Style',
-                                            button: true
-                                        }
-                                    },
-                                    position: {
-                                        at: 'left center',
-                                        my: 'right center'
-                                    },
-                                    show: {
-                                        event: 'click',
-                                        delay: 0,
-                                        ready: true,
-                                        solo: true
-                                    },
-                                    hide: false,
-                                    events: {
-                                        show: function(event, api) {
-                                            $('#showPaletteOnly').spectrum({color:"f00"});
-                                        }
-                                    }
-                                });
-                                
-                                /*
-                                table_name = layer.dataset_id;
-                                style_desc = '#' + 
-                                             table_name + 
-                                             '{polygon-fill:#FF0000}';
-                                    
-                                params.style = style_desc;
-                                    
-                                console.log("styler click");
-                                console.log(params.style);    
-                                    
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'apply-layer-style', 
-                                        params));
-                                */
-                                  
-                                    
-                                
-                                //keep the style around for later        
-                                layer.style = params.style; 
                                 event.stopPropagation();
                                 event.cancelBubble = true;
                             }
@@ -587,38 +508,235 @@ mol.modules.map.layers = function(mol) {
                     this.layersToggle({visible:true});
                 }
             },
-
-               /**
-                * Add sorting capability to LayerListDisplay, when a result is
-             * drag-n-drop, and the order of the result list is changed,
-             * then the map will re-render according to the result list's order.
-                **/
-               initSortable: function() {
-                    var self = this,
-                         display = this.display;
-
-                    display.list.sortable(
-                    {
-                            update: function(event, ui) {
-                                  var layers = [],
-                                  params = {},
-                            e = null;
-
-                                  $(display.list).find('.layerContainer').each(
-                                function(i, el) {
-                                           layers.push($(el).attr('id'));
-                                      }
-                            );
-
-                            params.layers = layers;
-                                  e = new mol.bus.Event('reorder-layers', params);
-                                  self.bus.fireEvent(e);
-                             }
+            
+            displayLayerStyler: function(button, layer) {
+                var table_name,
+                    style_desc, 
+                    params = {
+                        layer: layer,
+                        style: null
+                    },
+                    self = this;
+                
+                $(button).removeData('qtip');
+                var q = $(button).qtip({
+                    content: {
+                        text: self.getStylerLayout(layer),
+                        title: {
+                            text: 'Layer Style',
+                            button: true
                         }
-                    );
+                    },
+                    position: {
+                        at: 'left center',
+                        my: 'right center'
+                    },
+                    show: {
+                        event: 'click',
+                        delay: 0,
+                        ready: true,
+                        solo: true
+                    },
+                    hide: false,
+                    events: {
+                        render: function(event, api) {
+                            
+                                                        
+                            $(api.elements.content)
+                                .find('.sizer')
+                                    .slider({
+                                        value: 0.5, 
+                                        min: 0, 
+                                        max:1, 
+                                        step: 0.02, 
+                                        animate:"slow"});
+                        },
+                        show: function(event, api) {
+                            $('#showFillPalette').spectrum({
+                                color:"f00",
+                                change: function() {
+                                    console.log("fill changed");
+                                    
+                                    style_desc = '#' + 
+                                    layer.dataset_id + 
+                                    '{polygon-fill:#FF0000}';
+                                        
+                                    params.style = style_desc;
+                                        
+                                    console.log("styler click");
+                                    console.log(params.style);    
+                                        
+                                    self.bus.fireEvent(
+                                        new mol.bus.Event(
+                                            'apply-layer-style', 
+                                            params));
+                                }});
+                            $('#showBorderPalette').spectrum({color:"f00"});
+                        }
+                    }
+                });
+                
 
+                table_name = layer.dataset_id;
+                style_desc = '#' + 
+                             table_name + 
+                             '{polygon-fill:#FF0000}';
+                    
+                params.style = style_desc;   
+                    
+                self.bus.fireEvent(
+                    new mol.bus.Event(
+                        'apply-layer-style', 
+                        params));
+                  
+                //keep the style around for later        
+                layer.style = params.style; 
+            },
+            
+            getStylerLayout: function(layer) {
+                var styler;
+                
+                styler = '' + 
+                       '<div>' +
+                       '  <div>' +
+                       '    <div>Fill: <input type="text"' +
+                              'id="showFillPalette" class="stylerLabel"/>' +
+                       '    </div>' +
+                       '    <div>Border: <input type="text"' +
+                              'id="showBorderPalette" class="stylerLabel"/>' +
+                       '    </div>' +
+                       '  </div>' +
+                       '  <div class="pointSlider">' +
+                       '    <span class="sliderLabel stylerLabel">Size: </span>' +
+                       '    <div class="pointSizeContainer">' +
+                       '      <div class="sizer"/></div>' +
+                       '    </div>' +
+                       '    <span id="pointSizeValue">8px</span>' +
+                       '  </div>' +       
+                       '</div>';
+      
+                /*
+                if(layer.style_table == "points_style") {
+                    if(layer.type == "localinv") {
+                        style = '#' + layer.dataset_id + '{' + 
+                                'marker-fill: #6A0085;' + 
+                                'marker-line-color: #000000;' + 
+                                'marker-line-width: 1;' + 
+                                'marker-line-opacity: 1.0;' + 
+                                'marker-width:3;' + 
+                                'marker-allow-overlap:true;' + 
+                                '}';
+                    } else {
+                        style = '#' + layer.dataset_id + '{' + 
+                                'marker-fill: #a62a16;' + 
+                                'marker-line-color: #ffffff;' + 
+                                'marker-line-width: 1;' + 
+                                'marker-line-opacity: 1.0;' + 
+                                'marker-width:4;' + 
+                                'marker-allow-overlap:true;' + 
+                                '}';
+                    }
+                } else {
+                    if(layer.source == "iucn") {
+                        style = '#' + layer.dataset_id + '{' + 
+                                'line-color: #000000;' + 
+                                'line-opacity: 1.0;' + 
+                                'line-width: 0;' + 
+                                'polygon-opacity:1.0;' +
+                                '  [seasonality=1] {' +
+                                '    polygon-fill:#9C0;' +
+                                '  }' +
+                                '  [seasonality=2] {' +
+                                '    polygon-fill:#FC0;' +
+                                '  }' +
+                                '  [seasonality=3] {' +
+                                '    polygon-fill:#006BB4;' +
+                                '  }' +
+                                '  [seasonality=4] {' +
+                                '    polygon-fill:#E39C5B;' +
+                                '  }' +
+                                '  [seasonality=5] {' +
+                                '    polygon-fill:#E25B5B;' +
+                                '  }' +
+                                '}';
+                    } else if (layer.source == "jetz") {    
+                        style = '#' + layer.dataset_id + '{' + 
+                                'line-color: #000000;' + 
+                                'line-opacity: 1.0;' + 
+                                'line-width: 0;' + 
+                                'polygon-opacity:1.0;' +
+                                '  [seasonality=1] {' +
+                                '    polygon-fill:#FC0;' +
+                                '  }' +
+                                '  [seasonality=2] {' +
+                                '    polygon-fill:#9C0;' +
+                                '  }' +
+                                '  [seasonality=3] {' +
+                                '    polygon-fill:#006BB4;' +
+                                '  }' +
+                                '  [seasonality=4] {' +
+                                '    polygon-fill:#E25B5B;' +
+                                '  }' +
+                                '}';
+                    } else if (layer.type == 'regionalchecklist') {
+                        style = '#' + layer.dataset_id + '{' + 
+                                'line-color: #000000;' + 
+                                'line-opacity: 0.5;' + 
+                                'line-width: 1;' + 
+                                'polygon-fill: #000000;' + 
+                                'polygon-opacity:1.0;' + 
+                                '}';
+                    } else if (layer.type == 'localinv') {
+                        style = '#' + layer.dataset_id + '{' + 
+                                'line-color: #000000;' + 
+                                'line-opacity: 1.0;' + 
+                                'line-width: 1;' + 
+                                'polygon-fill: #6A0085;' + 
+                                'polygon-opacity:1.0;' + 
+                                '}';
+                    } else {
+                        style = '#' + layer.dataset_id + '{' + 
+                                'line-color: #000000;' + 
+                                'line-opacity: 0.50;' + 
+                                'line-width: 0;' + 
+                                'polygon-fill: #F60;' + 
+                                'polygon-opacity:1.0;' + 
+                                '}';
+                    }
+                }
+                */
+                
+                return styler;
+            },
 
-               }
+            /**
+            * Add sorting capability to LayerListDisplay, when a result is
+            * drag-n-drop, and the order of the result list is changed,
+            * then the map will re-render according to the result list's order.
+            **/
+
+            initSortable: function() {
+                var self = this, 
+                    display = this.display;
+    
+                display.list.sortable({
+                    update : function(event, ui) {
+                        var layers = [], 
+                            params = {}, 
+                            e = null;
+    
+                        $(display.list)
+                            .find('.layerContainer')
+                                .each(function(i, el) {
+                                    layers.push($(el).attr('id'));
+                        });
+    
+                        params.layers = layers;
+                        e = new mol.bus.Event('reorder-layers', params);
+                        self.bus.fireEvent(e);
+                    }
+                });
+            }
         }
     );
 
@@ -704,7 +822,7 @@ mol.modules.map.layers = function(mol) {
                 this.polygonLegend = $(this).find('.legend-polygon');
                 this.seasonalLegend = $(this).find('.legend-seasonal');
                 
-                if(layer.type == "points") {
+                if(layer.style_table == "points_style") {
                     this.polygonLegend.hide();
                     this.seasonalLegend.hide();
                     
@@ -714,7 +832,6 @@ mol.modules.map.layers = function(mol) {
                     this.pointLegend.hide();
                     
                     if(layer.source == "iucn") {
-                        console.log("seasonal");
                         this.polygonLegend.hide();
                         this.seasonalLegend.addClass(layer.source);                       
                     } else if (layer.source == "jetz") {    
@@ -722,9 +839,15 @@ mol.modules.map.layers = function(mol) {
                         $(this.seasonalLegend).find('.s5').hide();
                         this.seasonalLegend.addClass(layer.source);
                     } else {
-                        console.log("polygon");
                         this.seasonalLegend.hide();
                         this.polygonLegend.addClass(layer.type);
+                        
+                        if(layer.type == "regionalchecklist" 
+                            || layer.type == "localinv") {
+                            this.polygonLegend.addClass("withborder");
+                        } else {
+                            this.polygonLegend.addClass("noborder");
+                        }
                     }
                 }
             }
