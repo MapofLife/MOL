@@ -460,6 +460,16 @@ white-space: nowrap;
     padding: 0px;
 }
 
+.mol-LayerControl-Layers .layer button.styler{
+    background-color: rgba(25, 25, 25, 0);
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.mol-LayerControl-Layers .layer button.styler:hover{
+    background-color: rgba(25, 25, 25, 1);
+}
+
 .mol-LayerControl-Layers .layer .styler div{
     background-color: #FF0000;
     height: 20px;
@@ -472,10 +482,15 @@ white-space: nowrap;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-point {
+    height: 6px;
+    width: 6px;
     background-color:#a62a16;
     border-color:#FFFFFF;
     border-style:solid;
     border-width:2px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-point.localinv {
@@ -488,20 +503,32 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layer .styler div.legend-polygon {
     background-color:#FF6600;
     border:none;
+    width:18px;
+    height:18px;
+}
+
+.mol-LayerControl-Layers .layer .styler div.legend-polygon.withborder {
+    width:18px;
+    height:18px;
+}
+
+.mol-LayerControl-Layers .layer .styler div.legend-polygon.noborder {
+    width:20px;
+    height:20px;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-polygon.regionalchecklist {
     background-color:#000000;
     border-color:#000000;
     border-style:solid;
-    border-width:1px;
+    border-width:2px;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-polygon.localinv {
     background-color:#6A0085;
     border-color:#000000;
     border-style:solid;
-    border-width:1px;
+    border-width:2px;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-seasonal {

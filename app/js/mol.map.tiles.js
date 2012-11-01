@@ -374,7 +374,7 @@ mol.modules.map.tiles = function(mol) {
                                 'marker-line-color: #ffffff;' + 
                                 'marker-line-width: 1;' + 
                                 'marker-line-opacity: 1.0;' + 
-                                'marker-width:3;' + 
+                                'marker-width:4;' + 
                                 'marker-allow-overlap:true;' + 
                                 '}';
                     }
@@ -440,7 +440,7 @@ mol.modules.map.tiles = function(mol) {
                         style = '#' + layer.dataset_id + '{' + 
                                 'line-color: #000000;' + 
                                 'line-opacity: 0.50;' + 
-                                'line-width: 1;' + 
+                                'line-width: 0;' + 
                                 'polygon-fill: #F60;' + 
                                 'polygon-opacity:1.0;' + 
                                 '}';
