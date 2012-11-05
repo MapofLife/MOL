@@ -517,6 +517,14 @@ mol.modules.map.layers = function(mol) {
                         style: null
                     },
                     self = this;
+                    
+                //initialize styler based on current carto_css
+                //fill
+                //border
+                //size
+                
+                console.log("layer");
+                console.log(layer);
                 
                 $(button).removeData('qtip');
                 var q = $(button).qtip({
@@ -597,22 +605,29 @@ mol.modules.map.layers = function(mol) {
                 var styler;
                 
                 styler = '' + 
-                       '<div>' +
-                       '  <div>' +
-                       '    <div>Fill: <input type="text"' +
-                              'id="showFillPalette" class="stylerLabel"/>' +
+                       '<div class="mol-LayerControl-Styler">' +
+                       '  <div class="colorPickers">' +
+                       '    <div class="colorPicker">' + 
+                       '      <span class="stylerLabel">Fill:&nbsp</span>' + 
+                       '      <input type="text" id="showFillPalette" />' +
                        '    </div>' +
-                       '    <div>Border: <input type="text"' +
-                              'id="showBorderPalette" class="stylerLabel"/>' +
+                       '    <div class="colorPicker">' + 
+                       '      <span class="stylerLabel">Border:&nbsp</span>' + 
+                       '      <input type="text"' +
+                              'id="showBorderPalette" />' +
                        '    </div>' +
                        '  </div>' +
                        '  <div class="pointSlider">' +
-                       '    <span class="sliderLabel stylerLabel">Size: </span>' +
+                       '    <span class="sliderLabel">Size:&nbsp</span>' +
                        '    <div class="pointSizeContainer">' +
-                       '      <div class="sizer"/></div>' +
+                       '      <div class="sizer"></div>' +
                        '    </div>' +
                        '    <span id="pointSizeValue">8px</span>' +
-                       '  </div>' +       
+                       '  </div>' + 
+                       '  <div class="buttonWrapper">' +
+                       '    <button>Apply</button>' +
+                       '    <button>Cancel</button>' +
+                       '  </div>' +      
                        '</div>';
       
                 /*
