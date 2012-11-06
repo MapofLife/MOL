@@ -525,10 +525,8 @@ mol.modules.map.layers = function(mol) {
                 baseHtml = '' + 
                        '<div class="mol-LayerControl-Styler" ' + 
                             'title="Click to edit layer style.">' +
-                       '  <div class="colorPickers">' +
-                       '  </div>' + 
-                       '  <div class="pointSlider">' +
-                       '  </div>' +
+                       '  <div class="colorPickers"></div>' + 
+                       '  <div class="pointSlider"></div>' +
                        '  <div class="buttonWrapper">' +
                        '    <button id="applyStyle">Apply</button>' +
                        '    <button id="cancelStyle">Cancel</button>' +
@@ -587,70 +585,128 @@ mol.modules.map.layers = function(mol) {
                             }          
                                                   
                                         
-                            $(api.elements.content)
-                                .find('#applyStyle').click(
-                                    function(event) {
-                                        var o = {},
-                                            style_desc;
-                                            
-                                        if(layer.source == "iucn") {
-                                            o.s1 = $('#showFill1Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.s2 = $('#showFill2Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.s3 = $('#showFill3Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.s4 = $('#showFill4Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.s5 = $('#showFill5Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                        } else if(layer.source == "jetz") {
-                                            o.s1 = $('#showFill1Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.s2 = $('#showFill2Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.s3 = $('#showFill3Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.s4 = $('#showFill4Palette')
-                                                     .spectrum("get")
-                                                        .toHexString();
-                                        } else {
-                                            o.fill = $('#showFillPalette')
+                            $(api.elements.content).find('#applyStyle').click(
+                                function(event) {
+                                    var o = {},
+                                        style_desc;
+                                        
+                                    if(layer.source == "iucn") {
+                                        o.s1 = $('#showFill1Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s2 = $('#showFill2Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s3 = $('#showFill3Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s4 = $('#showFill4Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s5 = $('#showFill5Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                                    
+                                        $(button).find('.s1')
+                                                .css({
+                                                    'background-color':o.s1
+                                                });
+                                        $(button).find('.s2')
+                                                .css({
+                                                    'background-color':o.s2
+                                                });
+                                        $(button).find('.s3')
+                                                .css({
+                                                    'background-color':o.s3
+                                                });
+                                        $(button).find('.s4')
+                                                .css({
+                                                    'background-color':o.s4
+                                                });
+                                        $(button).find('.s5')
+                                                .css({
+                                                    'background-color':o.s5
+                                                });                    
+                                    } else if(layer.source == "jetz") {
+                                        o.s1 = $('#showFill1Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s2 = $('#showFill2Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s3 = $('#showFill3Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s4 = $('#showFill4Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                                    
+                                        $(button).find('.s1')
+                                                .css({
+                                                    'background-color':o.s1
+                                                });
+                                        $(button).find('.s2')
+                                                .css({
+                                                    'background-color':o.s2
+                                                });
+                                        $(button).find('.s3')
+                                                .css({
+                                                    'background-color':o.s3
+                                                });
+                                        $(button).find('.s4')
+                                                .css({
+                                                    'background-color':o.s4
+                                                });                                    
+                                    } else {
+                                        o.fill = $('#showFillPalette')
+                                                .spectrum("get")
+                                                    .toHexString();
+                                        o.border = $('#showBorderPalette')
                                                     .spectrum("get")
-                                                        .toHexString();
-                                            o.border = $('#showBorderPalette')
-                                                        .spectrum("get")
-                                                            .toHexString();                
-                                            o.size = $(api.elements.content)
-                                                        .find('.sizer')
-                                                            .slider('value');
+                                                        .toHexString();                
+                                        o.size = $(api.elements.content)
+                                                    .find('.sizer')
+                                                        .slider('value');
+                                            
+                                        if(layer.style_table == 
+                                            "points_style") {
+                                            $(button).find('.legend-point')
+                                                .css({
+                                                    'background-color':o.fill,
+                                                    'border-color':o.border,
+                                                    'width':(o.size+3)+"px",
+                                                    'height':(o.size+3)+"px"
+                                                });
+                                        } else {
+                                            $(button).find('.legend-polygon')
+                                                .css({
+                                                    'background-color':o.fill,
+                                                    'border-color':o.border,
+                                                    'border-width':o.size+"px"
+                                                    });
+                                                
+                                            }  
                                         }
    
                                         style_desc = '#' + 
-                                                     layer.dataset_id + 
-                                                     self.updateStyle(
-                                                         layer,
-                                                         layer.tile_style, 
-                                                         o);
-                                        
-                                        params.style = style_desc;
-                                        
-                                        console.log(params.style);    
-                                        
-                                        self.bus.fireEvent(
-                                            new mol.bus.Event(
-                                                'apply-layer-style', 
-                                                params));
-                                    }
-                                );
+                                                 layer.dataset_id + 
+                                                 self.updateStyle(
+                                                     layer,
+                                                     layer.tile_style, 
+                                                     o);
+                                    
+                                    params.style = style_desc;
+                                    
+                                    console.log(params.style);    
+                                    
+                                    self.bus.fireEvent(
+                                        new mol.bus.Event(
+                                            'apply-layer-style', 
+                                            params));
+                                            
+                                    $(button).qtip('destroy');
+                                }
+                            );
                                 
                             $(api.elements.content)
                                 .find('#cancelStyle').click(
@@ -660,7 +716,6 @@ mol.modules.map.layers = function(mol) {
                                 );
                         },
                         show: function(event, api) {
-                            
                             if(layer.source == "iucn") {
                                $('#showFill1Palette').spectrum({
                                   color:layer_tile_style.s1
