@@ -116,10 +116,6 @@ mol.modules.map.tiles = function(mol) {
                     function(event) {
                         var layer = event.layer,
                             style = event.style;
-
-                        if(layer.type == 'points') {
-                            return;
-                        }
                         
                         console.log("apply-layer-style");
                         console.log(style);
