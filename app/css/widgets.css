@@ -657,6 +657,66 @@ white-space: nowrap;
     height: 24px;
 }
 
+/*! Light tooltip style */
+.ui-tooltip-widgettheme{
+    behavior: url(/css/pie/PIE.htc);
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.89, rgba(29,43,82,0.65)),
+        color-stop(0.57, rgba(29,43,82,0.75))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    color: rgb(240, 240, 260);
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.ui-tooltip-widgettheme .ui-tooltip-titlebar{
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 95%, rgba(29,43,82,0.75) 75%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.95, rgba(29,43,82,0.75)),
+        color-stop(0.75, rgba(29,43,82,0.95))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.75) 95%,
+        rgba(29,43,82,0.95) 75%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.75) 95%,
+        rgba(29,43,82,0.95) 75%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.ui-tooltip-widgettheme .ui-tooltip .qtip {
+    border-width:0;
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
 .mol-LayerControl-Styler .colorPicker {
     width: 130px;
 }
@@ -679,6 +739,11 @@ white-space: nowrap;
     margin-top:4px;
     margin-right:4px;
     text-align:right;
+}
+
+.mol-LayerControl-Styler .colorPickers span + div {
+    margin-top:2px;
+    margin-bottom:2px;
 }
 
 .mol-LayerControl-Styler .pointSlider {
