@@ -517,31 +517,30 @@ mol.modules.map.layers = function(mol) {
                     },
                     self = this,
                     q,
-                    layer_tile_style;
-                    
-                //initialize styler based on current carto_css
-                //parse tile_style
-                
-                //fill
-                //border
-                //size
-                
-                console.log("layer");
-                console.log(layer);
+                    layer_tile_style,
+                    baseHtml;
                 
                 layer_tile_style = self.parseLayerStyle(layer);
                 
-                console.log(layer_tile_style);
-                
-                //need to add type if statements
+                baseHtml = '' + 
+                       '<div class="mol-LayerControl-Styler">' +
+                       '  <div class="colorPickers">' +
+                       '  </div>' + 
+                       '  <div class="pointSlider">' +
+                       '  </div>' +
+                       '  <div class="buttonWrapper">' +
+                       '    <button id="applyStyle">Apply</button>' +
+                       '    <button id="cancelStyle">Cancel</button>' +
+                       '  </div>' +      
+                       '</div>';
                 
                 $(button).removeData('qtip');
                 q = $(button).qtip({
                     content: {
-                        text: self.getStylerLayout(layer),
+                        text: baseHtml,
                         title: {
                             text: 'Layer Style',
-                            button: true
+                            button: false
                         }
                     },
                     position: {
@@ -556,7 +555,12 @@ mol.modules.map.layers = function(mol) {
                     },
                     hide: false,
                     events: {
-                        render: function(event, api) {                        
+                        render: function(event, api) {    
+                            self.getStylerLayout(
+                                    $(api.elements.content)
+                                        .find('.mol-LayerControl-Styler'),
+                                    layer);
+                                      
                             $(api.elements.content)
                                 .find('.sizer')
                                     .slider({
@@ -569,13 +573,14 @@ mol.modules.map.layers = function(mol) {
                                             $(api.elements.content)
                                                 .find('#pointSizeValue')
                                                     .html(ui.value + "px");
-                                        }});
-                                        
-                            $(api.elements.content)
+                                        }
+                                    });
+                                    
+                             $(api.elements.content)
                                 .find('#pointSizeValue')
                                     .html($(api.elements.content)
-                                                .find('.sizer')
-                                                    .slider('value') + "px");
+                                        .find('.sizer')
+                                            .slider('value') + "px");                      
                                         
                             $(api.elements.content)
                                 .find('#applyStyle').click(
@@ -591,6 +596,8 @@ mol.modules.map.layers = function(mol) {
                                         o.border = $('#showBorderPalette')
                                                     .spectrum("get")
                                                         .toHexString();
+                                                        
+                                        //not if polygon                
                                         o.size = $(api.elements.content)
                                                     .find('.sizer')
                                                         .slider('value');
@@ -612,6 +619,13 @@ mol.modules.map.layers = function(mol) {
                                                 params));
                                     }
                                 );
+                                
+                            $(api.elements.content)
+                                .find('#cancelStyle').click(
+                                    function(event) {
+                                        $(button).qtip('destroy');
+                                    }
+                                );
                         },
                         show: function(event, api) {
                             $('#showFillPalette').spectrum({
@@ -628,56 +642,58 @@ mol.modules.map.layers = function(mol) {
                 layer.style = params.style; 
             },
             
-            getStylerLayout: function(layer) {
-                var styler;
-                
-                styler = '' + 
-                       '<div class="mol-LayerControl-Styler">' +
-                       '  <div class="colorPickers">' +
-                       '    <div class="colorPicker">' + 
-                       '      <span class="stylerLabel">Fill:&nbsp</span>' + 
-                       '      <input type="text" id="showFillPalette" />' +
-                       '    </div>' +
-                       '    <div class="colorPicker">' + 
-                       '      <span class="stylerLabel">Border:&nbsp</span>' + 
-                       '      <input type="text"' +
-                              'id="showBorderPalette" />' +
-                       '    </div>' +
-                       '  </div>' +
-                       '  <div class="pointSlider">' +
-                       '    <span class="sliderLabel">Size:&nbsp</span>' +
-                       '    <div class="pointSizeContainer">' +
-                       '      <div class="sizer"></div>' +
-                       '    </div>' +
-                       '    <span id="pointSizeValue">8px</span>' +
-                       '  </div>' + 
-                       '  <div class="buttonWrapper">' +
-                       '    <button id="applyStyle">Apply</button>' +
-                       '    <button>Cancel</button>' +
-                       '  </div>' +      
-                       '</div>';
-      
+            getStylerLayout: function(element, layer) {
+                var pointsPickers,
+                    pointsSizer;
+                    
                 /*
+                styler = '' + 
+                   '<div class="mol-LayerControl-Styler">' +
+                   '  <div class="colorPickers">' +
+                   '    <div class="colorPicker">' + 
+                   '      <span class="stylerLabel">Fill:&nbsp</span>' + 
+                   '      <input type="text" id="showFillPalette" />' +
+                   '    </div>' +
+                   '    <div class="colorPicker">' + 
+                   '      <span class="stylerLabel">Border:&nbsp</span>' + 
+                   '      <input type="text"' +
+                          'id="showBorderPalette" />' +
+                   '    </div>' +
+                   '  </div>' +
+                   '  <div class="pointSlider">' +
+                   '    <span class="sliderLabel">Size:&nbsp</span>' +
+                   '    <div class="pointSizeContainer">' +
+                   '      <div class="sizer"></div>' +
+                   '    </div>' +
+                   '    <span id="pointSizeValue">8px</span>' +
+                   '  </div>' + 
+                   '  <div class="buttonWrapper">' +
+                   '    <button id="applyStyle">Apply</button>' +
+                   '    <button>Cancel</button>' +
+                   '  </div>' +      
+                   '</div>';
+                */    
+                       
                 if(layer.style_table == "points_style") {
-                    if(layer.type == "localinv") {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'marker-fill: #6A0085;' + 
-                                'marker-line-color: #000000;' + 
-                                'marker-line-width: 1;' + 
-                                'marker-line-opacity: 1.0;' + 
-                                'marker-width:3;' + 
-                                'marker-allow-overlap:true;' + 
-                                '}';
-                    } else {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'marker-fill: #a62a16;' + 
-                                'marker-line-color: #ffffff;' + 
-                                'marker-line-width: 1;' + 
-                                'marker-line-opacity: 1.0;' + 
-                                'marker-width:4;' + 
-                                'marker-allow-overlap:true;' + 
-                                '}';
-                    }
+                   pointsPickers = '' + 
+                       '<div class="colorPicker">' + 
+                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                       '  <input type="text" id="showFillPalette" />' +
+                       '</div>' +
+                       '<div class="colorPicker">' + 
+                       '  <span class="stylerLabel">Border:&nbsp</span>' + 
+                       '  <input type="text" id="showBorderPalette" />' +
+                       '</div>';
+                       
+                   pointsSizer = '' +
+                       '<span class="sliderLabel">Size:&nbsp</span>' +
+                       '  <div class="pointSizeContainer">' +
+                       '    <div class="sizer"></div>' +
+                       '  </div>' +
+                       '<span id="pointSizeValue">8px</span>';
+                   
+                   $(element).find('.colorPickers').prepend(pointsPickers);
+                   $(element).find('.pointSlider').prepend(pointsSizer);
                 } else {
                     if(layer.source == "iucn") {
                         style = '#' + layer.dataset_id + '{' + 
@@ -720,35 +736,28 @@ mol.modules.map.layers = function(mol) {
                                 '    polygon-fill:#E25B5B;' +
                                 '  }' +
                                 '}';
-                    } else if (layer.type == 'regionalchecklist') {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 0.5;' + 
-                                'line-width: 1;' + 
-                                'polygon-fill: #000000;' + 
-                                'polygon-opacity:1.0;' + 
-                                '}';
-                    } else if (layer.type == 'localinv') {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1.0;' + 
-                                'line-width: 1;' + 
-                                'polygon-fill: #6A0085;' + 
-                                'polygon-opacity:1.0;' + 
-                                '}';
                     } else {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 0.50;' + 
-                                'line-width: 0;' + 
-                                'polygon-fill: #F60;' + 
-                                'polygon-opacity:1.0;' + 
-                                '}';
+                       pointsPickers = '' + 
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFillPalette" />' +
+                           '</div>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Border:&nbsp</span>' + 
+                           '  <input type="text" id="showBorderPalette" />' +
+                           '</div>';
+                           
+                       pointsSizer = '' +
+                           '<span class="sliderLabel">Width:&nbsp</span>' +
+                           '  <div class="pointSizeContainer">' +
+                           '    <div class="sizer"></div>' +
+                           '  </div>' +
+                           '<span id="pointSizeValue">8px</span>';
+                       
+                       $(element).find('.colorPickers').prepend(pointsPickers);
+                       $(element).find('.pointSlider').prepend(pointsSizer);
                     }
                 }
-                */
-                
-                return styler;
             },
             
             parseLayerStyle: function(layer) {
@@ -792,17 +801,38 @@ mol.modules.map.layers = function(mol) {
                         
                     } else if (layer.source == "jetz") {    
                         
-                    } else if (layer.type == 'regionalchecklist') {
-                        
-                    } else if (layer.type == 'localinv') {
-                        
                     } else {
+                        fillStyle = style
+                                    .substring(
+                                        style.indexOf('polygon-fill'),
+                                        style.length-1);
+                                        
+                        borderStyle = style
+                                    .substring(
+                                        style.indexOf('line-color'),
+                                        style.length-1); 
+                                  
+                        sizeStyle = style
+                                    .substring(
+                                        style.indexOf('line-width'),
+                                        style.length-1);                   
                         
+                        o = {fill: fillStyle
+                                  .substring(
+                                    fillStyle.indexOf('#'),
+                                    fillStyle.indexOf(';')),
+                             border: borderStyle
+                                  .substring(
+                                    borderStyle.indexOf('#'),
+                                    borderStyle.indexOf(';')),
+                             size: Number($.trim(sizeStyle
+                                  .substring(
+                                    sizeStyle.indexOf(':')+1,
+                                    sizeStyle.indexOf(';'))))};
                     }
                 }
-                
-               
-               return o;
+                               
+                return o;
             },
             
             changeStyleProperty: function(style, property, newStyle) {
@@ -840,13 +870,13 @@ mol.modules.map.layers = function(mol) {
                     if(layer.source == "iucn") {
                         
                     } else if (layer.source == "jetz") {    
-                        
-                    } else if (layer.type == 'regionalchecklist') {
-                        
-                    } else if (layer.type == 'localinv') {
-                        
+
                     } else {
-                        
+                        style = this.changeStyleProperty(style, 'line-color', newStyle.border);
+                        style = this.changeStyleProperty(style, 'polygon-fill', newStyle.fill);
+                        style = this.changeStyleProperty(style, 'line-width', newStyle.size);
+                
+                        updatedStyle = style;
                     }
                 }
                 
