@@ -523,7 +523,8 @@ mol.modules.map.layers = function(mol) {
                 layer_tile_style = self.parseLayerStyle(layer);
                 
                 baseHtml = '' + 
-                       '<div class="mol-LayerControl-Styler">' +
+                       '<div class="mol-LayerControl-Styler" ' + 
+                            'title="Click to edit layer style.">' +
                        '  <div class="colorPickers">' +
                        '  </div>' + 
                        '  <div class="pointSlider">' +
@@ -545,7 +546,7 @@ mol.modules.map.layers = function(mol) {
                     },
                     position: {
                         at: 'left center',
-                        my: 'right center'
+                        my: 'right top'
                     },
                     show: {
                         event: 'click',
@@ -561,47 +562,78 @@ mol.modules.map.layers = function(mol) {
                                         .find('.mol-LayerControl-Styler'),
                                     layer);
                                       
-                            $(api.elements.content)
-                                .find('.sizer')
-                                    .slider({
-                                        value: layer_tile_style.size, 
-                                        min: 1, 
-                                        max:8, 
-                                        step: 1, 
-                                        animate:"slow",
-                                        change: function(event, ui) {
-                                            $(api.elements.content)
-                                                .find('#pointSizeValue')
-                                                    .html(ui.value + "px");
-                                        }
-                                    });
+                            if(layer.source != "jetz" && 
+                               layer.source != "iucn") {
+                                $(api.elements.content)
+                                    .find('.sizer')
+                                        .slider({
+                                            value: layer_tile_style.size, 
+                                            min: 1, 
+                                            max:8, 
+                                            step: 1, 
+                                            animate:"slow",
+                                            change: function(event, ui) {
+                                                $(api.elements.content)
+                                                    .find('#pointSizeValue')
+                                                        .html(ui.value + "px");
+                                            }
+                                        });
                                     
-                             $(api.elements.content)
-                                .find('#pointSizeValue')
-                                    .html($(api.elements.content)
-                                        .find('.sizer')
-                                            .slider('value') + "px");                      
+                                 $(api.elements.content)
+                                    .find('#pointSizeValue')
+                                        .html($(api.elements.content)
+                                            .find('.sizer')
+                                                .slider('value') + "px"); 
+                            }          
+                                                  
                                         
                             $(api.elements.content)
                                 .find('#applyStyle').click(
                                     function(event) {
                                         var o = {},
                                             style_desc;
-                                        //new function that updates all values
-                                        //TODO needs type if statement
-                                        
-                                        o.fill = $('#showFillPalette')
+                                            
+                                        if(layer.source == "iucn") {
+                                            o.s1 = $('#showFill1Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                            o.s2 = $('#showFill2Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                            o.s3 = $('#showFill3Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                            o.s4 = $('#showFill4Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                            o.s5 = $('#showFill5Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                        } else if(layer.source == "jetz") {
+                                            o.s1 = $('#showFill1Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                            o.s2 = $('#showFill2Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                            o.s3 = $('#showFill3Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                            o.s4 = $('#showFill4Palette')
+                                                     .spectrum("get")
+                                                        .toHexString();
+                                        } else {
+                                            o.fill = $('#showFillPalette')
                                                     .spectrum("get")
                                                         .toHexString();
-                                        o.border = $('#showBorderPalette')
-                                                    .spectrum("get")
-                                                        .toHexString();
-                                                        
-                                        //not if polygon                
-                                        o.size = $(api.elements.content)
-                                                    .find('.sizer')
-                                                        .slider('value');
-
+                                            o.border = $('#showBorderPalette')
+                                                        .spectrum("get")
+                                                            .toHexString();                
+                                            o.size = $(api.elements.content)
+                                                        .find('.sizer')
+                                                            .slider('value');
+                                        }
+   
                                         style_desc = '#' + 
                                                      layer.dataset_id + 
                                                      self.updateStyle(
@@ -628,12 +660,44 @@ mol.modules.map.layers = function(mol) {
                                 );
                         },
                         show: function(event, api) {
-                            $('#showFillPalette').spectrum({
-                                color:layer_tile_style.fill
-                            });
-                            $('#showBorderPalette').spectrum({
-                                color:layer_tile_style.border
-                            });
+                            
+                            if(layer.source == "iucn") {
+                               $('#showFill1Palette').spectrum({
+                                  color:layer_tile_style.s1
+                               });  
+                               $('#showFill2Palette').spectrum({
+                                  color:layer_tile_style.s2
+                               });
+                               $('#showFill3Palette').spectrum({
+                                  color:layer_tile_style.s3
+                               });
+                               $('#showFill4Palette').spectrum({
+                                  color:layer_tile_style.s4
+                               });
+                               $('#showFill5Palette').spectrum({
+                                  color:layer_tile_style.s5
+                               });
+                            } else if(layer.source == "jetz") {
+                               $('#showFill1Palette').spectrum({
+                                  color:layer_tile_style.s1
+                               });  
+                               $('#showFill2Palette').spectrum({
+                                  color:layer_tile_style.s2
+                               });
+                               $('#showFill3Palette').spectrum({
+                                  color:layer_tile_style.s3
+                               });
+                               $('#showFill4Palette').spectrum({
+                                  color:layer_tile_style.s4
+                               });
+                            } else {
+                                $('#showFillPalette').spectrum({
+                                    color:layer_tile_style.fill
+                                });
+                                $('#showBorderPalette').spectrum({
+                                    color:layer_tile_style.border
+                                });
+                            }
                         }
                     }
                 });
@@ -644,35 +708,7 @@ mol.modules.map.layers = function(mol) {
             
             getStylerLayout: function(element, layer) {
                 var pointsPickers,
-                    pointsSizer;
-                    
-                /*
-                styler = '' + 
-                   '<div class="mol-LayerControl-Styler">' +
-                   '  <div class="colorPickers">' +
-                   '    <div class="colorPicker">' + 
-                   '      <span class="stylerLabel">Fill:&nbsp</span>' + 
-                   '      <input type="text" id="showFillPalette" />' +
-                   '    </div>' +
-                   '    <div class="colorPicker">' + 
-                   '      <span class="stylerLabel">Border:&nbsp</span>' + 
-                   '      <input type="text"' +
-                          'id="showBorderPalette" />' +
-                   '    </div>' +
-                   '  </div>' +
-                   '  <div class="pointSlider">' +
-                   '    <span class="sliderLabel">Size:&nbsp</span>' +
-                   '    <div class="pointSizeContainer">' +
-                   '      <div class="sizer"></div>' +
-                   '    </div>' +
-                   '    <span id="pointSizeValue">8px</span>' +
-                   '  </div>' + 
-                   '  <div class="buttonWrapper">' +
-                   '    <button id="applyStyle">Apply</button>' +
-                   '    <button>Cancel</button>' +
-                   '  </div>' +      
-                   '</div>';
-                */    
+                    pointsSizer;    
                        
                 if(layer.style_table == "points_style") {
                    pointsPickers = '' + 
@@ -696,46 +732,65 @@ mol.modules.map.layers = function(mol) {
                    $(element).find('.pointSlider').prepend(pointsSizer);
                 } else {
                     if(layer.source == "iucn") {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1.0;' + 
-                                'line-width: 0;' + 
-                                'polygon-opacity:1.0;' +
-                                '  [seasonality=1] {' +
-                                '    polygon-fill:#9C0;' +
-                                '  }' +
-                                '  [seasonality=2] {' +
-                                '    polygon-fill:#FC0;' +
-                                '  }' +
-                                '  [seasonality=3] {' +
-                                '    polygon-fill:#006BB4;' +
-                                '  }' +
-                                '  [seasonality=4] {' +
-                                '    polygon-fill:#E39C5B;' +
-                                '  }' +
-                                '  [seasonality=5] {' +
-                                '    polygon-fill:#E25B5B;' +
-                                '  }' +
-                                '}';
+                        pointsPickers = '' + 
+                           '<span>Breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill1Palette" />' +
+                           '</div>' +
+                           '<span>Resident</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill2Palette" />' +
+                           '</div>' +
+                           '<span>Non-breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill3Palette" />' +
+                           '</div>' +
+                           '<span>Passage</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill4Palette" />' +
+                           '</div>' +
+                           '<span>Seasonality Uncertain</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill5Palette" />' +
+                           '</div>';
+                       
+                       $(element).find('.colorPickers').prepend(pointsPickers);
                     } else if (layer.source == "jetz") {    
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1.0;' + 
-                                'line-width: 0;' + 
-                                'polygon-opacity:1.0;' +
-                                '  [seasonality=1] {' +
-                                '    polygon-fill:#FC0;' +
-                                '  }' +
-                                '  [seasonality=2] {' +
-                                '    polygon-fill:#9C0;' +
-                                '  }' +
-                                '  [seasonality=3] {' +
-                                '    polygon-fill:#006BB4;' +
-                                '  }' +
-                                '  [seasonality=4] {' +
-                                '    polygon-fill:#E25B5B;' +
-                                '  }' +
-                                '}';
+                        
+                       //1 breeding 
+                       //2 resident 
+                       //3 nonbreeding 
+                       //4 passage
+                       //5 seasonality uncertain
+                        
+                       pointsPickers = '' + 
+                           '<span>Breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill1Palette" />' +
+                           '</div>' +
+                           '<span>Resident</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill2Palette" />' +
+                           '</div>' +
+                           '<span>Non-breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill3Palette" />' +
+                           '</div>' +
+                           '<span>Passage</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill4Palette" />' +
+                           '</div>';
+                       
+                       $(element).find('.colorPickers').prepend(pointsPickers);
                     } else {
                        pointsPickers = '' + 
                            '<div class="colorPicker">' + 
@@ -763,10 +818,19 @@ mol.modules.map.layers = function(mol) {
             parseLayerStyle: function(layer) {
                 var o,
                     style = layer.tile_style,
+                    s1Style,
+                    s2Style,
+                    s3Style,
+                    s4Style,
+                    s5Style,
                     fillStyle,
                     borderStyle,
-                    sizeStyle;
-                
+                    sizeStyle,
+                    s1,
+                    s2,
+                    s3,
+                    s4,
+                    s5;
                 
                 if(layer.style_table == "points_style") {
                     fillStyle = style
@@ -798,9 +862,124 @@ mol.modules.map.layers = function(mol) {
                                     sizeStyle.indexOf(';'))))};
                 } else {
                     if(layer.source == "iucn") {
+                        s1Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=1'),
+                                        style.length-1);
+                                            
+                        s1 = s1Style
+                                .substring(
+                                    s1Style.indexOf('polygon-fill'),
+                                    s1Style.length-1);
+                                    
+                        s2Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=2'),
+                                        style.length-1);
+                                            
+                        s2 = s2Style
+                                .substring(
+                                    s2Style.indexOf('polygon-fill'),
+                                    s2Style.length-1);
+                                    
+                        s3Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=3'),
+                                        style.length-1);
+                                            
+                        s3 = s3Style
+                                .substring(
+                                    s3Style.indexOf('polygon-fill'),
+                                    s3Style.length-1);
+                                    
+                        s4Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=4'),
+                                        style.length-1);
+                                            
+                        s4 = s4Style
+                                .substring(
+                                    s4Style.indexOf('polygon-fill'),
+                                    s4Style.length-1);
                         
-                    } else if (layer.source == "jetz") {    
+                        s5Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=5'),
+                                        style.length-1);
+                                            
+                        s5 = s5Style
+                                .substring(
+                                    s5Style.indexOf('polygon-fill'),
+                                    s5Style.length-1);
                         
+                        o = {s1: s1.substring(
+                                    s1.indexOf('#'),
+                                    s1.indexOf(';')),
+                             s2: s2.substring(
+                                    s2.indexOf('#'),
+                                    s2.indexOf(';')),
+                             s3: s3.substring(
+                                    s3.indexOf('#'),
+                                    s3.indexOf(';')),
+                             s4: s4.substring(
+                                    s4.indexOf('#'),
+                                    s4.indexOf(';')),
+                             s5: s5.substring(
+                                    s5.indexOf('#'),
+                                    s5.indexOf(';'))};
+                    } else if (layer.source == "jetz") {
+                        s1Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=1'),
+                                        style.length-1);
+                                            
+                        s1 = s1Style
+                                .substring(
+                                    s1Style.indexOf('polygon-fill'),
+                                    s1Style.length-1);
+                                    
+                        s2Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=2'),
+                                        style.length-1);
+                                            
+                        s2 = s2Style
+                                .substring(
+                                    s2Style.indexOf('polygon-fill'),
+                                    s2Style.length-1);
+                                    
+                        s3Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=3'),
+                                        style.length-1);
+                                            
+                        s3 = s3Style
+                                .substring(
+                                    s3Style.indexOf('polygon-fill'),
+                                    s3Style.length-1);
+                                    
+                        s4Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=4'),
+                                        style.length-1);
+                                            
+                        s4 = s4Style
+                                .substring(
+                                    s4Style.indexOf('polygon-fill'),
+                                    s4Style.length-1);
+                        
+                        o = {s1: s1.substring(
+                                    s1.indexOf('#'),
+                                    s1.indexOf(';')),
+                             s2: s2.substring(
+                                    s2.indexOf('#'),
+                                    s2.indexOf(';')),
+                             s3: s3.substring(
+                                    s3.indexOf('#'),
+                                    s3.indexOf(';')),
+                             s4: s4.substring(
+                                    s4.indexOf('#'),
+                                    s4.indexOf(';'))};
                     } else {
                         fillStyle = style
                                     .substring(
@@ -856,30 +1035,85 @@ mol.modules.map.layers = function(mol) {
                 return updatedStyle;
             },
             
+            changeSeasonalStyleProperty: function(style, property, newStyle) {
+                var updatedStyle,
+                    subStyle,
+                    midStyle;
+                
+                subStyle = style
+                            .substring(
+                                style.indexOf(property),
+                                style.length
+                            );
+                                
+                midStyle = subStyle
+                            .substring(
+                                subStyle.indexOf('polygon-fill'),
+                                subStyle.length
+                            );
+                
+                updatedStyle = style.substring(
+                                   0,
+                                   style.indexOf(property+"]") + 
+                                   property.length+1) +
+                               " { polygon-fill:" +  
+                               newStyle +
+                               midStyle.substring(
+                                   midStyle.indexOf(";"),
+                                   midStyle.length);
+                
+                return updatedStyle;
+            },
+            
             updateStyle: function(layer, style, newStyle) {
                 var updatedStyle;
                 
                 if(layer.style_table == "points_style") {
                     
-                    style = this.changeStyleProperty(style, 'marker-fill', newStyle.fill);
-                    style = this.changeStyleProperty(style, 'marker-line-color', newStyle.border);
-                    style = this.changeStyleProperty(style, 'marker-width', newStyle.size);
+                    style = this.changeStyleProperty(
+                                style, 'marker-fill', newStyle.fill);
+                    style = this.changeStyleProperty(
+                                style, 'marker-line-color', newStyle.border);
+                    style = this.changeStyleProperty(
+                                style, 'marker-width', newStyle.size);
                 
                     updatedStyle = style;
                 } else {
                     if(layer.source == "iucn") {
-                        
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=1', newStyle.s1);
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=2', newStyle.s2);
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=3', newStyle.s3);
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=4', newStyle.s4);
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=5', newStyle.s5);
+                
+                        updatedStyle = style;
                     } else if (layer.source == "jetz") {    
-
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=1', newStyle.s1);
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=2', newStyle.s2);
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=3', newStyle.s3);
+                        style = this.changeSeasonalStyleProperty(
+                                    style, 'seasonality=4', newStyle.s4);
+                
+                        updatedStyle = style;
                     } else {
-                        style = this.changeStyleProperty(style, 'line-color', newStyle.border);
-                        style = this.changeStyleProperty(style, 'polygon-fill', newStyle.fill);
-                        style = this.changeStyleProperty(style, 'line-width', newStyle.size);
+                        style = this.changeStyleProperty(
+                                    style, 'line-color', newStyle.border);
+                        style = this.changeStyleProperty(
+                                    style, 'polygon-fill', newStyle.fill);
+                        style = this.changeStyleProperty(
+                                    style, 'line-width', newStyle.size);
                 
                         updatedStyle = style;
                     }
                 }
-                
                 
                 return updatedStyle;
             },
