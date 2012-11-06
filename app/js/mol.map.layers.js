@@ -510,15 +510,18 @@ mol.modules.map.layers = function(mol) {
             },
             
             displayLayerStyler: function(button, layer) {
-                var table_name,
-                    style_desc, 
+                var table_name, 
                     params = {
                         layer: layer,
                         style: null
                     },
-                    self = this;
+                    self = this,
+                    q,
+                    layer_tile_style;
                     
                 //initialize styler based on current carto_css
+                //parse tile_style
+                
                 //fill
                 //border
                 //size
@@ -526,8 +529,14 @@ mol.modules.map.layers = function(mol) {
                 console.log("layer");
                 console.log(layer);
                 
+                layer_tile_style = self.parseLayerStyle(layer);
+                
+                console.log(layer_tile_style);
+                
+                //need to add type if statements
+                
                 $(button).removeData('qtip');
-                var q = $(button).qtip({
+                q = $(button).qtip({
                     content: {
                         text: self.getStylerLayout(layer),
                         title: {
@@ -547,55 +556,73 @@ mol.modules.map.layers = function(mol) {
                     },
                     hide: false,
                     events: {
-                        render: function(event, api) {
-                            
-                                                        
+                        render: function(event, api) {                        
                             $(api.elements.content)
                                 .find('.sizer')
                                     .slider({
-                                        value: 0.5, 
-                                        min: 0, 
-                                        max:1, 
-                                        step: 0.02, 
-                                        animate:"slow"});
+                                        value: layer_tile_style.size, 
+                                        min: 1, 
+                                        max:8, 
+                                        step: 1, 
+                                        animate:"slow",
+                                        change: function(event, ui) {
+                                            $(api.elements.content)
+                                                .find('#pointSizeValue')
+                                                    .html(ui.value + "px");
+                                        }});
+                                        
+                            $(api.elements.content)
+                                .find('#pointSizeValue')
+                                    .html($(api.elements.content)
+                                                .find('.sizer')
+                                                    .slider('value') + "px");
+                                        
+                            $(api.elements.content)
+                                .find('#applyStyle').click(
+                                    function(event) {
+                                        var o = {},
+                                            style_desc;
+                                        //new function that updates all values
+                                        //TODO needs type if statement
+                                        
+                                        o.fill = $('#showFillPalette')
+                                                    .spectrum("get")
+                                                        .toHexString();
+                                        o.border = $('#showBorderPalette')
+                                                    .spectrum("get")
+                                                        .toHexString();
+                                        o.size = $(api.elements.content)
+                                                    .find('.sizer')
+                                                        .slider('value');
+
+                                        style_desc = '#' + 
+                                                     layer.dataset_id + 
+                                                     self.updateStyle(
+                                                         layer,
+                                                         layer.tile_style, 
+                                                         o);
+                                        
+                                        params.style = style_desc;
+                                        
+                                        console.log(params.style);    
+                                        
+                                        self.bus.fireEvent(
+                                            new mol.bus.Event(
+                                                'apply-layer-style', 
+                                                params));
+                                    }
+                                );
                         },
                         show: function(event, api) {
                             $('#showFillPalette').spectrum({
-                                color:"f00",
-                                change: function() {
-                                    console.log("fill changed");
-                                    
-                                    style_desc = '#' + 
-                                    layer.dataset_id + 
-                                    '{polygon-fill:#FF0000}';
-                                        
-                                    params.style = style_desc;
-                                        
-                                    console.log("styler click");
-                                    console.log(params.style);    
-                                        
-                                    self.bus.fireEvent(
-                                        new mol.bus.Event(
-                                            'apply-layer-style', 
-                                            params));
-                                }});
-                            $('#showBorderPalette').spectrum({color:"f00"});
+                                color:layer_tile_style.fill
+                            });
+                            $('#showBorderPalette').spectrum({
+                                color:layer_tile_style.border
+                            });
                         }
                     }
                 });
-                
-
-                table_name = layer.dataset_id;
-                style_desc = '#' + 
-                             table_name + 
-                             '{polygon-fill:#FF0000}';
-                    
-                params.style = style_desc;   
-                    
-                self.bus.fireEvent(
-                    new mol.bus.Event(
-                        'apply-layer-style', 
-                        params));
                   
                 //keep the style around for later        
                 layer.style = params.style; 
@@ -625,7 +652,7 @@ mol.modules.map.layers = function(mol) {
                        '    <span id="pointSizeValue">8px</span>' +
                        '  </div>' + 
                        '  <div class="buttonWrapper">' +
-                       '    <button>Apply</button>' +
+                       '    <button id="applyStyle">Apply</button>' +
                        '    <button>Cancel</button>' +
                        '  </div>' +      
                        '</div>';
@@ -722,6 +749,109 @@ mol.modules.map.layers = function(mol) {
                 */
                 
                 return styler;
+            },
+            
+            parseLayerStyle: function(layer) {
+                var o,
+                    style = layer.tile_style,
+                    fillStyle,
+                    borderStyle,
+                    sizeStyle;
+                
+                
+                if(layer.style_table == "points_style") {
+                    fillStyle = style
+                                    .substring(
+                                        style.indexOf('marker-fill'),
+                                        style.length-1);
+                                        
+                    borderStyle = style
+                                    .substring(
+                                        style.indexOf('marker-line-color'),
+                                        style.length-1);   
+                                        
+                    sizeStyle = style
+                                    .substring(
+                                        style.indexOf('marker-width'),
+                                        style.length-1);                  
+                    
+                    o = {fill: fillStyle
+                                  .substring(
+                                    fillStyle.indexOf('#'),
+                                    fillStyle.indexOf(';')),
+                         border: borderStyle
+                                  .substring(
+                                    borderStyle.indexOf('#'),
+                                    borderStyle.indexOf(';')),
+                         size: Number($.trim(sizeStyle
+                                  .substring(
+                                    sizeStyle.indexOf(':')+1,
+                                    sizeStyle.indexOf(';'))))};
+                } else {
+                    if(layer.source == "iucn") {
+                        
+                    } else if (layer.source == "jetz") {    
+                        
+                    } else if (layer.type == 'regionalchecklist') {
+                        
+                    } else if (layer.type == 'localinv') {
+                        
+                    } else {
+                        
+                    }
+                }
+                
+               
+               return o;
+            },
+            
+            changeStyleProperty: function(style, property, newStyle) {
+                var updatedStyle,
+                    subStyle;
+                
+                subStyle = style
+                            .substring(
+                                style.indexOf(property),
+                                style.length);
+                
+                updatedStyle = style.substring(
+                                   0,
+                                   style.indexOf(property + ":") + 
+                                   property.length+1) +
+                               newStyle +
+                               subStyle.substring(
+                                   subStyle.indexOf(";"),
+                                   subStyle.length);
+                
+                return updatedStyle;
+            },
+            
+            updateStyle: function(layer, style, newStyle) {
+                var updatedStyle;
+                
+                if(layer.style_table == "points_style") {
+                    
+                    style = this.changeStyleProperty(style, 'marker-fill', newStyle.fill);
+                    style = this.changeStyleProperty(style, 'marker-line-color', newStyle.border);
+                    style = this.changeStyleProperty(style, 'marker-width', newStyle.size);
+                
+                    updatedStyle = style;
+                } else {
+                    if(layer.source == "iucn") {
+                        
+                    } else if (layer.source == "jetz") {    
+                        
+                    } else if (layer.type == 'regionalchecklist') {
+                        
+                    } else if (layer.type == 'localinv') {
+                        
+                    } else {
+                        
+                    }
+                }
+                
+                
+                return updatedStyle;
             },
 
             /**
