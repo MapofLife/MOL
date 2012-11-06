@@ -523,8 +523,7 @@ mol.modules.map.layers = function(mol) {
                 layer_tile_style = self.parseLayerStyle(layer);
                 
                 baseHtml = '' + 
-                       '<div class="mol-LayerControl-Styler" ' + 
-                            'title="Click to edit layer style.">' +
+                       '<div class="mol-LayerControl-Styler">' +
                        '  <div class="colorPickers"></div>' + 
                        '  <div class="pointSlider"></div>' +
                        '  <div class="buttonWrapper">' +
@@ -553,6 +552,10 @@ mol.modules.map.layers = function(mol) {
                         solo: true
                     },
                     hide: false,
+                    style: {
+                        def: false,
+                        classes: 'ui-tooltip-widgettheme'
+                    },
                     events: {
                         render: function(event, api) {    
                             self.getStylerLayout(
@@ -788,27 +791,27 @@ mol.modules.map.layers = function(mol) {
                 } else {
                     if(layer.source == "iucn") {
                         pointsPickers = '' + 
-                           '<span>Breeding</span>' +
+                           '<span class="seasonLabel">Breeding</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill1Palette" />' +
                            '</div>' +
-                           '<span>Resident</span>' +
+                           '<span class="seasonLabel">Resident</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill2Palette" />' +
                            '</div>' +
-                           '<span>Non-breeding</span>' +
+                           '<span class="seasonLabel">Non-breeding</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill3Palette" />' +
                            '</div>' +
-                           '<span>Passage</span>' +
+                           '<span class="seasonLabel">Passage</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill4Palette" />' +
                            '</div>' +
-                           '<span>Seasonality Uncertain</span>' +
+                           '<span class="seasonLabel">Seasonality Uncertain</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill5Palette" />' +
@@ -824,22 +827,22 @@ mol.modules.map.layers = function(mol) {
                        //5 seasonality uncertain
                         
                        pointsPickers = '' + 
-                           '<span>Breeding</span>' +
+                           '<span class="seasonLabel">Breeding</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill1Palette" />' +
                            '</div>' +
-                           '<span>Resident</span>' +
+                           '<span class="seasonLabel">Resident</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill2Palette" />' +
                            '</div>' +
-                           '<span>Non-breeding</span>' +
+                           '<span class="seasonLabel">Non-breeding</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill3Palette" />' +
                            '</div>' +
-                           '<span>Passage</span>' +
+                           '<span class="seasonLabel">Passage</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill4Palette" />' +
@@ -1210,7 +1213,8 @@ mol.modules.map.layers = function(mol) {
                 var html = '' +
                     '<div class="layerContainer">' +
                     '  <div class="layer">' +
-                    '    <button title="Layer styler." class="styler">' + 
+                    '    <button title="Click to edit layer style." ' +
+                                'class="styler">' + 
                     '      <div class="legend-point"></div> ' +
                     '      <div class="legend-polygon"></div> ' +
                     '      <div class="legend-seasonal">' +
