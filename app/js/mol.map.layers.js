@@ -372,9 +372,35 @@ mol.modules.map.layers = function(mol) {
                                 $(l.layer).focus();
                                 if($(this).hasClass('selected')) {
                                     $(this).removeClass('selected');
+                                    
+                                    //unstyle previous layer
+                                    self.toggleLayerHighlight(layer,false);
                                 } else {
-                                    $(self.display).find('.selected').removeClass('selected');
+                                    
+                                    if($(self.display).find('.selected').length > 0) {
+                                        //get a reference to this layer    
+                                        console.log("layer");
+                                        console.log($(self.display).find('.selected'));
+                                        console.log($(self.display).find('.selected').parent().attr('id'));
+                                        console.log(self.display.getLayerById($(self.display).find('.selected').parent().attr('id')));
+                                        self.toggleLayerHighlight(
+                                            self.display
+                                                .getLayerById(
+                                                    $(self.display)
+                                                        .find('.selected')
+                                                            .parent()
+                                                                .attr('id')),
+                                                                false);
+                                        
+                                    }
+                                    
+                                    $(self.display).find('.selected')
+                                        .removeClass('selected');
+                                        
                                     $(this).addClass('selected');
+                                    
+                                    //style selected layer
+                                    self.toggleLayerHighlight(layer,true);
                                 }
 
                                 self.map.overlayMapTypes.forEach(
@@ -520,7 +546,7 @@ mol.modules.map.layers = function(mol) {
                     q,
                     self = this;
                 
-                layer_tile_style = self.parseLayerStyle(layer);
+                layer_tile_style = self.parseLayerStyle(layer, false);
                 
                 baseHtml = '' + 
                        '<div class="mol-LayerControl-Styler">' +
@@ -697,8 +723,8 @@ mol.modules.map.layers = function(mol) {
                                                     'border-width':o.size+"px"
                                                     });
                                                 
-                                            }  
-                                        }
+                                        }  
+                                    }
    
                                         style_desc = '#' + 
                                                  layer.dataset_id + 
@@ -854,12 +880,19 @@ mol.modules.map.layers = function(mol) {
                 }
             },
             
-            parseLayerStyle: function(layer) {
+            parseLayerStyle: function(layer, original) {
                 var o,
                     fillStyle, borderStyle, sizeStyle,
-                    style = layer.tile_style,
+                    style,
                     s1Style, s2Style, s3Style, s4Style, s5Style,
                     s1, s2, s3, s4, s5;
+                    
+                    
+                if(original) {
+                    style = layer.style;
+                } else {
+                    style = layer.tile_style;
+                }   
                 
                 if(layer.style_table == "points_style") {
                     fillStyle = style
@@ -1078,6 +1111,61 @@ mol.modules.map.layers = function(mol) {
                 return updatedStyle;
             },
 
+            toggleLayerHighlight: function(layer, visible) {
+                var o = {},
+                    style_desc,
+                    self = this,
+                    style = layer.tile_style,
+                    oldStyle,
+                    params = {
+                        layer: layer,
+                        style: null
+                    };
+                    
+                    oldStyle = self.parseLayerStyle(layer, true);
+                    
+                    if(layer.style_table == "points_style") {
+                        style = this.changeStyleProperty(
+                                    style, 
+                                    'marker-line-color', 
+                                    visible ? '#FF1200' : oldStyle.border, 
+                                    false);
+                    } else {
+                        if(layer.source == "iucn" || layer.source == "jetz") {
+                            style = this.changeStyleProperty(
+                                    style, 
+                                    'line-color', 
+                                    "#FF1200", 
+                                    false);
+                            style = this.changeStyleProperty(
+                                    style, 
+                                    'line-width', 
+                                    visible ? 1 : 0, 
+                                    false);
+                        } else {
+                            style = this.changeStyleProperty(
+                                        style, 
+                                        'line-color', 
+                                        visible ? '#FF1200' : oldStyle.border, 
+                                        false);
+                            style = this.changeStyleProperty(
+                                        style, 
+                                        'line-width', 
+                                        visible ? 1 : oldStyle.size, 
+                                        false);
+                        }
+                    }
+
+                    style_desc = style;
+
+                    params.style = style_desc;   
+                    
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'apply-layer-style', 
+                            params));
+                    
+            },
             /**
             * Add sorting capability to LayerListDisplay, when a result is
             * drag-n-drop, and the order of the result list is changed,
@@ -1270,9 +1358,9 @@ mol.modules.map.layers = function(mol) {
                 return $(this).find('#{0}'.format(escape(layer.id)));
             },
 
-               getLayerById: function(id) {
-                    return _.find(this.layers, function(layer){ return layer.id === id; });
-               },
+            getLayerById: function(id) {
+                return _.find(this.layers, function(layer){ return layer.id === id; });
+            },
 
             addLayer: function(layer) {
                 var ld = new mol.map.layers.LayerDisplay(layer);

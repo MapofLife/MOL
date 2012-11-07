@@ -124,8 +124,6 @@ mol.modules.map.tiles = function(mol) {
                             function(maptype, index) {
                                 //find the overlaymaptype to style
                                 if (maptype.name === layer.id) {
-                                    console.log("match");
-                                    
                                     //remove it from the map
                                     self.map.overlayMapTypes.removeAt(index);
                                     //add the style
@@ -135,11 +133,21 @@ mol.modules.map.tiles = function(mol) {
                                     //fix the layer order
                                     self.map.overlayMapTypes.forEach(
                                         function(newmaptype, newindex) {
-                                            var mt;
+                                            var mt,
+                                                e,
+                                                params = {
+                                                    layer: layer,
+                                                    opacity: maptype.opacity
+                                                };
                                             if(newmaptype.name === layer.id) {
                                                 mt = self.map.overlayMapTypes.removeAt(newindex);
                                                 self.map.overlayMapTypes.insertAt(index, mt);
-                                                return
+                                                e = new mol.bus.Event(
+                                                    'layer-opacity', 
+                                                    params
+                                                );
+                                                self.bus.fireEvent(e);
+                                                return;
                                             }
                                         }
                                     );
@@ -329,6 +337,7 @@ mol.modules.map.tiles = function(mol) {
                 
                 if(layer.tile_style == undefined) {
                     layer.tile_style = this.getDefaultStyle(layer);
+                    layer.style = layer.tile_style;
                 }
 
                 this.layer = new google.maps.CartoDBLayer({
