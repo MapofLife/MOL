@@ -497,7 +497,9 @@ mol.modules.map.layers = function(mol) {
                     self = this,
                     q,
                     layer_tile_style,
-                    baseHtml;
+                    baseHtml,
+                    max,
+                    min;
                 
                 layer_tile_style = self.parseLayerStyle(layer);
                 
@@ -541,6 +543,14 @@ mol.modules.map.layers = function(mol) {
                                     $(api.elements.content)
                                         .find('.mol-LayerControl-Styler'),
                                     layer);
+                                    
+                            if(layer.style_table == "points_style") {
+                                max = 8;
+                                min = 1;
+                            } else {
+                                max = 3;
+                                min = 0;
+                            }        
                                       
                             if(layer.source != "jetz" && 
                                layer.source != "iucn") {
@@ -548,9 +558,9 @@ mol.modules.map.layers = function(mol) {
                                     .find('.sizer')
                                         .slider({
                                             value: layer_tile_style.size, 
-                                            min: 1, 
-                                            max:8, 
-                                            step: 1, 
+                                            min:min, 
+                                            max:max, 
+                                            step:1, 
                                             animate:"slow",
                                             change: function(event, ui) {
                                                 $(api.elements.content)
