@@ -370,7 +370,7 @@ mol.modules.map.tiles = function(mol) {
                                 'marker-line-color: #ffffff;' + 
                                 'marker-line-width: 1;' + 
                                 'marker-line-opacity: 1.0;' + 
-                                'marker-width:4;' + 
+                                'marker-width:3;' + 
                                 'marker-allow-overlap:true;' + 
                                 '}';
                     }
@@ -419,15 +419,15 @@ mol.modules.map.tiles = function(mol) {
                     } else if (layer.type == 'regionalchecklist') {
                         style = '#' + layer.dataset_id + '{' + 
                                 'line-color: #000000;' + 
-                                'line-opacity: 0.5;' + 
-                                'line-width: 1;' + 
+                                'line-opacity: 1;' + 
+                                'line-width: 0;' + 
                                 'polygon-fill: #000000;' + 
                                 'polygon-opacity:1.0;' + 
                                 '}';
                     } else if (layer.type == 'localinv') {
                         style = '#' + layer.dataset_id + '{' + 
                                 'line-color: #000000;' + 
-                                'line-opacity: 1.0;' + 
+                                'line-opacity: 1;' + 
                                 'line-width: 1;' + 
                                 'polygon-fill: #6A0085;' + 
                                 'polygon-opacity:1.0;' + 
@@ -435,7 +435,7 @@ mol.modules.map.tiles = function(mol) {
                     } else {
                         style = '#' + layer.dataset_id + '{' + 
                                 'line-color: #000000;' + 
-                                'line-opacity: 0.50;' + 
+                                'line-opacity: 1;' + 
                                 'line-width: 0;' + 
                                 'polygon-fill: #F60;' + 
                                 'polygon-opacity:1.0;' + 
