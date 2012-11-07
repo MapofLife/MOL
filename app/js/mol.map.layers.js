@@ -358,7 +358,6 @@ mol.modules.map.layers = function(mol) {
                         );
                         
                         // Click handler for style toggle 
-                        //TODO replace with a style picker widget (issue #124)
                         l.styler.click(
                             function(event) {   
                                 self.displayLayerStyler(this, layer);
@@ -510,17 +509,16 @@ mol.modules.map.layers = function(mol) {
             },
             
             displayLayerStyler: function(button, layer) {
-                var table_name, 
+                var baseHtml,
+                    layer_tile_style,
+                    max,
+                    min,
                     params = {
                         layer: layer,
                         style: null
                     },
-                    self = this,
                     q,
-                    layer_tile_style,
-                    baseHtml,
-                    max,
-                    min;
+                    self = this;
                 
                 layer_tile_style = self.parseLayerStyle(layer);
                 
@@ -535,6 +533,7 @@ mol.modules.map.layers = function(mol) {
                        '</div>';
                 
                 $(button).removeData('qtip');
+                
                 q = $(button).qtip({
                     content: {
                         text: baseHtml,
@@ -708,9 +707,7 @@ mol.modules.map.layers = function(mol) {
                                                      layer.tile_style, 
                                                      o);
                                     
-                                    params.style = style_desc;
-                                    
-                                    console.log(params.style);    
+                                    params.style = style_desc;   
                                     
                                     self.bus.fireEvent(
                                         new mol.bus.Event(
@@ -775,11 +772,11 @@ mol.modules.map.layers = function(mol) {
             },
             
             getStylerLayout: function(element, layer) {
-                var pointsPickers,
-                    pointsSizer;    
+                var pickers,
+                    sizer;    
                        
                 if(layer.style_table == "points_style") {
-                   pointsPickers = '' + 
+                   pickers = '' + 
                        '<div class="colorPicker">' + 
                        '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                        '  <input type="text" id="showFillPalette" />' +
@@ -789,54 +786,18 @@ mol.modules.map.layers = function(mol) {
                        '  <input type="text" id="showBorderPalette" />' +
                        '</div>';
                        
-                   pointsSizer = '' +
+                   sizer = '' +
                        '<span class="sliderLabel">Size:&nbsp</span>' +
                        '  <div class="pointSizeContainer">' +
                        '    <div class="sizer"></div>' +
                        '  </div>' +
                        '<span id="pointSizeValue">8px</span>';
                    
-                   $(element).find('.colorPickers').prepend(pointsPickers);
-                   $(element).find('.pointSlider').prepend(pointsSizer);
+                   $(element).find('.colorPickers').prepend(pickers);
+                   $(element).find('.pointSlider').prepend(sizer);
                 } else {
-                    if(layer.source == "iucn") {
-                        pointsPickers = '' + 
-                           '<span class="seasonLabel">Breeding</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill1Palette" />' +
-                           '</div>' +
-                           '<span class="seasonLabel">Resident</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill2Palette" />' +
-                           '</div>' +
-                           '<span class="seasonLabel">Non-breeding</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill3Palette" />' +
-                           '</div>' +
-                           '<span class="seasonLabel">Passage</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill4Palette" />' +
-                           '</div>' +
-                           '<span class="seasonLabel">Seasonality Uncertain</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill5Palette" />' +
-                           '</div>';
-                       
-                       $(element).find('.colorPickers').prepend(pointsPickers);
-                    } else if (layer.source == "jetz") {    
-                        
-                       //1 breeding 
-                       //2 resident 
-                       //3 nonbreeding 
-                       //4 passage
-                       //5 seasonality uncertain
-                        
-                       pointsPickers = '' + 
+                    if(layer.source == "iucn" || layer.source == "jetz") {
+                        pickers = '' + 
                            '<span class="seasonLabel">Breeding</span>' +
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
@@ -857,10 +818,20 @@ mol.modules.map.layers = function(mol) {
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill4Palette" />' +
                            '</div>';
-                       
-                       $(element).find('.colorPickers').prepend(pointsPickers);
+                           
+                       if (layer.source == "iucn") {
+                           pickers+=''+
+                               '<span class="seasonLabel">' + 
+                                   'Seasonality Uncertain</span>' +
+                               '<div class="colorPicker">' + 
+                               '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                               '  <input type="text" id="showFill5Palette" />' +
+                               '</div>';  
+                       }
+                           
+                       $(element).find('.colorPickers').prepend(pickers);
                     } else {
-                       pointsPickers = '' + 
+                       pickers = '' + 
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFillPalette" />' +
@@ -870,35 +841,25 @@ mol.modules.map.layers = function(mol) {
                            '  <input type="text" id="showBorderPalette" />' +
                            '</div>';
                            
-                       pointsSizer = '' +
+                       sizer = '' +
                            '<span class="sliderLabel">Width:&nbsp</span>' +
                            '  <div class="pointSizeContainer">' +
                            '    <div class="sizer"></div>' +
                            '  </div>' +
                            '<span id="pointSizeValue">8px</span>';
                        
-                       $(element).find('.colorPickers').prepend(pointsPickers);
-                       $(element).find('.pointSlider').prepend(pointsSizer);
+                       $(element).find('.colorPickers').prepend(pickers);
+                       $(element).find('.pointSlider').prepend(sizer);
                     }
                 }
             },
             
             parseLayerStyle: function(layer) {
                 var o,
+                    fillStyle, borderStyle, sizeStyle,
                     style = layer.tile_style,
-                    s1Style,
-                    s2Style,
-                    s3Style,
-                    s4Style,
-                    s5Style,
-                    fillStyle,
-                    borderStyle,
-                    sizeStyle,
-                    s1,
-                    s2,
-                    s3,
-                    s4,
-                    s5;
+                    s1Style, s2Style, s3Style, s4Style, s5Style,
+                    s1, s2, s3, s4, s5;
                 
                 if(layer.style_table == "points_style") {
                     fillStyle = style
@@ -929,7 +890,7 @@ mol.modules.map.layers = function(mol) {
                                     sizeStyle.indexOf(':')+1,
                                     sizeStyle.indexOf(';'))))};
                 } else {
-                    if(layer.source == "iucn") {
+                    if(layer.source == "iucn" || layer.source == "jetz") {
                         s1Style = style
                                     .substring(
                                         style.indexOf('seasonality=1'),
@@ -969,73 +930,7 @@ mol.modules.map.layers = function(mol) {
                                 .substring(
                                     s4Style.indexOf('polygon-fill'),
                                     s4Style.length-1);
-                        
-                        s5Style = style
-                                    .substring(
-                                        style.indexOf('seasonality=5'),
-                                        style.length-1);
-                                            
-                        s5 = s5Style
-                                .substring(
-                                    s5Style.indexOf('polygon-fill'),
-                                    s5Style.length-1);
-                        
-                        o = {s1: s1.substring(
-                                    s1.indexOf('#'),
-                                    s1.indexOf(';')),
-                             s2: s2.substring(
-                                    s2.indexOf('#'),
-                                    s2.indexOf(';')),
-                             s3: s3.substring(
-                                    s3.indexOf('#'),
-                                    s3.indexOf(';')),
-                             s4: s4.substring(
-                                    s4.indexOf('#'),
-                                    s4.indexOf(';')),
-                             s5: s5.substring(
-                                    s5.indexOf('#'),
-                                    s5.indexOf(';'))};
-                    } else if (layer.source == "jetz") {
-                        s1Style = style
-                                    .substring(
-                                        style.indexOf('seasonality=1'),
-                                        style.length-1);
-                                            
-                        s1 = s1Style
-                                .substring(
-                                    s1Style.indexOf('polygon-fill'),
-                                    s1Style.length-1);
                                     
-                        s2Style = style
-                                    .substring(
-                                        style.indexOf('seasonality=2'),
-                                        style.length-1);
-                                            
-                        s2 = s2Style
-                                .substring(
-                                    s2Style.indexOf('polygon-fill'),
-                                    s2Style.length-1);
-                                    
-                        s3Style = style
-                                    .substring(
-                                        style.indexOf('seasonality=3'),
-                                        style.length-1);
-                                            
-                        s3 = s3Style
-                                .substring(
-                                    s3Style.indexOf('polygon-fill'),
-                                    s3Style.length-1);
-                                    
-                        s4Style = style
-                                    .substring(
-                                        style.indexOf('seasonality=4'),
-                                        style.length-1);
-                                            
-                        s4 = s4Style
-                                .substring(
-                                    s4Style.indexOf('polygon-fill'),
-                                    s4Style.length-1);
-                        
                         o = {s1: s1.substring(
                                     s1.indexOf('#'),
                                     s1.indexOf(';')),
@@ -1048,6 +943,22 @@ mol.modules.map.layers = function(mol) {
                              s4: s4.substring(
                                     s4.indexOf('#'),
                                     s4.indexOf(';'))};
+                        
+                        if(layer.source == "iucn") {
+                            s5Style = style
+                                    .substring(
+                                        style.indexOf('seasonality=5'),
+                                        style.length-1);
+                                            
+                            s5 = s5Style
+                                    .substring(
+                                        s5Style.indexOf('polygon-fill'),
+                                        s5Style.length-1);
+                                        
+                            o.s5 = s5.substring(
+                                    s5.indexOf('#'),
+                                    s5.indexOf(';'));
+                        }
                     } else {
                         fillStyle = style
                                     .substring(
@@ -1082,28 +993,7 @@ mol.modules.map.layers = function(mol) {
                 return o;
             },
             
-            changeStyleProperty: function(style, property, newStyle) {
-                var updatedStyle,
-                    subStyle;
-                
-                subStyle = style
-                            .substring(
-                                style.indexOf(property),
-                                style.length);
-                
-                updatedStyle = style.substring(
-                                   0,
-                                   style.indexOf(property + ":") + 
-                                   property.length+1) +
-                               newStyle +
-                               subStyle.substring(
-                                   subStyle.indexOf(";"),
-                                   subStyle.length);
-                
-                return updatedStyle;
-            },
-            
-            changeSeasonalStyleProperty: function(style, property, newStyle) {
+            changeStyleProperty: function(style, property, newStyle, isSeason) {
                 var updatedStyle,
                     subStyle,
                     midStyle;
@@ -1111,16 +1001,16 @@ mol.modules.map.layers = function(mol) {
                 subStyle = style
                             .substring(
                                 style.indexOf(property),
-                                style.length
-                            );
+                                style.length);
                                 
-                midStyle = subStyle
+                if(isSeason) {
+                    midStyle = subStyle
                             .substring(
                                 subStyle.indexOf('polygon-fill'),
                                 subStyle.length
                             );
                 
-                updatedStyle = style.substring(
+                    updatedStyle = style.substring(
                                    0,
                                    style.indexOf(property+"]") + 
                                    property.length+1) +
@@ -1129,59 +1019,61 @@ mol.modules.map.layers = function(mol) {
                                midStyle.substring(
                                    midStyle.indexOf(";"),
                                    midStyle.length);
+                } else {
+                    updatedStyle = style.substring(
+                                   0,
+                                   style.indexOf(property + ":") + 
+                                   property.length+1) +
+                               newStyle +
+                               subStyle.substring(
+                                   subStyle.indexOf(";"),
+                                   subStyle.length);
+                }                
                 
+
                 return updatedStyle;
             },
-            
+
             updateStyle: function(layer, style, newStyle) {
                 var updatedStyle;
                 
                 if(layer.style_table == "points_style") {
-                    
                     style = this.changeStyleProperty(
-                                style, 'marker-fill', newStyle.fill);
+                                style, 'marker-fill', newStyle.fill, false);
                     style = this.changeStyleProperty(
-                                style, 'marker-line-color', newStyle.border);
+                                style, 'marker-line-color', newStyle.border, 
+                                    false);
                     style = this.changeStyleProperty(
-                                style, 'marker-width', newStyle.size);
-                
-                    updatedStyle = style;
+                                style, 'marker-width', newStyle.size, false);
                 } else {
-                    if(layer.source == "iucn") {
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=1', newStyle.s1);
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=2', newStyle.s2);
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=3', newStyle.s3);
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=4', newStyle.s4);
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=5', newStyle.s5);
-                
-                        updatedStyle = style;
-                    } else if (layer.source == "jetz") {    
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=1', newStyle.s1);
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=2', newStyle.s2);
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=3', newStyle.s3);
-                        style = this.changeSeasonalStyleProperty(
-                                    style, 'seasonality=4', newStyle.s4);
-                
-                        updatedStyle = style;
+                    if(layer.source == "iucn" || layer.source == "jetz") {
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=1', newStyle.s1, true);
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=2', newStyle.s2, true);
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=3', newStyle.s3, true);
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=4', newStyle.s4, true);
+                                    
+                        if(layer.source == "iucn") {
+                            style = this.changeStyleProperty(
+                                    style, 'seasonality=5', newStyle.s5, true);
+                        }            
                     } else {
                         style = this.changeStyleProperty(
-                                    style, 'line-color', newStyle.border);
+                                    style, 'line-color', newStyle.border, 
+                                        false);
                         style = this.changeStyleProperty(
-                                    style, 'polygon-fill', newStyle.fill);
+                                    style, 'polygon-fill', newStyle.fill, 
+                                        false);
                         style = this.changeStyleProperty(
-                                    style, 'line-width', newStyle.size);
-                
-                        updatedStyle = style;
+                                    style, 'line-width', newStyle.size, 
+                                        false);
                     }
                 }
+                
+                updatedStyle = style;
                 
                 return updatedStyle;
             },
