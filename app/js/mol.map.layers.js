@@ -548,6 +548,7 @@ mol.modules.map.layers = function(mol) {
             displayLayerStyler: function(button, layer) {
                 var baseHtml,
                     layer_tile_style,
+                    layer_orig_style,
                     max,
                     min,
                     params = {
@@ -557,7 +558,8 @@ mol.modules.map.layers = function(mol) {
                     q,
                     self = this;
                 
-                layer_tile_style = self.parseLayerStyle(layer, false);
+                layer_tile_style = self.parseLayerStyle(layer, "tile");
+                layer_orig_style = self.parseLayerStyle(layer, "orig");
                 
                 baseHtml = '' + 
                        '<div class="mol-LayerControl-Styler">' +
@@ -766,41 +768,107 @@ mol.modules.map.layers = function(mol) {
                                 );
                         },
                         show: function(event, api) {
+                            var colors = ['black','white','red','yellow',
+                                          'blue','green','orange','purple'],
+                                colors2 = ['#66C2A5','#FC8D62', '#8DA0CB',
+                                           '#E78AC3', '#A6D854', '#FFD92F',
+                                           '#E5C494'];
+                            
+                            console.log("layer show");
+                            console.log(layer);
+                            console.log(layer.style);
+                            console.log(layer_orig_style);
+                            
                             if(layer.source == "iucn") {
                                $('#showFill1Palette').spectrum({
-                                  color:layer_tile_style.s1
+                                  color:layer_tile_style.s1,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s1],
+                                      colors, colors2
+                                  ]
                                });  
                                $('#showFill2Palette').spectrum({
-                                  color:layer_tile_style.s2
+                                  color:layer_tile_style.s2,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s2],
+                                      colors, colors2
+                                  ]
                                });
                                $('#showFill3Palette').spectrum({
-                                  color:layer_tile_style.s3
+                                  color:layer_tile_style.s3,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s3],
+                                      colors, colors2
+                                  ]
                                });
                                $('#showFill4Palette').spectrum({
-                                  color:layer_tile_style.s4
+                                  color:layer_tile_style.s4,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s4],
+                                      colors, color2
+                                  ]
                                });
                                $('#showFill5Palette').spectrum({
-                                  color:layer_tile_style.s5
+                                  color:layer_tile_style.s5,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s5],
+                                      colors, color2
+                                  ]
                                });
                             } else if(layer.source == "jetz") {
                                $('#showFill1Palette').spectrum({
-                                  color:layer_tile_style.s1
+                                  color:layer_tile_style.s1,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s1],
+                                      colors, color2
+                                  ]
                                });  
                                $('#showFill2Palette').spectrum({
-                                  color:layer_tile_style.s2
+                                  color:layer_tile_style.s2,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s2],
+                                      colors, color2
+                                  ]
                                });
                                $('#showFill3Palette').spectrum({
-                                  color:layer_tile_style.s3
+                                  color:layer_tile_style.s3,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s3],
+                                      colors, colors2
+                                  ]
                                });
                                $('#showFill4Palette').spectrum({
-                                  color:layer_tile_style.s4
+                                  color:layer_tile_style.s4,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [layer_orig_style.s4],
+                                      colors, colors2
+                                  ]
                                });
                             } else {
                                 $('#showFillPalette').spectrum({
-                                    color:layer_tile_style.fill
+                                    color:layer_tile_style.fill,
+                                    showPaletteOnly: true,
+                                    palette: [
+                                        [layer_orig_style.fill],
+                                        colors, colors2
+                                    ]
                                 });
                                 $('#showBorderPalette').spectrum({
-                                    color:layer_tile_style.border
+                                    color:layer_tile_style.border,
+                                    showPaletteOnly: true,
+                                    palette: [
+                                        [layer_orig_style.border],
+                                        colors, colors2
+                                    ]
                                 });
                             }
                         }
@@ -899,8 +967,10 @@ mol.modules.map.layers = function(mol) {
                     s1, s2, s3, s4, s5;
                     
                     
-                if(original) {
+                if(original == "current") {
                     style = layer.style;
+                } else if(original == "orig") {
+                    style = layer.orig_style;
                 } else {
                     style = layer.tile_style;
                 }   
@@ -1133,7 +1203,7 @@ mol.modules.map.layers = function(mol) {
                         style: null
                     };
                     
-                    oldStyle = self.parseLayerStyle(layer, true);
+                    oldStyle = self.parseLayerStyle(layer, "current");
                     
                     if(layer.style_table == "points_style") {
                         style = this.changeStyleProperty(

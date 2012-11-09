@@ -335,6 +335,7 @@ mol.modules.map.tiles = function(mol) {
                 if(layer.tile_style == undefined) {
                     layer.tile_style = this.getDefaultStyle(layer);
                     layer.style = layer.tile_style;
+                    layer.orig_style = layer.tile_style;
                 }
 
                 this.layer = new google.maps.CartoDBLayer({
