@@ -252,8 +252,6 @@ mol.modules.map.layers = function(mol) {
                 var all = [],
                     layerIds = [],
                     sortedLayers = this.sortLayers(layers),
-                    first = (this.display.find('.layer').length==0) 
-                                ? true : false,
                     wasSelected = this.display.find('.layer.selected');
 
                 _.each(
@@ -471,34 +469,27 @@ mol.modules.map.layers = function(mol) {
                     )
                 );
 
-                if(first) {
-                    if(this.display.list.find('.layer').length > 0) {
-                        this.display.list.find('.layer')[0].click();
-                    }
-                } else {
-                    if(sortedLayers.length == 1) {
-                        //if only one new layer is being added
-                        //select it
-                        this.display.list.find('.layer')
-                            [this.display.list.find('.layer').length-1].click();
-                    } else if(sortedLayers.length > 1) {
-                        //if multiple layers are being added
-                        //layer clickability returned to the
-                        //previously selected layer
-                        if(wasSelected.length > 0) {
-                            this.map.overlayMapTypes.forEach(
-                                function(mt) {
-                                    if(mt.name ==
-                                        wasSelected.parent().attr("id")) {
-                                        mt.interaction.add();
-                                        mt.interaction.clickAction = "full";
-                                    } else {
-                                        mt.interaction.remove();
-                                        mt.interaction.clickAction = "";
-                                    }
+                if(sortedLayers.length == 1) {
+                    //if only one new layer is being added
+                    //select it
+                    this.display.list.find('.layer')
+                        [this.display.list.find('.layer').length-1].click();
+                } else if(sortedLayers.length > 1) {
+                    //if multiple layers are being added
+                    //layer clickability returned to the
+                    //previously selected layer
+                    if(wasSelected.length > 0) {
+                        this.map.overlayMapTypes.forEach(
+                            function(mt) {
+                                if(mt.name == wasSelected.parent().attr("id")) {
+                                    mt.interaction.add();
+                                    mt.interaction.clickAction = "full";
+                                } else {
+                                    mt.interaction.remove();
+                                    mt.interaction.clickAction = "";
                                 }
-                            );
-                        }
+                            }
+                        );
                     }
                 }
                 
