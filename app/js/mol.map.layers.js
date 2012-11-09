@@ -772,105 +772,53 @@ mol.modules.map.layers = function(mol) {
                                           'blue','green','orange','purple'],
                                 colors2 = ['#66C2A5','#FC8D62', '#8DA0CB',
                                            '#E78AC3', '#A6D854', '#FFD92F',
-                                           '#E5C494'];
-                            
-                            console.log("layer show");
-                            console.log(layer);
-                            console.log(layer.style);
-                            console.log(layer_orig_style);
-                            
-                            if(layer.source == "iucn") {
-                               $('#showFill1Palette').spectrum({
-                                  color:layer_tile_style.s1,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s1],
-                                      colors, colors2
-                                  ]
-                               });  
-                               $('#showFill2Palette').spectrum({
-                                  color:layer_tile_style.s2,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s2],
-                                      colors, colors2
-                                  ]
-                               });
-                               $('#showFill3Palette').spectrum({
-                                  color:layer_tile_style.s3,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s3],
-                                      colors, colors2
-                                  ]
-                               });
-                               $('#showFill4Palette').spectrum({
-                                  color:layer_tile_style.s4,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s4],
-                                      colors, color2
-                                  ]
-                               });
-                               $('#showFill5Palette').spectrum({
-                                  color:layer_tile_style.s5,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s5],
-                                      colors, color2
-                                  ]
-                               });
-                            } else if(layer.source == "jetz") {
-                               $('#showFill1Palette').spectrum({
-                                  color:layer_tile_style.s1,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s1],
-                                      colors, color2
-                                  ]
-                               });  
-                               $('#showFill2Palette').spectrum({
-                                  color:layer_tile_style.s2,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s2],
-                                      colors, color2
-                                  ]
-                               });
-                               $('#showFill3Palette').spectrum({
-                                  color:layer_tile_style.s3,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s3],
-                                      colors, colors2
-                                  ]
-                               });
-                               $('#showFill4Palette').spectrum({
-                                  color:layer_tile_style.s4,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [layer_orig_style.s4],
-                                      colors, colors2
-                                  ]
-                               });
+                                           '#E5C494'],
+                                objs,
+                                x;
+                                
+                            if(layer.source == "iucn" || 
+                               layer.source == "jetz") {
+                               objs = [ {name: '#showFill1Palette', 
+                                           color: layer_tile_style.s1, 
+                                           def: layer_orig_style.s1},
+                                        {name: '#showFill2Palette', 
+                                           color: layer_tile_style.s2, 
+                                           def: layer_orig_style.s2},
+                                        {name: '#showFill3Palette', 
+                                           color: layer_tile_style.s3, 
+                                           def: layer_orig_style.s3},
+                                        {name: '#showFill4Palette', 
+                                           color: layer_tile_style.s4, 
+                                           def: layer_orig_style.s4}     
+                                      ];
+                                      
+                               if(layer.source == "iucn") {
+                                   objs.push({name: '#showFill5Palette', 
+                                             color: layer_tile_style.s5, 
+                                             def: layer_orig_style.s5});
+                               }        
                             } else {
-                                $('#showFillPalette').spectrum({
-                                    color:layer_tile_style.fill,
-                                    showPaletteOnly: true,
-                                    palette: [
-                                        [layer_orig_style.fill],
-                                        colors, colors2
-                                    ]
-                                });
-                                $('#showBorderPalette').spectrum({
-                                    color:layer_tile_style.border,
-                                    showPaletteOnly: true,
-                                    palette: [
-                                        [layer_orig_style.border],
-                                        colors, colors2
-                                    ]
-                                });
+                                objs = [ {name: '#showFillPalette', 
+                                            color: layer_tile_style.fill, 
+                                            def: layer_orig_style.fill},
+                                         {name: '#showBorderPalette', 
+                                            color: layer_tile_style.border, 
+                                            def: layer_orig_style.border}     
+                                      ];
                             }
+                            
+                            _.each(objs, function(obj) {
+                                console.log("obj");
+                                console.log(obj);
+                                $(obj.name).spectrum({
+                                  color: obj.color,
+                                  showPaletteOnly: true,
+                                  palette: [
+                                      [obj.def],
+                                      colors, colors2
+                                  ]
+                               }); 
+                            });    
                         }
                     }
                 });
