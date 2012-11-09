@@ -12,7 +12,8 @@ mol.modules.map.layers = function(mol) {
             },
 
             start: function() {
-                this.display = new mol.map.layers.LayerListDisplay('.map_container');
+                this.display = new mol.map.layers.LayerListDisplay(
+                                                    '.map_container');
                 this.fireEvents();
                 this.addEventHandlers();
                 this.initSortable();
@@ -102,7 +103,10 @@ mol.modules.map.layers = function(mol) {
                             event.layers,
                             function(layer) { // Removes duplicate layers.
                                 if (self.display.getLayer(layer).length > 0) {
-                                    event.layers = _.without(event.layers, layer);
+                                    event.layers = _.without(
+                                                        event.layers, 
+                                                        layer
+                                                    );
                                 }
                             }
                         );
@@ -240,7 +244,7 @@ mol.modules.map.layers = function(mol) {
             },
 
             /**
-             * Handler for layer opacity changes via UI. It fires a layer-opacity
+             * Handler for layer opacity changes via UI. Fires a layer-opacity
              * event on the bus, passing in the layer object and its opacity.
              */
             opacityHandler: function(layer, l) {
@@ -255,7 +259,8 @@ mol.modules.map.layers = function(mol) {
                         opacity: parseFloat(l.opacity.slider("value"))
                     },
 
-                    layer.opacity = params.opacity; //store the opacity on the layer object
+                    //store the opacity on the layer object
+                    layer.opacity = params.opacity;
 
                     e = new mol.bus.Event('layer-opacity', params);
 
@@ -330,7 +335,8 @@ mol.modules.map.layers = function(mol) {
                             }
                         );
 
-                        //Click handler for zoom button fires 'layer-zoom-extent'
+                        //Click handler for zoom button 
+                        //fires 'layer-zoom-extent'
                         //and 'show-loading-indicator' events.
                         l.zoom.click(
                             function(event) {
@@ -377,7 +383,8 @@ mol.modules.map.layers = function(mol) {
                                     self.toggleLayerHighlight(layer,false);
                                 } else {
                                     
-                                    if($(self.display).find('.selected').length > 0) {
+                                    if($(self.display)
+                                            .find('.selected').length > 0) {
                                         //get a reference to this layer    
                                         self.toggleLayerHighlight(
                                             self.display
@@ -400,10 +407,12 @@ mol.modules.map.layers = function(mol) {
 
                                 self.map.overlayMapTypes.forEach(
                                     function(mt) {
-                                        if(mt.name == layer.id && $(l.layer).hasClass('selected')) {
+                                        if(mt.name == layer.id && 
+                                           $(l.layer).hasClass('selected')) {
                                             if(!self.clickDisabled) {
                                                mt.interaction.add();
-                                               mt.interaction.clickAction = "full"
+                                               mt.interaction.clickAction = 
+                                                                        "full";
                                             } else {
                                                mt.interaction.remove();
                                                mt.interaction.clickAction = "";
@@ -424,12 +433,16 @@ mol.modules.map.layers = function(mol) {
                         // Click handler for the toggle button.
                         l.toggle.click(
                             function(event) {
-                                var showing = $(event.currentTarget).is(':checked'),
+                                var showing = $(event.currentTarget)
+                                                    .is(':checked'),
                                     params = {
                                         layer: layer,
                                         showing: showing
                                     },
-                                    e = new mol.bus.Event('layer-toggle', params);
+                                    e = new mol.bus.Event(
+                                                'layer-toggle', 
+                                                params
+                                            );
 
                                 self.bus.fireEvent(e);
                                 event.stopPropagation();
@@ -479,13 +492,16 @@ mol.modules.map.layers = function(mol) {
                         return layer.id;
                     },
                     this);
-                this.bus.fireEvent(new mol.bus.Event('reorder-layers', {layers:layerIds}));
-                
-                
-               
-                // And this stuff ensures correct initial layer opacities on the map.
+
+                this.bus.fireEvent(
+                    new mol.bus.Event(
+                        'reorder-layers', 
+                        {layers:layerIds}
+                    )
+                );
+
                 _.each(
-                    all.reverse(), // Reverse so that layers on top get rendered on top.
+                    all.reverse(), 
                     function(item) {
                         this.opacityHandler(item.layer, item.l)();
                     },
@@ -1219,7 +1235,7 @@ mol.modules.map.layers = function(mol) {
                     '    <div class="layerName">' +
                     '      <div class="layerRecords">{4}</div>' +
                     '      <div title="{2}" class="layerNomial">{2}</div>' +
-                    '      <div title="{3}" class="layerEnglishName">{3}</div>' +
+                    '      <div title="{3}" class="layerEnglishName">{3}</div>'+
                     '    </div>' +
                     '    <button title="Remove layer." class="close">' + 
                            'x' + 
@@ -1254,9 +1270,19 @@ mol.modules.map.layers = function(mol) {
                 );
                 
                 this.attr('id', layer.id);
+<<<<<<< HEAD
                 this.opacity = $(this).find('.opacity').slider(
                     {value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"}
                 );
+=======
+                this.opacity = $(this).find('.opacity')
+                                        .slider({
+                                            value: 0.5, 
+                                            min: 0, 
+                                            max:1, 
+                                            step: 0.02, 
+                                            animate:"slow"});
+>>>>>>> 80 char width
                 this.toggle = $(this).find('.toggle').button();
                 this.styler = $(this).find('.styler');
                 this.zoom = $(this).find('.zoom');
@@ -1314,7 +1340,8 @@ mol.modules.map.layers = function(mol) {
                     '<div class="mol-LayerControl-Layers">' +
                         '<div class="layers widgetTheme">' +
                             '<div class="layersHeader">' +
-                                '<button class="layersToggle button">▲</button>' +
+                                '<button class="layersToggle button">' + 
+                                    '▲</button>' +
                                 'Layers' +
                             '</div>' +
                             '<div class="layersContainer">' +
@@ -1354,7 +1381,8 @@ mol.modules.map.layers = function(mol) {
             },
 
             getLayerById: function(id) {
-                return _.find(this.layers, function(layer){ return layer.id === id; });
+                return _.find(this.layers, function(layer){ 
+                                return layer.id === id; });
             },
 
             addLayer: function(layer) {
