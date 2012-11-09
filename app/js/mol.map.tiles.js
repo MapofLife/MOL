@@ -116,7 +116,7 @@ mol.modules.map.tiles = function(mol) {
                     function(event) {
                         var layer = event.layer,
                             style = event.style;
-
+                            
                         self.map.overlayMapTypes.forEach(
                             function(maptype, index) {
                                 //find the overlaymaptype to style

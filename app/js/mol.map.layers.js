@@ -230,31 +230,6 @@ mol.modules.map.layers = function(mol) {
             },
 
             /**
-             * Handler for layer opacity changes via UI. Fires a layer-opacity
-             * event on the bus, passing in the layer object and its opacity.
-             */
-            opacityHandler: function(layer, l) {
-                return function(event) {
-                    var params = {},
-                        e = null;
-
-                    l.toggle.attr('checked', true);
-
-                    params = {
-                        layer: layer,
-                        opacity: parseFloat(l.opacity.slider("value"))
-                    },
-
-                    //store the opacity on the layer object
-                    layer.opacity = params.opacity;
-
-                    e = new mol.bus.Event('layer-opacity', params);
-
-                    self.bus.fireEvent(e);
-                };
-            },
-
-            /**
              * Adds layer widgets to the map. The layers parameter is an array
              * of layer objects {id, name, type, source}.
              */
@@ -289,10 +264,6 @@ mol.modules.map.layers = function(mol) {
                         //Hack so that at the end 
                         //we can fire opacity event with all layers
                         all.push({layer:layer, l:l, opacity:opacity});
-
-                        //Opacity slider change handler.
-                        l.opacity.bind("slide",self.opacityHandler(layer, l));
-                        l.opacity.slider("value",layer.opacity);
 
                         //Close handler for x button 
                         //fires a 'remove-layers' event.
@@ -486,16 +457,6 @@ mol.modules.map.layers = function(mol) {
                     )
                 );
 
-                //This stuff ensures correct initial layer opacities on the map.
-                // Reverse so that layers on top get rendered on top.
-                _.each(
-                    all.reverse(), 
-                    function(item) {
-                        this.opacityHandler(item.layer, item.l)();
-                    },
-                    this
-                );
-
                 if(first) {
                     if(this.display.list.find('.layer').length > 0) {
                         this.display.list.find('.layer')[0].click();
@@ -547,7 +508,14 @@ mol.modules.map.layers = function(mol) {
                 baseHtml = '' + 
                        '<div class="mol-LayerControl-Styler">' +
                        '  <div class="colorPickers"></div>' + 
-                       '  <div class="pointSlider"></div>' +
+                       '  <div class="sizerHolder"></div>' +
+                       '  <div class="opacityHolder">' +
+                       '    <span class="sliderLabel">Opacity:&nbsp</span>' +
+                       '    <div class="sliderContainer">' +
+                       '      <div class="opacity"></div>' +
+                       '    </div>' +
+                       '    <span id="opacityValue">50</span>' +
+                       '  </div>' +
                        '  <div class="buttonWrapper">' +
                        '    <button id="applyStyle">Apply</button>' +
                        '    <button id="cancelStyle">Cancel</button>' +
@@ -585,7 +553,8 @@ mol.modules.map.layers = function(mol) {
                                     $(api.elements.content)
                                         .find('.mol-LayerControl-Styler'),
                                     layer);
-                                    
+                            
+                            //sizer        
                             if(layer.style_table == "points_style") {
                                 max = 8;
                                 min = 1;
@@ -604,7 +573,7 @@ mol.modules.map.layers = function(mol) {
                                             max:max, 
                                             step:1, 
                                             animate:"slow",
-                                            change: function(event, ui) {
+                                            slide: function(event, ui) {
                                                 $(api.elements.content)
                                                     .find('#pointSizeValue')
                                                         .html(ui.value + "px");
@@ -616,12 +585,36 @@ mol.modules.map.layers = function(mol) {
                                         .html($(api.elements.content)
                                             .find('.sizer')
                                                 .slider('value') + "px"); 
-                            }          
-                                                  
-                                        
+                            }
+                            
+                            //opacity
+                            $(api.elements.content)
+                                .find('.opacity')
+                                    .slider({
+                                        value: layer.opacity, 
+                                        min:0, 
+                                        max:1, 
+                                        step: 0.1, 
+                                        animate:"slow",
+                                        slide: function(event, ui) {
+                                            $(api.elements.content)
+                                                .find('#opacityValue')
+                                                    .html(
+                                                        (ui.value)*100 + 
+                                                        "&#37"
+                                                    );
+                                        }}
+                                    );
+                            
+                            $(api.elements.content)
+                                    .find('#opacityValue')
+                                        .html((layer.opacity)*100 + "&#37"); 
+                                                 
                             $(api.elements.content).find('#applyStyle').click(
                                 function(event) {
                                     var o = {},
+                                        params = {},
+                                        oparams = {},
                                         style_desc;
                                         
                                     if(layer.source == "iucn") {
@@ -722,30 +715,51 @@ mol.modules.map.layers = function(mol) {
                                         }  
                                     }
    
-                                        style_desc = '#' + 
-                                                 layer.dataset_id + 
-                                                 self.updateStyle(
-                                                     layer,
-                                                     layer.tile_style, 
-                                                     o);
+                                    style_desc = '#' + 
+                                             layer.dataset_id + 
+                                             self.updateStyle(
+                                                 layer,
+                                                 layer.tile_style, 
+                                                 o);
                                     
-                                    params.style = style_desc;   
+                                    params.layer = layer;
+                                    params.style = style_desc;
+                                    
+                                    //keep the style around for later        
+                                    layer.style = params.style;
                                     
                                     self.bus.fireEvent(
                                         new mol.bus.Event(
                                             'apply-layer-style', 
                                             params));
+
+                                    oparams = {
+                                        layer: layer,
+                                        opacity: parseFloat(
+                                                    $(api.elements.content)
+                                                        .find('.opacity')
+                                                            .slider("value"))
+                                    };
+
+                                    //store the opacity on the layer object
+                                    layer.opacity = oparams.opacity;
+
+                                    self.bus.fireEvent(
+                                        new mol.bus.Event(
+                                            'layer-opacity', 
+                                            oparams));        
+                                           
+                                    button.disabled = false;      
                                             
                                     $(button).qtip('destroy');
-                                    
-                                    //keep the style around for later        
-                                    layer.style = params.style; 
                                 }
                             );
                                 
                             $(api.elements.content)
                                 .find('#cancelStyle').click(
                                     function(event) {
+                                        button.disabled = false;
+                                        
                                         $(button).qtip('destroy');
                                     }
                                 );
@@ -758,6 +772,8 @@ mol.modules.map.layers = function(mol) {
                                            '#E5C494'],
                                 objs,
                                 x;
+                                
+                            button.disabled = true;
                                 
                             if(layer.source == "iucn" || 
                                layer.source == "jetz") {
@@ -791,8 +807,6 @@ mol.modules.map.layers = function(mol) {
                             }
                             
                             _.each(objs, function(obj) {
-                                console.log("obj");
-                                console.log(obj);
                                 $(obj.name).spectrum({
                                   color: obj.color,
                                   showPaletteOnly: true,
@@ -824,13 +838,13 @@ mol.modules.map.layers = function(mol) {
                        
                    sizer = '' +
                        '<span class="sliderLabel">Size:&nbsp</span>' +
-                       '  <div class="pointSizeContainer">' +
+                       '  <div class="sliderContainer">' +
                        '    <div class="sizer"></div>' +
                        '  </div>' +
                        '<span id="pointSizeValue">8px</span>';
                    
                    $(element).find('.colorPickers').prepend(pickers);
-                   $(element).find('.pointSlider').prepend(sizer);
+                   $(element).find('.sizerHolder').prepend(sizer);
                 } else {
                     if(layer.source == "iucn" || layer.source == "jetz") {
                         pickers = '' + 
@@ -879,13 +893,13 @@ mol.modules.map.layers = function(mol) {
                            
                        sizer = '' +
                            '<span class="sliderLabel">Width:&nbsp</span>' +
-                           '  <div class="pointSizeContainer">' +
+                           '  <div class="sliderContainer">' +
                            '    <div class="sizer"></div>' +
                            '  </div>' +
                            '<span id="pointSizeValue">8px</span>';
                        
                        $(element).find('.colorPickers').prepend(pickers);
-                       $(element).find('.pointSlider').prepend(sizer);
+                       $(element).find('.sizerHolder').prepend(sizer);
                     }
                 }
             },
@@ -1249,11 +1263,8 @@ mol.modules.map.layers = function(mol) {
                     '       <span title="Toggle layer visibility." ' +
                             'class="customCheck"></span>' + 
                     '    </label>' +
-                    '   <div class="opacityContainer">' +
-                    '      <div class="opacity"/></div>' +
                     '   </div>' +
                     '   <div class="break"></div>' +
-                    '  </div>' +
                     '</div>',
                     self = this;
 
@@ -1271,13 +1282,6 @@ mol.modules.map.layers = function(mol) {
                 );
                 
                 this.attr('id', layer.id);
-                this.opacity = $(this).find('.opacity')
-                                        .slider({
-                                            value: 0.5, 
-                                            min: 0, 
-                                            max:1, 
-                                            step: 0.02, 
-                                            animate:"slow"});
                 this.toggle = $(this).find('.toggle').button();
                 this.styler = $(this).find('.styler');
                 this.zoom = $(this).find('.zoom');
@@ -1298,7 +1302,6 @@ mol.modules.map.layers = function(mol) {
                     
                     this.pointLegend.addClass(layer.type);
                 } else {
-                    
                     this.pointLegend.hide();
                     
                     if(layer.source == "iucn") {

@@ -413,7 +413,7 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layer .layerName{
     float: left;
     white-space:normal;
-    width: 48%;
+    width: 62%;
     margin-left: 5px;
     margin-right: 5px;
     -webkit-touch-callout: none;
@@ -466,6 +466,18 @@ white-space: nowrap;
     -webkit-box-shadow: none;
     box-shadow: none;
 }
+
+.mol-LayerControl-Layers .layer button.styler[disabled]{
+    background-color: rgba(25, 25, 25, 0);
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    opacity:0.5;
+}
+.mol-LayerControl-Layers .layer button.styler[disabled]:hover{
+    background-color: rgba(25, 25, 25, 0);
+}
+
 .mol-LayerControl-Layers .layer button.styler:hover{
     background-color: rgba(25, 25, 25, 1);
 }
@@ -629,24 +641,7 @@ white-space: nowrap;
 }
 
 
-.mol-LayerControl-Layers .layer .opacityContainer {
-    float: right;
-    position: relative;
-    width: 12%;
-    height: 24px;
-    margin-right: 5px;
-}
 
-.mol-LayerControl-Layers .layer .opacity  {
-    position: absolute;
-    top: 50%;
-    width: 100%;
-    height: 3px;
-}
-.mol-LayerControl-Layers .layer .opacity .ui-slider-handle {
-    width: 8px;
-    height: 11px;
-}
 
 .mol-LayerControl-Layers .layer .zoom {
     float: right;
@@ -727,15 +722,16 @@ white-space: nowrap;
 
 .mol-LayerControl-Styler .stylerLabel {
     float:left;
-    width:45px;
+    width:48px;
     margin-top:10px;
     margin-right:4px;
     text-align:right;
 }
 
-.mol-LayerControl-Styler .sliderLabel {
+.mol-LayerControl-Styler .sliderLabel, 
+.mol-LayerControl-Styler .opacityLabel {
     float:left;
-    width:45px;
+    width:48px;
     margin-top:4px;
     margin-right:4px;
     text-align:right;
@@ -746,37 +742,43 @@ white-space: nowrap;
     margin-bottom:2px;
 }
 
-.mol-LayerControl-Styler .pointSlider {
+.mol-LayerControl-Styler .sizerHolder,
+.mol-LayerControl-Styler .opacityHolder  {
     padding-top:4px;
     padding-bottom:4px;
+    width: 140px;
 }
 
-.mol-LayerControl-Styler #pointSizeValue {
+.mol-LayerControl-Styler #pointSizeValue,
+.mol-LayerControl-Styler #opacityValue {
     margin-top:4px;
     float:left;
     clear:right;
+    width:28px;
 }
 
-.mol-LayerControl-Styler .pointSizeContainer {
+.mol-LayerControl-Styler .sliderContainer {
     float: left;
     position: relative;
-    width: 40%;
+    width: 38%;
     margin-right:4px;
     margin-bottom:8px;
 }
 
-.mol-LayerControl-Styler .pointSizeContainer .sizer {
+.mol-LayerControl-Styler .sliderContainer .sizer,
+.mol-LayerControl-Styler .sliderContainer .opacity {
     height: 5px;
     margin-top: 5px;
 }
 
-.mol-LayerControl-Styler .pointSizeContainer .sizer .ui-slider-handle {
+.mol-LayerControl-Styler .sliderContainer .sizer .ui-slider-handle,
+.mol-LayerControl-Styler .sliderContainer .opacity .ui-slider-handle {
     width: 8px;
     height: 11px;
 }
 
 .mol-LayerControl-Styler .buttonWrapper {
-    width:90%;
+    width:85%;
     margin:0 auto;
 }
 
