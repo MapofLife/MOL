@@ -365,10 +365,6 @@ mol.modules.map.layers = function(mol) {
                                     
                                     if($(self.display).find('.selected').length > 0) {
                                         //get a reference to this layer    
-                                        console.log("layer");
-                                        console.log($(self.display).find('.selected'));
-                                        console.log($(self.display).find('.selected').parent().attr('id'));
-                                        console.log(self.display.getLayerById($(self.display).find('.selected').parent().attr('id')));
                                         self.toggleLayerHighlight(
                                             self.display
                                                 .getLayerById(
@@ -377,7 +373,6 @@ mol.modules.map.layers = function(mol) {
                                                             .parent()
                                                                 .attr('id')),
                                                                 false);
-                                        
                                     }
                                     
                                     $(self.display).find('.selected')
@@ -720,6 +715,9 @@ mol.modules.map.layers = function(mol) {
                                             params));
                                             
                                     $(button).qtip('destroy');
+                                    
+                                    //keep the style around for later        
+                                    layer.style = params.style; 
                                 }
                             );
                                 
@@ -771,9 +769,6 @@ mol.modules.map.layers = function(mol) {
                         }
                     }
                 });
-                  
-                //keep the style around for later        
-                layer.style = params.style; 
             },
             
             getStylerLayout: function(element, layer) {
