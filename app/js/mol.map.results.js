@@ -86,6 +86,11 @@ mol.modules.map.results = function(mol) {
                     self.display.addAllButton.click();
                 }
             );
+            this.display.clearResultsButton.click(
+                function(event) {
+                    self.clearResults();
+                }
+            );
             /**
              * Clicking the 'map selected layers' button fires an 'add-layers'
              * event on the bus.
@@ -468,23 +473,28 @@ mol.modules.map.results = function(mol) {
         init: function() {
             var html = '' +
                 '<div class="mol-LayerControl-Results">' +
-                '  <div class="filters"></div>' +
-                '  <div class="searchResults widgetTheme">' +
-                '    <div class="results">' +
-                '      <div class="resultHeader">' +
-                '         Results' +
-                '         <a href="#" class="selectNone">none</a>' +
-                '         <a href="#" class="selectAll">all</a>' +
-                '      </div>' +
-                '      <ol class="resultList"></ol>' +
-                '      <div class="pageNavigation">' +
-                '         <button class="addAll">Map Selected Layers</button>' +
-                '      </div>' +
-                '    </div>' +
-                '    <div class="noresults">' +
-                '      <h3>No results found.</h3>' +
-                '    </div>' +
-                '  </div>' +
+                    '<div class="filters"></div>' +
+                    '<div class="searchResults widgetTheme">' +
+                        '<div class="results">' +
+                            '<div class="resultHeader">' +
+                                'Results' +
+                                '<a href="#" class="selectNone">none</a>' +
+                                '<a href="#" class="selectAll">all</a>' +
+                            '</div>' +
+                            '<ol class="resultList"></ol>' +
+                            '<div class="pageNavigation">' +
+                                '<button class="addAll">' +
+                                    'Map Selected Layers' +
+                                '</button>' +
+                                '<button class="clearResults">' +
+                                    'Clear Results' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="noresults">' +
+                            '<h3>No results found.</h3>' +
+                        '</div>' +
+                    '</div>' +
                 '</div>';
 
             this._super(html);
@@ -493,6 +503,7 @@ mol.modules.map.results = function(mol) {
             this.selectAllLink = $(this).find('.selectAll');
             this.selectNoneLink = $(this).find('.selectNone');
             this.addAllButton = $(this).find('.addAll');
+            this.clearResultsButton = $(this).find('.clearResults');
             this.results = $(this).find('.results');
             this.noResults = $(this).find('.noresults');
         },
