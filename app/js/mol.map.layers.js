@@ -604,9 +604,11 @@ mol.modules.map.layers = function(mol) {
                             $(api.elements.content).find('#applyStyle').click(
                                 function(event) {
                                     var o = {},
+                                        os = {},
                                         params = {},
                                         oparams = {},
-                                        style_desc;
+                                        style_desc,
+                                        sel_style_desc;
                                         
                                     if(layer.source == "iucn") {
                                         o.s1 = $('#showFill1Palette')
@@ -703,27 +705,33 @@ mol.modules.map.layers = function(mol) {
                                                     'border-width':o.size+"px"
                                                     });
                                                 
-                                        }  
-                                        
-                                        if($(button).parent()
-                                                .hasClass('.selected')) {
-                                            o.border = "#FF1200";
                                         }
-                                        
                                     }
-   
-                                    style_desc = '#' + 
-                                             layer.dataset_id + 
-                                             self.updateStyle(
-                                                 layer,
-                                                 layer.tile_style, 
-                                                 o);
+                                    
+                                    console.log("before selected");
+                                    console.log(o);
+                                    
+                                    $.extend(os, o);
+                                    
+                                    if($(button).parent()
+                                            .hasClass('selected')) {   
+                                        os.border = "#FF1200";
+                                    }
+                                    
+                                    sel_style_desc = self.updateStyle(
+                                                             layer,
+                                                             layer.tile_style, 
+                                                             os);
+                                    style_desc = self.updateStyle(
+                                                         layer,
+                                                         layer.tile_style, 
+                                                         o);                                    
                                     
                                     params.layer = layer;
-                                    params.style = style_desc;
+                                    params.style = sel_style_desc;
                                     
                                     //keep the style around for later        
-                                    layer.style = params.style;
+                                    layer.style = style_desc;
                                     
                                     self.bus.fireEvent(
                                         new mol.bus.Event(
@@ -1311,13 +1319,6 @@ mol.modules.map.layers = function(mol) {
                     } else {
                         this.seasonalLegend.hide();
                         this.polygonLegend.addClass(layer.type);
-                        
-                        if(layer.type == "regionalchecklist" 
-                            || layer.type == "localinv") {
-                            this.polygonLegend.addClass("withborder");
-                        } else {
-                            this.polygonLegend.addClass("noborder");
-                        }
                     }
                 }
             }

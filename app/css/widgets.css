@@ -514,19 +514,10 @@ white-space: nowrap;
 
 .mol-LayerControl-Layers .layer .styler div.legend-polygon {
     background-color:#FF6600;
-    border:none;
+    border-width:0px;
+    border-style:solid;
     width:18px;
     height:18px;
-}
-
-.mol-LayerControl-Layers .layer .styler div.legend-polygon.withborder {
-    width:18px;
-    height:18px;
-}
-
-.mol-LayerControl-Layers .layer .styler div.legend-polygon.noborder {
-    width:20px;
-    height:20px;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-polygon.regionalchecklist {
