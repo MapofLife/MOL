@@ -19,7 +19,37 @@ mol.modules.map.layers = function(mol) {
                 this.display.toggle(false);
             },
 
+            layersToggle: function(event) {
+                var self = this,
+                    visible = event.visible;
+                
+                if (visible == this.display.expanded) {
+                    return;
+                }
+                if(this.display.expanded == true || visible == false) {
+                    this.display.layersWrapper.animate(
+                        {height: this.display.layersHeader.height()+18},
+                        1000,
+                          function() {
+                            self.display.layersToggle.text('▼');
+                            self.display.expanded = false;
+                        }
+                    );
 
+
+                } else {
+                    this.display.layersWrapper.animate(
+                        {height:this.display.layersHeader.height()
+                            +this.display.layersContainer.height()+35},
+                        1000,
+                        function() {
+                            self.display.layersToggle.text('▲');
+                            self.display.expanded = true;
+                        }
+                    );
+
+                }
+            },
             addEventHandlers: function() {
                 var self = this;
                 this.display.removeAll.click (
@@ -40,30 +70,7 @@ mol.modules.map.layers = function(mol) {
                 );
                 this.display.layersToggle.click(
                     function(event) {
-                        var that = this;
-                        if(self.display.expanded) {
-                            self.display.layersWrapper.animate(
-                                {height: self.display.layersHeader.height()+18},
-                                1000,
-                                  function() {
-                                    $(that).text('▼');
-                                    self.display.expanded = false;
-                                }
-                            );
-
-
-                        } else {
-                            self.display.layersWrapper.animate(
-                                {height:self.display.layersHeader.height()
-                                    +self.display.layersContainer.height()+35},
-                                1000,
-                                function() {
-                                    $(that).text('▲');
-                                    self.display.expanded = true;
-                                }
-                            );
-
-                        }
+                        self.layersToggle(event);
                     }
                 );
                 this.bus.addHandler(
@@ -123,6 +130,7 @@ mol.modules.map.layers = function(mol) {
                                 catch(e) {
                                     //invalid extent
                                 }
+                                
                             }
                         )
                         self.addLayers(event.layers);
@@ -143,6 +151,12 @@ mol.modules.map.layers = function(mol) {
                         } else {
                             self.display.toggle(event.visible);
                         }
+                    }
+                );
+                this.bus.addHandler(
+                    'layers-toggle',
+                    function(event) {
+                        self.layersToggle(event);
                     }
                 );
                 this.bus.addHandler(
@@ -268,11 +282,6 @@ mol.modules.map.layers = function(mol) {
                             self = this,
                             opacity = null;
 
-                        self.bus.fireEvent(
-                            new mol.bus.Event('show-layer-display-toggle')
-                        );
-
-                        //set this correctly
                         //disable interactivity to start
                         self.map.overlayMapTypes.forEach(
                             function(mt) {
@@ -300,7 +309,6 @@ mol.modules.map.layers = function(mol) {
                                 l.remove();
                                 // Hide the layer widget toggle in the main menu if no layers exist
                                 if(self.map.overlayMapTypes.length == 0) {
-                                    self.bus.fireEvent(new mol.bus.Event('hide-layer-display-toggle'));
                                     self.display.toggle(false);
                                 }
                                 event.stopPropagation();
@@ -433,7 +441,9 @@ mol.modules.map.layers = function(mol) {
                     },
                     this);
                 this.bus.fireEvent(new mol.bus.Event('reorder-layers', {layers:layerIds}));
-
+                
+                
+               
                 // And this stuff ensures correct initial layer opacities on the map.
                 _.each(
                     all.reverse(), // Reverse so that layers on top get rendered on top.
@@ -472,6 +482,11 @@ mol.modules.map.layers = function(mol) {
                             );
                         }
                     }
+                }
+                
+                //done making widgets, toggle on if we have layers.
+                if(layerIds.length>0) {
+                    this.layersToggle({visible:true});
                 }
             },
 

@@ -101,6 +101,19 @@ mol.modules.map.results = function(mol) {
                     if(self.display.find('.result').filter(':visible').length == layers.length) {
                         clearResults = true;
                     } 
+                    //remove layers that are already mapped
+                    self.map.overlayMapTypes.forEach(
+                          function(layer) {
+                              _.each(
+                                  layers,
+                                  function(newLayer) {
+                                      if(newLayer.id==layer.name) {
+                                          layers = _.without(layers, newLayer);
+                                      }
+                                  }
+                              )
+                          }
+                    );
                     if(self.map.overlayMapTypes.length + layers.length > self.maxLayers) {
                         if(!$.browser.chrome) {
                             alert(

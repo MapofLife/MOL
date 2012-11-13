@@ -799,7 +799,37 @@ mol.modules.map.layers = function(mol) {
                 this.display.toggle(false);
             },
 
+            layersToggle: function(event) {
+                var self = this,
+                    visible = event.visible;
+                
+                if (visible == this.display.expanded) {
+                    return;
+                }
+                if(this.display.expanded == true || visible == false) {
+                    this.display.layersWrapper.animate(
+                        {height: this.display.layersHeader.height()+18},
+                        1000,
+                          function() {
+                            self.display.layersToggle.text('▼');
+                            self.display.expanded = false;
+                        }
+                    );
 
+
+                } else {
+                    this.display.layersWrapper.animate(
+                        {height:this.display.layersHeader.height()
+                            +this.display.layersContainer.height()+35},
+                        1000,
+                        function() {
+                            self.display.layersToggle.text('▲');
+                            self.display.expanded = true;
+                        }
+                    );
+
+                }
+            },
             addEventHandlers: function() {
                 var self = this;
                 this.display.removeAll.click (
@@ -820,30 +850,7 @@ mol.modules.map.layers = function(mol) {
                 );
                 this.display.layersToggle.click(
                     function(event) {
-                        var that = this;
-                        if(self.display.expanded) {
-                            self.display.layersWrapper.animate(
-                                {height: self.display.layersHeader.height()+18},
-                                1000,
-                                  function() {
-                                    $(that).text('▼');
-                                    self.display.expanded = false;
-                                }
-                            );
-
-
-                        } else {
-                            self.display.layersWrapper.animate(
-                                {height:self.display.layersHeader.height()
-                                    +self.display.layersContainer.height()+35},
-                                1000,
-                                function() {
-                                    $(that).text('▲');
-                                    self.display.expanded = true;
-                                }
-                            );
-
-                        }
+                        self.layersToggle(event);
                     }
                 );
                 this.bus.addHandler(
@@ -903,6 +910,7 @@ mol.modules.map.layers = function(mol) {
                                 catch(e) {
                                     //invalid extent
                                 }
+                                
                             }
                         )
                         self.addLayers(event.layers);
@@ -926,10 +934,16 @@ mol.modules.map.layers = function(mol) {
                     }
                 );
                 this.bus.addHandler(
+                    'layers-toggle',
+                    function(event) {
+                        self.layersToggle(event);
+                    }
+                );
+                this.bus.addHandler(
                     'layer-click-toggle',
                     function(event) {
                         self.clickDisabled = event.disable;
-
+                        
                         //true to disable
                         if(event.disable) {
                             self.map.overlayMapTypes.forEach(
@@ -939,24 +953,28 @@ mol.modules.map.layers = function(mol) {
                                }
                             );
                         } else {
-                            _.each(
-                                $(self.display.list).children(),
+                            _.any($(self.display.list).children(),
                                 function(layer) {
-                                    self.map.overlayMapTypes.forEach(
-                                        function(mt) {
-                                            if(mt.name == $(layer).attr('id')
-                                                && $(layer).find('.layer')
-                                                    .hasClass('selected')) {
-                                                mt.interaction.add();
-                                                mt.interaction.clickAction
-                                                    = "full";
-                                            } else {
-                                                mt.interaction.remove();
-                                                mt.interaction.clickAction = "";
+                                    if($(layer).find('.layer')
+                                            .hasClass('selected')) {
+                                        self.map.overlayMapTypes.forEach(
+                                            function(mt) {
+                                                if(mt.name == $(layer)
+                                                                .attr('id')) {      
+                                                    mt.interaction.add();
+                                                    mt.interaction.clickAction
+                                                        = "full";
+                                                } else {
+                                                    mt.interaction.remove();
+                                                    mt.interaction.clickAction 
+                                                        = "";
+                                                }
+    
                                             }
-
-                                        }
-                                    );
+                                        );
+                                        
+                                        return true;     
+                                    }
                                 }
                             );
                         }
@@ -1044,11 +1062,6 @@ mol.modules.map.layers = function(mol) {
                             self = this,
                             opacity = null;
 
-                        self.bus.fireEvent(
-                            new mol.bus.Event('show-layer-display-toggle')
-                        );
-
-                        //set this correctly
                         //disable interactivity to start
                         self.map.overlayMapTypes.forEach(
                             function(mt) {
@@ -1076,7 +1089,6 @@ mol.modules.map.layers = function(mol) {
                                 l.remove();
                                 // Hide the layer widget toggle in the main menu if no layers exist
                                 if(self.map.overlayMapTypes.length == 0) {
-                                    self.bus.fireEvent(new mol.bus.Event('hide-layer-display-toggle'));
                                     self.display.toggle(false);
                                 }
                                 event.stopPropagation();
@@ -1209,7 +1221,9 @@ mol.modules.map.layers = function(mol) {
                     },
                     this);
                 this.bus.fireEvent(new mol.bus.Event('reorder-layers', {layers:layerIds}));
-
+                
+                
+               
                 // And this stuff ensures correct initial layer opacities on the map.
                 _.each(
                     all.reverse(), // Reverse so that layers on top get rendered on top.
@@ -1248,6 +1262,11 @@ mol.modules.map.layers = function(mol) {
                             );
                         }
                     }
+                }
+                
+                //done making widgets, toggle on if we have layers.
+                if(layerIds.length>0) {
+                    this.layersToggle({visible:true});
                 }
             },
 
@@ -1722,6 +1741,19 @@ mol.modules.map.results = function(mol) {
                     if(self.display.find('.result').filter(':visible').length == layers.length) {
                         clearResults = true;
                     } 
+                    //remove layers that are already mapped
+                    self.map.overlayMapTypes.forEach(
+                          function(layer) {
+                              _.each(
+                                  layers,
+                                  function(newLayer) {
+                                      if(newLayer.id==layer.name) {
+                                          layers = _.without(layers, newLayer);
+                                      }
+                                  }
+                              )
+                          }
+                    );
                     if(self.map.overlayMapTypes.length + layers.length > self.maxLayers) {
                         if(!$.browser.chrome) {
                             alert(
@@ -3551,10 +3583,7 @@ mol.modules.map.tiles = function(mol) {
                     } else {
                         $(self.display.queryButton).html("OFF");
                         self.toggleMapLayerClicks(false);
-                    } 
-                    
-                    //TODO
-                    //change cursor
+                    }
                 }
             );
             this.bus.addHandler(
@@ -3695,7 +3724,7 @@ mol.modules.map.tiles = function(mol) {
 
             this.bus.addHandler(
                 'species-list-tool-toggle',
-                function(event, params) {                    
+                function(event, params) {                                      
                     if(event.visible == true) {
                         self.enabled = true;
                     } else {
@@ -3797,8 +3826,6 @@ mol.modules.map.tiles = function(mol) {
                         visible: false
                         }, 
                         that = this;
-                    
-                    console.log("toggleButton click");
                     
                     if(self.display.speciesDisplay.is(':visible')) {
                         self.display.speciesDisplay.hide();
@@ -5254,9 +5281,6 @@ mol.modules.map.splash = function(mol) {
                     term: 'Puma concolor'
                 }));
                 setTimeout(function() {
-                    self.bus.fireEvent(new mol.bus.Event('results-select-all'))
-                }, 1000);
-                setTimeout(function() {
                     self.bus.fireEvent(new mol.bus.Event('results-map-selected'))
                 }, 2000);
             });
@@ -5265,7 +5289,7 @@ mol.modules.map.splash = function(mol) {
                 $(self.display.parent()).animate({
                     left: '{0}px'.format($(window).width() / 3 - 400)
                 }, 'slow');
-                self.bus.fireEvent(new mol.bus.Event('layer-display-toggle', {
+                self.bus.fireEvent(new mol.bus.Event('layers-toggle', {
                     visible: false
                 }));
                 self.bus.fireEvent(new mol.bus.Event('species-list-query-click', {

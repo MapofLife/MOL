@@ -43,9 +43,6 @@ mol.modules.map.splash = function(mol) {
                     term: 'Puma concolor'
                 }));
                 setTimeout(function() {
-                    self.bus.fireEvent(new mol.bus.Event('results-select-all'))
-                }, 1000);
-                setTimeout(function() {
                     self.bus.fireEvent(new mol.bus.Event('results-map-selected'))
                 }, 2000);
             });
@@ -54,7 +51,7 @@ mol.modules.map.splash = function(mol) {
                 $(self.display.parent()).animate({
                     left: '{0}px'.format($(window).width() / 3 - 400)
                 }, 'slow');
-                self.bus.fireEvent(new mol.bus.Event('layer-display-toggle', {
+                self.bus.fireEvent(new mol.bus.Event('layers-toggle', {
                     visible: false
                 }));
                 self.bus.fireEvent(new mol.bus.Event('species-list-query-click', {
