@@ -13,15 +13,15 @@ mol.modules.map.boot = function(mol) {
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
                     't.sort_order as type_sort_order, ' +
-                    't.title as type_title,' +
+                    't.title as type_title, '+
                     't.opacity as opacity, ' +
                     'CONCAT(l.provider,\'\') as source, '+
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
                     's.title as source_type_title, ' +   
-                    'CONCAT(n.class,\'\') as _class, ' +
                     'l.feature_count as feature_count, '+
-                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(n.v,\'\') as names, ' +
+                    'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
                             '"lng":\',ST_XMin(l.extent),\', '+
@@ -30,10 +30,12 @@ mol.modules.map.boot = function(mol) {
                         '"ne":{' +
                         '"lng":\',ST_XMax(l.extent),\', ' +
                         '"lat":\',ST_YMax(l.extent),\' ' +
-                        '}}\') as extent, ' +
+                        '}}\') ' +
+                    'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
-                    'd.dataset_title as dataset_title, ' +
+                    'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
+                    
                 'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
@@ -43,11 +45,10 @@ mol.modules.map.boot = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN taxonomy n ON ' +
-                    'l.scientificname = n.scientificname ' +
+                'LEFT JOIN ac n ON ' +
+                    'l.scientificname = n.n ' +
                 'WHERE ' +
-                    "l.scientificname~*'\\m{0}' " +
-                    "OR n.common_names_eng~*'\\m{0}' " +
+                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
                 'ORDER BY name, type_sort_order';
         },
         start: function() {

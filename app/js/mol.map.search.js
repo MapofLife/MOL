@@ -30,6 +30,7 @@ mol.modules.map.search = function(mol) {
                     's.title as source_type_title, ' +   
                     'l.feature_count as feature_count, '+
                     'CONCAT(n.v,\'\') as names, ' +
+                    'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
                             '"lng":\',ST_XMin(l.extent),\', '+
@@ -38,10 +39,12 @@ mol.modules.map.search = function(mol) {
                         '"ne":{' +
                         '"lng":\',ST_XMax(l.extent),\', ' +
                         '"lat":\',ST_YMax(l.extent),\' ' +
-                        '}}\') as extent, ' +
+                        '}}\') ' +
+                    'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
+                    
                 'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +

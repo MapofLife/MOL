@@ -1349,10 +1349,15 @@ mol.modules.map.layers = function(mol) {
                     )
                 );
                 this.attr('id', layer.id);
-                this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
+                this.opacity = $(this).find('.opacity').slider(
+                    {value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"}
+                );
                 this.toggle = $(this).find('.toggle').button();
                 this.styler = $(this).find('.styler');
                 this.zoom = $(this).find('.zoom');
+                if(layer.extent == null) {
+                    this.zoom.css('visibility','hidden');
+                }
                 this.info = $(this).find('.info');
                 this.close = $(this).find('.close');
                 this.type = $(this).find('.type');
@@ -1729,6 +1734,11 @@ mol.modules.map.results = function(mol) {
                 'results-map-selected',
                 function(event) {
                     self.display.addAllButton.click();
+                }
+            );
+            this.display.clearResultsButton.click(
+                function(event) {
+                    self.clearResults();
                 }
             );
             /**
@@ -2126,23 +2136,28 @@ mol.modules.map.results = function(mol) {
         init: function() {
             var html = '' +
                 '<div class="mol-LayerControl-Results">' +
-                '  <div class="filters"></div>' +
-                '  <div class="searchResults widgetTheme">' +
-                '    <div class="results">' +
-                '      <div class="resultHeader">' +
-                '         Results' +
-                '         <a href="#" class="selectNone">none</a>' +
-                '         <a href="#" class="selectAll">all</a>' +
-                '      </div>' +
-                '      <ol class="resultList"></ol>' +
-                '      <div class="pageNavigation">' +
-                '         <button class="addAll">Map Selected Layers</button>' +
-                '      </div>' +
-                '    </div>' +
-                '    <div class="noresults">' +
-                '      <h3>No results found.</h3>' +
-                '    </div>' +
-                '  </div>' +
+                    '<div class="filters"></div>' +
+                    '<div class="searchResults widgetTheme">' +
+                        '<div class="results">' +
+                            '<div class="resultHeader">' +
+                                'Results' +
+                                '<a href="#" class="selectNone">none</a>' +
+                                '<a href="#" class="selectAll">all</a>' +
+                            '</div>' +
+                            '<ol class="resultList"></ol>' +
+                            '<div class="pageNavigation">' +
+                                '<button class="addAll">' +
+                                    'Map Selected Layers' +
+                                '</button>' +
+                                '<button class="clearResults">' +
+                                    'Clear Results' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="noresults">' +
+                            '<h3>No results found.</h3>' +
+                        '</div>' +
+                    '</div>' +
                 '</div>';
 
             this._super(html);
@@ -2151,6 +2166,7 @@ mol.modules.map.results = function(mol) {
             this.selectAllLink = $(this).find('.selectAll');
             this.selectNoneLink = $(this).find('.selectNone');
             this.addAllButton = $(this).find('.addAll');
+            this.clearResultsButton = $(this).find('.clearResults');
             this.results = $(this).find('.results');
             this.noResults = $(this).find('.noresults');
         },
@@ -2390,6 +2406,7 @@ mol.modules.map.search = function(mol) {
                     's.title as source_type_title, ' +   
                     'l.feature_count as feature_count, '+
                     'CONCAT(n.v,\'\') as names, ' +
+                    'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
                             '"lng":\',ST_XMin(l.extent),\', '+
@@ -2398,10 +2415,12 @@ mol.modules.map.search = function(mol) {
                         '"ne":{' +
                         '"lng":\',ST_XMax(l.extent),\', ' +
                         '"lat":\',ST_YMax(l.extent),\' ' +
-                        '}}\') as extent, ' +
+                        '}}\') ' +
+                    'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
+                    
                 'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
@@ -5719,15 +5738,15 @@ mol.modules.map.boot = function(mol) {
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
                     't.sort_order as type_sort_order, ' +
-                    't.title as type_title,' +
+                    't.title as type_title, '+
                     't.opacity as opacity, ' +
                     'CONCAT(l.provider,\'\') as source, '+
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
                     's.title as source_type_title, ' +   
-                    'CONCAT(n.class,\'\') as _class, ' +
                     'l.feature_count as feature_count, '+
-                    'CONCAT(n.common_names_eng,\'\') as names, ' +
+                    'CONCAT(n.v,\'\') as names, ' +
+                    'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
                             '"lng":\',ST_XMin(l.extent),\', '+
@@ -5736,10 +5755,12 @@ mol.modules.map.boot = function(mol) {
                         '"ne":{' +
                         '"lng":\',ST_XMax(l.extent),\', ' +
                         '"lat":\',ST_YMax(l.extent),\' ' +
-                        '}}\') as extent, ' +
+                        '}}\') ' +
+                    'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
-                    'd.dataset_title as dataset_title, ' +
+                    'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
+                    
                 'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
@@ -5749,11 +5770,10 @@ mol.modules.map.boot = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN taxonomy n ON ' +
-                    'l.scientificname = n.scientificname ' +
+                'LEFT JOIN ac n ON ' +
+                    'l.scientificname = n.n ' +
                 'WHERE ' +
-                    "l.scientificname~*'\\m{0}' " +
-                    "OR n.common_names_eng~*'\\m{0}' " +
+                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
                 'ORDER BY name, type_sort_order';
         },
         start: function() {

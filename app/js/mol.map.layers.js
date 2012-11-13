@@ -569,10 +569,15 @@ mol.modules.map.layers = function(mol) {
                     )
                 );
                 this.attr('id', layer.id);
-                this.opacity = $(this).find('.opacity').slider({value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"});
+                this.opacity = $(this).find('.opacity').slider(
+                    {value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"}
+                );
                 this.toggle = $(this).find('.toggle').button();
                 this.styler = $(this).find('.styler');
                 this.zoom = $(this).find('.zoom');
+                if(layer.extent == null) {
+                    this.zoom.css('visibility','hidden');
+                }
                 this.info = $(this).find('.info');
                 this.close = $(this).find('.close');
                 this.type = $(this).find('.type');
