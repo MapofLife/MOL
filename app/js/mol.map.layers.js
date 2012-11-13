@@ -493,7 +493,7 @@ mol.modules.map.layers = function(mol) {
                     q,
                     self = this;
                 
-                layer_tile_style = self.parseLayerStyle(layer, "tile");
+                layer_tile_style = self.parseLayerStyle(layer, "current");
                 layer_orig_style = self.parseLayerStyle(layer, "orig");
                 
                 baseHtml = '' + 
@@ -678,7 +678,7 @@ mol.modules.map.layers = function(mol) {
                                     } else {
                                         o.fill = $('#showFillPalette')
                                                 .spectrum("get")
-                                                    .toHexString();
+                                                    .toHexString();          
                                         o.border = $('#showBorderPalette')
                                                     .spectrum("get")
                                                         .toHexString();                
@@ -704,6 +704,12 @@ mol.modules.map.layers = function(mol) {
                                                     });
                                                 
                                         }  
+                                        
+                                        if($(button).parent()
+                                                .hasClass('.selected')) {
+                                            o.border = "#FF1200";
+                                        }
+                                        
                                     }
    
                                     style_desc = '#' + 
