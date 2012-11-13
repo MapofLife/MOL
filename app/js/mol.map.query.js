@@ -87,7 +87,7 @@ mol.modules.map.query = function(mol) {
             this.addEventHandlers();
             
             //disable all map clicks
-            this.toggleMapLayerClicks(true);
+            this.toggleMapLayerClicks(false);
         },
         
         toggleMapLayerClicks : function(boo) {            
@@ -202,20 +202,27 @@ mol.modules.map.query = function(mol) {
             );
             this.bus.addHandler(
                 'dialog-closed-click',
-                function(event) {                    
-                    if($.cookie('mol_species_list_query_tip') == null) {
-                        $(self.display).qtip({
-                            content: 'Species querying enabled! ' + 
-                                     'Click the map to generate a list. ' + 
-                                     'Toggle this button to disable.',
+                function(event) {                  
+                    if($.cookie('mol_species_list_query_tip_disabled') == null) {
+                        $(self.display.queryButton).qtip({
+                            content: {
+                                text: 'Species list querying is currently ' +
+                                      'disabled. Toggle this button to enable' +
+                                      ' querying and left-click the map to' + 
+                                      ' generate a list.',
+                                title: {
+                                    text: 'Species List Tool',
+                                    button: true
+                                }     
+                                
+                            },
                             position: {
-                                my: 'bottom right',
-                                at: 'top left'
+                                my: 'top right',
+                                at: 'bottom left'
                             },
                             show: {
                                 event: false,
                                 ready: true
-                                    
                             },
                             hide: {
                                 fixed: false,
@@ -224,9 +231,9 @@ mol.modules.map.query = function(mol) {
                         });
                         
                         $.cookie(
-                            'mol_species_list_query_tip', 
+                            'mol_species_list_query_tip_disabled', 
                             'tip_seen',
-                            {expires: 30});
+                            {expires: 1});
                     }
                 }
             );
@@ -1248,10 +1255,10 @@ mol.modules.map.query = function(mol) {
                     '  <span class="title">Species List</span>' +
                     '  <div class="speciesDisplay">' +
                     '    <button id="speciesListButton" ' + 
-                             'class="toggleBtn selected" ' +
+                             'class="toggleBtn" ' +
                              'title="Click to activate species' + 
                                  ' list querying.">' +
-                             'ON' +
+                             'OFF' +
                     '    </button>' + 
                          'Radius </span>' +
                     '    <select class="radius">' +
