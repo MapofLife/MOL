@@ -769,8 +769,12 @@ white-space: nowrap;
 }
 
 .mol-LayerControl-Styler .buttonWrapper {
-    width:85%;
+    width:100%;
     margin:0 auto;
+}
+
+.mol-LayerControl-Styler .buttonWrapper button {
+    font-size:10px;
 }
 
 
