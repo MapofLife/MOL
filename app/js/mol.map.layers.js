@@ -71,7 +71,127 @@ mol.modules.map.layers = function(mol) {
             
             this.display.styleAll.click (
                 function(event) {
+                    var button = this,
+                        baseHtml,
+                        q;
+                        
+                    baseHtml = '' + 
+                           '<div class="mol-LayerControl-Styler">' +
+                           '  <div class="colorPickers">' + 
+                           '    <div class="colorPicker">' + 
+                           '      <span class="stylerLabel">Color:&nbsp</span>' + 
+                           '      <input type="text" id="allFill" />' +
+                           '    </div>' + 
+                           '  </div>' + 
+                           '  <div class="buttonWrapper allStyler">' +
+                           '    <button id="applyStyle">Apply</button>' +
+                           '    <button id="cancelStyle">Cancel</button>' +
+                           '  </div>' +      
+                           '</div>';
                     
+                    $(button).removeData('qtip');
+                    
+                    q = $(button).qtip({
+                        content: {
+                            text: baseHtml,
+                            title: {
+                                text: 'Style All Layers',
+                                button: false
+                            }
+                        },
+                        position: {
+                            at: 'left center',
+                            my: 'right top'
+                        },
+                        show: {
+                            event: 'click',
+                            delay: 0,
+                            ready: true,
+                            solo: true
+                        },
+                        hide: false,
+                        style: {
+                            def: false,
+                            classes: 'ui-tooltip-widgettheme'
+                        },
+                        events: {
+                            render: function(event, api) {                                       
+                                var colors = ['black','white','red','yellow',
+                                              'blue','green','orange','purple'],
+                                    colors2 = ['#66C2A5','#FC8D62', '#8DA0CB',
+                                               '#E78AC3', '#A6D854', '#FFD92F',
+                                               '#E5C494'];
+         
+                                $("#allFill").spectrum({
+                                      color: 'black',
+                                      showPaletteOnly: true,
+                                      palette: [colors, colors2]
+                                });         
+
+                                $(api.elements.content)
+                                    .find('#applyStyle').click(
+                                        function(event) {
+                                            var o = {},
+                                                color;
+                                            
+                                            color = $('#allFill')
+                                                        .spectrum("get")
+                                                            .toHexString();
+                                            
+                                            o.fill = color;
+                                            o.size = 1;
+                                            o.border = color;
+                                            o.s1 = color;
+                                            o.s2 = color;
+                                            o.s3 = color;
+                                            o.s4 = color;
+                                            o.s5 = color;
+                                            
+                                            _.each(
+                                                self.display.layers,
+                                                function(layer) {
+                                                    var l,
+                                                            
+                                                    l = self.display
+                                                            .getLayer(layer);                                
+                                                    
+                                                    //update css
+                                                    self.updateLegendCss(
+                                                        $(l).find('.styler'), 
+                                                        o, 
+                                                        layer
+                                                    );
+                        
+                                                    //update tiles
+                                                    self.updateLayerStyle(
+                                                        $(l).find('.styler'),
+                                                        o,
+                                                        layer, 
+                                                        0.5
+                                                    );
+                                                }
+                                            );  
+                                                   
+                                            button.disabled = false;      
+                                                    
+                                            $(button).qtip('destroy');
+                                        }
+                                );
+                                    
+                                $(api.elements.content)
+                                    .find('#cancelStyle').click(
+                                        function(event) {
+                                            button.disabled = false;
+                                            
+                                            $(button).qtip('destroy');
+                                        }
+                                    );
+                            },
+                            show: function(event, api) {                              
+                                button.disabled = true;
+                            }
+                        }
+                    });
                 }
             );
             
@@ -669,6 +789,22 @@ mol.modules.map.layers = function(mol) {
                 }
             });
         },
+        
+        displayAllStyler: function() {
+            var baseHtml,
+                layer_curr_style,
+                layer_orig_style,
+                max,
+                min,
+                params = {
+                    layer: layer,
+                    style: null
+                },
+                q,
+                self = this;
+            
+            
+        },
             
         getStylerLayout: function(element, layer) {
             var pickers,
@@ -966,7 +1102,7 @@ mol.modules.map.layers = function(mol) {
                          border: borderStyle.substring(
                                     borderStyle.indexOf('#'),
                                     borderStyle.indexOf(';')),
-                         size: Number($.trim(sizeStylesubstring(
+                         size: Number($.trim(sizeStyle.substring(
                                     sizeStyle.indexOf(':')+1,
                                     sizeStyle.indexOf(';'))))};
                 }
