@@ -501,7 +501,7 @@ mol.modules.map.layers = function(mol) {
             
             displayLayerStyler: function(button, layer) {
                 var baseHtml,
-                    layer_tile_style,
+                    layer_curr_style,
                     layer_orig_style,
                     max,
                     min,
@@ -512,7 +512,7 @@ mol.modules.map.layers = function(mol) {
                     q,
                     self = this;
                 
-                layer_tile_style = self.parseLayerStyle(layer, "current");
+                layer_curr_style = self.parseLayerStyle(layer, "current");
                 layer_orig_style = self.parseLayerStyle(layer, "orig");
                 
                 baseHtml = '' + 
@@ -528,6 +528,7 @@ mol.modules.map.layers = function(mol) {
                        '  </div>' +
                        '  <div class="buttonWrapper">' +
                        '    <button id="applyStyle">Apply</button>' +
+                       '    <button id="resetStyle">Reset</button>' +
                        '    <button id="cancelStyle">Cancel</button>' +
                        '  </div>' +      
                        '</div>';
@@ -558,68 +559,19 @@ mol.modules.map.layers = function(mol) {
                         classes: 'ui-tooltip-widgettheme'
                     },
                     events: {
-                        render: function(event, api) {    
+                        render: function(event, api) {   
                             self.getStylerLayout(
                                     $(api.elements.content)
                                         .find('.mol-LayerControl-Styler'),
                                     layer);
-                            
-                            //sizer        
-                            if(layer.style_table == "points_style") {
-                                max = 8;
-                                min = 1;
-                            } else {
-                                max = 3;
-                                min = 0;
-                            }        
-                                      
-                            if(layer.source != "jetz" && 
-                               layer.source != "iucn") {
-                                $(api.elements.content)
-                                    .find('.sizer')
-                                        .slider({
-                                            value: layer_tile_style.size, 
-                                            min:min, 
-                                            max:max, 
-                                            step:1, 
-                                            animate:"slow",
-                                            slide: function(event, ui) {
-                                                $(api.elements.content)
-                                                    .find('#pointSizeValue')
-                                                        .html(ui.value + "px");
-                                            }
-                                        });
                                     
-                                 $(api.elements.content)
-                                    .find('#pointSizeValue')
-                                        .html($(api.elements.content)
-                                            .find('.sizer')
-                                                .slider('value') + "px"); 
-                            }
-                            
-                            //opacity
-                            $(api.elements.content)
-                                .find('.opacity')
-                                    .slider({
-                                        value: layer.opacity, 
-                                        min:0, 
-                                        max:1, 
-                                        step: 0.1, 
-                                        animate:"slow",
-                                        slide: function(event, ui) {
-                                            $(api.elements.content)
-                                                .find('#opacityValue')
-                                                    .html(
-                                                        (ui.value)*100 + 
-                                                        "&#37"
-                                                    );
-                                        }}
-                                    );
-                            
-                            $(api.elements.content)
-                                    .find('#opacityValue')
-                                        .html((layer.opacity)*100 + "&#37"); 
-                                                 
+                            self.setStylerProperties(
+                                        api.elements.content,
+                                        layer,
+                                        layer_curr_style, 
+                                        layer_orig_style,
+                                        false);
+                   
                             $(api.elements.content).find('#applyStyle').click(
                                 function(event) {
                                     var o = {},
@@ -727,9 +679,6 @@ mol.modules.map.layers = function(mol) {
                                         }
                                     }
                                     
-                                    console.log("before selected");
-                                    console.log(o);
-                                    
                                     $.extend(os, o);
                                     
                                     if($(button).parent()
@@ -778,6 +727,25 @@ mol.modules.map.layers = function(mol) {
                                     $(button).qtip('destroy');
                                 }
                             );
+                            
+                            $(api.elements.content)
+                                .find('#resetStyle').click(
+                                    function(event) {
+                                        //button.disabled = false;
+                                        
+                                        //should this close qtip?
+                                        //$(button).qtip('destroy');
+                                        
+                                        //at the very least, should reset items
+                                        
+                                        self.setStylerProperties(
+                                                        api.elements.content,
+                                                        layer,
+                                                        layer_orig_style, 
+                                                        layer_orig_style,
+                                                        true);
+                                    }
+                                );
                                 
                             $(api.elements.content)
                                 .find('#cancelStyle').click(
@@ -788,58 +756,8 @@ mol.modules.map.layers = function(mol) {
                                     }
                                 );
                         },
-                        show: function(event, api) {
-                            var colors = ['black','white','red','yellow',
-                                          'blue','green','orange','purple'],
-                                colors2 = ['#66C2A5','#FC8D62', '#8DA0CB',
-                                           '#E78AC3', '#A6D854', '#FFD92F',
-                                           '#E5C494'],
-                                objs,
-                                x;
-                                
+                        show: function(event, api) {                              
                             button.disabled = true;
-                                
-                            if(layer.source == "iucn" || 
-                               layer.source == "jetz") {
-                               objs = [ {name: '#showFill1Palette', 
-                                           color: layer_tile_style.s1, 
-                                           def: layer_orig_style.s1},
-                                        {name: '#showFill2Palette', 
-                                           color: layer_tile_style.s2, 
-                                           def: layer_orig_style.s2},
-                                        {name: '#showFill3Palette', 
-                                           color: layer_tile_style.s3, 
-                                           def: layer_orig_style.s3},
-                                        {name: '#showFill4Palette', 
-                                           color: layer_tile_style.s4, 
-                                           def: layer_orig_style.s4}     
-                                      ];
-                                      
-                               if(layer.source == "iucn") {
-                                   objs.push({name: '#showFill5Palette', 
-                                             color: layer_tile_style.s5, 
-                                             def: layer_orig_style.s5});
-                               }        
-                            } else {
-                                objs = [ {name: '#showFillPalette', 
-                                            color: layer_tile_style.fill, 
-                                            def: layer_orig_style.fill},
-                                         {name: '#showBorderPalette', 
-                                            color: layer_tile_style.border, 
-                                            def: layer_orig_style.border}     
-                                      ];
-                            }
-                            
-                            _.each(objs, function(obj) {
-                                $(obj.name).spectrum({
-                                  color: obj.color,
-                                  showPaletteOnly: true,
-                                  palette: [
-                                      [obj.def],
-                                      colors, colors2
-                                  ]
-                               }); 
-                            });    
                         }
                     }
                 });
@@ -926,6 +844,103 @@ mol.modules.map.layers = function(mol) {
                        $(element).find('.sizerHolder').prepend(sizer);
                     }
                 }
+            },
+            
+            setStylerProperties: function(cont, lay, currSty, origSty, reset) {
+                var colors = ['black','white','red','yellow',
+                              'blue','green','orange','purple'],
+                    colors2 = ['#66C2A5','#FC8D62', '#8DA0CB',
+                               '#E78AC3', '#A6D854', '#FFD92F','#E5C494'],
+                    objs,
+                    x,
+                    max,
+                    min,
+                    layOpa;    
+                                
+                    if(lay.source == "iucn" || lay.source == "jetz") {
+                       objs = [ {name: '#showFill1Palette', 
+                                 color: currSty.s1, 
+                                 def: origSty.s1},
+                                {name: '#showFill2Palette', 
+                                 color: currSty.s2, 
+                                 def: origSty.s2},
+                                {name: '#showFill3Palette', 
+                                 color: currSty.s3, 
+                                 def: origSty.s3},
+                                {name: '#showFill4Palette', 
+                                 color: currSty.s4, 
+                                 def: origSty.s4}     
+                              ];
+                              
+                       if(lay.source == "iucn") {
+                           objs.push({name: '#showFill5Palette', 
+                                      color: currSty.s5, 
+                                      def: origSty.s5});
+                       }        
+                    } else {
+                        objs = [ {name: '#showFillPalette', 
+                                  color: currSty.fill, 
+                                  def: origSty.fill},
+                                 {name: '#showBorderPalette', 
+                                  color: currSty.border, 
+                                  def: origSty.border}     
+                               ];
+                    }
+                    
+                    _.each(objs, function(obj) {
+                        $(obj.name).spectrum({
+                          color: obj.color,
+                          showPaletteOnly: true,
+                          palette: [
+                              [obj.def],
+                              colors, colors2
+                          ]
+                       }); 
+                    });
+                    
+                    //sizer        
+                    if(lay.style_table == "points_style") {
+                        max = 8;
+                        min = 1;
+                    } else {
+                        max = 3;
+                        min = 0;
+                    }        
+                                      
+                    if(lay.source != "jetz" && lay.source != "iucn") {
+                        $(cont).find('.sizer').slider({
+                            value: currSty.size, 
+                            min:min, 
+                            max:max, 
+                            step:1, 
+                            animate:"slow",
+                            slide: function(event, ui) {
+                                console.log("sizer slider");
+                                $(cont).find('#pointSizeValue').html(
+                                    ui.value + "px");
+                            }
+                        });
+                            
+                        $(cont).find('#pointSizeValue').html(
+                            $(cont).find('.sizer').slider('value') + "px"); 
+                    }
+
+                    layOpa = reset ? lay.orig_opacity : lay.opacity;
+                            
+                    //opacity
+                    $(cont).find('.opacity').slider({
+                        value: layOpa, 
+                        min:0, 
+                        max:1, 
+                        step: 0.1, 
+                        animate:"slow",
+                        slide: function(event, ui) {
+                            $(cont).find('#opacityValue').html(
+                                (ui.value)*100 + "&#37");
+                        }}
+                    );
+                    
+                    $(cont).find('#opacityValue').html((layOpa)*100 + "&#37");
             },
             
             parseLayerStyle: function(layer, original) {
