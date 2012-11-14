@@ -288,7 +288,7 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layersHeader {
     margin: 5px;
     margin-bottom: 0px;
-    padding: 5px;
+    padding: 4px;
     line-height: 25px;
 }
 
@@ -302,8 +302,7 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layersContainer {
     margin: 5px;
     margin-top: 0px;
-    padding: 5px;
-    padding-top: 10px;
+    padding: 4px;
     border-bottom-left-radius:3px;
     border-bottom-right-radius:3px;
     -moz-border-radius-bottomleft: 3px;

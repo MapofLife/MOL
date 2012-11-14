@@ -20,6 +20,7 @@ mol.modules.map.layers = function(mol) {
                 this.display.toggle(false);
             },
 
+<<<<<<< HEAD
             layersToggle: function(event) {
                 var self = this,
                     visible = event.visible;
@@ -51,11 +52,12 @@ mol.modules.map.layers = function(mol) {
 
                 }
             },
+=======
+>>>>>>> Added Reset All button.
             addEventHandlers: function() {
                 var self = this;
                 this.display.removeAll.click (
                     function(event) {
-
                         $(self.display).find(".close").trigger("click");
                     }
                 );
@@ -67,6 +69,41 @@ mol.modules.map.layers = function(mol) {
                                     checkbox.click({currentTarget : this})
                             }
                         );
+                    }
+                );
+                this.display.resetAll.click (
+                    function(event) {
+                        _.each(
+                            self.display.layers,
+                            function(layer) {
+                                var l,
+                                    o; 
+                                    
+                                //get original style    
+                                l = self.display.getLayer(layer);                                
+                                o = self.parseLayerStyle(layer, "orig");
+                                
+                                //update css
+                                self.updateLegendCss(
+                                    $(l).find('.styler'), 
+                                    o, 
+                                    layer
+                                );
+
+                                //update tiles
+                                self.updateLayerStyle(
+                                    $(l).find('.styler'),
+                                    o,
+                                    layer, 
+                                    layer.orig_opacity
+                                );
+                            }
+                        );
+                    }
+                );
+                this.display.styleAll.click (
+                    function(event) {
+                        
                     }
                 );
                 this.display.layersToggle.click(
@@ -574,13 +611,8 @@ mol.modules.map.layers = function(mol) {
                    
                             $(api.elements.content).find('#applyStyle').click(
                                 function(event) {
-                                    var o = {},
-                                        os = {},
-                                        params = {},
-                                        oparams = {},
-                                        style_desc,
-                                        sel_style_desc;
-                                        
+                                    var o = {};
+                                    
                                     if(layer.source == "iucn") {
                                         o.s1 = $('#showFill1Palette')
                                                  .spectrum("get")
@@ -596,28 +628,7 @@ mol.modules.map.layers = function(mol) {
                                                     .toHexString();
                                         o.s5 = $('#showFill5Palette')
                                                  .spectrum("get")
-                                                    .toHexString();
-                                                    
-                                        $(button).find('.s1')
-                                                .css({
-                                                    'background-color':o.s1
-                                                });
-                                        $(button).find('.s2')
-                                                .css({
-                                                    'background-color':o.s2
-                                                });
-                                        $(button).find('.s3')
-                                                .css({
-                                                    'background-color':o.s3
-                                                });
-                                        $(button).find('.s4')
-                                                .css({
-                                                    'background-color':o.s4
-                                                });
-                                        $(button).find('.s5')
-                                                .css({
-                                                    'background-color':o.s5
-                                                });                    
+                                                    .toHexString();                  
                                     } else if(layer.source == "jetz") {
                                         o.s1 = $('#showFill1Palette')
                                                  .spectrum("get")
@@ -630,24 +641,7 @@ mol.modules.map.layers = function(mol) {
                                                     .toHexString();
                                         o.s4 = $('#showFill4Palette')
                                                  .spectrum("get")
-                                                    .toHexString();
-                                                    
-                                        $(button).find('.s1')
-                                                .css({
-                                                    'background-color':o.s1
-                                                });
-                                        $(button).find('.s2')
-                                                .css({
-                                                    'background-color':o.s2
-                                                });
-                                        $(button).find('.s3')
-                                                .css({
-                                                    'background-color':o.s3
-                                                });
-                                        $(button).find('.s4')
-                                                .css({
-                                                    'background-color':o.s4
-                                                });                                    
+                                                    .toHexString();                                    
                                     } else {
                                         o.fill = $('#showFillPalette')
                                                 .spectrum("get")
@@ -658,69 +652,19 @@ mol.modules.map.layers = function(mol) {
                                         o.size = $(api.elements.content)
                                                     .find('.sizer')
                                                         .slider('value');
-                                            
-                                        if(layer.style_table == 
-                                            "points_style") {
-                                            $(button).find('.legend-point')
-                                                .css({
-                                                    'background-color':o.fill,
-                                                    'border-color':o.border,
-                                                    'width':(o.size+3)+"px",
-                                                    'height':(o.size+3)+"px"
-                                                });
-                                        } else {
-                                            $(button).find('.legend-polygon')
-                                                .css({
-                                                    'background-color':o.fill,
-                                                    'border-color':o.border,
-                                                    'border-width':o.size+"px"
-                                                    });
+                                    }
+                                    
+                                    self.updateLegendCss(button, o, layer);
+                                    
+                                    self.updateLayerStyle(
+                                            button,
+                                            o,
+                                            layer,
+                                            parseFloat($(api.elements.content)
+                                                .find('.opacity')
+                                                    .slider("value"))
                                                 
-                                        }
-                                    }
-                                    
-                                    $.extend(os, o);
-                                    
-                                    if($(button).parent()
-                                            .hasClass('selected')) {   
-                                        os.border = "#FF1200";
-                                    }
-                                    
-                                    sel_style_desc = self.updateStyle(
-                                                             layer,
-                                                             layer.tile_style, 
-                                                             os);
-                                    style_desc = self.updateStyle(
-                                                         layer,
-                                                         layer.tile_style, 
-                                                         o);                                    
-                                    
-                                    params.layer = layer;
-                                    params.style = sel_style_desc;
-                                    
-                                    //keep the style around for later        
-                                    layer.style = style_desc;
-                                    
-                                    self.bus.fireEvent(
-                                        new mol.bus.Event(
-                                            'apply-layer-style', 
-                                            params));
-
-                                    oparams = {
-                                        layer: layer,
-                                        opacity: parseFloat(
-                                                    $(api.elements.content)
-                                                        .find('.opacity')
-                                                            .slider("value"))
-                                    };
-
-                                    //store the opacity on the layer object
-                                    layer.opacity = oparams.opacity;
-
-                                    self.bus.fireEvent(
-                                        new mol.bus.Event(
-                                            'layer-opacity', 
-                                            oparams));        
+                                    );       
                                            
                                     button.disabled = false;      
                                             
@@ -731,13 +675,6 @@ mol.modules.map.layers = function(mol) {
                             $(api.elements.content)
                                 .find('#resetStyle').click(
                                     function(event) {
-                                        //button.disabled = false;
-                                        
-                                        //should this close qtip?
-                                        //$(button).qtip('destroy');
-                                        
-                                        //at the very least, should reset items
-                                        
                                         self.setStylerProperties(
                                                         api.elements.content,
                                                         layer,
@@ -1175,6 +1112,79 @@ mol.modules.map.layers = function(mol) {
                 
                 return updatedStyle;
             },
+            
+            updateLegendCss: function(button, o, layer) {
+                if(layer.source == "iucn") {          
+                    $(button).find('.s1').css({'background-color':o.s1});
+                    $(button).find('.s2').css({'background-color':o.s2});
+                    $(button).find('.s3').css({'background-color':o.s3});
+                    $(button).find('.s4').css({'background-color':o.s4});
+                    $(button).find('.s5').css({'background-color':o.s5});                    
+                } else if(layer.source == "jetz") { 
+                    $(button).find('.s1').css({'background-color':o.s1});
+                    $(button).find('.s2').css({'background-color':o.s2});
+                    $(button).find('.s3').css({'background-color':o.s3});
+                    $(button).find('.s4').css({'background-color':o.s4});                                    
+                } else {
+                    if(layer.style_table == "points_style") {
+                        $(button).find('.legend-point')
+                            .css({
+                                'background-color':o.fill,
+                                'border-color':o.border,
+                                'width':(o.size+3)+"px",
+                                'height':(o.size+3)+"px"
+                            }
+                        );
+                    } else {
+                        $(button).find('.legend-polygon')
+                            .css({
+                                'background-color':o.fill,
+                                'border-color':o.border,
+                                'border-width':o.size+"px"
+                            }
+                        );    
+                    }
+                }
+            },
+            
+            updateLayerStyle: function(button, obj, lay, opa) {
+                var o = obj,
+                    os = {},
+                    sel_style_desc,
+                    style_desc,
+                    params = {},
+                    oparams = {},
+                    self = this;
+                    
+                $.extend(os, o);
+                                    
+                if($(button).parent().hasClass('selected')) {   
+                    os.border = "#FF1200";
+                }
+                
+                sel_style_desc = self.updateStyle(lay, lay.tile_style, os);
+                style_desc = self.updateStyle(lay, lay.tile_style, o);                                    
+                
+                params.layer = lay;
+                params.style = sel_style_desc;
+                
+                //keep the style around for later        
+                lay.style = style_desc;
+                
+                self.bus.fireEvent(new mol.bus.Event(
+                    'apply-layer-style', params));
+
+                oparams = {
+                    layer: lay,
+                    opacity: opa
+                };
+
+                //store the opacity on the layer object
+                lay.opacity = oparams.opacity;
+
+                self.bus.fireEvent(new mol.bus.Event(
+                    'layer-opacity', oparams));
+            },
 
             toggleLayerHighlight: function(layer, visible) {
                 var o = {},
@@ -1321,12 +1331,6 @@ mol.modules.map.layers = function(mol) {
                 );
                 
                 this.attr('id', layer.id);
-<<<<<<< HEAD
-<<<<<<< HEAD
-                this.opacity = $(this).find('.opacity').slider(
-                    {value: 0.5, min: 0, max:1, step: 0.02, animate:"slow"}
-                );
-=======
                 this.opacity = $(this).find('.opacity')
                                         .slider({
                                             value: 0.5, 
@@ -1334,9 +1338,6 @@ mol.modules.map.layers = function(mol) {
                                             max:1, 
                                             step: 0.02, 
                                             animate:"slow"});
->>>>>>> 80 char width
-=======
->>>>>>> Moving opacity into styler.
                 this.toggle = $(this).find('.toggle').button();
                 this.styler = $(this).find('.styler');
                 this.zoom = $(this).find('.zoom');
@@ -1397,10 +1398,16 @@ mol.modules.map.layers = function(mol) {
                                 '</div>' +
                                 '<div class="pageNavigation">' +
                                     '<button class="removeAll">' +
-                                        'Remove All Layers' +
+                                        'Remove All' +
                                     '</button>' +
                                     '<button class="toggleAll">' +
-                                        'Toggle All Layers' +
+                                        'Toggle All' +
+                                    '</button>' +
+                                    '<button class="resetAll">' +
+                                        'Reset All' +
+                                    '</button>' +
+                                    '<button class="styleAll">' +
+                                        'Style All' +
                                     '</button>' +
                                 '</div>' +
                             '</div>' +
@@ -1411,6 +1418,9 @@ mol.modules.map.layers = function(mol) {
                 this.list = $(this).find("#sortable");
                 this.removeAll = $(this).find(".removeAll");
                 this.toggleAll = $(this).find(".toggleAll");
+                this.resetAll = $(this).find(".resetAll");
+                this.styleAll = $(this).find(".styleAll");
+                this.rese
                 this.open = false;
                 this.views = {};
                 this.layers = [];
