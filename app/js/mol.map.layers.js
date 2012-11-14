@@ -179,6 +179,18 @@ mol.modules.map.layers = function(mol) {
                            '    <button id="cancelStyle">Cancel</button>' +
                            '  </div>' +      
                            '</div>';
+                           
+                    _.each(
+                        self.display.layers,
+                        function(layer) {
+                            var l, 
+                                b;
+                            
+                            l = self.display.getLayer(layer);
+                            b = $(l).find('.styler');
+                            $(b).qtip('destroy');
+                        }
+                    );       
                     
                     $(button).removeData('qtip');
                     
@@ -241,7 +253,7 @@ mol.modules.map.layers = function(mol) {
                                             _.each(
                                                 self.display.layers,
                                                 function(layer) {
-                                                    var l,
+                                                    var l;
                                                             
                                                     l = self.display
                                                             .getLayer(layer);                                
@@ -280,6 +292,11 @@ mol.modules.map.layers = function(mol) {
                             },
                             show: function(event, api) {                              
                                 button.disabled = true;
+                            },
+                            hide: function(event, api) {
+                                button.disabled = false;
+                                
+                                $(button).qtip('destroy');
                             }
                         }
                     });
@@ -606,7 +623,19 @@ mol.modules.map.layers = function(mol) {
                     
                     // Click handler for style toggle 
                     l.styler.click(
-                        function(event) {   
+                        function(event) {
+                            _.each(
+                                self.display.layers,
+                                function(layer) {
+                                    var l, 
+                                        b;
+                                    
+                                    l = self.display.getLayer(layer);
+                                    b = $(l).find('.styler');
+                                    $(b).qtip('destroy');
+                                }
+                            );
+                             
                             self.displayLayerStyler(this, layer);
                             
                             event.stopPropagation();
@@ -794,7 +823,7 @@ mol.modules.map.layers = function(mol) {
                    '  </div>' +      
                    '</div>';
             
-            $(button).removeData('qtip');
+            $(button).removeData('qtip'); 
             
             q = $(button).qtip({
                 content: {
@@ -1057,6 +1086,9 @@ mol.modules.map.layers = function(mol) {
                     },
                     show: function(event, api) {                              
                         button.disabled = true;
+                    },
+                    hidden: function(event, api) {
+                        button.disabled = false;
                     }
                 }
             });
