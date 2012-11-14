@@ -10,8 +10,8 @@
 -- 	scientificname
 --	commonname
 
-DROP function get_species_list_csv(text, float, float, int, text);
-CREATE FUNCTION get_species_list_csv(text, float, float, int, text)
+DROP function get_species_list_csv(text, numeric, numeric, int, text);
+CREATE FUNCTION get_species_list_csv(text, numeric, numeric, int, text)
 	RETURNS TABLE(
 		"Scientific Name" text, 
 		"Common Name (English)" text, 

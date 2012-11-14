@@ -10,8 +10,8 @@
 -- 	scientificname
 --	commonname
 
-DROP function get_species_list(text, float, float, int, text);
-CREATE FUNCTION get_species_list(text, float, float, int, text)
+DROP function get_species_list(text, numeric, numeric, int, text);
+CREATE FUNCTION public.get_species_list(text, numeric, numeric, int, text)
 	RETURNS TABLE(
 		scientificname text, 
 		thumbsrc text, 
