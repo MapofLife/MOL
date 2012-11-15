@@ -44,7 +44,7 @@ mol.modules.map.layers = function(mol) {
                         self.display.layers,
                         function(layer) {
                             var l,
-                                o; 
+                                o;
                                 
                             //get original style    
                             l = self.display.getLayer(layer);                                
@@ -54,7 +54,8 @@ mol.modules.map.layers = function(mol) {
                             self.updateLegendCss(
                                 $(l).find('.styler'), 
                                 o, 
-                                layer
+                                layer,
+                                layer.orig_opacity
                             );
 
                             //update tiles
@@ -171,7 +172,8 @@ mol.modules.map.layers = function(mol) {
                                                     self.updateLegendCss(
                                                         $(l).find('.styler'), 
                                                         o, 
-                                                        layer
+                                                        layer,
+                                                        0.5
                                                     );
                         
                                                     //update tiles
@@ -773,7 +775,13 @@ mol.modules.map.layers = function(mol) {
                                                     .slider('value');
                                 }
                                 
-                                self.updateLegendCss(button, o, layer);
+                                self.updateLegendCss(
+                                        button, 
+                                        o, 
+                                        layer,
+                                        parseFloat($(api.elements.content)
+                                            .find('.opacity')
+                                                .slider("value")));
                                 
                                 self.updateLayerStyle(
                                         button,
@@ -781,8 +789,7 @@ mol.modules.map.layers = function(mol) {
                                         layer,
                                         parseFloat($(api.elements.content)
                                             .find('.opacity')
-                                                .slider("value"))
-                                            
+                                                .slider("value")) 
                                 );       
                                        
                                 button.disabled = false;      
@@ -1227,18 +1234,27 @@ mol.modules.map.layers = function(mol) {
             return updatedStyle;
         },
             
-        updateLegendCss: function(button, o, layer) {
+        updateLegendCss: function(button, o, layer, opa) {
             if(layer.source == "iucn") {          
-                $(button).find('.s1').css({'background-color':o.s1});
-                $(button).find('.s2').css({'background-color':o.s2});
-                $(button).find('.s3').css({'background-color':o.s3});
-                $(button).find('.s4').css({'background-color':o.s4});
-                $(button).find('.s5').css({'background-color':o.s5});                    
+                $(button).find('.s1').css({
+                    'background-color':o.s1, 'opacity':opa});
+                $(button).find('.s2').css({
+                    'background-color':o.s2, 'opacity':opa});
+                $(button).find('.s3').css({
+                    'background-color':o.s3, 'opacity':opa});
+                $(button).find('.s4').css({
+                    'background-color':o.s4, 'opacity':opa});
+                $(button).find('.s5').css({
+                    'background-color':o.s5, 'opacity':opa});                    
             } else if(layer.source == "jetz") { 
-                $(button).find('.s1').css({'background-color':o.s1});
-                $(button).find('.s2').css({'background-color':o.s2});
-                $(button).find('.s3').css({'background-color':o.s3});
-                $(button).find('.s4').css({'background-color':o.s4});                                    
+                $(button).find('.s1').css({
+                    'background-color':o.s1, 'opacity':opa});
+                $(button).find('.s2').css({
+                    'background-color':o.s2, 'opacity':opa});
+                $(button).find('.s3').css({
+                    'background-color':o.s3, 'opacity':opa});
+                $(button).find('.s4').css({
+                    'background-color':o.s4, 'opacity':opa});                                    
             } else {
                 if(layer.style_table == "points_style") {
                     $(button).find('.legend-point')
@@ -1246,7 +1262,8 @@ mol.modules.map.layers = function(mol) {
                             'background-color':o.fill,
                             'border-color':o.border,
                             'width':(o.size+3)+"px",
-                            'height':(o.size+3)+"px"
+                            'height':(o.size+3)+"px",
+                            'opacity':opa
                         }
                     );
                 } else {
@@ -1254,7 +1271,8 @@ mol.modules.map.layers = function(mol) {
                         .css({
                             'background-color':o.fill,
                             'border-color':o.border,
-                            'border-width':o.size+"px"
+                            'border-width':o.size+"px",
+                            'opacity':opa
                         }
                     );    
                 }
