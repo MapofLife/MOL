@@ -495,8 +495,6 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layer .styler div.legend-point {
     height: 7px;
     width: 7px;
-    background-color:#a62a16;
-    border-color:#FFFFFF;
     border-style:solid;
     border-width:1px;
     -webkit-border-radius: 10px;
@@ -504,44 +502,15 @@ white-space: nowrap;
     border-radius: 10px;
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-point.localinv {
-    background-color:#6A0085;
-    border-color:#000000;
-    border-style:solid;
-    border-width:2px;
-}
-
 .mol-LayerControl-Layers .layer .styler div.legend-polygon {
-    background-color:#FF6600;
-    border-width:0px;
     border-style:solid;
     width:18px;
     height:18px;
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-polygon.regionalchecklist {
-    background-color:#000000;
-    border-color:#000000;
-    border-style:solid;
-    border-width:1px;
-    opacity:0.25;
-}
-
-.mol-LayerControl-Layers .layer .styler div.legend-polygon.localinv {
-    background-color:#6A0085;
-    border-color:#000000;
-    border-style:solid;
-    border-width:1px;
-}
-
-.mol-LayerControl-Layers .layer .styler div.legend-polygon.griddedrangeatlas {
-    opacity: 0.5;
-}
-
 .mol-LayerControl-Layers .layer .styler div.legend-seasonal {
     background-color:transparent;
     border: solid;
-    border-width: 0px;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-seasonal div.seasonal {
@@ -550,7 +519,6 @@ white-space: nowrap;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
-    opacity: 0.5;
 }
 
 .mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div {
@@ -558,26 +526,6 @@ white-space: nowrap;
 }
 .mol-LayerControl-Layers .layer .styler div.legend-seasonal.jetz div {
     height:5px;
-}
-
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div.s1,
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.jetz div.s2 {
-    background-color:#99CC00;
-}
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.jetz div.s1,
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div.s2 {
-    background-color:#FFCC00;
-}
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div.s3,
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.jetz div.s3 {
-    background-color:#006BB4;
-}
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div.s4 {
-    background-color:#E39C5B;
-}
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.jetz div.s4,
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div.s5 {
-    background-color:#E25B5B;
 }
 
 .mol-LayerControl-Layers .layer .type img,
