@@ -422,7 +422,7 @@ mol.modules.map.tiles = function(mol) {
                                 '    polygon-fill:#006BB4;' +
                                 '  }' +
                                 '  [seasonality=4] {' +
-                                '    polygon-fill:#E25B5B;' +
+                                '    polygon-fill:#E39C5B;' +
                                 '  }' +
                                 '}';
                     } else if (layer.type == 'regionalchecklist') {
