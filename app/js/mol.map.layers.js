@@ -870,17 +870,44 @@ mol.modules.map.layers = function(mol) {
                $(element).find('.sizerHolder').prepend(sizer);
             } else {
                 if(layer.source == "iucn" || layer.source == "jetz") {
-                    pickers = '' + 
-                       '<span class="seasonLabel">Breeding</span>' +
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                       '  <input type="text" id="showFill1Palette" />' +
-                       '</div>' +
-                       '<span class="seasonLabel">Resident</span>' +
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                       '  <input type="text" id="showFill2Palette" />' +
-                       '</div>' +
+                    pickers = ''; 
+                       
+                    //breeding  
+                    if(layer.source == "iucn") {
+                       pickers+=''+
+                           '<span class="seasonLabel">Breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill2Palette" />' +
+                           '</div>';
+                    } else {
+                        pickers+=''+
+                           '<span class="seasonLabel">Breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill1Palette" />' +
+                           '</div>'
+                    }
+                   
+                    //resident
+                    if(layer.source == "iucn") {
+                        pickers+=''+
+                           '<span class="seasonLabel">Resident</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill1Palette" />' +
+                           '</div>';
+                    } else {
+                        pickers+=''+                       
+                           '<span class="seasonLabel">Resident</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill2Palette" />' +
+                           '</div>';
+                    }
+                    
+                    //non-breeding and passage                   
+                    pickers+='' +
                        '<span class="seasonLabel">Non-breeding</span>' +
                        '<div class="colorPicker">' + 
                        '  <span class="stylerLabel">Fill:&nbsp</span>' + 
@@ -891,6 +918,7 @@ mol.modules.map.layers = function(mol) {
                        '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                        '  <input type="text" id="showFill4Palette" />' +
                        '</div>';
+                   
                        
                    if (layer.source == "iucn") {
                        pickers+=''+
