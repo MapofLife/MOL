@@ -446,7 +446,8 @@ mol.modules.map.layers = function(mol) {
             var all = [],
                 layerIds = [],
                 sortedLayers = this.sortLayers(layers),
-                wasSelected = this.display.find('.layer.selected');
+                wasSelected = this.display.find('.layer.selected'),
+                o = {};
 
             _.each(
                 sortedLayers,
@@ -470,6 +471,17 @@ mol.modules.map.layers = function(mol) {
                     //Hack so that at the end 
                     //we can fire opacity event with all layers
                     all.push({layer:layer, l:l, opacity:opacity});
+                    
+                    //style legends
+                    o = self.parseLayerStyle(layer, "orig");
+                                    
+                    //initalize css
+                    self.updateLegendCss(
+                        $(l).find('.styler'), 
+                        o, 
+                        layer,
+                        layer.orig_opacity
+                    );
 
                     //Close handler for x button 
                     //fires a 'remove-layers' event.
