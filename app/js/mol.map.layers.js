@@ -1054,44 +1054,17 @@ mol.modules.map.layers = function(mol) {
                $(element).find('.sizerHolder').prepend(sizer);
             } else {
                 if(layer.source == "iucn" || layer.source == "jetz") {
-                    pickers = ''; 
-                       
-                    //breeding  
-                    if(layer.source == "iucn") {
-                       pickers+=''+
-                           '<span class="seasonLabel">Breeding</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill2Palette" />' +
-                           '</div>';
-                    } else {
-                        pickers+=''+
-                           '<span class="seasonLabel">Breeding</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill1Palette" />' +
-                           '</div>'
-                    }
-                   
-                    //resident
-                    if(layer.source == "iucn") {
-                        pickers+=''+
-                           '<span class="seasonLabel">Resident</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill1Palette" />' +
-                           '</div>';
-                    } else {
-                        pickers+=''+                       
-                           '<span class="seasonLabel">Resident</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill2Palette" />' +
-                           '</div>';
-                    }
-                    
-                    //non-breeding and passage                   
-                    pickers+='' +
+                   pickers = '' +
+                       '<span class="seasonLabel">Breeding</span>' +
+                       '<div class="colorPicker">' + 
+                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                       '  <input type="text" id="showFill2Palette" />' +
+                       '</div>' +
+                       '<span class="seasonLabel">Resident</span>' +
+                       '<div class="colorPicker">' + 
+                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                       '  <input type="text" id="showFill1Palette" />' +
+                       '</div>' +
                        '<span class="seasonLabel">Non-breeding</span>' +
                        '<div class="colorPicker">' + 
                        '  <span class="stylerLabel">Fill:&nbsp</span>' + 
@@ -1453,7 +1426,8 @@ mol.modules.map.layers = function(mol) {
         },
 
         updateStyle: function(layer, style, newStyle) {
-            var updatedStyle;
+            var updatedStyle,
+                season;
             
             if(layer.style_table == "points_style") {
                 style = this.changeStyleProperty(
@@ -1468,7 +1442,7 @@ mol.modules.map.layers = function(mol) {
                     style = this.changeStyleProperty(
                                 style, 'line-color', newStyle.border, false);
                     style = this.changeStyleProperty(
-                                style, 'line-width', newStyle.size, false);                
+                                style, 'line-width', newStyle.size, false);                         
                     
                     style = this.changeStyleProperty(
                                 style, '1', newStyle.s1, true, 'polygon-fill');
@@ -1504,10 +1478,10 @@ mol.modules.map.layers = function(mol) {
         updateLegendCss: function(button, o, layer, opa) {
             if(layer.source == "iucn" || layer.source == "jetz") {          
                 $(button).find('.s1').css({
-                    'background-color':o.s1, 
+                    'background-color':o.s2, 
                     'opacity':opa});
                 $(button).find('.s2').css({
-                    'background-color':o.s2,
+                    'background-color':o.s1,
                     'opacity':opa});
                 $(button).find('.s3').css({
                     'background-color':o.s3,

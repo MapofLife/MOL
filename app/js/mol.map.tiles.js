@@ -317,7 +317,7 @@ mol.modules.map.tiles = function(mol) {
             init: function(layer, table, map) {
                 var sql =  "" +
                     "SELECT * FROM " +
-                    " get_mol_tile('{0}','{1}','{2}','{3}')".format(
+                    " get_mol_tile_beta('{0}','{1}','{2}','{3}')".format(
                         layer.source, 
                         layer.type, 
                         layer.name, 
@@ -333,7 +333,7 @@ mol.modules.map.tiles = function(mol) {
                        '{0}:8080'.format(hostname) : hostname;
                 
                 if(layer.tile_style == undefined) {
-                    layer.tile_style = this.getDefaultStyle(layer);
+                    layer.tile_style = "#" + layer.dataset_id + layer.css;
                     layer.style = layer.tile_style;
                     layer.orig_style = layer.tile_style;
                     
@@ -357,102 +357,6 @@ mol.modules.map.tiles = function(mol) {
                         infowindow: infowindow,
                         opacity: layer.opacity
                 });
-            },
-            
-            getDefaultStyle: function(layer) {
-                var style;
-                
-                //this will be replaced by a server call in the future
-                if(layer.style_table == "points_style") {
-                    if(layer.type == "localinv") {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'marker-fill: #6A0085;' + 
-                                'marker-line-color: #000000;' + 
-                                'marker-line-width: 1;' + 
-                                'marker-line-opacity: 1.0;' + 
-                                'marker-width:3;' + 
-                                'marker-allow-overlap:true;' + 
-                                '}';
-                    } else {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'marker-fill: #a62a16;' + 
-                                'marker-line-color: #ffffff;' + 
-                                'marker-line-width: 1;' + 
-                                'marker-line-opacity: 1.0;' + 
-                                'marker-width:3;' + 
-                                'marker-allow-overlap:true;' + 
-                                '}';
-                    }
-                } else {
-                    if(layer.source == "iucn") {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1.0;' + 
-                                'line-width: 0;' + 
-                                'polygon-opacity:1.0;' +
-                                '  [seasonality=1] {' +
-                                '    polygon-fill:#9C0;' +
-                                '  }' +
-                                '  [seasonality=2] {' +
-                                '    polygon-fill:#FC0;' +
-                                '  }' +
-                                '  [seasonality=3] {' +
-                                '    polygon-fill:#006BB4;' +
-                                '  }' +
-                                '  [seasonality=4] {' +
-                                '    polygon-fill:#E39C5B;' +
-                                '  }' +
-                                '  [seasonality=5] {' +
-                                '    polygon-fill:#E25B5B;' +
-                                '  }' +
-                                '}';
-                    } else if (layer.source == "jetz") {    
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1.0;' + 
-                                'line-width: 0;' + 
-                                'polygon-opacity:1.0;' +
-                                '  [seasonality=1] {' +
-                                '    polygon-fill:#FC0;' +
-                                '  }' +
-                                '  [seasonality=2] {' +
-                                '    polygon-fill:#9C0;' +
-                                '  }' +
-                                '  [seasonality=3] {' +
-                                '    polygon-fill:#006BB4;' +
-                                '  }' +
-                                '  [seasonality=4] {' +
-                                '    polygon-fill:#E39C5B;' +
-                                '  }' +
-                                '}';
-                    } else if (layer.type == 'regionalchecklist') {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1;' + 
-                                'line-width: 0;' + 
-                                'polygon-fill: #000000;' + 
-                                'polygon-opacity:1.0;' + 
-                                '}';
-                    } else if (layer.type == 'localinv') {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1;' + 
-                                'line-width: 1;' + 
-                                'polygon-fill: #6A0085;' + 
-                                'polygon-opacity:1.0;' + 
-                                '}';
-                    } else {
-                        style = '#' + layer.dataset_id + '{' + 
-                                'line-color: #000000;' + 
-                                'line-opacity: 1;' + 
-                                'line-width: 0;' + 
-                                'polygon-fill: #F60;' + 
-                                'polygon-opacity:1.0;' + 
-                                '}';
-                    }
-                }
-                
-                return style;
             }
         }
     );

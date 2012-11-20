@@ -21,6 +21,7 @@ mol.modules.map.search = function(mol) {
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
+                    't.carto_css as css,' +
                     't.sort_order as type_sort_order, ' +
                     't.title as type_title, '+
                     't.opacity as opacity, ' +
