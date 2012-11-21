@@ -54,7 +54,6 @@
      <script type="text/javascript" src="../../../js/mol.map.loading.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.dashboard.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.query.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.legend.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.basemap.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.metadata.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.splash.js"></script>
@@ -120,8 +119,6 @@
                 de.start()
                 qe = new env.map.query.QueryEngine(proxy, bus, me.display.map)
                 qe.start()
-                lge = new env.map.legend.LegendEngine(proxy, bus)
-                lge.start()
                 bme = new env.map.basemap.BaseMapEngine(proxy, bus, me.display.map)
                 bme.start()
                 mde = new env.map.metadata.MetadataEngine(proxy, bus)
@@ -161,8 +158,6 @@
                  de.start()
                 qe = new env.map.query.QueryEngine(proxy, bus, me.display.map);
                 qe.start()
-                lge = new env.map.legend.LegendEngine(proxy, bus)
-                lge.start()
                 bme = new env.map.basemap.BaseMapEngine(proxy, bus, me.display.map)
                 bme.start()
                 mde = new env.map.metadata.MetadataEngine(proxy, bus)

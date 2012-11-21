@@ -1402,65 +1402,6 @@ div.mol-Dashboard-TableWindow {
      font-weight:normal;
 }
 
-
-.mol-Map-LegendDisplay {
-    display: none;
-    float:right;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    font-size: 0.8em;
-    padding: 2px;
-    padding-left:6px;
-    padding-right:6px;
-    margin: 2px;
-}
-.mol-Map-LegendDisplay .legendRow {
-     margin-left:12px;
-}
-.mol-Map-LegendDisplay .legendItem {
-     display:inline-block;
-     width: 15px;
-     height: 8px;
-}
-.mol-Map-LegendDisplay .point {
-     position:relative;
-     left:5px;
-     bottom:4px;
-}
-.mol-Map-LegendDisplay .narrow {
-     width: 3px;
-}
-.mol-Map-LegendDisplay .ecoregion {
-      background-color:#000000;
-      opacity:0.25;
-      border: 1px solid #000000;
-}
-.mol-Map-LegendDisplay .griddedsurvey {
-    background-image: url(/static/maps/legend/griddedsurvey.png);
-    opacity: 0.5;
-}
-
-    
-.mol-Map-LegendDisplay .protectedarea {
-      background-color:#6A0085;
-      border:1px solid #000000;
-}
-
-.mol-Map-LegendDisplay .seasonality1 {
-      background-color:#99CC00;
-}
-.mol-Map-LegendDisplay .seasonality2 {
-      background-color:#FFCC00;
-}
-.mol-Map-LegendDisplay .seasonality3 {
-      background-color:#006BB4;
-}
-.mol-Map-LegendDisplay .seasonality4 {
-      background-color:#FF9900;
-}
-.mol-Map-LegendDisplay .seasonality5 {
-      background-color:#E25B5B;
-}
 .mol-BaseMapControl {
     list-style-type: none;
     font-size: 0.8em;
