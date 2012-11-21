@@ -1355,7 +1355,7 @@ mol.modules.map.layers = function(mol) {
             $.extend(os, o);
                                 
             if($(button).parent().hasClass('selected')) {   
-                os.border = "#FF1200";
+                os.border = "#FF00FF";
             }
             
             sel_style_desc = self.updateStyle(lay, lay.tile_style, os);
@@ -1399,14 +1399,14 @@ mol.modules.map.layers = function(mol) {
                     style = this.changeStyleProperty(
                                 style, 
                                 'marker-line-color', 
-                                visible ? '#FF1200' : oldStyle.border, 
+                                visible ? '#FF00FF' : oldStyle.border, 
                                 false
                             );
                 } else {
                     style = this.changeStyleProperty(
                                     style, 
                                     'line-color', 
-                                    visible ? '#FF1200' : oldStyle.border, 
+                                    visible ? '#FF00FF' : oldStyle.border, 
                                     false
                                 );
                                 
