@@ -61,22 +61,6 @@ mol.modules.map.menu = function(mol) {
             );
 
             this.bus.addHandler(
-                'add-legend-toggle-button',
-                function(event) {
-                    $(self.display).prepend(event.button);
-                    self.display.legendItem =
-                        $(self.display).find('#legend');
-
-                    self.display.legendItem.click(
-                        function(event) {
-                            self.bus.fireEvent(
-                                new mol.bus.Event('legend-display-toggle'));
-                        }
-                    );
-                }
-            );
-
-            this.bus.addHandler(
                 'add-dashboard-toggle-button',
                 function(event) {
                     $(self.display).prepend(event.button);
