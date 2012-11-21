@@ -23,12 +23,18 @@ mol.modules.map.layers = function(mol) {
             
             this.display.removeAll.click (
                 function(event) {
+                    $(self.display.styleAll).prop('disabled', false);
+                    $(self.display.styleAll).qtip('destroy');
+                    
                     $(self.display).find(".close").trigger("click");
                 }
             );
             
             this.display.toggleAll.click (
                 function(event) {
+                    $(self.display.styleAll).prop('disabled', false);
+                    $(self.display.styleAll).qtip('destroy');
+                    
                     _.each(
                         $(self.display).find(".toggle"),
                         function(checkbox){
@@ -40,6 +46,9 @@ mol.modules.map.layers = function(mol) {
             
             this.display.resetAll.click (
                 function(event) {
+                    $(self.display.styleAll).prop('disabled', false);
+                    $(self.display.styleAll).qtip('destroy');
+                    
                     _.each(
                         self.display.layers,
                         function(layer) {
@@ -74,7 +83,7 @@ mol.modules.map.layers = function(mol) {
                 function(event) {
                     var button = this,
                         baseHtml,
-                        q;
+                        q;      
                         
                     baseHtml = '' + 
                            '<div class="mol-LayerControl-Styler">' +
@@ -211,6 +220,9 @@ mol.modules.map.layers = function(mol) {
                 function(event) {
                     var that = this;
                     if(self.display.expanded) {
+                        $(self.display.styleAll).prop('disabled', false);
+                        $(self.display.styleAll).qtip('destroy');
+                        
                         self.display.layersWrapper.animate(
                             {height: self.display.layersHeader.height()+18},
                             1000,
@@ -457,6 +469,11 @@ mol.modules.map.layers = function(mol) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
                                         'hide-layer-display-toggle'));
+                                        
+                                $(self.display.styleAll)
+                                    .prop('disabled', false);
+                                $(self.display.styleAll).qtip('destroy');
+                                        
                                 self.display.toggle(false);
                             }
                             event.stopPropagation();
@@ -1540,7 +1557,6 @@ mol.modules.map.layers = function(mol) {
             this.toggleAll = $(this).find(".toggleAll");
             this.resetAll = $(this).find(".resetAll");
             this.styleAll = $(this).find(".styleAll");
-            this.rese
             this.open = false;
             this.views = {};
             this.layers = [];
