@@ -1403,33 +1403,19 @@ mol.modules.map.layers = function(mol) {
                                 false
                             );
                 } else {
-                    if(layer.source == "iucn" || layer.source == "jetz") {
-                        style = this.changeStyleProperty(
-                                    style, 
-                                    'line-color', 
-                                    "#FF1200", 
-                                    false
-                                );
-                        style = this.changeStyleProperty(
-                                    style, 
-                                    'line-width', 
-                                    visible ? 1 : 0, 
-                                    false
-                                );
-                    } else {
-                        style = this.changeStyleProperty(
+                    style = this.changeStyleProperty(
                                     style, 
                                     'line-color', 
                                     visible ? '#FF1200' : oldStyle.border, 
                                     false
                                 );
-                        style = this.changeStyleProperty(
-                                    style, 
-                                    'line-width', 
-                                    visible ? 1 : oldStyle.size, 
-                                    false
-                                );
-                    }
+                                
+                    style = this.changeStyleProperty(
+                                style, 
+                                'line-width', 
+                                visible ? 1 : oldStyle.size, 
+                                false
+                            );
                 }
 
                 style_desc = style;
