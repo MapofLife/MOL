@@ -12,7 +12,10 @@ mol.modules.map.boot = function(mol) {
             this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
-                    't.carto_css as css,' +
+                    "case d.style_table when 'points_style' " + 
+                        'THEN t.carto_css_point ' + 
+                        "when 'polygons_style' " + 
+                        'THEN t.carto_css_poly END as css,' +
                     't.sort_order as type_sort_order, ' +
                     't.title as type_title, '+
                     't.opacity as opacity, ' +
