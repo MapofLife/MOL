@@ -6,11 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link rel="stylesheet" href="../../../js/lib/jquery/css/ui-lightness/jquery-ui-1.8.18.custom.css">
     <link rel="stylesheet" href="../../../css/mol.css">
-    <link rel="stylesheet" href="../../../css/cartodb.css">
+    <link rel="stylesheet" href="../../../css/cartodb.css">   
+    <link rel="stylesheet" href="../../../css/jquery.qtip.min.css">
     <link rel="stylesheet" href="../../../css/widgets.css">
     <link rel="stylesheet" href="../../../css/tablesorter.css">
     <link rel="stylesheet" href="../../../css/theme.blue.css">
-    <link rel="stylesheet" href="../../../css/jquery.qtip.min.css">
+    <link rel="stylesheet" href="../../../css/spectrum.css">
+    
 
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -31,6 +33,7 @@
     <script type="text/javascript" src="../../../js/lib/cartodb-gmapsv3.js"></script>
     <script type="text/javascript" src="../../../js/lib/wax.g.js"></script>
     <script type="text/javascript" src="../../../js/lib/ppgallery.js"></script>
+    <script type="text/javascript" src="../../../js/lib/spectrum.js"></script>
     <script type="text/javascript" src="../../../js/lib/jquery.cookie.js"></script>
 
     {% if prod %}
@@ -51,7 +54,6 @@
      <script type="text/javascript" src="../../../js/mol.map.loading.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.dashboard.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.query.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.legend.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.basemap.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.metadata.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.splash.js"></script>
@@ -117,8 +119,6 @@
                 de.start()
                 qe = new env.map.query.QueryEngine(proxy, bus, me.display.map)
                 qe.start()
-                lge = new env.map.legend.LegendEngine(proxy, bus)
-                lge.start()
                 bme = new env.map.basemap.BaseMapEngine(proxy, bus, me.display.map)
                 bme.start()
                 mde = new env.map.metadata.MetadataEngine(proxy, bus)
@@ -158,8 +158,6 @@
                  de.start()
                 qe = new env.map.query.QueryEngine(proxy, bus, me.display.map);
                 qe.start()
-                lge = new env.map.legend.LegendEngine(proxy, bus)
-                lge.start()
                 bme = new env.map.basemap.BaseMapEngine(proxy, bus, me.display.map)
                 bme.start()
                 mde = new env.map.metadata.MetadataEngine(proxy, bus)
