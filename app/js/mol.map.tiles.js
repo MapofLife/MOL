@@ -107,6 +107,55 @@ mol.modules.map.tiles = function(mol) {
                         );
                     }
                 );
+                
+                /**
+                 * Handler for applying cartocss style to a layer.
+                 */
+                this.bus.addHandler(
+                    'apply-layer-style',
+                    function(event) {
+                        var layer = event.layer,
+                            style = event.style;
+                            
+                        self.map.overlayMapTypes.forEach(
+                            function(maptype, index) {
+                                //find the overlaymaptype to style
+                                if (maptype.name === layer.id) {
+                                    //remove it from the map
+                                    self.map.overlayMapTypes.removeAt(index);
+                                    //add the style
+                                    layer.tile_style = style;
+                                    //make the layer
+                                    self.getTile(layer);
+                                    //fix the layer order
+                                    self.map.overlayMapTypes.forEach(
+                                        function(newmaptype, newindex) {
+                                            var mt,
+                                                e,
+                                                params = {
+                                                    layer: layer,
+                                                    opacity: maptype.opacity
+                                                };
+                                            if(newmaptype.name === layer.id) {
+                                                mt = self.map.overlayMapTypes.removeAt(newindex);
+                                                self.map.overlayMapTypes.insertAt(index, mt);
+                                                e = new mol.bus.Event(
+                                                    'layer-opacity', 
+                                                    params
+                                                );
+                                                self.bus.fireEvent(e);
+                                                return;
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        );
+                        
+                        
+                        
+                    }
+                );
 
                 /**
                  * Handler for when the add-layers event is fired. This renders
@@ -241,8 +290,7 @@ mol.modules.map.tiles = function(mol) {
                                 layer.style_table, 
                                 this.map
                             );
-                           
-                
+
                 maptype.layer.params.layer.onbeforeload = function (){
                     self.bus.fireEvent(
                         new mol.bus.Event(
@@ -251,6 +299,7 @@ mol.modules.map.tiles = function(mol) {
                         )
                     )
                 };
+                
                 maptype.layer.params.layer.onafterload = function (){
                     self.bus.fireEvent(
                         new mol.bus.Event(
@@ -268,7 +317,7 @@ mol.modules.map.tiles = function(mol) {
             init: function(layer, table, map) {
                 var sql =  "" +
                     "SELECT * FROM " +
-                    " get_mol_tile('{0}','{1}','{2}','{3}')".format(
+                    " get_mol_tile_beta('{0}','{1}','{2}','{3}')".format(
                         layer.source, 
                         layer.type, 
                         layer.name, 
@@ -279,27 +328,34 @@ mol.modules.map.tiles = function(mol) {
                     info_query = sql; 
                     meta_query = "" +
                         "SELECT * FROM get_feature_metadata(TEXT('{0}'))",
-                    tile_style =  null,
                     infowindow = true,
                     hostname = (hostname === 'localhost') ? 
                        '{0}:8080'.format(hostname) : hostname;
+                
+                if(layer.tile_style == undefined) {
+                    layer.tile_style = "#" + layer.dataset_id + layer.css;
+                    layer.style = layer.tile_style;
+                    layer.orig_style = layer.tile_style;
+                    
+                    layer.orig_opacity = layer.opacity;
+                }
 
                 this.layer = new google.maps.CartoDBLayer({
                         tile_name: layer.id,
+                        tile_style: layer.tile_style,
                         hostname: hostname,
                         map_canvas: 'map_container',
                         map: map,
                         user_name: 'mol',
                         table_name: table,
                         mol_layer: layer,
-                        style_table_name: style_table_name,
+                        style_table_name: layer.dataset_id,
                         query: sql,
                         info_query: info_query,
                         meta_query: meta_query,
-                        tile_style: tile_style,
                         map_style: false,
                         infowindow: infowindow,
-                        opacity: 0.5
+                        opacity: layer.opacity
                 });
             }
         }

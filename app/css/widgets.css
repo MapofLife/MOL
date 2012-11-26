@@ -189,6 +189,10 @@ font-size: 0.8em;
 white-space: nowrap;
 }
 
+/*
+ * Start Layer Control
+ */
+
 .mol-LayerControl-Menu .button:hover{
     color: #FFF;
     cursor: pointer;
@@ -281,14 +285,10 @@ white-space: nowrap;
     float:right;
 }
 
-.mol-LayerControl-Layers .layerContainer {
-    height:38px;
-    cursor:inherit;
-}
 .mol-LayerControl-Layers .layersHeader {
     margin: 5px;
     margin-bottom: 0px;
-    padding: 5px;
+    padding: 4px;
     line-height: 25px;
 }
 
@@ -302,8 +302,7 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layersContainer {
     margin: 5px;
     margin-top: 0px;
-    padding: 5px;
-    padding-top: 10px;
+    padding: 4px;
     border-bottom-left-radius:3px;
     border-bottom-right-radius:3px;
     -moz-border-radius-bottomleft: 3px;
@@ -311,12 +310,6 @@ white-space: nowrap;
     pointer-events:auto;
     cursor:default;
 }
-
-.mol-LayerControl-Layers .keycatcher {
-    position:absolute;
-    visibility:hidden;
-}
-
 
 .mol-LayerControl-Layers .break{
     float: left;
@@ -356,18 +349,6 @@ white-space: nowrap;
     width: 100%;
 }
 
-.mol-LayerControl-Layers .layer {
-    padding: 2px;
-    margin-bottom: 5px;
-    text-align: left;
-    width: 99%;
-    float: left;
-    position: relative;
-}
-.mol-LayerControl-Layers .layerRecords {
-    float: right;
-    font-size: 0.8em;
-}
 .mol-LayerControl-Layers .staticLink{
     display: none;
 }
@@ -390,6 +371,37 @@ white-space: nowrap;
     background-color: #ababab;
 }
 
+.mol-LayerControl-Layers .pageNavigation{
+    width: 100%;
+    height: 25px;
+    padding: 0px;
+    margin: 4px;
+    margin-top: 0px;
+}
+
+.mol-LayerControl-Layers .pageNavigation button {
+    float: right;
+    margin-right: 4px;
+    padding: 3px;
+}
+
+/** reorganized Layer Control entry
+ */
+
+.mol-LayerControl-Layers .layerContainer {
+    height:38px;
+    cursor:inherit;
+}
+
+.mol-LayerControl-Layers .layer {
+    padding: 2px;
+    margin-bottom: 2px;
+    text-align: left;
+    width: 99%;
+    float: left;
+    position: relative;
+}
+
 .mol-LayerControl-Layers .layer.selected{
     border: 2px solid rgba(255, 100, 88, .45);
     border-radius:5px;
@@ -400,7 +412,7 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layer .layerName{
     float: left;
     white-space:normal;
-    width: 190px;
+    width: 280px;
     margin-left: 5px;
     margin-right: 5px;
     -webkit-touch-callout: none;
@@ -416,7 +428,8 @@ white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
-.mol-LayerControl-Layers .layerEnglishName {
+
+.mol-LayerControl-Layers .layer .layerEnglishName {
     display: block;
     font-size: 0.8em;
     white-space: nowrap;
@@ -424,31 +437,101 @@ white-space: nowrap;
     overflow: hidden;
 }
 
-.mol-LayerControl-Layers .layer .type{
+.mol-LayerControl-Layers .layer .layerRecords {
+    float: right;
+    font-size: 0.8em;
+    padding-top: 2px;
+}
+
+.mol-LayerControl-Layers .layer .type, 
+.mol-LayerControl-Layers .layer .source {
     float: left;
     text-align: center;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     padding: 0px;
     padding-top: 2px;
-
 }
-.mol-LayerControl-Layers .layer .source{
+.mol-LayerControl-Layers .layer .styler{
     float: left;
-    text-align: center;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     padding: 0px;
-    padding-top: 2px;
+}
 
+.mol-LayerControl-Layers .layer button.styler{
+    background-color: rgba(25, 25, 25, 0);
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
 }
-.mol-LayerControl-Layers .layer .type img{
-    height: 16px;
-    width: 16px;
+
+.mol-LayerControl-Layers .layer button.styler[disabled]{
+    background-color: rgba(25, 25, 25, 0);
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    opacity:0.5;
 }
-.mol-LayerControl-Layers .layer .source img{
-    height: 16px;
-    width: 16px;
+.mol-LayerControl-Layers .layer button.styler[disabled]:hover{
+    background-color: rgba(25, 25, 25, 0);
+}
+
+.mol-LayerControl-Layers .layer button.styler:hover{
+    background-color: rgba(25, 25, 25, 1);
+}
+
+.mol-LayerControl-Layers .layer .styler div{
+    background-color: #FF0000;
+    height: 20px;
+    width: 20px;
+    margin: 0px auto;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+}
+
+.mol-LayerControl-Layers .layer .styler div.legend-point {
+    height: 7px;
+    width: 7px;
+    border-style:solid;
+    border-width:1px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.mol-LayerControl-Layers .layer .styler div.legend-polygon {
+    border-style:solid;
+    width:18px;
+    height:18px;
+}
+
+.mol-LayerControl-Layers .layer .styler div.legend-seasonal {
+    background-color:transparent;
+    border: solid;
+}
+
+.mol-LayerControl-Layers .layer .styler div.legend-seasonal div.seasonal {
+    width: 20px;
+    margin: 0px auto;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div {
+    height:4px;
+}
+.mol-LayerControl-Layers .layer .styler div.legend-seasonal.jetz div {
+    height:5px;
+}
+
+.mol-LayerControl-Layers .layer .type img,
+.mol-LayerControl-Layers .layer .source img {
+    height: 20px;
+    width: 20px;
 }
 .mol-LayerControl-Layers .layer .buttonContainer {
     width: 20px;
@@ -467,7 +550,6 @@ white-space: nowrap;
     width:24px;
     height:24px;
     cursor: pointer;
-
 }
 
 .mol-LayerControl-Layers .layer .customCheck:after{
@@ -485,16 +567,6 @@ white-space: nowrap;
     border-radius: 3px;
     border: none;
 }
-.custom_checkbox {
-    content:url('/static/maps/search/unchecked.png');
-    position:absolute;
-    left: 0;
-}
-
-.custom_checkbox .selected{
-    content:url('/static/maps/search/checked.png');
-
-}
 
 .mol-LayerControl-Layers .layer .toggle:hover + .customCheck:after{
     background-color: rgb(25, 25, 25);
@@ -504,84 +576,177 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layer .toggle:checked + .customCheck:after {
     content:url('/static/maps/layers/active.png');
 }
-.mol-LayerControl-Layers .layer .info{
-    float: right;
-    position: relative;
-    width: 7%;
-    font-style: italic;
-    font-size: 1.2em;
-    height: 24px;
-}
-
 .mol-LayerControl-Layers .layer .close {
     float: right;
     position: relative;
-    width: 7%;
+    width: 24px;
     font-style: italic;
     font-size: 1.2em;
     height: 24px;
 }
 
-.mol-LayerControl-Layers .layer .opacityContainer {
-    float: right;
-    position: relative;
-    width: 15%;
-    height: 24px;
-    margin-right: 5px;
-}
-.mol-LayerControl-Layers .layer .opacity  {
-    position: absolute;
-    top: 50%;
-    width: 100%;
-    height: 3px;
-}
-.mol-LayerControl-Layers .layer .opacity .ui-slider-handle {
-    width: 8px;
-    height: 11px;
-}
+
+
 
 .mol-LayerControl-Layers .layer .zoom {
     float: right;
     position: relative;
-    width: 7%;
+    width: 24px;
     font-style: italic;
     font-size: 1.2em;
     height: 24px;
 }
 
-.mol-LayerControl-Layers .loading {
-    display: table-cell;
+/*! Light tooltip style */
+.ui-tooltip-widgettheme{
+    behavior: url(/css/pie/PIE.htc);
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.89, rgba(29,43,82,0.65)),
+        color-stop(0.57, rgba(29,43,82,0.75))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    color: rgb(240, 240, 260);
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.ui-tooltip-widgettheme .ui-tooltip-titlebar{
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 95%, rgba(29,43,82,0.75) 75%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.95, rgba(29,43,82,0.75)),
+        color-stop(0.75, rgba(29,43,82,0.95))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.75) 95%,
+        rgba(29,43,82,0.95) 75%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.75) 95%,
+        rgba(29,43,82,0.95) 75%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.ui-tooltip-widgettheme .ui-tooltip .qtip {
+    border-width:0;
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.mol-LayerControl-Styler .colorPicker {
+    width: 130px;
+}
+
+.mol-LayerControl-Styler .colorPickers div + div {
+    padding-top:4px;
+}
+
+.mol-LayerControl-Styler .stylerLabel {
+    float:left;
+    width:48px;
+    margin-top:10px;
+    margin-right:4px;
+    text-align:right;
+}
+
+.mol-LayerControl-Styler .sliderLabel, 
+.mol-LayerControl-Styler .opacityLabel {
+    float:left;
+    width:48px;
+    margin-top:4px;
+    margin-right:4px;
+    text-align:right;
+}
+
+.mol-LayerControl-Styler .colorPickers span + div {
+    margin-top:2px;
+    margin-bottom:2px;
+}
+
+.mol-LayerControl-Styler .sizerHolder,
+.mol-LayerControl-Styler .opacityHolder {
+    padding-top:4px;
+    padding-bottom:4px;
+    width: 140px;
+}
+
+.mol-LayerControl-Styler #pointSizeValue,
+.mol-LayerControl-Styler #opacityValue {
+    margin-top:4px;
+    float:left;
+    clear:right;
+    width:28px;
+}
+
+.mol-LayerControl-Styler .sliderContainer {
     float: left;
-}
-.mol-LayerControl-Layers .selectAll {
-    color: #E6FAE6;
-    padding-left: 2px;
-    font-size: 0.9em;
-    float: right;
-    padding-right: 10px;
+    position: relative;
+    width: 38%;
+    margin-right:4px;
+    margin-bottom:8px;
 }
 
-.mol-LayerControl-Layers .selectNone {
-    color: #E6FAE6;
-    padding-left: 2px;
-    font-size: 0.9em;
-    float: right;
-    padding-right: 10px;
+.mol-LayerControl-Styler .sliderContainer .sizer,
+.mol-LayerControl-Styler .sliderContainer .opacity {
+    height: 5px;
+    margin-top: 5px;
 }
 
-.mol-LayerControl-Layers .pageNavigation{
-    width: 100%;
-    height: 25px;
-    padding: 0px;
-    margin: 4px;
-    margin-top: 0px;
+.mol-LayerControl-Styler .sliderContainer .sizer .ui-slider-handle,
+.mol-LayerControl-Styler .sliderContainer .opacity .ui-slider-handle {
+    width: 8px;
+    height: 11px;
 }
 
-.mol-LayerControl-Layers .pageNavigation button {
-float: right;
-margin-right: 4px;
-padding: 3px;
+.mol-LayerControl-Styler .buttonWrapper {
+    width:135px;
+    margin:0 auto;
+    margin-top:20px;
 }
+
+.mol-LayerControl-Styler .buttonWrapper.allStyler {
+    width: 75%;
+    margin: 0 auto;
+    margin-top: 4px;
+}
+
+.mol-LayerControl-Styler .buttonWrapper button {
+    font-size:10px;
+    margin:2px 0 2px 0;
+}
+
+
+/*
+ * End Layer Control
+ */
+
+
+
+
 
 /* BEGIN SEARCH UI
  * search, results
@@ -1237,65 +1402,6 @@ div.mol-Dashboard-TableWindow {
      font-weight:normal;
 }
 
-
-.mol-Map-LegendDisplay {
-    display: none;
-    float:right;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    font-size: 0.8em;
-    padding: 2px;
-    padding-left:6px;
-    padding-right:6px;
-    margin: 2px;
-}
-.mol-Map-LegendDisplay .legendRow {
-     margin-left:12px;
-}
-.mol-Map-LegendDisplay .legendItem {
-     display:inline-block;
-     width: 15px;
-     height: 8px;
-}
-.mol-Map-LegendDisplay .point {
-     position:relative;
-     left:5px;
-     bottom:4px;
-}
-.mol-Map-LegendDisplay .narrow {
-     width: 3px;
-}
-.mol-Map-LegendDisplay .ecoregion {
-      background-color:#000000;
-      opacity:0.25;
-      border: 1px solid #000000;
-}
-.mol-Map-LegendDisplay .griddedsurvey {
-    background-image: url(/static/maps/legend/griddedsurvey.png);
-    opacity: 0.5;
-}
-
-    
-.mol-Map-LegendDisplay .protectedarea {
-      background-color:#6A0085;
-      border:1px solid #000000;
-}
-
-.mol-Map-LegendDisplay .seasonality1 {
-      background-color:#99CC00;
-}
-.mol-Map-LegendDisplay .seasonality2 {
-      background-color:#FFCC00;
-}
-.mol-Map-LegendDisplay .seasonality3 {
-      background-color:#006BB4;
-}
-.mol-Map-LegendDisplay .seasonality4 {
-      background-color:#FF9900;
-}
-.mol-Map-LegendDisplay .seasonality5 {
-      background-color:#E25B5B;
-}
 .mol-BaseMapControl {
     list-style-type: none;
     font-size: 0.8em;

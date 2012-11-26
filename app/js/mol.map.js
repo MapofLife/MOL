@@ -11,7 +11,6 @@ mol.modules.map = function(mol) {
             'loading',
             'dashboard',
             'query',
-            'legend',
             'basemap',
             'metadata',
             'splash',
