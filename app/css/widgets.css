@@ -1290,6 +1290,7 @@ div.mol-Dashboard-TableWindow {
     height: 22px;
     color: #fff;
     padding: 3px;
+    float: left;
 }
 
 .mol-Map-QueryDisplay button img{
@@ -1306,19 +1307,12 @@ div.mol-Dashboard-TableWindow {
 }
 
 .mol-Map-QueryDisplay span.title {
-    float: left;
     line-height: 25px;
     font-size: 0.8em;
     margin-right: 2px;
     -moz-user-select: none;
     padding-left: 2px;
-}
-
-.mol-Map-QueryDisplay button.toggle {
     float: left;
-    height: 20px;
-    width: 23px;
-    margin-left: 4px;
 }
 
 .mol-Map-QueryDisplay span.types {
@@ -1328,9 +1322,9 @@ div.mol-Dashboard-TableWindow {
 
 .mol-Map-QueryDisplay div.speciesDisplay {
     float: left;
-    _float: none;
     font-size: 0.7em;
     margin-right: 2px;
+    margin-top: 2px;
     -moz-user-select: none;
 }
 
