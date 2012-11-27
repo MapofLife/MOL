@@ -116,12 +116,15 @@ mol.modules.map.tiles = function(mol) {
                     function(event) {
                         var layer = event.layer,
                             style = event.style;
+                            sel = event.isSelected;
                             
                         self.map.overlayMapTypes.forEach(
                             function(maptype, index) {
                                 //find the overlaymaptype to style
                                 if (maptype.name === layer.id) {
                                     //remove it from the map
+                                    maptype.interaction.remove();
+                                    maptype.interaction.clickAction = "";
                                     self.map.overlayMapTypes.removeAt(index);
                                     //add the style
                                     layer.tile_style = style;
@@ -139,6 +142,19 @@ mol.modules.map.tiles = function(mol) {
                                             if(newmaptype.name === layer.id) {
                                                 mt = self.map.overlayMapTypes.removeAt(newindex);
                                                 self.map.overlayMapTypes.insertAt(index, mt);
+                                                
+                                                self.map.overlayMapTypes.forEach(
+                                                    function(mz) { 
+                                                        mz.interaction.remove();
+                                                        mz.interaction.clickAction = "";
+                                                                                                               
+                                                        if(mz.name === layer.id && sel) {
+                                                            mz.interaction.add();
+                                                            mz.interaction.clickAction = "full";
+                                                        }
+                                                    }
+                                                );
+                                                
                                                 e = new mol.bus.Event(
                                                     'layer-opacity', 
                                                     params

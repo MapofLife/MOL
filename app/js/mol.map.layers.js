@@ -271,7 +271,7 @@ mol.modules.map.layers = function(mol) {
                             layer: layer,
                             opacity: parseFloat(l.find('.opacity')
                                 .slider("value"))
-                        },
+                        },                        
                         e = new mol.bus.Event('layer-opacity', params);
                         self.bus.fireEvent(e);
                     }
@@ -349,6 +349,7 @@ mol.modules.map.layers = function(mol) {
             this.bus.addHandler(
                 'layer-click-toggle',
                 function(event) {
+                    
                     self.clickDisabled = event.disable;
                     
                     //true to disable
@@ -363,7 +364,7 @@ mol.modules.map.layers = function(mol) {
                         _.any($(self.display.list).children(),
                             function(layer) {
                                 if($(layer).find('.layer')
-                                        .hasClass('selected')) {
+                                        .hasClass('selected')) {    
                                     self.map.overlayMapTypes.forEach(
                                         function(mt) {
                                             if(mt.name == $(layer).attr('id')) {      
@@ -554,16 +555,20 @@ mol.modules.map.layers = function(mol) {
                     
                     l.layer.click(
                         function(event) {
+                            var boo = false,
+                                isSelected = false;
+
                             $(l.layer).focus();
+                            
                             if($(this).hasClass('selected')) {
                                 $(this).removeClass('selected');
                                 
                                 //unstyle previous layer
-                                self.toggleLayerHighlight(layer,false);
+                                boo = false;
                             } else {
                                 
                                 if($(self.display)
-                                        .find('.selected').length > 0) {
+                                        .find('.selected').length > 0) {       
                                     //get a reference to this layer    
                                     self.toggleLayerHighlight(
                                         self.display
@@ -572,6 +577,7 @@ mol.modules.map.layers = function(mol) {
                                                     .find('.selected')
                                                         .parent()
                                                             .attr('id')),
+                                                            false,
                                                             false);
                                 }
                                 
@@ -581,9 +587,10 @@ mol.modules.map.layers = function(mol) {
                                 $(this).addClass('selected');
                                 
                                 //style selected layer
-                                self.toggleLayerHighlight(layer,true);
+                                boo = true;
+                                isSelected = true;
                             }
-
+                            
                             self.map.overlayMapTypes.forEach(
                                 function(mt) {
                                     if(mt.name == layer.id && 
@@ -601,6 +608,13 @@ mol.modules.map.layers = function(mol) {
                                     }
                                 }
                             )
+                            
+                            if(self.clickDisabled) {
+                                isSelected = false;
+                            }
+                            
+                            self.toggleLayerHighlight(layer,boo,isSelected);
+                            
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
@@ -682,6 +696,7 @@ mol.modules.map.layers = function(mol) {
                 //if multiple layers are being added
                 //layer clickability returned to the
                 //previously selected layer
+                
                 if(wasSelected.length > 0) {
                     this.map.overlayMapTypes.forEach(
                         function(mt) {
@@ -695,6 +710,7 @@ mol.modules.map.layers = function(mol) {
                         }
                     );
                 }
+                
             }
             
             //done making widgets, toggle on if we have layers.
@@ -1374,7 +1390,7 @@ mol.modules.map.layers = function(mol) {
                 'layer-opacity', oparams));
         },
 
-        toggleLayerHighlight: function(layer, visible) {
+        toggleLayerHighlight: function(layer, visible, sel) {
             var o = {},
                 style_desc,
                 self = this,
@@ -1382,7 +1398,8 @@ mol.modules.map.layers = function(mol) {
                 oldStyle,
                 params = {
                     layer: layer,
-                    style: null
+                    style: null,
+                    isSelected: sel
                 };
                 
                 oldStyle = self.parseLayerStyle(layer, "current");
