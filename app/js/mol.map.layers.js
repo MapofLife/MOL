@@ -47,6 +47,8 @@ mol.modules.map.layers = function(mol) {
                     function() {
                         self.display.layersToggle.text('▲');
                         self.display.expanded = true;
+                        
+                        $(self.display.layersWrapper).css({'height':''});
                     }
                 );
 
