@@ -333,7 +333,7 @@ mol.modules.map.tiles = function(mol) {
             init: function(layer, table, map) {
                 var sql =  "" +
                     "SELECT * FROM " +
-                    " get_mol_tile('{0}','{1}','{2}','{3}')".format(
+                    " get_mol_tile_beta('{0}','{1}','{2}','{3}')".format(
                         layer.source, 
                         layer.type, 
                         layer.name, 

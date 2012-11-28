@@ -521,10 +521,7 @@ white-space: nowrap;
     border-radius: 3px;
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.iucn div {
-    height:4px;
-}
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal.jetz div {
+.mol-LayerControl-Layers .layer .styler div.legend-seasonal div {
     height:5px;
 }
 

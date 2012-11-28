@@ -205,6 +205,7 @@ mol.modules.map.layers = function(mol) {
                                             o.s3 = color;
                                             o.s4 = color;
                                             o.s5 = color;
+                                            o.p = color;
                                             
                                             _.each(
                                                 self.display.layers,
@@ -815,11 +816,15 @@ mol.modules.map.layers = function(mol) {
                                     o.s4 = $('#showFill4Palette')
                                              .spectrum("get")
                                                 .toHexString();
-                                                
+                                     
+                                    //TODO issue #175 replace iucn ref               
                                     if(layer.source == "iucn") {
                                         o.s5 = $('#showFill5Palette')
                                              .spectrum("get")
-                                                .toHexString();   
+                                                .toHexString();  
+                                        o.p = $('#showFill6Palette')
+                                             .spectrum("get")
+                                                .toHexString();         
                                     }                                                               
                                 } else {
                                     o.fill = $('#showFillPalette')
@@ -934,7 +939,8 @@ mol.modules.map.layers = function(mol) {
                        '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                        '  <input type="text" id="showFill4Palette" />' +
                        '</div>';
-                       
+                   
+                   //TODO issue #175 replace iucn ref                           
                    if (layer.source == "iucn") {
                        pickers+=''+
                            '<span class="seasonLabel">' + 
@@ -942,7 +948,13 @@ mol.modules.map.layers = function(mol) {
                            '<div class="colorPicker">' + 
                            '  <span class="stylerLabel">Fill:&nbsp</span>' + 
                            '  <input type="text" id="showFill5Palette" />' +
-                           '</div>';  
+                           '</div>'+ 
+                           '<span class="seasonLabel">' + 
+                               'Extinct or Presence Uncertain</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill6Palette" />' +
+                           '</div>';
                    }
                    
                    pickers+=''+
@@ -1012,11 +1024,15 @@ mol.modules.map.layers = function(mol) {
                              color: currSty.border, 
                              def: origSty.border}       
                           ];
-                          
+                   
+                   //TODO issue #175 replace iucn ref           
                    if(lay.source == "iucn") {
                        objs.push({name: '#showFill5Palette', 
                                   color: currSty.s5, 
-                                  def: origSty.s5});          
+                                  def: origSty.s5});
+                       objs.push({name: '#showFill6Palette', 
+                                  color: currSty.p, 
+                                  def: origSty.p});                            
                    }        
                 } else {
                     objs = [ {name: '#showFillPalette', 
@@ -1084,8 +1100,8 @@ mol.modules.map.layers = function(mol) {
             var o,
                 fillStyle, borderStyle, sizeStyle,
                 style,
-                s1Style, s2Style, s3Style, s4Style, s5Style,
-                s1, s2, s3, s4, s5;
+                s1Style, s2Style, s3Style, s4Style, s5Style, pStyle,
+                s1, s2, s3, s4, s5, p;
                 
             if(original == "current") {
                 style = layer.style;
@@ -1164,6 +1180,7 @@ mol.modules.map.layers = function(mol) {
                                     s4.indexOf('#'),
                                     s4.indexOf(';'))};
                     
+                    //TODO issue #175 replace iucn ref    
                     if(layer.source == "iucn") {
                         s5Style = style.substring(
                                     style.indexOf('seasonality=5'),
@@ -1176,6 +1193,18 @@ mol.modules.map.layers = function(mol) {
                         o.s5 = s5.substring(
                                     s5.indexOf('#'),
                                     s5.indexOf(';'));
+                                    
+                        pStyle = style.substring(
+                                    style.indexOf('presence=4'),
+                                    style.length-1);
+                                        
+                        p = pStyle.substring(
+                                    pStyle.indexOf('polygon-fill'),
+                                    pStyle.length-1);           
+                                    
+                        o.p = p.substring(
+                                    p.indexOf('#'),
+                                    p.indexOf(';'));            
                     }
                 } else {
                     fillStyle = style.substring(
@@ -1219,11 +1248,11 @@ mol.modules.map.layers = function(mol) {
             if(isSeas) {
                 spreStyle = style.substring(
                                 0,
-                                style.indexOf("seasonality="+prop+"]")
+                                style.indexOf(prop+"]")
                             );
                 
                 preStyle = style.substring(
-                                style.indexOf("seasonality="+prop+"]"),
+                                style.indexOf(prop+"]"),
                                 style.length
                            );
                             
@@ -1280,17 +1309,33 @@ mol.modules.map.layers = function(mol) {
             } else {
                 if(layer.type == "range") {
                     style = this.changeStyleProperty(
-                                style, '1', newStyle.s1, true, 'polygon-fill');
+                                style, 'seasonality=1', newStyle.s1, true, 
+                                'polygon-fill');
                     style = this.changeStyleProperty(
-                                style, '2', newStyle.s2, true, 'polygon-fill');
+                                style, 'seasonality=2', newStyle.s2, true, 
+                                'polygon-fill');
                     style = this.changeStyleProperty(
-                                style, '3', newStyle.s3, true, 'polygon-fill');
+                                style, 'seasonality=3', newStyle.s3, true, 
+                                'polygon-fill');
                     style = this.changeStyleProperty(
-                                style, '4', newStyle.s4, true, 'polygon-fill');            
-                                
+                                style, 'seasonality=4', newStyle.s4, true, 
+                                'polygon-fill');            
+                    
+                    //TODO issue #175 replace iucn ref                
                     if(layer.source == "iucn") {
                         style = this.changeStyleProperty(
-                                style, '5', newStyle.s5, true, 'polygon-fill');       
+                                style, 'seasonality=5', newStyle.s5, true, 
+                                'polygon-fill');
+                                
+                        style = this.changeStyleProperty(
+                                style, 'presence=4', newStyle.p, true, 
+                                'polygon-fill');
+                        style = this.changeStyleProperty(
+                                style, 'presence=5', newStyle.p, true, 
+                                'polygon-fill'); 
+                        style = this.changeStyleProperty(
+                                style, 'presence=6', newStyle.p, true, 
+                                'polygon-fill');                                         
                     }            
                 } else {
                     style = this.changeStyleProperty(
@@ -1323,12 +1368,6 @@ mol.modules.map.layers = function(mol) {
                 $(button).find('.s4').css({
                     'background-color':o.s4,
                     'opacity':opa});
-                    
-                if(layer.source == "iucn") {
-                    $(button).find('.s5').css({
-                        'background-color':o.s5,
-                        'opacity':opa}); 
-                } 
                 
                 $(button).find('.legend-seasonal')
                     .css({
@@ -1491,7 +1530,6 @@ mol.modules.map.layers = function(mol) {
                 '        <div class="seasonal s2"></div>' +
                 '        <div class="seasonal s3"></div>' +
                 '        <div class="seasonal s4"></div>' +
-                '        <div class="seasonal s5"></div>' +
                 '      </div> ' +
                 '    </button>' +
                 '    <button class="source" title="Layer Source: {5}">' +
@@ -1561,13 +1599,10 @@ mol.modules.map.layers = function(mol) {
             } else {
                 this.pointLegend.hide();
                 
+                //TODO issue #175 replace iucn ref    
                 if(layer.source == "iucn" || layer.source == "jetz") {
                     this.polygonLegend.hide();
                     this.seasonalLegend.addClass(layer.source);                       
-
-                    if(layer.source == "jetz") {
-                        $(this.seasonalLegend).find('.s5').hide();
-                    }
                 } else {
                     this.seasonalLegend.hide();
                     this.polygonLegend.addClass(layer.type);
