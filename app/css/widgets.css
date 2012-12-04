@@ -662,6 +662,10 @@ white-space: nowrap;
     padding-top:4px;
 }
 
+.mol-LayerControl-Styler .seasChk {
+    vertical-align:middle;
+}
+
 .mol-LayerControl-Styler .stylerLabel {
     float:left;
     width:48px;
@@ -669,6 +673,7 @@ white-space: nowrap;
     margin-right:4px;
     text-align:right;
 }
+
 
 .mol-LayerControl-Styler .sliderLabel, 
 .mol-LayerControl-Styler .opacityLabel {
