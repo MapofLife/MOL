@@ -131,15 +131,10 @@ mol.modules.map.query = function(mol) {
              */
             this.display.queryButton.click(
                 function(event) {
-                    var params = {visible: false};
+                    var params = {};
                     
-                    if(self.display.speciesDisplay.is(':visible')) {
-                        self.display.speciesDisplay.hide();
-                        params.visible = false;
-                    } else {
-                        self.display.speciesDisplay.show();
-                        params.visible = true;
-                    }
+                    params.visible = self.display.speciesDisplay
+                                        .is(':visible') ? false : true;
                     
                     self.bus.fireEvent(
                         new mol.bus.Event('species-list-tool-toggle', params));
@@ -297,6 +292,12 @@ mol.modules.map.query = function(mol) {
                         self.enabled = true;
                     } else {
                         self.enabled = false;
+                    }
+                    
+                    if(self.enabled == false) {
+                        self.display.speciesDisplay.hide();
+                    } else {
+                        self.display.speciesDisplay.show();
                     }
                     
                     if (self.listradius) {

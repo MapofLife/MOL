@@ -54,6 +54,8 @@ mol.modules.map.splash = function(mol) {
                 self.bus.fireEvent(new mol.bus.Event('layers-toggle', {
                     visible: false
                 }));
+                self.bus.fireEvent(new mol.bus.Event('species-list-tool-toggle', 
+                    {visible: true}));
                 self.bus.fireEvent(new mol.bus.Event('species-list-query-click', {
                     gmaps_event: {
                         latLng: new google.maps.LatLng(-2.263, 39.045)
