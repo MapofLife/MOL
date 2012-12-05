@@ -804,19 +804,26 @@ mol.modules.map.layers = function(mol) {
                                 var o = {};
 
                                 if(layer.type == "range") {
-                                    o.s1 = $('#showFill1Palette')
+                                    //TODO issue #175 replace iucn ref 
+                                    if(layer.source == "jetz" || 
+                                       layer.source == "iucn") {
+                                        o.s1 = $('#showFill1Palette')
                                              .spectrum("get")
                                                 .toHexString();
-                                    o.s1c = $('#seasChk1').is(':checked') ? 1:0;        
-                                    o.s2 = $('#showFill2Palette')
-                                             .spectrum("get")
-                                                .toHexString();
-                                    o.s2c = $('#seasChk2').is(':checked') ? 1:0;            
-                                    o.s3 = $('#showFill3Palette')
-                                             .spectrum("get")
-                                                .toHexString();
-                                    o.s3c = $('#seasChk3').is(':checked') ? 1:0;            
-                                     
+                                        o.s1c = $('#seasChk1')
+                                                    .is(':checked') ? 1:0;        
+                                        o.s2 = $('#showFill2Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s2c = $('#seasChk2')
+                                                    .is(':checked') ? 1:0;            
+                                        o.s3 = $('#showFill3Palette')
+                                                 .spectrum("get")
+                                                    .toHexString();
+                                        o.s3c = $('#seasChk3')
+                                                    .is(':checked') ? 1:0; 
+                                    }
+                                    
                                     //TODO issue #175 replace iucn ref               
                                     if(layer.source == "iucn") {
                                         o.s4 = $('#showFill4Palette')
@@ -824,11 +831,17 @@ mol.modules.map.layers = function(mol) {
                                                 .toHexString();
                                         o.s4c = $('#seasChk4')
                                                     .is(':checked') ? 1:0;
+                                    }                
+                                     
+                                    if(layer.source != "jetz") {
                                         o.s5 = $('#showFill5Palette')
                                              .spectrum("get")
                                                 .toHexString();
                                         o.s5c = $('#seasChk5')
-                                                    .is(':checked') ? 1:0;          
+                                                    .is(':checked') ? 1:0;
+                                    }
+                                    
+                                    if(layer.source == "iucn") {               
                                         o.p = $('#showFill6Palette')
                                              .spectrum("get")
                                                 .toHexString(); 
@@ -927,28 +940,33 @@ mol.modules.map.layers = function(mol) {
                $(element).find('.sizerHolder').prepend(sizer);
             } else {
                 if(layer.type == "range") {
-                   pickers = '' +
-                       '<span class="seasonLabel">Breeding</span>' +
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                       '  <input type="text" id="showFill2Palette" />' +
-                       '  <input type="checkbox" id="seasChk2" ' + 
-                                'class="seasChk" checked="checked"/>' +
-                       '</div>' +
-                       '<span class="seasonLabel">Resident</span>' +
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                       '  <input type="text" id="showFill1Palette" />' +
-                       '  <input type="checkbox" id="seasChk1" ' + 
-                                'class="seasChk" checked="checked"/>' +
-                       '</div>' +
-                       '<span class="seasonLabel">Non-breeding</span>' +
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                       '  <input type="text" id="showFill3Palette" />' +
-                       '  <input type="checkbox" id="seasChk3" ' + 
-                                'class="seasChk" checked="checked"/>' +
-                       '</div>';                       
+                   pickers = '';
+                   
+                   //TODO issue #175 replace iucn ref     
+                   if(layer.source == "jetz" || layer.source == "iucn") {
+                       pickers+=''+
+                           '<span class="seasonLabel">Breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill2Palette" />' +
+                           '  <input type="checkbox" id="seasChk2" ' + 
+                                    'class="seasChk" checked="checked"/>' +
+                           '</div>' +
+                           '<span class="seasonLabel">Resident</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill1Palette" />' +
+                           '  <input type="checkbox" id="seasChk1" ' + 
+                                    'class="seasChk" checked="checked"/>' +
+                           '</div>' +
+                           '<span class="seasonLabel">Non-breeding</span>' +
+                           '<div class="colorPicker">' + 
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '  <input type="text" id="showFill3Palette" />' +
+                           '  <input type="checkbox" id="seasChk3" ' + 
+                                    'class="seasChk" checked="checked"/>' +
+                           '</div>';
+                   }                           
                    
                    //TODO issue #175 replace iucn ref                           
                    if (layer.source == "iucn") {
@@ -959,7 +977,12 @@ mol.modules.map.layers = function(mol) {
                            '  <input type="text" id="showFill4Palette" />' +
                            '  <input type="checkbox" id="seasChk4" ' + 
                                     'class="seasChk" checked="checked"/>' +
-                           '</div>'+
+                           '</div>';
+                   }
+                   
+                   //TODO issue #175 replace iucn ref  
+                   if(layer.source != 'jetz') {
+                        pickers+=''+
                            '<span class="seasonLabel">' + 
                                'Seasonality Uncertain</span>' +
                            '<div class="colorPicker">' + 
@@ -967,7 +990,11 @@ mol.modules.map.layers = function(mol) {
                            '  <input type="text" id="showFill5Palette" />' +
                            '  <input type="checkbox" id="seasChk5" ' + 
                                     'class="seasChk" checked="checked"/>' +
-                           '</div>'+ 
+                           '</div>';
+                   }            
+                     
+                   //TODO issue #175 replace iucn ref         
+                   if(layer.source == "iucn") {        
                            '<span class="seasonLabel">' + 
                                'Extinct or Presence Uncertain</span>' +
                            '<div class="colorPicker">' + 
@@ -1023,52 +1050,59 @@ mol.modules.map.layers = function(mol) {
                           'blue','green','orange','purple'],
                 colors2 = ['#66C2A5','#FC8D62', '#8DA0CB',
                            '#E78AC3', '#A6D854', '#FFD92F','#E5C494'],
-                objs,
+                objs = [],
                 max,
                 min,
                 layOpa;    
                             
                 if(lay.type == "range") {
-                   objs = [ {name: '#showFill1Palette', 
-                             color: currSty.s1, 
-                             def: origSty.s1},
-                            {name: '#showFill2Palette', 
-                             color: currSty.s2, 
-                             def: origSty.s2},
-                            {name: '#showFill3Palette', 
-                             color: currSty.s3, 
-                             def: origSty.s3},
-                            {name: '#showBorderPalette', 
-                             color: currSty.border, 
-                             def: origSty.border}       
-                          ];
+                    if(lay.source == "jetz" || lay.source == "iucn") {
+                        objs.push({name: '#showFill1Palette', 
+                                color: currSty.s1, 
+                                def: origSty.s1});
+                        objs.push({name: '#showFill2Palette', 
+                                color: currSty.s2, 
+                                def: origSty.s2});
+                        objs.push({name: '#showFill3Palette', 
+                                color: currSty.s3, 
+                                def: origSty.s3});
+                                
+                        $(cont).find('#seasChk1')
+                            .prop('checked', (currSty.s1c == 1) ? true : false);
+                        $(cont).find('#seasChk2')
+                            .prop('checked', (currSty.s2c == 1) ? true : false);
+                        $(cont).find('#seasChk3')
+                            .prop('checked', (currSty.s3c == 1) ? true : false);         
+                    }
+                    
+                    objs.push({name: '#showBorderPalette', 
+                                color: currSty.border, 
+                                def: origSty.border});                        
                           
-                   $(cont).find('#seasChk1')
-                        .prop('checked', (currSty.s1c == 1) ? true : false);
-                   $(cont).find('#seasChk2')
-                        .prop('checked', (currSty.s2c == 1) ? true : false);
-                   $(cont).find('#seasChk3')
-                        .prop('checked', (currSty.s3c == 1) ? true : false);     
-                   
                    //TODO issue #175 replace iucn ref           
-                   if(lay.source == "iucn") {
-                       $(cont).find('#seasChk4')
+                    if(lay.source == "iucn") {
+                        $(cont).find('#seasChk4')
                             .prop('checked', (currSty.s4c == 1) ? true : false);
-                       $(cont).find('#seasChk5')
+                        objs.push({name: '#showFill4Palette', 
+                              color: currSty.s4, 
+                              def: origSty.s4});                         
+                    }
+                   
+                    if(lay.source != 'jetz') {
+                        $(cont).find('#seasChk5')
                             .prop('checked', (currSty.s5c == 1) ? true : false);
-                       $(cont).find('#seasChk6')
-                            .prop('checked', (currSty.pc == 1) ? true : false); 
-                       
-                       objs.push({name: '#showFill4Palette', 
-                                  color: currSty.s4, 
-                                  def: origSty.s4});                       
-                       objs.push({name: '#showFill5Palette', 
-                                  color: currSty.s5, 
-                                  def: origSty.s5});
-                       objs.push({name: '#showFill6Palette', 
+                        objs.push({name: '#showFill5Palette', 
+                              color: currSty.s5, 
+                              def: origSty.s5});
+                    }
+                   
+                    if(lay.source == "iucn") {
+                        $(cont).find('#seasChk6')
+                            .prop('checked', (currSty.pc == 1) ? true : false);
+                        objs.push({name: '#showFill6Palette', 
                                   color: currSty.p, 
-                                  def: origSty.p});                            
-                   }        
+                                  def: origSty.p});       
+                    }        
                 } else {
                     objs = [ {name: '#showFillPalette', 
                               color: currSty.fill, 
@@ -1132,7 +1166,7 @@ mol.modules.map.layers = function(mol) {
         },
             
         parseLayerStyle: function(layer, original) {
-            var o,
+            var o = {},
                 fillStyle, borderStyle, sizeStyle,
                 style,
                 s1Style, s2Style, s3Style, s4Style, s5Style, pStyle,
@@ -1145,7 +1179,7 @@ mol.modules.map.layers = function(mol) {
                 style = layer.orig_style;
             } else {
                 style = layer.tile_style;
-            }   
+            }
             
             if(layer.style_table == "points_style") {
                 fillStyle = style.substring(
@@ -1170,61 +1204,63 @@ mol.modules.map.layers = function(mol) {
                                     sizeStyle.indexOf(':')+1,
                                     sizeStyle.indexOf(';'))))};
             } else {
-                if(layer.type == "range") {                    
-                    s1Style = style.substring(
-                                    style.indexOf('seasonality=1'),
-                                    style.length-1);
+                if(layer.type == "range") {
+                    if(layer.source == "jetz" || layer.source == "iucn") {
+                        s1Style = style.substring(
+                                        style.indexOf('seasonality=1'),
+                                        style.length-1);
+                                            
+                        s1 = s1Style.substring(
+                                        s1Style.indexOf('polygon-fill'),
+                                        s1Style.length-1);
                                         
-                    s1 = s1Style.substring(
-                                    s1Style.indexOf('polygon-fill'),
-                                    s1Style.length-1);
-                                    
-                    c1 = s1Style.substring(
-                                    s1Style.indexOf('polygon-opacity'),
-                                    s1Style.length-1);           
-  
-                    s2Style = style.substring(
-                                    style.indexOf('seasonality=2'),
-                                    style.length-1);
+                        c1 = s1Style.substring(
+                                        s1Style.indexOf('polygon-opacity'),
+                                        s1Style.length-1);           
+      
+                        s2Style = style.substring(
+                                        style.indexOf('seasonality=2'),
+                                        style.length-1);
+                                            
+                        s2 = s2Style.substring(
+                                        s2Style.indexOf('polygon-fill'),
+                                        s2Style.length-1);
                                         
-                    s2 = s2Style.substring(
-                                    s2Style.indexOf('polygon-fill'),
-                                    s2Style.length-1);
+                        c2 = s2Style.substring(
+                                        s2Style.indexOf('polygon-opacity'),
+                                        s2Style.length-1);                 
                                     
-                    c2 = s2Style.substring(
-                                    s2Style.indexOf('polygon-opacity'),
-                                    s2Style.length-1);                 
-                                
-                    s3Style = style.substring(
-                                    style.indexOf('seasonality=3'),
-                                    style.length-1);
+                        s3Style = style.substring(
+                                        style.indexOf('seasonality=3'),
+                                        style.length-1);
+                                            
+                        s3 = s3Style.substring(
+                                        s3Style.indexOf('polygon-fill'),
+                                        s3Style.length-1);
                                         
-                    s3 = s3Style.substring(
-                                    s3Style.indexOf('polygon-fill'),
-                                    s3Style.length-1);
+                        c3 = s3Style.substring(
+                                        s3Style.indexOf('polygon-opacity'),
+                                        s3Style.length-1);                                 
                                     
-                    c3 = s3Style.substring(
-                                    s3Style.indexOf('polygon-opacity'),
-                                    s3Style.length-1);                                 
-                                
-                    o = {s1: s1.substring(
-                                    s1.indexOf('#'),
-                                    s1.indexOf(';')),
-                         s2: s2.substring(
-                                    s2.indexOf('#'),
-                                    s2.indexOf(';')),
-                         s3: s3.substring(
-                                    s3.indexOf('#'),
-                                    s3.indexOf(';')),
-                         s1c: c1.substring(
-                                    c1.indexOf(':')+1,
-                                    c1.indexOf(';')),
-                         s2c: c2.substring(
-                                    c2.indexOf(':')+1,
-                                    c2.indexOf(';')),
-                         s3c: c3.substring(
-                                    c3.indexOf(':')+1,
-                                    c3.indexOf(';'))};
+                        o.s1 = s1.substring(
+                                        s1.indexOf('#'),
+                                        s1.indexOf(';'));
+                        o.s2 = s2.substring(
+                                        s2.indexOf('#'),
+                                        s2.indexOf(';'));
+                        o.s3 = s3.substring(
+                                        s3.indexOf('#'),
+                                        s3.indexOf(';'));
+                        o.s1c = c1.substring(
+                                        c1.indexOf(':')+1,
+                                        c1.indexOf(';'));
+                        o.s2c = c2.substring(
+                                        c2.indexOf(':')+1,
+                                        c2.indexOf(';'));
+                        o.s3c = c3.substring(
+                                        c3.indexOf(':')+1,
+                                        c3.indexOf(';'));    
+                    }
                     
                     //TODO issue #175 replace iucn ref    
                     if(layer.source == "iucn") {
@@ -1246,8 +1282,10 @@ mol.modules.map.layers = function(mol) {
                         
                         o.s4c = c4.substring(
                                     c4.indexOf(':')+1,
-                                    c4.indexOf(';'));
-                        
+                                    c4.indexOf(';'));               
+                    }
+                    
+                    if(layer.source != 'jetz') {
                         s5Style = style.substring(
                                     style.indexOf('seasonality=5'),
                                     style.length-1);
@@ -1266,8 +1304,10 @@ mol.modules.map.layers = function(mol) {
                                     
                         o.s5c = c5.substring(
                                     c5.indexOf(':')+1,
-                                    c5.indexOf(';'));          
-                                    
+                                    c5.indexOf(';'));    
+                    }
+                    
+                    if(layer.source == "iucn") {
                         pStyle = style.substring(
                                     style.indexOf('presence=4'),
                                     style.length-1);
@@ -1286,7 +1326,7 @@ mol.modules.map.layers = function(mol) {
                                     
                         o.pc = pc.substring(
                                     pc.indexOf(':')+1,
-                                    pc.indexOf(';'));                       
+                                    pc.indexOf(';'));
                     }
                 } else {
                     fillStyle = style.substring(
@@ -1390,26 +1430,28 @@ mol.modules.map.layers = function(mol) {
                             style, 'marker-width', newStyle.size, false);
             } else {
                 if(layer.type == "range") {
-                    style = this.changeStyleProperty(
-                                style, 'seasonality=1', newStyle.s1, true, 
-                                'polygon-fill');
-                    style = this.changeStyleProperty(
-                                style, 'seasonality=2', newStyle.s2, true, 
-                                'polygon-fill');
-                    style = this.changeStyleProperty(
-                                style, 'seasonality=3', newStyle.s3, true, 
-                                'polygon-fill');                    
-                                
-                    style = this.changeStyleProperty(
-                                style, 'seasonality=1', newStyle.s1c, true, 
-                                'polygon-opacity');
-                    style = this.changeStyleProperty(
-                                style, 'seasonality=2', newStyle.s2c, true, 
-                                'polygon-opacity');
-                    style = this.changeStyleProperty(
-                                style, 'seasonality=3', newStyle.s3c, true, 
-                                'polygon-opacity');                                             
-                    
+                    if(layer.source == "jetz" || layer.source == "iucn") {
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=1', newStyle.s1, true, 
+                                    'polygon-fill');
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=2', newStyle.s2, true, 
+                                    'polygon-fill');
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=3', newStyle.s3, true, 
+                                    'polygon-fill');                    
+                                    
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=1', newStyle.s1c, true, 
+                                    'polygon-opacity');
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=2', newStyle.s2c, true, 
+                                    'polygon-opacity');
+                        style = this.changeStyleProperty(
+                                    style, 'seasonality=3', newStyle.s3c, true, 
+                                    'polygon-opacity');    
+                    }
+
                     //TODO issue #175 replace iucn ref                
                     if(layer.source == "iucn") {
                         style = this.changeStyleProperty(
@@ -1417,15 +1459,25 @@ mol.modules.map.layers = function(mol) {
                                 'polygon-fill');
                         style = this.changeStyleProperty(
                                 style, 'seasonality=4', newStyle.s4c, true, 
-                                'polygon-opacity');        
-                        
+                                'polygon-opacity');               
+                    }
+                    
+                    if(layer.source != 'jetz') {
                         style = this.changeStyleProperty(
                                 style, 'seasonality=5', newStyle.s5, true, 
                                 'polygon-fill');
                         style = this.changeStyleProperty(
                                 style, 'seasonality=5', newStyle.s5c, true, 
-                                'polygon-opacity');         
-                                
+                                'polygon-opacity');
+                        style = this.changeStyleProperty(
+                                style, 'seasonality=0', newStyle.s5, true, 
+                                'polygon-fill');
+                        style = this.changeStyleProperty(
+                                style, 'seasonality=0', newStyle.s5c, true, 
+                                'polygon-opacity');        
+                    }
+                    
+                    if(layer.source == 'iucn') {
                         style = this.changeStyleProperty(
                                 style, 'presence=4', newStyle.p, true, 
                                 'polygon-fill');
@@ -1443,8 +1495,8 @@ mol.modules.map.layers = function(mol) {
                                 'polygon-opacity'); 
                         style = this.changeStyleProperty(
                                 style, 'presence=6', newStyle.pc, true, 
-                                'polygon-opacity');        
-                    }                                                     
+                                'polygon-opacity');
+                    }                                                 
                 } else {
                     style = this.changeStyleProperty(
                                 style, 'polygon-fill', newStyle.fill, 
@@ -1463,31 +1515,42 @@ mol.modules.map.layers = function(mol) {
         },
             
         updateLegendCss: function(button, o, layer, opa) {
-            if(layer.type == "range") {      
-                $(button).find('.s1').css({
-                    'background-color':o.s2, 
-                    'opacity': (o.s2c == 0) ? 0 : opa});
-                $(button).find('.s2').css({
-                    'background-color':o.s1,
-                    'opacity': (o.s1c == 0) ? 0 : opa});
-                $(button).find('.s3').css({
-                    'background-color':o.s3,
-                    'opacity': (o.s3c == 0) ? 0 : opa});
-                
-                //TODO issue #175 replace iucn ref                
-                if(layer.source == "iucn") {
-                    $(button).find('.s4').css({
-                        'background-color':o.s4,
-                        'opacity': (o.s4c == 0) ? 0 : opa}); 
-                }
-                
-                $(button).find('.legend-seasonal')
-                    .css({
-                        'border-color':o.border,
-                        'border-width':o.size+"px",
-                        'opacity':opa
+            if(layer.type == "range") {
+                if(layer.source == "jetz" || layer.source == "iucn") {
+                    $(button).find('.s1').css({
+                        'background-color':o.s2, 
+                        'opacity': (o.s2c == 0) ? 0 : opa});
+                    $(button).find('.s2').css({
+                        'background-color':o.s1,
+                        'opacity': (o.s1c == 0) ? 0 : opa});
+                    $(button).find('.s3').css({
+                        'background-color':o.s3,
+                        'opacity': (o.s3c == 0) ? 0 : opa});
+                        
+                    //TODO issue #175 replace iucn ref                
+                    if(layer.source == "iucn") {
+                        $(button).find('.s4').css({
+                            'background-color':o.s4,
+                            'opacity': (o.s4c == 0) ? 0 : opa}); 
                     }
-                );                                       
+                    
+                    $(button).find('.legend-seasonal')
+                        .css({
+                            'border-color':o.border,
+                            'border-width':o.size+"px",
+                            'opacity':opa
+                        }
+                    );     
+                } else {
+                    $(button).find('.legend-polygon')
+                        .css({
+                            'background-color':o.s5,
+                            'border-color':o.border,
+                            'border-width':o.size+"px",
+                            'opacity':(o.s5c == 0) ? 0 : opa
+                        }
+                    );
+                }                                  
             } else {
                 if(layer.style_table == "points_style") {
                     $(button).find('.legend-point')
@@ -1708,22 +1771,22 @@ mol.modules.map.layers = function(mol) {
             if(layer.style_table == "points_style") {
                 this.polygonLegend.hide();
                 this.seasonalLegend.hide();
-                
-                this.pointLegend.addClass(layer.type);
             } else {
                 this.pointLegend.hide();
                 
                 //TODO issue #175 replace iucn ref    
-                if(layer.source == "iucn" || layer.source == "jetz") {
-                    this.polygonLegend.hide();
-                    this.seasonalLegend.addClass(layer.source); 
-                    
-                    if(layer.source == 'jetz') {
-                        this.s4.hide();
-                    }                      
+                if(layer.type == "range") {
+                    if(layer.source == "jetz" || layer.source == "iucn") {
+                       this.polygonLegend.hide();
+                       
+                       if(layer.source == 'jetz') {
+                            this.s4.hide();
+                       }    
+                    } else {
+                        this.seasonalLegend.hide();
+                    }          
                 } else {
                     this.seasonalLegend.hide();
-                    this.polygonLegend.addClass(layer.type);
                 }
             }
         }
