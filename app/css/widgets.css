@@ -132,25 +132,13 @@ button:hover{
 
 }
 
-.mol-Sidebar .status {
-    behavior: url(/css/pie/PIE.htc);
-    -moz-border-radius-topleft: 3px;
-    border-top-left-radius: 3px;
-    -moz-border-radius-topright: 3px;
-    border-top-right-radius: 3px;
+.mol-help.iframe.status {
+    margin-left:-0.9em;
 }
-.mol-Sidebar .help {
-    behavior: url(/css/pie/PIE.htc);
-    -moz-border-radius-bottomright: 3px;
-    border-bottom-right-radius: 3px;
-    -moz-border-radius-bottomleft: 3px;
-    border-bottom-left-radius: 3px;
+.mol-feedback.iframe.feedback {
+    margin-left:-0.9em;
 }
-.mol-Sidebar .button{
-        padding:6px;
-        cursor:pointer;
 
-}
 
 .mol-BottomRightMenu {
     behavior: url(/css/pie/PIE.htc);
@@ -443,7 +431,7 @@ white-space: nowrap;
     padding-top: 2px;
 }
 
-.mol-LayerControl-Layers .layer .type, 
+.mol-LayerControl-Layers .layer .type,
 .mol-LayerControl-Layers .layer .source {
     float: left;
     text-align: center;
@@ -675,7 +663,7 @@ white-space: nowrap;
 }
 
 
-.mol-LayerControl-Styler .sliderLabel, 
+.mol-LayerControl-Styler .sliderLabel,
 .mol-LayerControl-Styler .opacityLabel {
     float:left;
     width:48px;

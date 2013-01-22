@@ -71,8 +71,8 @@ mol.modules.map.help = function(mol) {
                     {
                         autoOpen: false,
 			            dialogClass: "mol-help",
-                        height: 550,
-                        width: 700,
+                        height: 500,
+                        width: 800,
                         modal: true
                     }
                 );
@@ -81,8 +81,8 @@ mol.modules.map.help = function(mol) {
                     {
                         autoOpen: false,
 			            dialogClass: "mol-help",
-                        height: 550,
-                        width: 850,
+                        height: 360,
+                        width: 360,
                         modal: true,
                     }
                 );
@@ -94,9 +94,9 @@ mol.modules.map.help = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<iframe id="help_dialog" ' + 
-                        'class="mol-help iframe_content" ' + 
-                        'src="/static/help/index.html">' + 
+                    '<iframe id="help_dialog" ' +
+                        'class="mol-help iframe_content" ' +
+                        'src="/static/help/index.html">' +
                     '</iframe>';
 
                 this._super(html);
@@ -110,16 +110,17 @@ mol.modules.map.help = function(mol) {
         {
             init: function() {
                 var html = '' +
-                    '<iframe id="feedback_dialog" ' + 
-                        'src="https://docs.google.com/' + 
-                        'spreadsheet/embeddedform?' + 
-                        'formkey=dC10Y2ZWNkJXbU5RQWpWbXpJTzhGWEE6MQ" ' + 
-                        'width="760" ' + 
-                        'height="625" ' + 
-                        'frameborder="0" ' + 
-                        'marginheight="0" ' + 
-                        'marginwidth="0">' + 
-                        'Loading...' + 
+                    '<iframe id="feedback_dialog" ' +
+                        'src="https://docs.google.com/' +
+                        'spreadsheet/embeddedform?' +
+                        'formkey=dC10Y2ZWNkJXbU5RQWpWbXpJTzhGWEE6MQ" ' +
+                        'width="340" ' +
+                        'height="340" ' +
+                        'frameborder="0" ' +
+                        'marginheight="0" ' +
+                        'marginwidth="0" ' +
+                        'class="mol-feedback iframe feedback">' +
+                        'Loading...' +
                     '</iframe>';
 
                 this._super(html);
