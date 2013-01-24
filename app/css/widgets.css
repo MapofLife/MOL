@@ -1352,6 +1352,51 @@ div.mol-Dashboard-TableWindow {
     padding:0px;
 }
 
+.mol-Map-ListDialogContent.ui-dialog-content.ui-widget-content {
+    padding: 0.5em 0.5em;
+}
+
+.mol-Map-ListDialogContent .ui-tabs-nav.ui-widget-header {
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    background-image: none;
+}
+
+.mol-Map-ListDialogContent li.ui-state-default {
+    background: #1D2B52;
+    opacity: 0.75; 
+}
+
+.mol-Map-ListDialogContent li.ui-state-default a {
+    padding: 0.3em 0.4em;
+    /*color: white;*/
+    font-size: 0.8em;
+}
+
+.mol-Map-ListDialogContent li.ui-state-default a {
+    color: white;
+}
+
+.mol-Map-ListDialogContent li.ui-state-hover a {
+    color: #C77405;
+}
+
+.mol-Map-ListDialogContent li.ui-state-active a {
+    color: #1D2B52;
+}
+
+
+
+.mol-Map-ListDialogContent li.ui-state-active {
+    background: none;
+}
+
+.mol-Map-ListDialogContent .ui-tabs.ui-tabs-nav {
+    padding: 0;
+}
+
+
 .mol-Map-ListQuery {
      margin:4px;
 }
