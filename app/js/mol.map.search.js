@@ -21,9 +21,9 @@ mol.modules.map.search = function(mol) {
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
-                    "CASE d.style_table WHEN 'points_style' " + 
-                        'THEN t.carto_css_point ' + 
-                        "WHEN 'polygons_style' " + 
+                    "CASE d.style_table WHEN 'points_style' " +
+                        'THEN t.carto_css_point ' +
+                        "WHEN 'polygons_style' " +
                         'THEN t.carto_css_poly END as css,' +
                     't.sort_order as type_sort_order, ' +
                     't.title as type_title, '+
@@ -31,7 +31,7 @@ mol.modules.map.search = function(mol) {
                     'CONCAT(l.provider,\'\') as source, '+
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
-                    's.title as source_type_title, ' +   
+                    's.title as source_type_title, ' +
                     'l.feature_count as feature_count, '+
                     'CONCAT(n.v,\'\') as names, ' +
                     'CASE WHEN l.extent is null THEN null ELSE ' +
@@ -46,9 +46,9 @@ mol.modules.map.search = function(mol) {
                         '}}\') ' +
                     'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
-                    'd.dataset_title as dataset_title, ' + 
+                    'd.dataset_title as dataset_title, ' +
                     'd.style_table as style_table ' +
-                    
+
                 'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
@@ -88,7 +88,7 @@ mol.modules.map.search = function(mol) {
                 item.label = item.label.replace(
                     new RegExp("(?![^&;]+;)(?!<[^<>]*)(" +
                        $.ui.autocomplete.escapeRegex(this.term) +
-                       ")(?![^<>]*>)(?![^&;]+;)", "gi"), 
+                       ")(?![^<>]*>)(?![^&;]+;)", "gi"),
                     "<strong>$1</strong>"
                 );
                 return $("<li></li>")
@@ -105,10 +105,10 @@ mol.modules.map.search = function(mol) {
             var self = this;
             $(this.display.searchBox).autocomplete(
                 {
-                    minLength: 3, 
+                    minLength: 3,
                     source: function(request, response) {
                         $.getJSON(
-                            mol.services.cartodb.sqlApi.jsonp_url.format(
+                            mol.services.cartodb.sqlApi.json_url.format(
                                     self.ac_sql.format(
                                         $.trim(request.term)
                                             .replace(/ /g, ' ')
@@ -122,8 +122,8 @@ mol.modules.map.search = function(mol) {
                                         var sci, eng;
                                         if(row.n != undefined){
                                             sci = row.n;
-                                            eng = (row.v == null || 
-                                                row.v == '') ? 
+                                            eng = (row.v == null ||
+                                                row.v == '') ?
                                                     '' :
                                                     ', {0}'.format(
                                                         row.v.replace(
@@ -132,7 +132,7 @@ mol.modules.map.search = function(mol) {
                                                     );
                                             names.push({
                                                 label:self.ac_label_html
-                                                    .format(sci, eng), 
+                                                    .format(sci, eng),
                                                 value:sci
                                             });
                                             scinames.push(sci);
@@ -145,12 +145,11 @@ mol.modules.map.search = function(mol) {
                                 response(names);
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
-                                        'hide-loading-indicator', 
+                                        'hide-loading-indicator',
                                         {source : "autocomplete"}
                                     )
                                 );
-                             },
-                             'json'
+                             }
                         );
                     },
                     select: function(event, ui) {
@@ -166,7 +165,7 @@ mol.modules.map.search = function(mol) {
                         self.names=[];
                         self.bus.fireEvent(
                             new mol.bus.Event(
-                                'show-loading-indicator', 
+                                'show-loading-indicator',
                                 {source : "autocomplete"}
                             )
                         );
@@ -175,7 +174,7 @@ mol.modules.map.search = function(mol) {
                         self.searching[$(this).val()] = false;
                         self.bus.fireEvent(
                              new mol.bus.Event(
-                                'hide-loading-indicator', 
+                                'hide-loading-indicator',
                                 {source : "autocomplete"}
                             )
                         );
@@ -259,18 +258,18 @@ mol.modules.map.search = function(mol) {
                     var params = {
                         visible: false
                     }, that = this;
-                    
+
                     if(self.display.searchDisplay.is(':visible')) {
                         self.display.searchDisplay.hide();
                         $(this).text('▶');
                         params.visible = false;
                     } else {
-                        
+
                         self.display.searchDisplay.show();
                         $(this).text('◀');
                         params.visible = true;
                     }
-                    
+
                     self.bus.fireEvent(
                         new mol.bus.Event('results-display-toggle', params));
                 }
@@ -285,7 +284,7 @@ mol.modules.map.search = function(mol) {
                         $(this).autocomplete("close");
                         self.bus.fireEvent(
                             new mol.bus.Event(
-                                'hide-loading-indicator', 
+                                'hide-loading-indicator',
                                 {source : "autocomplete"}
                             )
                         );
@@ -312,18 +311,18 @@ mol.modules.map.search = function(mol) {
 
         /**
          * Searches CartoDB using a term from the search box. Fires
-         * a search event on the bus. The success callback fires a 
+         * a search event on the bus. The success callback fires a
          * search-results event on the bus.
          *
          * @param term the search term (scientific name)
          */
         search: function(term) {
             var self = this;
-                
-                
+
+
                 $(self.display.searchBox).autocomplete('disable');
                 $(self.display.searchBox).autocomplete('close');
-                
+
                 if(term.length<3) {
                     if ($.trim(term).length==0) {
                         self.bus.fireEvent(new mol.bus.Event('clear-results'));
@@ -336,29 +335,27 @@ mol.modules.map.search = function(mol) {
                 } else {
                     self.bus.fireEvent(
                         new mol.bus.Event(
-                            'show-loading-indicator', 
+                            'show-loading-indicator',
                             {source : "search-{0}".format(term)}
                         )
                     );
                     $(self.display.searchBox).val(term);
+                    term = $.trim(term).replace(/ /g, ' ');
                     $.getJSON(
-                        mol.services.cartodb.sqlApi.jsonp_url.format(
-                            this.search_sql.format(
-                                $.trim(term)
-                                .replace(/ /g, ' ')
-                            )
+                        mol.services.cartodb.sqlApi.json_url.format(
+                            this.search_sql.format(term)
                         ),
                         function (response) {
                             var results = {term:term, response:response};
                             self.bus.fireEvent(
                                 new mol.bus.Event(
-                                    'hide-loading-indicator', 
+                                    'hide-loading-indicator',
                                     {source : "search-{0}".format(term)}
                                 )
                             );
                             self.bus.fireEvent(
                                 new mol.bus.Event(
-                                    'search-results', 
+                                    'search-results',
                                     results
                                 )
                             );

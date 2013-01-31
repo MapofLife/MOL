@@ -30,7 +30,7 @@ mol.modules.map.metadata = function(mol) {
        },
 
         start: function() {
-            
+
             this.addEventHandlers();
         },
         getTypeMetadata:function (params) {
@@ -38,7 +38,7 @@ mol.modules.map.metadata = function(mol) {
                 type = params.type,
                 title = params.title,
                 sql = this.sql['types'].format(type);
-              this.getMetadata(sql, title);  
+              this.getMetadata(sql, title);
         },
         getDashboardMetadata: function (params) {
             var self = this,
@@ -55,14 +55,14 @@ mol.modules.map.metadata = function(mol) {
                 )
             );
             $.getJSON(
-                mol.services.cartodb.sqlApi.jsonp_url.format(sql),
+                mol.services.cartodb.sqlApi.json_url.format(sql),
                 function(response) {
                     if(self.display) {
                         self.display.dialog('close');
                     }
                     if(!response.error) {
                         if(response.total_rows > 0) {
-                            self.display = 
+                            self.display =
                                 new mol.map.metadata.MetadataDisplay(
                                     response, title
                                 );
@@ -110,7 +110,7 @@ mol.map.metadata.MetadataDisplay = mol.mvp.View.extend(
                     '<div class="metarow metakey-{0}">' +
                         '<div class="key">{1}</div>' +
                         '<div class="values"></div>' +
-                    '</div>'; 
+                    '</div>';
            _.each(
                 response.rows[0],
                 function(val, key, list) {
@@ -151,7 +151,7 @@ mol.map.metadata.MetadataDisplay = mol.mvp.View.extend(
                     )
                 }
             );
-           
+
             this.dialog(
                 {
                     autoOpen: true,
@@ -163,35 +163,35 @@ mol.map.metadata.MetadataDisplay = mol.mvp.View.extend(
             $(this).find('.key')
                 .width(
                     Math.max.apply(
-                        Math, 
+                        Math,
                         $(self)
                             .find('.key')
                                 .map(
-                                    function(){ 
-                                        return $(this).width(); 
+                                    function(){
+                                        return $(this).width();
                                     }
                                 ).get()));
             //set total width
             this.dialog(
-                "option", 
+                "option",
                 "width",
                 Math.max.apply(
-                    Math, 
+                    Math,
                     $(self).find('.key')
                         .map(
-                            function(){ 
-                                return $(this).width(); 
+                            function(){
+                                return $(this).width();
                             }
                         ).get())+
                     Math.max.apply(
-                        Math, 
+                        Math,
                         $(self).find('.values').map(
-                            function(){ 
-                                return $(this).width() 
+                            function(){
+                                return $(this).width()
                             }
                         ).get())+150
             );
-            
+
             this.dialog("moveToTop");
         }
     });
