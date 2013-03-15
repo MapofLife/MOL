@@ -135,6 +135,28 @@ mol.modules.map.layers = function(mol) {
                 }
             );
             
+            /*
+             * Toggle Click Handler for Layer Clicking
+             */
+            this.display.layerClickButton.click(
+                function(event) {
+                    var params = {};
+  
+                    if($(self.display.layerClickButton).hasClass('selected')) {
+                        params.disable = true;
+                        $(self.display.layerClickButton).removeClass('selected');
+                        $(self.display.layerClickButton).html("OFF");
+                    } else {
+                        params.disable = false;
+                        $(self.display.layerClickButton).addClass('selected');
+                        $(self.display.layerClickButton).html("ON");
+                    }
+                    
+                    self.bus.fireEvent(
+                        new mol.bus.Event('layer-clicking-toggle', params)); 
+                }
+            );
+            
             this.display.layersToggle.click(
                 function(event) {
                     self.layersToggle(event);
@@ -211,42 +233,13 @@ mol.modules.map.layers = function(mol) {
             
             this.bus.addHandler(
                 'layer-click-toggle',
-                function(event) {
-                    
+                function(event) {                    
                     self.clickDisabled = event.disable;
                     
-                    //true to disable
-                    if(event.disable) {
-                        self.map.overlayMapTypes.forEach(
-                          function(mt) {
-                              mt.interaction.remove();
-                              mt.interaction.clickAction = "";
-                           }
-                        );
-                    } else {
-                        _.any($(self.display.list).children(),
-                            function(layer) {
-                                if($(layer).find('.layer')
-                                        .hasClass('selected')) {    
-                                    self.map.overlayMapTypes.forEach(
-                                        function(mt) {
-                                            if(mt.name == $(layer).attr('id')) {      
-                                                mt.interaction.add();
-                                                mt.interaction.clickAction
-                                                    = "full";
-                                            } else {
-                                                mt.interaction.remove();
-                                                mt.interaction.clickAction 
-                                                    = "";
-                                            }
-
-                                        }
-                                    );
-                                    
-                                    return true;     
-                                }
-                            }
-                        );
+                    //if false, unselect layer query
+                    if(self.clickDisabled) {
+                        $(self.display.layerClickButton).removeClass('selected');
+                        $(self.display.layerClickButton).html("OFF");
                     }
                 }
             );
@@ -309,14 +302,6 @@ mol.modules.map.layers = function(mol) {
 
                     self.bus.fireEvent(
                         new mol.bus.Event('show-layer-display-toggle')
-                    );
-
-                    //disable interactivity to start
-                    self.map.overlayMapTypes.forEach(
-                        function(mt) {
-                            mt.interaction.remove();
-                            mt.interaction.clickAction = "";
-                        }
                     );
                     
                     //Hack so that at the end 
@@ -468,24 +453,6 @@ mol.modules.map.layers = function(mol) {
                                 isSelected = true;
                             }
                             
-                            self.map.overlayMapTypes.forEach(
-                                function(mt) {
-                                    if(mt.name == layer.id && 
-                                       $(l.layer).hasClass('selected')) {
-                                        if(!self.clickDisabled) {
-                                           mt.interaction.add();
-                                           mt.interaction.clickAction = "full";
-                                        } else {
-                                           mt.interaction.remove();
-                                           mt.interaction.clickAction = "";
-                                        }
-                                    } else {
-                                        mt.interaction.remove();
-                                        mt.interaction.clickAction = "";
-                                    }
-                                }
-                            )
-                            
                             if(self.clickDisabled) {
                                 isSelected = false;
                             }
@@ -579,26 +546,7 @@ mol.modules.map.layers = function(mol) {
                 //select it
                 this.display.list.find('.layer')
                     [this.display.list.find('.layer').length-1].click();
-            } else if(sortedLayers.length > 1) {
-                //if multiple layers are being added
-                //layer clickability returned to the
-                //previously selected layer
-                
-                if(wasSelected.length > 0) {
-                    this.map.overlayMapTypes.forEach(
-                        function(mt) {
-                            if(mt.name == wasSelected.parent().attr("id")) {
-                                mt.interaction.add();
-                                mt.interaction.clickAction = "full";
-                            } else {
-                                mt.interaction.remove();
-                                mt.interaction.clickAction = "";
-                            }
-                        }
-                    );
-                }
-                
-            }
+            } 
             
             //done making widgets, toggle on if we have layers.
             if(layerIds.length>0) {
@@ -744,6 +692,13 @@ mol.modules.map.layers = function(mol) {
                         '<div class="layersHeader">' +
                             '<button class="layersToggle button">▲</button>' +
                             'Layers' +
+		                    '<span class="title">Query Layers</span>' +
+		                    '<button id="layerClickButton" ' + 
+		                             'class="toggleBtn" ' +
+		                             'title="Click to activate map layer' + 
+		                                 ' querying.">' +
+		                             'OFF' +
+		                    '</button>' +
                         '</div>' +
                         '<div class="layersContainer">' +
                             '<div class="scrollContainer">' +
@@ -780,6 +735,7 @@ mol.modules.map.layers = function(mol) {
             this.layersWrapper = $(this).find(".layers");
             this.layersContainer = $(this).find(".layersContainer");
             this.layersHeader = $(this).find(".layersHeader");
+            this.layerClickButton = $(this).find('#layerClickButton');
             this.expanded = true;
         },
 

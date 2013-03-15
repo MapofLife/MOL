@@ -22,9 +22,6 @@ mol.modules.map.query = function(mol) {
         start : function() {
             this.addQueryDisplay();
             this.addEventHandlers();
-            
-            //disable all map clicks
-            this.toggleMapLayerClicks(false);
         },
         
         toggleMapLayerClicks : function(boo) {            
@@ -140,6 +137,25 @@ mol.modules.map.query = function(mol) {
                         new mol.bus.Event('species-list-tool-toggle', params));
                 }
             );
+            
+            this.bus.addHandler(
+                'layer-clicking-toggle',
+                function(event) {
+                    var params = {};
+                    
+                    if(!event.disable) {
+                        params.visible = false;
+                        
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'species-list-tool-toggle', 
+                                params
+                            )
+                        );
+                    }
+                }
+            );
+            
             this.bus.addHandler(
                 'dialog-closed-click',
                 function(event) {                  

@@ -292,6 +292,25 @@ white-space: nowrap;
     line-height: 25px;
 }
 
+.mol-LayerControl-Layers .layers .layersHeader .title {
+    margin-left: 20px;
+}
+
+.mol-LayerControl-Layers .layers .layersHeader button.toggleBtn {
+    width:32px;
+    height: 22px;
+    color: #fff;
+    padding: 3px;
+}
+
+.mol-LayerControl-Layers .layers .layersHeader button.selected {
+    border: 3px solid rgba(255, 100, 88, .45);
+    border-radius:5px;
+    -moz-border-radius:5px;
+    -ms-border-radius:5px;
+    padding:0px;
+}
+
 .mol-LayerControl-Layers .layers {
     border-radius: 3px;
     -moz-border-radius: 3px;
@@ -1545,3 +1564,77 @@ div.cartodb_infowindow div.top p {
     max-height: 40px;
     white-space: normal;
 }
+
+/*
+ * New Feature Metadata
+ * 
+ */
+
+div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
+    padding: 0.5em 0.5em;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-header {
+    background: rgba(29, 43, 82, 0.75);
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-header .ui-icon{
+    left: 0em;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-header a {
+    font-size: 0.7em;
+    padding: 0.2em 0.2em 0.2em 0.3em;
+    color: #FFF;
+    padding-left: 1.4em;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content {
+    font-size: 12px;
+    font-weight: normal;
+    font-style: normal;
+    padding: 0.4em 0.4em;
+    overflow-y: scroll;
+    max-height: 250px;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content p {
+    margin: 0.2em;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.itemPair {
+    margin-top: 1px;
+    maring-bottom: 1px;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureItem {
+    width: 49%;
+    float: left;
+    font-weight: bold;
+    text-align: right;
+    margin-right: 2px;
+}
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureData {
+    width: 50%;
+    float: left;
+    text-align: left;
+    min-height: 15px;
+}
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureData SUB,
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureData SUP {
+    line-height: 0;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion-header button {
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    padding: 0px;
+    padding-top: 1px;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion-header a img{
+    width: 16px;
+    height: 16px;
+}
+

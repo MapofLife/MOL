@@ -10,6 +10,7 @@ mol.modules.map = function(mol) {
             'menu',
             'loading',
             'dashboard',
+            'feature',
             'query',
             'basemap',
             'metadata',
@@ -119,7 +120,9 @@ mol.modules.map = function(mol) {
 
                 return control;
             },
-
+            mousestop: function(event) {
+                console.log('Mouse stopped!');
+            },
             addEventHandlers: function() {
                 var self = this;
 
@@ -142,6 +145,34 @@ mol.modules.map = function(mol) {
                     "idle",
                     function () {
                         self.bus.fireEvent(new mol.bus.Event('map-idle'));
+                    }
+                );
+                /*
+                 * A poor man's mousestop event.
+                 */
+                google.maps.event.addListener(
+                    self.display.map,
+                    "mousemove",
+                    function (event) {
+                        self.then = (new Date()).getTime();
+                        if(self.mousetimer) {
+                            clearTimeout(self.mouseTimer)
+                        }
+                        self.mousetimer = setTimeout(
+                            function() {
+                                var now = (new Date()).getTime();
+                                if(now-self.then > 100) {
+                                    self.then = now;
+                                    self.bus.fireEvent(
+                                        new mol.bus.Event(
+                                            'map-mouse-stop',
+                                            event
+                                        )
+                                    );
+                                };
+                            },
+                            150
+                        )
                     }
                 );
                 /**
