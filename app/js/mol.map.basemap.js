@@ -44,11 +44,21 @@ mol.modules.map.basemap = function(mol) {
                                     "visibility" : "off"
                                 }]
                             }, {
-                                "featureType" : "administrative.locality",
+                                "featureType" : "administrative",
                                 "stylers" : [{
                                     "visibility" : "off"
                                 }]
                             }, {
+                                "featureType" : "administrative.country",
+                                "stylers" : [{
+                                    "visibility" : "on"
+                                }]
+                            }, {
+                                "featureType" : "administrative.province",
+                                "stylers" : [{
+                                    "visibility" : "on"
+                                }]
+                            },{
                                 "featureType" : "road",
                                 "stylers" : [{
                                     "visibility" : "simplified"

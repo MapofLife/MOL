@@ -28,19 +28,19 @@ mol.modules.map.boot = function(mol) {
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
-                            '"lng":\',ST_XMin(l.extent),\', '+
-                            '"lat":\',ST_YMin(l.extent),\' '+
+                            '"lng":\',ST_XMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', '+
+                            '"lat":\',ST_YMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' '+
                         '}, '+
                         '"ne":{' +
-                        '"lng":\',ST_XMax(l.extent),\', ' +
-                        '"lat":\',ST_YMax(l.extent),\' ' +
+                        '"lng":\',ST_XMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', ' +
+                        '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
-                    'END as extent, ' +
+		    'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
-                'FROM layer_metadata l ' +
+                'FROM layer_metadata_mar_8_2013 l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
@@ -49,7 +49,7 @@ mol.modules.map.boot = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN ac n ON ' +
+                'LEFT JOIN ac_mar_8_2013 n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
                      "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
@@ -79,7 +79,7 @@ mol.modules.map.boot = function(mol) {
             } else {
                 // Otherwise, try and get a result using term
                 $.getJSON(
-                    mol.services.cartodb.sqlApi.jsonp_url.format(this.sql.format(self.term)),
+                    mol.services.cartodb.sqlApi.json_url.format(this.sql.format(self.term)),
                     function(response) {
                         var results = response.rows;
                         if (results.length == 0) {

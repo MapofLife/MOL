@@ -21,14 +21,14 @@ mol.modules.map.layers = function(mol) {
         layersToggle: function(event) {
             var self = this,
                 visible = event.visible;
-            
+
             if (visible == this.display.expanded) {
                 return;
             }
             if(this.display.expanded == true || visible == false) {
                 $(self.display.styleAll).prop('disabled', false);
                 $(self.display.styleAll).qtip('destroy');
-                
+
                 this.display.layersWrapper.animate(
                     {height: this.display.layersHeader.height()+18},
                     1000,
@@ -47,7 +47,7 @@ mol.modules.map.layers = function(mol) {
                     function() {
                         self.display.layersToggle.text('▲');
                         self.display.expanded = true;
-                        
+
                         $(self.display.layersWrapper).css({'height':''});
                     }
                 );
@@ -57,21 +57,32 @@ mol.modules.map.layers = function(mol) {
 
         addEventHandlers: function() {
             var self = this;
-            
+
             this.display.removeAll.click (
                 function(event) {
+
+                    self.map.overlayMapTypes.clear();
                     $(self.display.styleAll).prop('disabled', false);
                     $(self.display.styleAll).qtip('destroy');
-                    
+
                     $(self.display).find(".close").trigger("click");
+                    self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'hide-layer-display-toggle'));
+
+                    $(self.display.styleAll)
+                        .prop('disabled', false);
+                    $(self.display.styleAll).qtip('destroy');
+
+                    self.display.toggle(false);
                 }
             );
-            
+
             this.display.toggleAll.click (
                 function(event) {
                     $(self.display.styleAll).prop('disabled', false);
                     $(self.display.styleAll).qtip('destroy');
-                    
+
                     _.each(
                         $(self.display).find(".toggle"),
                         function(checkbox){
@@ -80,19 +91,19 @@ mol.modules.map.layers = function(mol) {
                     );
                 }
             );
-            
+
             this.display.resetAll.click (
                 function(event) {
                     $(self.display.styleAll).prop('disabled', false);
                     $(self.display.styleAll).qtip('destroy');
-                    
+
                     _.each(
                         self.display.layers,
                         function(layer) {
                             var l;
-                                
-                            l = self.display.getLayer(layer);                                
-                            
+
+                            l = self.display.getLayer(layer);
+
                             self.bus.fireEvent(
                                 new mol.bus.Event(
                                     'reset-layer-style',
@@ -107,21 +118,21 @@ mol.modules.map.layers = function(mol) {
                     );
                 }
             );
-            
+
             this.display.styleAll.click (
                 function(event) {
                     _.each(
                         self.display.layers,
                         function(layer) {
-                            var l, 
+                            var l,
                                 b;
-                            
+
                             l = self.display.getLayer(layer);
                             b = $(l).find('.styler');
                             $(b).qtip('destroy');
                         }
                     );
-                    
+
                     self.bus.fireEvent(
                         new mol.bus.Event(
                             'style-all-layers',
@@ -134,29 +145,54 @@ mol.modules.map.layers = function(mol) {
                     );
                 }
             );
-            
+
             /*
              * Toggle Click Handler for Layer Clicking
              */
+            $(this.display.layerClickButton).qtip({
+                content: {
+                    text: 'Toggle this button to make map features clickable.',
+                    title: {
+                        text: 'Map Feature Clicks',
+                        button: true
+                    }
+
+                },
+                position: {
+                    my: 'top right',
+                    at: 'bottom left'
+                },
+                show: {
+                    event: true,
+                    ready: true,
+                    solo: true,
+                    delay: 0
+                },
+                hide: {
+                    fixed: false,
+                    event: 'mouseenter'
+                }
+            });
+
             this.display.layerClickButton.click(
                 function(event) {
                     var params = {};
-  
+
                     if($(self.display.layerClickButton).hasClass('selected')) {
-                        params.disable = true;
+                        params.action = '';
                         $(self.display.layerClickButton).removeClass('selected');
                         $(self.display.layerClickButton).html("OFF");
                     } else {
-                        params.disable = false;
+                        params.action = 'info';
                         $(self.display.layerClickButton).addClass('selected');
                         $(self.display.layerClickButton).html("ON");
                     }
-                    
+
                     self.bus.fireEvent(
-                        new mol.bus.Event('layer-clicking-toggle', params)); 
+                        new mol.bus.Event('layer-click-action', params));
                 }
             );
-            
+
             this.display.layersToggle.click(
                 function(event) {
                     self.layersToggle(event);
@@ -195,7 +231,7 @@ mol.modules.map.layers = function(mol) {
                                 } else {
                                     bounds.union(layer_bounds)
                                 }
-                                
+
                             }
                             catch(e) {
                                 //invalid extent
@@ -208,7 +244,7 @@ mol.modules.map.layers = function(mol) {
                     }
                 }
             );
-            
+
             this.bus.addHandler(
                 'layer-display-toggle',
                 function(event) {
@@ -223,26 +259,43 @@ mol.modules.map.layers = function(mol) {
                     }
                 }
             );
-            
+
             this.bus.addHandler(
                 'layers-toggle',
                 function(event) {
                     self.layersToggle(event);
                 }
             );
-            
+
             this.bus.addHandler(
                 'layer-click-toggle',
-                function(event) {                    
+                function(event) {
                     self.clickDisabled = event.disable;
-                    
+
                     //if false, unselect layer query
                     if(self.clickDisabled) {
                         $(self.display.layerClickButton).removeClass('selected');
                         $(self.display.layerClickButton).html("OFF");
                     }
+
+
                 }
             );
+            this.bus.addHandler(
+                'layer-click-action',
+                function(event) {
+
+                    if(event.action != 'info') {
+                        $(self.display.layerClickButton).removeClass('selected');
+                        $(self.display.layerClickButton).html("OFF");
+                        self.clickDisabled = true;
+                    } else {
+                        self.clickDisabled = false;
+                        $(self.display.layerClickButton).addClass('selected');
+                        $(self.display.layerClickButton).html("ON");
+                    }
+                }
+            )
         },
 
         /**
@@ -303,11 +356,11 @@ mol.modules.map.layers = function(mol) {
                     self.bus.fireEvent(
                         new mol.bus.Event('show-layer-display-toggle')
                     );
-                    
-                    //Hack so that at the end 
+
+                    //Hack so that at the end
                     //we can fire opacity event with all layers
                     all.push({layer:layer, l:l, opacity:opacity});
-                    
+
                     //style legends initially
                     self.bus.fireEvent(
                         new mol.bus.Event(
@@ -319,7 +372,7 @@ mol.modules.map.layers = function(mol) {
                         )
                     );
 
-                    //Close handler for x button 
+                    //Close handler for x button
                     //fires a 'remove-layers' event.
                     l.close.click(
                         function(event) {
@@ -330,18 +383,18 @@ mol.modules.map.layers = function(mol) {
 
                             self.bus.fireEvent(e);
                             l.remove();
-                            
-                            //Hide the layer widget toggle in the main menu 
+
+                            //Hide the layer widget toggle in the main menu
                             //if no layers exist
                             if(self.map.overlayMapTypes.length == 0) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
                                         'hide-layer-display-toggle'));
-                                        
+
                                 $(self.display.styleAll)
                                     .prop('disabled', false);
                                 $(self.display.styleAll).qtip('destroy');
-                                        
+
                                 self.display.toggle(false);
                             }
                             event.stopPropagation();
@@ -349,7 +402,7 @@ mol.modules.map.layers = function(mol) {
                         }
                     );
 
-                    //Click handler for zoom button 
+                    //Click handler for zoom button
                     //fires 'layer-zoom-extent'
                     //and 'show-loading-indicator' events.
                     l.zoom.click(
@@ -361,38 +414,38 @@ mol.modules.map.layers = function(mol) {
                                 extent = eval('({0})'.format(layer.extent)),
                                 bounds = new google.maps.LatLngBounds(
                                             new google.maps.LatLng(
-                                                extent.sw.lat, 
-                                                extent.sw.lng), 
+                                                extent.sw.lat,
+                                                extent.sw.lng),
                                             new google.maps.LatLng(
-                                                extent.ne.lat, 
+                                                extent.ne.lat,
                                                 extent.ne.lng));
-                                                
-                            if(!$(l.layer).hasClass('selected')){
-                                l.layer.click();
-                            }
+
+                            //if(!$(l.layer).hasClass('selected')){
+                            //    l.layer.click();
+                            //}
                             self.map.fitBounds(bounds);
 
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
                     );
-                    
-                    // Click handler for style toggle 
+
+                    // Click handler for style toggle
                     l.styler.click(
                         function(event) {
                             _.each(
                                 self.display.layers,
                                 function(layer) {
-                                    var l, 
+                                    var l,
                                         b;
-                                    
+
                                     l = self.display.getLayer(layer);
                                     b = $(l).find('.styler');
                                     $(b).prop('disabled', false);
                                     $(b).qtip('destroy');
                                 }
                             );
-                            
+
                             self.bus.fireEvent(
                                 new mol.bus.Event(
                                     'show-styler',
@@ -402,29 +455,29 @@ mol.modules.map.layers = function(mol) {
                                     }}
                                 )
                             );
-                            
+
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
                     );
-                    
+
                     l.layer.click(
                         function(event) {
                             var boo = false,
                                 isSelected = false;
 
                             $(l.layer).focus();
-                            
+
                             if($(this).hasClass('selected')) {
                                 $(this).removeClass('selected');
-                                
+
                                 //unstyle previous layer
                                 boo = false;
                             } else {
-                                
+
                                 if($(self.display)
-                                        .find('.selected').length > 0) {       
-                                                                                 
+                                        .find('.layer.selected').length > 0) {
+
                                     //toggle layer highlight
                                     self.bus.fireEvent(
                                         new mol.bus.Event(
@@ -433,30 +486,30 @@ mol.modules.map.layers = function(mol) {
                                                 layer: self.display
                                                          .getLayerById(
                                                            $(self.display)
-                                                             .find('.selected')
+                                                             .find('.layer.selected')
                                                                .parent()
                                                                  .attr('id')),
                                                 visible: false,
                                                 selected: false
                                             }}
                                         )
-                                    );                        
+                                    );
                                 }
-                                
-                                $(self.display).find('.selected')
+
+                                $(self.display).find('.layer.selected')
                                     .removeClass('selected');
-                                    
+
                                 $(this).addClass('selected');
-                                
+
                                 //style selected layer
                                 boo = true;
                                 isSelected = true;
                             }
-                            
+
                             if(self.clickDisabled) {
                                 isSelected = false;
                             }
-                            
+
                             //toggle layer highlight
                             self.bus.fireEvent(
                                 new mol.bus.Event(
@@ -468,7 +521,7 @@ mol.modules.map.layers = function(mol) {
                                     }}
                                 )
                             );
-                            
+
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
@@ -533,10 +586,10 @@ mol.modules.map.layers = function(mol) {
                     return layer.id;
                 },
                 this);
-                
+
             this.bus.fireEvent(
                 new mol.bus.Event(
-                    'reorder-layers', 
+                    'reorder-layers',
                     {layers:layerIds}
                 )
             );
@@ -546,14 +599,14 @@ mol.modules.map.layers = function(mol) {
                 //select it
                 this.display.list.find('.layer')
                     [this.display.list.find('.layer').length-1].click();
-            } 
-            
+            }
+
             //done making widgets, toggle on if we have layers.
             if(layerIds.length>0) {
                 this.layersToggle({visible:true});
             }
         },
-            
+
         /**
         * Add sorting capability to LayerListDisplay, when a result is
         * drag-n-drop, and the order of the result list is changed,
@@ -561,13 +614,13 @@ mol.modules.map.layers = function(mol) {
         **/
 
         initSortable: function() {
-            var self = this, 
+            var self = this,
                 display = this.display;
 
             display.list.sortable({
                 update : function(event, ui) {
-                    var layers = [], 
-                        params = {}, 
+                    var layers = [],
+                        params = {},
                         e = null;
 
                     $(display.list)
@@ -590,7 +643,7 @@ mol.modules.map.layers = function(mol) {
                 '<div class="layerContainer">' +
                 '  <div class="layer">' +
                 '    <button title="Click to edit layer style." ' +
-                            'class="styler">' + 
+                            'class="styler">' +
                 '      <div class="legend-point"></div> ' +
                 '      <div class="legend-polygon"></div> ' +
                 '      <div class="legend-seasonal">' +
@@ -611,8 +664,8 @@ mol.modules.map.layers = function(mol) {
                 '      <div title="{2}" class="layerNomial">{2}</div>' +
                 '      <div title="{3}" class="layerEnglishName">{3}</div>'+
                 '    </div>' +
-                '    <button title="Remove layer." class="close">' + 
-                       'x' + 
+                '    <button title="Remove layer." class="close">' +
+                       'x' +
                 '    </button>' +
                 '    <button title="Zoom to layer extent." class="zoom">' +
                        'z' +
@@ -620,7 +673,7 @@ mol.modules.map.layers = function(mol) {
                 '    <label class="buttonContainer">' +
                 '       <input class="toggle" type="checkbox">' +
                 '       <span title="Toggle layer visibility." ' +
-                        'class="customCheck"></span>' + 
+                        'class="customCheck"></span>' +
                 '    </label>' +
                 '   </div>' +
                 '   <div class="break"></div>' +
@@ -634,12 +687,12 @@ mol.modules.map.layers = function(mol) {
                     layer.name,
                     layer.names,
                     (layer.feature_count != null) ?
-                        '{0} features'.format(layer.feature_count) : '',
+                        '{0}'.format(layer.feature_count) : '',
                     layer.source_title,
                     layer.type_title
                 )
             );
-            
+
             this.attr('id', layer.id);
             this.toggle = $(this).find('.toggle').button();
             this.styler = $(this).find('.styler');
@@ -653,30 +706,30 @@ mol.modules.map.layers = function(mol) {
             this.source = $(this).find('.source');
             this.layer = $(this).find('.layer');
             this.layerObj = layer;
-            
+
             //legend items
             this.pointLegend = $(this).find('.legend-point');
             this.polygonLegend = $(this).find('.legend-polygon');
             this.seasonalLegend = $(this).find('.legend-seasonal');
             this.s4 = $(this).find('.s4');
-            
+
             if(layer.style_table == "points_style") {
                 this.polygonLegend.hide();
                 this.seasonalLegend.hide();
             } else {
                 this.pointLegend.hide();
-                
-                //TODO issue #175 replace iucn ref    
+
+                //TODO issue #175 replace iucn ref
                 if(layer.type == "range") {
                     if(layer.source == "jetz" || layer.source == "iucn") {
                        this.polygonLegend.hide();
-                       
+
                        if(layer.source == 'jetz') {
                             this.s4.hide();
-                       }    
+                       }
                     } else {
                         this.seasonalLegend.hide();
-                    }          
+                    }
                 } else {
                     this.seasonalLegend.hide();
                 }
@@ -691,14 +744,14 @@ mol.modules.map.layers = function(mol) {
                     '<div class="layers widgetTheme">' +
                         '<div class="layersHeader">' +
                             '<button class="layersToggle button">▲</button>' +
+                            '<button id="layerClickButton" ' +
+                                     'class="toggleBtn selected" ' +
+                                     'title="Click to activate map layer' +
+                                         ' querying.">' +
+                                     'ON' +
+                            '</button>' +
+                            '<span class="title">Identify Layers</span>' +
                             'Layers' +
-		                    '<span class="title">Query Layers</span>' +
-		                    '<button id="layerClickButton" ' + 
-		                             'class="toggleBtn" ' +
-		                             'title="Click to activate map layer' + 
-		                                 ' querying.">' +
-		                             'OFF' +
-		                    '</button>' +
                         '</div>' +
                         '<div class="layersContainer">' +
                             '<div class="scrollContainer">' +
@@ -744,7 +797,7 @@ mol.modules.map.layers = function(mol) {
         },
 
         getLayerById: function(id) {
-            return _.find(this.layers, function(layer){ 
+            return _.find(this.layers, function(layer){
                             return layer.id === id; });
         },
 

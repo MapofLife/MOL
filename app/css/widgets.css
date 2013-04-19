@@ -294,6 +294,7 @@ white-space: nowrap;
 
 .mol-LayerControl-Layers .layers .layersHeader .title {
     margin-left: 20px;
+    float: right;
 }
 
 .mol-LayerControl-Layers .layers .layersHeader button.toggleBtn {
@@ -301,6 +302,8 @@ white-space: nowrap;
     height: 22px;
     color: #fff;
     padding: 3px;
+    margin-right:10px;
+    float:right;
 }
 
 .mol-LayerControl-Layers .layers .layersHeader button.selected {
@@ -462,7 +465,7 @@ white-space: nowrap;
     padding-top: 2px;
 }
 
-.mol-LayerControl-Layers .layer .type, 
+.mol-LayerControl-Layers .layer .type,
 .mol-LayerControl-Layers .layer .source {
     float: left;
     text-align: center;
@@ -478,29 +481,29 @@ white-space: nowrap;
     padding: 0px;
 }
 
-.mol-LayerControl-Layers .layer button.styler{
+.styler{
     background-color: rgba(25, 25, 25, 0);
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     box-shadow: none;
 }
 
-.mol-LayerControl-Layers .layer button.styler[disabled]{
+.styler[disabled]{
     background-color: rgba(25, 25, 25, 0);
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     box-shadow: none;
     opacity:0.5;
 }
-.mol-LayerControl-Layers .layer button.styler[disabled]:hover{
+.styler[disabled]:hover{
     background-color: rgba(25, 25, 25, 0);
 }
 
-.mol-LayerControl-Layers .layer button.styler:hover{
+.styler:hover{
     background-color: rgba(25, 25, 25, 1);
 }
 
-.mol-LayerControl-Layers .layer .styler div{
+.styler div{
     background-color: #FF0000;
     height: 20px;
     width: 20px;
@@ -508,10 +511,10 @@ white-space: nowrap;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
-    border: none;
+    /*border: none;*/
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-point {
+.legend-point {
     height: 7px;
     width: 7px;
     border-style:solid;
@@ -521,18 +524,18 @@ white-space: nowrap;
     border-radius: 10px;
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-polygon {
+.legend-polygon {
     border-style:solid;
     width:18px;
     height:18px;
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal {
+.legend-seasonal {
     background-color:transparent;
     border: solid;
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal div.seasonal {
+.legend-seasonal div.seasonal {
     width: 20px;
     margin: 0px auto;
     -webkit-border-radius: 3px;
@@ -540,7 +543,7 @@ white-space: nowrap;
     border-radius: 3px;
 }
 
-.mol-LayerControl-Layers .layer .styler div.legend-seasonal div {
+.legend-seasonal div {
     height:5px;
 }
 
@@ -694,7 +697,7 @@ white-space: nowrap;
 }
 
 
-.mol-LayerControl-Styler .sliderLabel, 
+.mol-LayerControl-Styler .sliderLabel,
 .mol-LayerControl-Styler .opacityLabel {
     float:left;
     width:48px;
@@ -772,20 +775,15 @@ white-space: nowrap;
 /* BEGIN SEARCH UI
  * search, results
  */
+
 .mol-LayerControl-Search {
+    display:inline-block;
     white-space: nowrap;
-}
-
-
-.mol-LayerControl-Search, .mol-LayerControl-Add {
-    display: table-cell;
-    height: 26px;
     margin-bottom: 5px;
     margin-right: 5px;
-    padding: 3px 5px 2px 5px;
+    padding: 4px 5px 4px 5px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-    white-space: nowrap;
     pointer-events: auto;
     -moz-user-select: text;
 }
@@ -804,7 +802,6 @@ white-space: nowrap;
     -moz-user-select: none;
 }
 .mol-LayerControl-Search .value{
-    display:inline-block;
     margin-right: 5px;
     -moz-user-select: text;
     -webkit-user-select: text;
@@ -839,21 +836,15 @@ white-space: nowrap;
 
 
 .mol-LayerControl-Search .execute{
-    display:inline-block;
     margin-left: 4px;
     width: 50px;
     height:20px;
 }
 .mol-LayerControl-Search .toggle{
-    float:left;
     height: 20px;
     width: 23px;
     margin-left: 4px;
-    /*background-image:url('/static/maps/search/cancel.png');
-    background-size:14px 14px;
-    background-repeat:no-repeat;
-    background-position:center;*/
-}
+ }
 
 .mol-LayerControl-Search .cancel img{
     width: 16px;
@@ -1384,7 +1375,7 @@ div.mol-Dashboard-TableWindow {
 
 .mol-Map-ListDialogContent li.ui-state-default {
     background: #1D2B52;
-    opacity: 0.75; 
+    opacity: 0.75;
 }
 
 .mol-Map-ListDialogContent li.ui-state-default a {
@@ -1567,12 +1558,22 @@ div.cartodb_infowindow div.top p {
 
 /*
  * New Feature Metadata
- * 
+ *
  */
 
+.mol-Map-FeatureDisplay {
+    position: relative;
+    width: 210px;
+    padding: 7px 8px 7px 8px;
+    overflow-x: hidden;
+    background: url('/static/light.png') repeat-y -452px 0;
+}
 div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
     padding: 0.5em 0.5em;
+    width:100%;
 }
+
+
 
 .mol-Map-FeatureDisplay .ui-accordion .ui-accordion-header {
     background: rgba(29, 43, 82, 0.75);
@@ -1587,6 +1588,8 @@ div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
     padding: 0.2em 0.2em 0.2em 0.3em;
     color: #FFF;
     padding-left: 1.4em;
+    padding-bottom: 0.3em;
+    /*height:18px;*/
 }
 
 .mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content {
@@ -1594,8 +1597,8 @@ div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
     font-weight: normal;
     font-style: normal;
     padding: 0.4em 0.4em;
-    overflow-y: scroll;
     max-height: 250px;
+    min-width:178px;
 }
 
 .mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content p {
@@ -1604,7 +1607,8 @@ div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
 
 .mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.itemPair {
     margin-top: 1px;
-    maring-bottom: 1px;
+    margin-bottom: 1px;
+    text-indent:-0.2em;
 }
 
 .mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureItem {
@@ -1636,5 +1640,21 @@ div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
 .mol-Map-FeatureDisplay .ui-accordion-header a img{
     width: 16px;
     height: 16px;
+}
+/*.mol-Map-FeatureDisplay .styler {
+    float:right;
+}
+.mol-Map-FeatureDisplay .source {
+    float:right;
+}*/
+.mol-Map-FeatureDisplay .icons {
+    text-align:right;
+    white-space: nowrap;
+}
+.mol-Map-FeatureDisplay .info {
+    font-size: 12px;
+}
+.mol-Map-FeatureDisplay .name {
+    text-align: left;
 }
 

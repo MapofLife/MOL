@@ -6,7 +6,6 @@ mol.modules.map.metadata = function(mol) {
         init: function(proxy, bus) {
             this.proxy = proxy;
             this.bus = bus;
-            this.url = 'http://mol.cartodb.com/api/v2/sql?q={0}&callback=?';
             this.sql = {
                 dashboard: '' +
                     'SELECT Coverage as "Coverage", Taxon as "Taxon", ' +

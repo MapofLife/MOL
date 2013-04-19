@@ -77,16 +77,31 @@ mol.modules.core = function(mol) {
     mol.core = {};
 
     /**
-     * Retunrs a layer id string given a layer {name, type, source, englishname}.
+     * Returns a layer id string given a layer {name, type, source, englishname}.
      */
     mol.core.getLayerId = function(layer) {
-        var name = $.trim(layer.name.toLowerCase()).replace(/ /g, "_"),
-            type = $.trim(layer.type.toLowerCase()).replace(/ /g, "_"),
-            source = $.trim(layer.source.toLowerCase()).replace(/,/g, "").replace(/ /g, "_"),
-            dataset_id = $.trim(layer.dataset_id).replace(/,/g, "").replace(/ /g, "_");
+        var //name = $.trim(layer.name.toLowerCase()).replace(/ /g, "_").replace(/(.)/),
+            name = this.encode(layer.name),
+            type = this.encode(layer.type),
+            source = this.encode(layer.source),
+            source_type = this.encode(layer.source_type),
+            dataset_id = this.encode(layer.dataset_id);
 
-        return 'layer--{0}--{1}--{2}--{3}'.format(name, type, source, dataset_id);
+        return 'layer--{0}--{1}--{2}--{3}--{4}'.format(name, type, source, dataset_id, source_type);
     };
+    /*
+     * Makes a srting safe for use as a DOM id or class name.
+     */
+    mol.core.encode = function(string) {
+        return (escape(string)).replace(/%/g,'percent').replace(/\./g,'period');
+    };
+    /*
+     * Decodes string encoded with mol.core.encode. 
+     */
+    mol.core.decode = function(string) {
+        return (unescape(string.replace(/percent/g,'%').replace(/period/g,'.')));
+    };
+    
 }
 mol.modules.bus = function(mol) {
 
@@ -291,12 +306,14 @@ mol.modules.services.cartodb = function(mol) {
             init: function() {
                 this.jsonp_url = '' +
                     'http://d3dvrpov25vfw0.cloudfront.net/' +
-                    'api/v2/sql?callback=?&q={0}';
+//                    'http://mol.cartodb.com/' +
+                    'api/v2/sql?mol_cache=041920131653&callback=?&q={0}';
                 this.json_url = '' +
                     'http://d3dvrpov25vfw0.cloudfront.net/' +
-                    'api/v2/sql?q={0}';
+//                    'http://mol.cartodb.com/' +
+                    'api/v2/sql?mol_cache=041920131653&q={0}';
                 //cache key is mmddyyyyhhmm
-                this.sql_cache_key = '120420121435';
+                this.sql_cache_key = '041920131653';
             }
         }
     );
@@ -304,9 +321,10 @@ mol.modules.services.cartodb = function(mol) {
         {
             init: function() {
                 this.host = '' +
+//                    'mol.cartodb.com';
                     'd3dvrpov25vfw0.cloudfront.net';
                 //cache key is mmddyyyyhhmm of cache start
-                this.tile_cache_key = '121220121553';
+                this.tile_cache_key = '041920131653';
             }
         }
     );
@@ -505,24 +523,7 @@ mol.modules.map = function(mol) {
                         );
                     }
                 );
-                this.bus.addHandler(
-                    'register-list-click',
-                    function(event) {
-                            google.maps.event.addListener(
-                            self.display.map,
-                            "click",
-                            function(event) {
-                                var params = {
-                                    gmaps_event : event,
-                                    map : self.display.map}
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'species-list-query-click',
-                                        params));
-                            }
-                        );
-                    }
-                );
+
                 /*
                  *  Turn on the loading indicator display when zooming
                  */
@@ -600,11 +601,12 @@ mol.modules.map = function(mol) {
                     minLat: -85,
                     maxLat: 85,
                     mapTypeControl: false,
-                    panControl: false,
+                    panControl: true,
                     zoomControl: true,
                     streetViewControl: false,
+                    useStaticMap:false,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    styles:[ 
+                    styles:[
                         {
                             "stylers" : [{
                                 "saturation" : -65
@@ -625,9 +627,19 @@ mol.modules.map = function(mol) {
                                 "visibility" : "off"
                             }]
                         }, {
-                            "featureType" : "administrative.locality",
+                                "featureType" : "administrative",
                             "stylers" : [{
                                 "visibility" : "off"
+                            }]
+                        }, {
+                            "featureType" : "administrative.country",
+                            "stylers" : [{
+                                "visibility" : "on"
+                            }]
+                        }, {
+                            "featureType" : "administrative.province",
+                            "stylers" : [{
+                                "visibility" : "on"
                             }]
                         }, {
                             "featureType" : "road",
@@ -847,14 +859,14 @@ mol.modules.map.layers = function(mol) {
         layersToggle: function(event) {
             var self = this,
                 visible = event.visible;
-            
+
             if (visible == this.display.expanded) {
                 return;
             }
             if(this.display.expanded == true || visible == false) {
                 $(self.display.styleAll).prop('disabled', false);
                 $(self.display.styleAll).qtip('destroy');
-                
+
                 this.display.layersWrapper.animate(
                     {height: this.display.layersHeader.height()+18},
                     1000,
@@ -873,7 +885,7 @@ mol.modules.map.layers = function(mol) {
                     function() {
                         self.display.layersToggle.text('▲');
                         self.display.expanded = true;
-                        
+
                         $(self.display.layersWrapper).css({'height':''});
                     }
                 );
@@ -883,21 +895,32 @@ mol.modules.map.layers = function(mol) {
 
         addEventHandlers: function() {
             var self = this;
-            
+
             this.display.removeAll.click (
                 function(event) {
+
+                    self.map.overlayMapTypes.clear();
                     $(self.display.styleAll).prop('disabled', false);
                     $(self.display.styleAll).qtip('destroy');
-                    
+
                     $(self.display).find(".close").trigger("click");
+                    self.bus.fireEvent(
+                                    new mol.bus.Event(
+                                        'hide-layer-display-toggle'));
+
+                    $(self.display.styleAll)
+                        .prop('disabled', false);
+                    $(self.display.styleAll).qtip('destroy');
+
+                    self.display.toggle(false);
                 }
             );
-            
+
             this.display.toggleAll.click (
                 function(event) {
                     $(self.display.styleAll).prop('disabled', false);
                     $(self.display.styleAll).qtip('destroy');
-                    
+
                     _.each(
                         $(self.display).find(".toggle"),
                         function(checkbox){
@@ -906,19 +929,19 @@ mol.modules.map.layers = function(mol) {
                     );
                 }
             );
-            
+
             this.display.resetAll.click (
                 function(event) {
                     $(self.display.styleAll).prop('disabled', false);
                     $(self.display.styleAll).qtip('destroy');
-                    
+
                     _.each(
                         self.display.layers,
                         function(layer) {
                             var l;
-                                
-                            l = self.display.getLayer(layer);                                
-                            
+
+                            l = self.display.getLayer(layer);
+
                             self.bus.fireEvent(
                                 new mol.bus.Event(
                                     'reset-layer-style',
@@ -933,21 +956,21 @@ mol.modules.map.layers = function(mol) {
                     );
                 }
             );
-            
+
             this.display.styleAll.click (
                 function(event) {
                     _.each(
                         self.display.layers,
                         function(layer) {
-                            var l, 
+                            var l,
                                 b;
-                            
+
                             l = self.display.getLayer(layer);
                             b = $(l).find('.styler');
                             $(b).qtip('destroy');
                         }
                     );
-                    
+
                     self.bus.fireEvent(
                         new mol.bus.Event(
                             'style-all-layers',
@@ -960,7 +983,54 @@ mol.modules.map.layers = function(mol) {
                     );
                 }
             );
-            
+
+            /*
+             * Toggle Click Handler for Layer Clicking
+             */
+            $(this.display.layerClickButton).qtip({
+                content: {
+                    text: 'Toggle this button to make map features clickable.',
+                    title: {
+                        text: 'Map Feature Clicks',
+                        button: true
+                    }
+
+                },
+                position: {
+                    my: 'top right',
+                    at: 'bottom left'
+                },
+                show: {
+                    event: true,
+                    ready: true,
+                    solo: true,
+                    delay: 0
+                },
+                hide: {
+                    fixed: false,
+                    event: 'mouseenter'
+                }
+            });
+
+            this.display.layerClickButton.click(
+                function(event) {
+                    var params = {};
+
+                    if($(self.display.layerClickButton).hasClass('selected')) {
+                        params.action = '';
+                        $(self.display.layerClickButton).removeClass('selected');
+                        $(self.display.layerClickButton).html("OFF");
+                    } else {
+                        params.action = 'info';
+                        $(self.display.layerClickButton).addClass('selected');
+                        $(self.display.layerClickButton).html("ON");
+                    }
+
+                    self.bus.fireEvent(
+                        new mol.bus.Event('layer-click-action', params));
+                }
+            );
+
             this.display.layersToggle.click(
                 function(event) {
                     self.layersToggle(event);
@@ -999,7 +1069,7 @@ mol.modules.map.layers = function(mol) {
                                 } else {
                                     bounds.union(layer_bounds)
                                 }
-                                
+
                             }
                             catch(e) {
                                 //invalid extent
@@ -1012,7 +1082,7 @@ mol.modules.map.layers = function(mol) {
                     }
                 }
             );
-            
+
             this.bus.addHandler(
                 'layer-display-toggle',
                 function(event) {
@@ -1027,20 +1097,43 @@ mol.modules.map.layers = function(mol) {
                     }
                 }
             );
-            
+
             this.bus.addHandler(
                 'layers-toggle',
                 function(event) {
                     self.layersToggle(event);
                 }
             );
-            
+
             this.bus.addHandler(
                 'layer-click-toggle',
-                function(event) {                    
+                function(event) {
                     self.clickDisabled = event.disable;
+
+                    //if false, unselect layer query
+                    if(self.clickDisabled) {
+                        $(self.display.layerClickButton).removeClass('selected');
+                        $(self.display.layerClickButton).html("OFF");
+                    }
+
+
                 }
             );
+            this.bus.addHandler(
+                'layer-click-action',
+                function(event) {
+
+                    if(event.action != 'info') {
+                        $(self.display.layerClickButton).removeClass('selected');
+                        $(self.display.layerClickButton).html("OFF");
+                        self.clickDisabled = true;
+                    } else {
+                        self.clickDisabled = false;
+                        $(self.display.layerClickButton).addClass('selected');
+                        $(self.display.layerClickButton).html("ON");
+                    }
+                }
+            )
         },
 
         /**
@@ -1101,11 +1194,11 @@ mol.modules.map.layers = function(mol) {
                     self.bus.fireEvent(
                         new mol.bus.Event('show-layer-display-toggle')
                     );
-                    
-                    //Hack so that at the end 
+
+                    //Hack so that at the end
                     //we can fire opacity event with all layers
                     all.push({layer:layer, l:l, opacity:opacity});
-                    
+
                     //style legends initially
                     self.bus.fireEvent(
                         new mol.bus.Event(
@@ -1117,7 +1210,7 @@ mol.modules.map.layers = function(mol) {
                         )
                     );
 
-                    //Close handler for x button 
+                    //Close handler for x button
                     //fires a 'remove-layers' event.
                     l.close.click(
                         function(event) {
@@ -1128,18 +1221,18 @@ mol.modules.map.layers = function(mol) {
 
                             self.bus.fireEvent(e);
                             l.remove();
-                            
-                            //Hide the layer widget toggle in the main menu 
+
+                            //Hide the layer widget toggle in the main menu
                             //if no layers exist
                             if(self.map.overlayMapTypes.length == 0) {
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
                                         'hide-layer-display-toggle'));
-                                        
+
                                 $(self.display.styleAll)
                                     .prop('disabled', false);
                                 $(self.display.styleAll).qtip('destroy');
-                                        
+
                                 self.display.toggle(false);
                             }
                             event.stopPropagation();
@@ -1147,7 +1240,7 @@ mol.modules.map.layers = function(mol) {
                         }
                     );
 
-                    //Click handler for zoom button 
+                    //Click handler for zoom button
                     //fires 'layer-zoom-extent'
                     //and 'show-loading-indicator' events.
                     l.zoom.click(
@@ -1159,38 +1252,38 @@ mol.modules.map.layers = function(mol) {
                                 extent = eval('({0})'.format(layer.extent)),
                                 bounds = new google.maps.LatLngBounds(
                                             new google.maps.LatLng(
-                                                extent.sw.lat, 
-                                                extent.sw.lng), 
+                                                extent.sw.lat,
+                                                extent.sw.lng),
                                             new google.maps.LatLng(
-                                                extent.ne.lat, 
+                                                extent.ne.lat,
                                                 extent.ne.lng));
-                                                
-                            if(!$(l.layer).hasClass('selected')){
-                                l.layer.click();
-                            }
+
+                            //if(!$(l.layer).hasClass('selected')){
+                            //    l.layer.click();
+                            //}
                             self.map.fitBounds(bounds);
 
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
                     );
-                    
-                    // Click handler for style toggle 
+
+                    // Click handler for style toggle
                     l.styler.click(
                         function(event) {
                             _.each(
                                 self.display.layers,
                                 function(layer) {
-                                    var l, 
+                                    var l,
                                         b;
-                                    
+
                                     l = self.display.getLayer(layer);
                                     b = $(l).find('.styler');
                                     $(b).prop('disabled', false);
                                     $(b).qtip('destroy');
                                 }
                             );
-                            
+
                             self.bus.fireEvent(
                                 new mol.bus.Event(
                                     'show-styler',
@@ -1200,29 +1293,29 @@ mol.modules.map.layers = function(mol) {
                                     }}
                                 )
                             );
-                            
+
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
                     );
-                    
+
                     l.layer.click(
                         function(event) {
                             var boo = false,
                                 isSelected = false;
 
                             $(l.layer).focus();
-                            
+
                             if($(this).hasClass('selected')) {
                                 $(this).removeClass('selected');
-                                
+
                                 //unstyle previous layer
                                 boo = false;
                             } else {
-                                
+
                                 if($(self.display)
-                                        .find('.selected').length > 0) {       
-                                                                                 
+                                        .find('.layer.selected').length > 0) {
+
                                     //toggle layer highlight
                                     self.bus.fireEvent(
                                         new mol.bus.Event(
@@ -1231,30 +1324,30 @@ mol.modules.map.layers = function(mol) {
                                                 layer: self.display
                                                          .getLayerById(
                                                            $(self.display)
-                                                             .find('.selected')
+                                                             .find('.layer.selected')
                                                                .parent()
                                                                  .attr('id')),
                                                 visible: false,
                                                 selected: false
                                             }}
                                         )
-                                    );                        
+                                    );
                                 }
-                                
-                                $(self.display).find('.selected')
+
+                                $(self.display).find('.layer.selected')
                                     .removeClass('selected');
-                                    
+
                                 $(this).addClass('selected');
-                                
+
                                 //style selected layer
                                 boo = true;
                                 isSelected = true;
                             }
-                            
+
                             if(self.clickDisabled) {
                                 isSelected = false;
                             }
-                            
+
                             //toggle layer highlight
                             self.bus.fireEvent(
                                 new mol.bus.Event(
@@ -1266,7 +1359,7 @@ mol.modules.map.layers = function(mol) {
                                     }}
                                 )
                             );
-                            
+
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
@@ -1331,10 +1424,10 @@ mol.modules.map.layers = function(mol) {
                     return layer.id;
                 },
                 this);
-                
+
             this.bus.fireEvent(
                 new mol.bus.Event(
-                    'reorder-layers', 
+                    'reorder-layers',
                     {layers:layerIds}
                 )
             );
@@ -1344,14 +1437,14 @@ mol.modules.map.layers = function(mol) {
                 //select it
                 this.display.list.find('.layer')
                     [this.display.list.find('.layer').length-1].click();
-            } 
-            
+            }
+
             //done making widgets, toggle on if we have layers.
             if(layerIds.length>0) {
                 this.layersToggle({visible:true});
             }
         },
-            
+
         /**
         * Add sorting capability to LayerListDisplay, when a result is
         * drag-n-drop, and the order of the result list is changed,
@@ -1359,13 +1452,13 @@ mol.modules.map.layers = function(mol) {
         **/
 
         initSortable: function() {
-            var self = this, 
+            var self = this,
                 display = this.display;
 
             display.list.sortable({
                 update : function(event, ui) {
-                    var layers = [], 
-                        params = {}, 
+                    var layers = [],
+                        params = {},
                         e = null;
 
                     $(display.list)
@@ -1388,7 +1481,7 @@ mol.modules.map.layers = function(mol) {
                 '<div class="layerContainer">' +
                 '  <div class="layer">' +
                 '    <button title="Click to edit layer style." ' +
-                            'class="styler">' + 
+                            'class="styler">' +
                 '      <div class="legend-point"></div> ' +
                 '      <div class="legend-polygon"></div> ' +
                 '      <div class="legend-seasonal">' +
@@ -1409,8 +1502,8 @@ mol.modules.map.layers = function(mol) {
                 '      <div title="{2}" class="layerNomial">{2}</div>' +
                 '      <div title="{3}" class="layerEnglishName">{3}</div>'+
                 '    </div>' +
-                '    <button title="Remove layer." class="close">' + 
-                       'x' + 
+                '    <button title="Remove layer." class="close">' +
+                       'x' +
                 '    </button>' +
                 '    <button title="Zoom to layer extent." class="zoom">' +
                        'z' +
@@ -1418,7 +1511,7 @@ mol.modules.map.layers = function(mol) {
                 '    <label class="buttonContainer">' +
                 '       <input class="toggle" type="checkbox">' +
                 '       <span title="Toggle layer visibility." ' +
-                        'class="customCheck"></span>' + 
+                        'class="customCheck"></span>' +
                 '    </label>' +
                 '   </div>' +
                 '   <div class="break"></div>' +
@@ -1432,12 +1525,12 @@ mol.modules.map.layers = function(mol) {
                     layer.name,
                     layer.names,
                     (layer.feature_count != null) ?
-                        '{0} features'.format(layer.feature_count) : '',
+                        '{0}'.format(layer.feature_count) : '',
                     layer.source_title,
                     layer.type_title
                 )
             );
-            
+
             this.attr('id', layer.id);
             this.toggle = $(this).find('.toggle').button();
             this.styler = $(this).find('.styler');
@@ -1451,30 +1544,30 @@ mol.modules.map.layers = function(mol) {
             this.source = $(this).find('.source');
             this.layer = $(this).find('.layer');
             this.layerObj = layer;
-            
+
             //legend items
             this.pointLegend = $(this).find('.legend-point');
             this.polygonLegend = $(this).find('.legend-polygon');
             this.seasonalLegend = $(this).find('.legend-seasonal');
             this.s4 = $(this).find('.s4');
-            
+
             if(layer.style_table == "points_style") {
                 this.polygonLegend.hide();
                 this.seasonalLegend.hide();
             } else {
                 this.pointLegend.hide();
-                
-                //TODO issue #175 replace iucn ref    
+
+                //TODO issue #175 replace iucn ref
                 if(layer.type == "range") {
                     if(layer.source == "jetz" || layer.source == "iucn") {
                        this.polygonLegend.hide();
-                       
+
                        if(layer.source == 'jetz') {
                             this.s4.hide();
-                       }    
+                       }
                     } else {
                         this.seasonalLegend.hide();
-                    }          
+                    }
                 } else {
                     this.seasonalLegend.hide();
                 }
@@ -1489,6 +1582,13 @@ mol.modules.map.layers = function(mol) {
                     '<div class="layers widgetTheme">' +
                         '<div class="layersHeader">' +
                             '<button class="layersToggle button">▲</button>' +
+                            '<button id="layerClickButton" ' +
+                                     'class="toggleBtn selected" ' +
+                                     'title="Click to activate map layer' +
+                                         ' querying.">' +
+                                     'ON' +
+                            '</button>' +
+                            '<span class="title">Identify Layers</span>' +
                             'Layers' +
                         '</div>' +
                         '<div class="layersContainer">' +
@@ -1526,6 +1626,7 @@ mol.modules.map.layers = function(mol) {
             this.layersWrapper = $(this).find(".layers");
             this.layersContainer = $(this).find(".layersContainer");
             this.layersHeader = $(this).find(".layersHeader");
+            this.layerClickButton = $(this).find('#layerClickButton');
             this.expanded = true;
         },
 
@@ -1534,7 +1635,7 @@ mol.modules.map.layers = function(mol) {
         },
 
         getLayerById: function(id) {
-            return _.find(this.layers, function(layer){ 
+            return _.find(this.layers, function(layer){
                             return layer.id === id; });
         },
 
@@ -2403,7 +2504,7 @@ mol.modules.map.results = function(mol) {
                         layer.type, 
                         layer.names, 
                         (layer.feature_count != null) ? 
-                            '{0} features'.format(layer.feature_count) : '', 
+                            '{0}'.format(layer.feature_count) : '', 
                         layer.type_title, 
                         layer.source_title
                     )
@@ -2493,13 +2594,13 @@ mol.modules.map.search = function(mol) {
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+                "SELECT n,v FROM ac_mar_8_2013 WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
-                    "CASE d.style_table WHEN 'points_style' " +
-                        'THEN t.carto_css_point ' +
-                        "WHEN 'polygons_style' " +
+                    "CASE d.style_table WHEN 'points_style' " + 
+                        'THEN t.carto_css_point ' + 
+                        "WHEN 'polygons_style' " + 
                         'THEN t.carto_css_poly END as css,' +
                     't.sort_order as type_sort_order, ' +
                     't.title as type_title, '+
@@ -2507,25 +2608,35 @@ mol.modules.map.search = function(mol) {
                     'CONCAT(l.provider,\'\') as source, '+
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
-                    's.title as source_type_title, ' +
-                    'l.feature_count as feature_count, '+
+                    's.title as source_type_title, ' +   
+                    "CASE WHEN d.type = 'taxogeooccchecklist' " +
+                        'THEN ' +
+                            "CONCAT("+
+                                "to_char(l.occ_count,'999,999,999'),"+
+                                "' records<br>'," +
+                                "to_char(l.feature_count, '999,999,999'),"+
+                                "' locations'"+
+			    ") " +
+                        'ELSE ' +
+                            "CONCAT(to_char(l.feature_count,'999,999,999'),' features') "+
+                    'END as feature_count, '+
                     'CONCAT(n.v,\'\') as names, ' +
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
-                            '"lng":\',ST_XMin(l.extent),\', '+
-                            '"lat":\',ST_YMin(l.extent),\' '+
+                            '"lng":\',ST_XMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', '+
+                            '"lat":\',ST_YMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' '+
                         '}, '+
                         '"ne":{' +
-                        '"lng":\',ST_XMax(l.extent),\', ' +
-                        '"lat":\',ST_YMax(l.extent),\' ' +
+                        '"lng":\',ST_XMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', ' +
+                        '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
-                    'd.dataset_title as dataset_title, ' +
+                    'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
-
-                'FROM layer_metadata l ' +
+                    
+                'FROM layer_metadata_mar_8_2013 l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
@@ -2534,7 +2645,7 @@ mol.modules.map.search = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN ac n ON ' +
+                'LEFT JOIN ac_mar_8_2013 n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
                      "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
@@ -2564,7 +2675,7 @@ mol.modules.map.search = function(mol) {
                 item.label = item.label.replace(
                     new RegExp("(?![^&;]+;)(?!<[^<>]*)(" +
                        $.ui.autocomplete.escapeRegex(this.term) +
-                       ")(?![^<>]*>)(?![^&;]+;)", "gi"),
+                       ")(?![^<>]*>)(?![^&;]+;)", "gi"), 
                     "<strong>$1</strong>"
                 );
                 return $("<li></li>")
@@ -2581,10 +2692,10 @@ mol.modules.map.search = function(mol) {
             var self = this;
             $(this.display.searchBox).autocomplete(
                 {
-                    minLength: 3,
+                    minLength: 3, 
                     source: function(request, response) {
                         $.getJSON(
-                            mol.services.cartodb.sqlApi.json_url.format(
+                            'http://mol.cartodb.com/api/v1/sql?q={0}'.format(
                                     self.ac_sql.format(
                                         $.trim(request.term)
                                             .replace(/ /g, ' ')
@@ -2598,8 +2709,8 @@ mol.modules.map.search = function(mol) {
                                         var sci, eng;
                                         if(row.n != undefined){
                                             sci = row.n;
-                                            eng = (row.v == null ||
-                                                row.v == '') ?
+                                            eng = (row.v == null || 
+                                                row.v == '') ? 
                                                     '' :
                                                     ', {0}'.format(
                                                         row.v.replace(
@@ -2608,7 +2719,7 @@ mol.modules.map.search = function(mol) {
                                                     );
                                             names.push({
                                                 label:self.ac_label_html
-                                                    .format(sci, eng),
+                                                    .format(sci, eng), 
                                                 value:sci
                                             });
                                             scinames.push(sci);
@@ -2621,11 +2732,12 @@ mol.modules.map.search = function(mol) {
                                 response(names);
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
-                                        'hide-loading-indicator',
+                                        'hide-loading-indicator', 
                                         {source : "autocomplete"}
                                     )
                                 );
-                             }
+                             },
+                             'json'
                         );
                     },
                     select: function(event, ui) {
@@ -2641,7 +2753,7 @@ mol.modules.map.search = function(mol) {
                         self.names=[];
                         self.bus.fireEvent(
                             new mol.bus.Event(
-                                'show-loading-indicator',
+                                'show-loading-indicator', 
                                 {source : "autocomplete"}
                             )
                         );
@@ -2650,7 +2762,7 @@ mol.modules.map.search = function(mol) {
                         self.searching[$(this).val()] = false;
                         self.bus.fireEvent(
                              new mol.bus.Event(
-                                'hide-loading-indicator',
+                                'hide-loading-indicator', 
                                 {source : "autocomplete"}
                             )
                         );
@@ -2734,18 +2846,18 @@ mol.modules.map.search = function(mol) {
                     var params = {
                         visible: false
                     }, that = this;
-
+                    
                     if(self.display.searchDisplay.is(':visible')) {
                         self.display.searchDisplay.hide();
                         $(this).text('▶');
                         params.visible = false;
                     } else {
-
+                        
                         self.display.searchDisplay.show();
                         $(this).text('◀');
                         params.visible = true;
                     }
-
+                    
                     self.bus.fireEvent(
                         new mol.bus.Event('results-display-toggle', params));
                 }
@@ -2760,7 +2872,7 @@ mol.modules.map.search = function(mol) {
                         $(this).autocomplete("close");
                         self.bus.fireEvent(
                             new mol.bus.Event(
-                                'hide-loading-indicator',
+                                'hide-loading-indicator', 
                                 {source : "autocomplete"}
                             )
                         );
@@ -2787,18 +2899,18 @@ mol.modules.map.search = function(mol) {
 
         /**
          * Searches CartoDB using a term from the search box. Fires
-         * a search event on the bus. The success callback fires a
+         * a search event on the bus. The success callback fires a 
          * search-results event on the bus.
          *
          * @param term the search term (scientific name)
          */
         search: function(term) {
             var self = this;
-
-
+                
+                
                 $(self.display.searchBox).autocomplete('disable');
                 $(self.display.searchBox).autocomplete('close');
-
+                
                 if(term.length<3) {
                     if ($.trim(term).length==0) {
                         self.bus.fireEvent(new mol.bus.Event('clear-results'));
@@ -2811,27 +2923,29 @@ mol.modules.map.search = function(mol) {
                 } else {
                     self.bus.fireEvent(
                         new mol.bus.Event(
-                            'show-loading-indicator',
+                            'show-loading-indicator', 
                             {source : "search-{0}".format(term)}
                         )
                     );
                     $(self.display.searchBox).val(term);
-                    term = $.trim(term).replace(/ /g, ' ');
                     $.getJSON(
-                        mol.services.cartodb.sqlApi.json_url.format(
-                            this.search_sql.format(term)
+                        'http://mol.cartodb.com/api/v1/sql?q={0}'.format(
+                            this.search_sql.format(
+                                $.trim(term)
+                                .replace(/ /g, ' ')
+                            )
                         ),
                         function (response) {
                             var results = {term:term, response:response};
                             self.bus.fireEvent(
                                 new mol.bus.Event(
-                                    'hide-loading-indicator',
+                                    'hide-loading-indicator', 
                                     {source : "search-{0}".format(term)}
                                 )
                             );
                             self.bus.fireEvent(
                                 new mol.bus.Event(
-                                    'search-results',
+                                    'search-results', 
                                     results
                                 )
                             );
@@ -2846,7 +2960,7 @@ mol.modules.map.search = function(mol) {
     mol.map.search.SearchDisplay = mol.mvp.View.extend({
         init: function() {
             var html = '' +
-                '<div class="mol-LayerControl-Search widgetTheme">' +
+                '<div class="mol-LayerControl-Search widgetTheme" style="display: inline-block">' +
                 '    <div class="title">Search</div>' +
                 '    <div class="searchDisplay">' +
                 '       <input class="value ui-autocomplete-input" type="text" ' +
@@ -2867,7 +2981,8 @@ mol.modules.map.search = function(mol) {
             this.searchBox.html('');
         }
     });
-};/**
+};
+/**
  * This module handles add-layers events and layer-toggle events. tI basically
  * proxies the CartoDB JavaScript API for adding and removing CartoDB layers
  * to and from the map.
@@ -2895,11 +3010,15 @@ mol.modules.map.tiles = function(mol) {
         addEventHandlers: function() {
             var self = this;
             this.bus.addHandler(
-                'layer-click-toggle',
+                'layer-click-action',
                 function(event) {
-                    if(event.disable) {
-                        self.clickAction = 'list';
+                    self.clickAction = event.action;
+                    if (self.clickAction == 'info'){
+                        self.updateGrid(true);
+                    } else {
+                        self.updateGrid(false);
                     }
+
                 }
             );
             /**
@@ -2919,18 +3038,18 @@ mol.modules.map.tiles = function(mol) {
                         if (showing) {
                             self.map.overlayMapTypes.forEach(
                                 function(mt, index) {
-                                    if (mt != undefined && 
+                                    if (mt != undefined &&
                                         mt.name == layer.id) {
                                         params = {
                                             layer: layer,
                                             opacity: 1,
                                             style_opacity: layer.style_opacity
                                         };
-                                        
+
                                         layer.opacity = 1;
 
                                         e = new mol.bus.Event(
-                                            'layer-opacity', 
+                                            'layer-opacity',
                                             params);
                                         self.bus.fireEvent(e);
                                         return;
@@ -2941,18 +3060,18 @@ mol.modules.map.tiles = function(mol) {
                         } else { // Remove layer from map.
                             self.map.overlayMapTypes.forEach(
                                 function(mt, index) {
-                                    if (mt != undefined && 
+                                    if (mt != undefined &&
                                         mt.name == layer.id) {
                                         params = {
                                             layer: layer,
                                             opacity: 0,
                                             style_opacity: layer.style_opacity
                                         };
-                                        
+
                                         layer.opacity = 0;
-                                        
+
                                         e = new mol.bus.Event(
-                                            'layer-opacity', 
+                                            'layer-opacity',
                                             params
                                         );
                                         self.bus.fireEvent(e);
@@ -2973,7 +3092,7 @@ mol.modules.map.tiles = function(mol) {
                         var layer = event.layer,
                             opacity = event.opacity,
                             style_opacity = event.style_opacity;
-                            
+
                         if (opacity === undefined) {
                             return;
                         }
@@ -2991,7 +3110,7 @@ mol.modules.map.tiles = function(mol) {
                         );
                     }
                 );
-                
+
                 /**
                  * Handler for applying cartocss style to a layer.
                  */
@@ -2999,12 +3118,20 @@ mol.modules.map.tiles = function(mol) {
                     'apply-layer-style',
                     function(event) {
                         var layer = event.layer,
+                            gridmt;
                             style = event.style;
                             sel = event.isSelected;
- 
+
+                        self.bus.fireEvent(new mol.bus.Event('clear-map'));
+
                         self.map.overlayMapTypes.forEach(
                             function(maptype, index) {
                                 //find the overlaymaptype to style
+                                if(maptype.name == 'grid') {
+                                    gridmt = maptype;
+                                    self.map.overlayMapTypes.removeAt(index);
+                                }
+
                                 if (maptype.name === layer.id) {
                                     //remove it from the map
                                     self.map.overlayMapTypes.removeAt(index);
@@ -3020,18 +3147,18 @@ mol.modules.map.tiles = function(mol) {
                                                 params = {
                                                     layer: layer,
                                                     opacity: layer.opacity,
-                                                    style_opacity: 
+                                                    style_opacity:
                                                         layer.style_opacity
                                                 };
-                                                
+
                                             if(newmaptype.name === layer.id) {
                                                 mt = self.map.overlayMapTypes
                                                         .removeAt(newindex);
                                                 self.map.overlayMapTypes
                                                         .insertAt(index, mt);
-                                                
+
                                                 e = new mol.bus.Event(
-                                                    'layer-opacity', 
+                                                    'layer-opacity',
                                                     params
                                                 );
                                                 self.bus.fireEvent(e);
@@ -3042,9 +3169,12 @@ mol.modules.map.tiles = function(mol) {
                                 }
                             }
                         );
-                        
-                        
-                        
+                        if(self.clickAction == 'info') {
+                            self.updateGrid(true);
+                        }
+
+
+
                     }
                 );
 
@@ -3076,7 +3206,7 @@ mol.modules.map.tiles = function(mol) {
                             function(layer) { // "lid" is short for layer id.
                                 var lid = layer.id;
                                 mapTypes.forEach(
-                                    function(mt, index) { 
+                                    function(mt, index) {
                                         if (mt != undefined && mt.name === lid) {
                                             mapTypes.removeAt(index);
                                         }
@@ -3084,11 +3214,16 @@ mol.modules.map.tiles = function(mol) {
                                 );
                             }
                         );
+                        if(self.clickAction == 'info') {
+                            self.updateGrid(true);
+                        } else {
+                            self.updateGrid(false);
+                        }
                     }
                 );
                 /**
-                 * Handler for when the reorder-layers event is fired. This 
-                 * renders the layers according to the list of layers 
+                 * Handler for when the reorder-layers event is fired. This
+                 * renders the layers according to the list of layers
                  * provided
                  */
                 this.bus.addHandler(
@@ -3101,8 +3236,8 @@ mol.modules.map.tiles = function(mol) {
                                layers,
                                function(lid) { // "lid" is short for layerId.
                                     mapTypes.forEach(
-                                         function(mt, index) { 
-                                              if ((mt != undefined) && 
+                                         function(mt, index) {
+                                              if ((mt != undefined) &&
                                                   (mt.name === lid)) {
                                                   mapTypes.removeAt(index);
                                                   mapTypes.insertAt(0, mt);
@@ -3111,6 +3246,16 @@ mol.modules.map.tiles = function(mol) {
                                     );
                                }
                           );
+                     }
+                );
+                this.bus.addHandler(
+                     'update-grid',
+                     function(event) {
+                         if(event.toggle == true) {
+                             self.updateGrid(true);
+                         } else {
+                             self.updateGrid(false);
+                         }
                      }
                 );
         },
@@ -3132,9 +3277,33 @@ mol.modules.map.tiles = function(mol) {
                 },
                 self
             );
+            if(this.clickAction == 'info') {
+                this.updateGrid(true);
+            } else {
+                this.updateGrid(false);
+            }
+        },
+        updateGrid: function(toggle) {
+             var gridmt,
+                self = this;
+
+             this.map.overlayMapTypes.forEach(
+                 function (mt, i) {
+                     if(mt) {
+                         if(mt.name=='grid') {
+                            self.map.overlayMapTypes.removeAt(i);
+                         }
+                     }
+                  }
+             );
+
+             if(toggle==true && this.map.overlayMapTypes.length>0) {
+                gridmt = new mol.map.tiles.GridTile(this.map);
+                this.map.overlayMapTypes.push(gridmt.layer);
+             }
         },
         /**
-         * Returns an array of layer objects that are not already on the 
+         * Returns an array of layer objects that are not already on the
          * map.
          *
          * @param layers an array of layer object {id, name, type, source}.
@@ -3169,10 +3338,11 @@ mol.modules.map.tiles = function(mol) {
          */
         getTile: function(layer) {
             var self = this,
-            maptype = new mol.map.tiles.CartoDbTile(
-                        layer, 
-                        this.map
-                    );
+                maptype = new mol.map.tiles.CartoDbTile(
+                            layer,
+                            this.map
+                        ),
+                gridmt;
             maptype.onbeforeload = function (){
                 self.bus.fireEvent(
                     new mol.bus.Event(
@@ -3181,7 +3351,7 @@ mol.modules.map.tiles = function(mol) {
                     )
                 )
             };
-            
+
             maptype.onafterload = function (){
                 self.bus.fireEvent(
                     new mol.bus.Event(
@@ -3190,30 +3360,51 @@ mol.modules.map.tiles = function(mol) {
                     )
                 )
             };
+
+            this.map.overlayMapTypes.forEach(
+                function(mt, i) {
+                    if(mt.name == 'grid') {
+                        self.map.overlayMapTypes.removeAt(i);
+                    }
+                }
+            );
+
             this.map.overlayMapTypes.insertAt(0,maptype.layer);
+
+            if(this.clickAction == 'info') {
+                this.updateGrid(true);
+            } else {
+                this.updateGrid(false);
+            }
+
         }
     });
 
     mol.map.tiles.CartoDbTile = Class.extend({
         init: function(layer, map) {
             var sql =  "" + //c is in case cache key starts with a number
-                "SELECT c{4}.* FROM get_tile('{0}','{1}','{2}','{3}') c{4}"
+                "SELECT * FROM get_tile('{0}','{1}','{2}','{3}')"
                 .format(
-                    layer.source, 
-                    layer.type, 
-                    layer.name, 
+                    layer.source,
+                    layer.type,
+                    layer.name,
                     layer.dataset_id,
                     mol.services.cartodb.tileApi.tile_cache_key
                 ),
                 urlPattern = '' +
-                    'http://{HOST}/tiles/{STYLE_TABLE}/{Z}/{X}/{Y}.png?'+ 
+                    'http://{HOST}/tiles/{DATASET_ID}/{Z}/{X}/{Y}.png?'+
                     'sql={SQL}'+
-                    '&style={TILE_STYLE}',
+                    '&style={TILE_STYLE}' +
+                    '&cache_key={CACHE_KEY}',
                 style_table_name = layer.style_table,
                 pendingurls = [],
                 options,
                 self = this;
-            
+
+            if(layer == null || layer == undefined) {
+                return;
+            }
+
             if(layer.tile_style == undefined) {
                 layer.tile_style = "#{0}{1}"
                     .format(layer.dataset_id,layer.css);
@@ -3225,7 +3416,7 @@ mol.modules.map.tiles = function(mol) {
             }
 
             options = {
-                // Makes a cartoDb Tile URL and keeps track of it for 
+                // Makes a cartoDb Tile URL and keeps track of it for
                 // layer load/unload events
                 getTileUrl: function(tile, zoom) {
                     var y = tile.y,
@@ -3243,13 +3434,16 @@ mol.modules.map.tiles = function(mol) {
                     }
                     url = urlPattern
                         .replace("{HOST}",mol.services.cartodb.tileApi.host)
-                        .replace("{STYLE_TABLE}",layer.style_table)
+                        .replace("{DATASET_ID}",layer.dataset_id)
                         .replace("{SQL}",sql)
                         .replace("{X}",x)
                         .replace("{Y}",y)
                         .replace("{Z}",zoom)
-                        .replace("{TILE_STYLE}",layer.tile_style);
-                    
+                        .replace("{TILE_STYLE}",
+                             encodeURIComponent(layer.tile_style))
+                        .replace("{CACHE_KEY}",
+                            mol.services.cartodb.tileApi.tile_cache_key);
+
                     pendingurls.push(url);
                     return(url);
                 },
@@ -3258,20 +3452,20 @@ mol.modules.map.tiles = function(mol) {
                 minZoom: 0,
                 opacity: layer.orig_opacity
             };
-            
+
             this.layer = new google.maps.ImageMapType(options);
             this.layer.layer = layer;
             this.layer.name = layer.id;
-            
+
             //Wrap the stock getTile to add in before/after load events.
             this.baseGetTile = this.layer.getTile;
             this.layer.getTile = function(tileCoord, zoom, ownerDocument) {
                 var node = self.baseGetTile(tileCoord, zoom, ownerDocument);
-                
+
                 $("img", node).one("load", function() {
                    var index = $.inArray(this.__src__, pendingurls);
                     pendingurls.splice(index, 1);
-                    if (pendingurls.length === 0 && 
+                    if (pendingurls.length === 0 &&
                         self.onafterload != undefined) {
                             self.onafterload();
                     }
@@ -3282,11 +3476,143 @@ mol.modules.map.tiles = function(mol) {
                         self.onafterload();
                     }
                 });
+
                 return node;
             };
         }
     });
-};mol.modules.map.dashboard = function(mol) {
+
+    mol.map.tiles.GridTile = Class.extend({
+        init: function(map) {
+            var options = {
+                    // Just a blank image
+                    getTileUrl: function(tile, zoom) {
+                        var y = tile.y,
+                            x = tile.x,
+                            tileRange = 1 << zoom,
+                            url;
+                        if (y < 0 || y >= tileRange) {
+                            return null;
+                        }
+                        if (x < 0 || x >= tileRange) {
+                            x = (x % tileRange + tileRange) % tileRange;
+                        }
+
+
+                        return ('/static/blank_tile.png?z={0}&x={1}&y={2}&'
+                            .format(
+                                 zoom, x, y
+                            ));
+                    },
+                    tileSize: new google.maps.Size(256, 256),
+                    maxZoom: 9,
+                    minZoom: 0,
+                    opacity: 0
+            },
+                sql =  "" + //wrap unioned tile requests
+                    "SELECT g.*, 1 as cartodb_id " +
+                    "FROM ({0}) g",
+                layersql = '' +
+                    "SELECT " +
+                        "the_geom_webmercator as the_geom_webmercator, " +
+                        "seasonality, '{1}' as  type, " +
+                        "'{0}' as provider, " +
+                        "'{3}' as dataset_id, " +
+                        "'{2}' as scientificname " +
+                    "FROM " +
+                        "get_tile('{0}','{1}','{2}','{3}')",
+                gridUrlPattern = '' +
+                    'http://{0}/' +
+                    'tiles/generic_style/{z}/{x}/{y}.grid.json?'+
+                    'interactivity=cartodb_id&sql={1}',
+                gridUrl = gridUrlPattern.format(
+                    mol.services.cartodb.tileApi.host,
+                    sql.format(
+                        $.map(
+                            map.overlayMapTypes.getArray(),
+                            function(mt) {
+                                if(mt.name != 'grid' && mt.name != undefined) {
+                                    return layersql.format(
+                                        mt.layer.source,
+                                        mt.layer.type,
+                                        unescape(mt.layer.name.replace(/percent/g,'%')),
+                                        mt.layer.dataset_id
+                                    );
+                                }
+                            }
+                        ).join(' UNION ')
+                    )
+                ),
+                self = this;
+
+            this.layer = new google.maps.ImageMapType(options);
+            this.layer.name = 'grid';
+            this.layer.layer = {};
+            this.layer.layer.name = 'grid';
+            //Wrap the stock getTile to add grid events.
+            this.baseGetTile = this.layer.getTile;
+            this.layer.getTile = function(tileCoord, zoom, ownerDocument) {
+                var node = self.baseGetTile(tileCoord, zoom, ownerDocument),
+                    y = tileCoord.y,
+                    x = tileCoord.x,
+                    tileRange = 1 << zoom,
+                    url;
+
+                    if (y < 0 || y >= tileRange) {
+                        return null;
+                    }
+                    if (x < 0 || x >= tileRange) {
+                        x = (x % tileRange + tileRange) % tileRange;
+                    }
+
+                    url = gridUrl
+                        .replace('{x}',x)
+                        .replace('{y}',y)
+                        .replace('{z}',zoom);
+
+
+                $.getJSON(
+                    url,
+                    function(result) {
+                        result.url = url;
+                        if(!result.error) {
+                            $('img',node).data('grid',result);
+                        }
+                    }
+                ).error(
+                    function(result) {
+                        //oh well
+                });
+
+                $("img", node).mousemove(
+                    function(event) {
+                        var x = Math.round(event.offsetX*(64/256)),
+                            y = Math.round(event.offsetY*(64/256)),
+                            grid = $(this).data('grid');
+
+                        if(grid) {
+                            if(grid.grid[y]!=undefined) {
+                                if(grid.grid[y][x] != undefined) {
+                                    if(grid.grid[y][x] == ' ') {
+                                        map.setOptions({
+                                            draggableCursor: 'auto'
+                                        });
+                                    } else {
+                                        map.setOptions({
+                                            draggableCursor: 'pointer'
+                                        });
+                                    }
+                                }
+                             }
+                        }
+                    }
+                );
+                return node;
+            }
+        }
+    });
+}
+mol.modules.map.dashboard = function(mol) {
 
     mol.map.dashboard = {};
 
@@ -3297,10 +3623,10 @@ mol.modules.map.tiles = function(mol) {
                 this.bus = bus;
                 this.summary_sql = '' +
                     'SELECT DISTINCT * ' +
-                    'FROM get_dashboard_summary()';
+                    'FROM get_dashboard_summary_beta()';
                 this.dashboard_sql = '' +
                     'SELECT DISTINCT * ' +
-                    'FROM dash_cache ' +
+                    'FROM dashboard_metadata_mar_8_2013 ' +
                     'ORDER BY dataset_title asc';
                 this.summary = null;
                 this.types = {};
@@ -3395,7 +3721,7 @@ mol.modules.map.tiles = function(mol) {
                 var self = this;
 
                 $.getJSON(
-                    mol.services.cartodb.sqlApi.jsonp_url.format(this.dashboard_sql),
+                    mol.services.cartodb.sqlApi.json_url.format(this.dashboard_sql),
                     function(response) {
                         self.display = new mol.map.dashboard.DashboardDisplay(
                             response.rows, self.summary
@@ -3431,7 +3757,7 @@ mol.modules.map.tiles = function(mol) {
                 );
 
                 $.getJSON(
-                    mol.services.cartodb.sqlApi.jsonp_url.format(this.summary_sql),
+                    'http://mol.cartodb.com/api/v1/sql?q={0}'.format(this.summary_sql),
                     function(response) {
                         self.summary = response.rows[0];
                         if(self.display) {
@@ -3510,7 +3836,13 @@ mol.modules.map.tiles = function(mol) {
                     sortList: [[0,0]],
                     widthFixed: true,
                     theme: "blue",
-                    widgets: ["filter","zebra"]
+                    widgets: ["filter","zebra","scroller"],
+                    widgetOptions : {
+                      scroller_height : 500,
+                      scroller_barWidth : 17,
+                      scroller_jumpToHeader: true,
+                      scroller_idPrefix : 's_'
+                    }
                 });
                 this.datasets = $(this).find('.dataset');
 
@@ -3619,10 +3951,11 @@ mol.modules.map.tiles = function(mol) {
 
 
 
-};mol.modules.map.feature = function(mol) {
-    
+};
+mol.modules.map.feature = function(mol) {
+
     mol.map.feature = {};
-    
+
     mol.map.feature.FeatureEngine = mol.mvp.Engine.extend({
         init : function(proxy, bus, map) {
             this.proxy = proxy;
@@ -3631,175 +3964,170 @@ mol.modules.map.tiles = function(mol) {
             //TODO add
             this.url = 'http://mol.cartodb.com/api/v2/sql?callback=?&q={0}';
             //TODO add
-            this.sql = "SELECT * FROM " + 
-                       "get_map_feature_metadata({0},{1},{2},{3},'{4}')";
+            this.sql = "SELECT * FROM " +
+                       "get_map_feature_metadata_test({0},{1},{2},{3},'{4}')";
             
             this.clickDisabled = false;
             this.makingRequest = false;
             this.mapMarker;
             this.activeLayers = [];
+
+            this.lastRequestTime;
+            google.maps.event.clearListeners(this.map,'click');
+                this.map.setOptions({
+                draggableCursor: 'auto'
+            });
+            google.maps.event.addListener(
+                this.map,
+                "click",
+                this.featureclick.bind(this)
+            );
         },
 
         start : function() {
             this.addEventHandlers();
         },
-        
+
         addEventHandlers : function () {
             var self = this;
-            
-            this.bus.addHandler(
-                'layer-click-toggle',
-                function(event) {
-                    self.clickDisabled = event.disable;
-                }
-            );
-            
+
             this.bus.addHandler(
                 'add-layers',
                 function(event) {
-                    var newLays = _.map(event.layers, 
-                                        function(l) { 
+                    var newLays = _.map(event.layers,
+                                        function(l) {
                                           var o = {id:l.id, op:l.opacity};
-                                          
+
                                           return o });
-                    
+
                     self.activeLayers = _.compact(
                                             _.union(
-                                                newLays, 
-                                                self.activeLayers));                              
+                                                newLays,
+                                                self.activeLayers));
                 }
             );
-            
+
             this.bus.addHandler(
                 'remove-layers',
                 function(event) {
-                    var oldLays = _.map(event.layers, 
-                                        function(l) { 
+                    var oldLays = _.map(event.layers,
+                                        function(l) {
                                             var o = {id:l.id, op:l.opacity};
                                             return o;
-                                        });                       
-                                                
+                                        });
+
                     _.each(oldLays, function(e) {
                         self.activeLayers = _.reject(
-                                                self.activeLayers, 
+                                                self.activeLayers,
                                                 function(ol) {
                                                     return ol.id == e.id;
                                                 });
-                    });                                                                      
+                    });
                 }
             );
-            
+
             this.bus.addHandler(
                 'layer-toggle',
                 function(event) {
                     _.each(self.activeLayers, function(al) {
                         if(al.id == event.layer.id) {
                             al.op = event.showing ? 1 : 0;
-                        }  
-                    });             
+                        }
+                    });
                 }
             );
-                
-            //may want to wait to add this until ready
-            google.maps.event.addListener(
-                self.map,
-                "click",
-                function (mouseevent) {
-                    var tolerance = 2,
-                        sqlLayers,
-                        sql,
-                        sym;
-                        
-                    if(!self.clickDisabled && self.activeLayers.length > 0) {
-                        if(self.makingRequest) {
-                            alert('Please wait for your feature metadata ' + 
-                              'request to complete before starting another.');
-                        } else {
-                            self.makingRequest = true;
-                          
-                            if(self.display) {
-                                if(self.display.dialog("isOpen")) {
-                                    self.display.dialog("close");
-                                }
-                            }   
-                            
-                            sqlLayers =  _.pluck(_.reject(
-                                            self.activeLayers, 
-                                            function(al) {
-                                                return al.op == 0;
-                                            }), 'id');         
-                            
-                            sql = self.sql.format(
-                                    mouseevent.latLng.lng(),
-                                    mouseevent.latLng.lat(),
-                                    tolerance,
-                                    self.map.getZoom(),
-                                    sqlLayers.toString()
-                            );
-                            
-                            self.bus.fireEvent(new mol.bus.Event(
-                                'show-loading-indicator',
-                                {source : 'feature'}));
-                                
-                            sym = {
-                                    path: google.maps.SymbolPath.CIRCLE,
-                                    scale: 6,
-                                    strokeColor: 'black',
-                                    strokeWeight: 3,
-                                    fillColor: 'yellow',
-                                    fillOpacity: 1,
-                                  };     
-                            
-                            $.getJSON(
-                                self.url.format(sql),
-                                function(data, textStatus, jqXHR) {
-                                    var results = {
-                                            latlng: mouseevent.latLng,
-                                            response: data
-                                        },
-                                        e;
-                                        
-                                    if(!data.error && data.rows.length != 0) {
-                                        self.mapMarker = new google.maps.Marker(
-                                            {
-                                                map: self.map,
-                                                icon: sym,
-                                                position: mouseevent.latLng,
-                                                clickable: false
-                                            }
-                                        );
-                                        
-                                        self.processResults(data.rows);
-                                                                     
-                                        e = new mol.bus.Event(
-                                                'feature-results', 
-                                                results
-                                            );    
-                                            
-                                        self.bus.fireEvent(e);
-                                    }  
-                                        
-                                    self.makingRequest = false;    
-                                    
-                                    self.bus.fireEvent(
-                                        new mol.bus.Event(
-                                          'hide-loading-indicator',
-                                          {source : 'feature'})); 
-                                }
-                            );
-                        }  
+            this.bus.addHandler(
+                'clear-map',
+                function(event) {
+                    if (self.mapMarker) {
+                        self.mapMarker.remove();
+                    }
+                    self.map.setOptions({scrollwheel:true});
+                }
+            );
+
+            this.bus.addHandler(
+                'layer-click-action',
+                function(event) {
+                    var action = event.action;
+
+                    self.clickDisabled = (action == 'info') ? false: true;
+
+
+
+                    if(self.clickDisabled == false) {
+                        google.maps.event.clearListeners(self.map,'click');
+                        self.map.setOptions({
+                            draggableCursor: 'auto'
+                        });
+                        google.maps.event.addListener(
+                            self.map,
+                            "click",
+                            self.featureclick.bind(self)
+                        );
+
+                        //self.bus.fireEvent(
+                        //    new mol.bus.Event('update-grid',{toggle: true}));
                     }
                 }
             );
-            
-            this.bus.addHandler(
-                'feature-results',
-                function(event) {
-                    self.showFeatures(event);
-                }
-            );
         },
-        
+        featureclick : function (mouseevent) {
+            var tolerance = 4,
+                sqlLayers,
+                sql,
+                sym,
+                self = this;
+
+            if(!this.clickDisabled && this.activeLayers.length > 0) {
+                if(this.display) {
+                    this.display.remove();
+                }
+
+                sqlLayers =  _.pluck(_.reject(
+                                this.activeLayers,
+                                function(al) {
+                                    return al.op == 0;
+                                }), 'id');
+
+                sql = this.sql.format(
+                        mouseevent.latLng.lng(),
+                        mouseevent.latLng.lat(),
+                        tolerance,
+                        this.map.getZoom(),
+                        sqlLayers.toString()
+                );
+
+                this.bus.fireEvent(new mol.bus.Event(
+                    'show-loading-indicator',
+                    {source : 'feature'}));
+
+
+
+                $.getJSON(
+                    this.url.format(sql),
+                    function(data, textStatus, jqXHR) {
+                        var results = {
+                                latlng: mouseevent.latLng,
+                                response: data
+                            },
+                            e;
+
+                        if(!data.error && data.rows.length != 0) {
+                            self.processResults(data.rows);
+                            self.showFeatures(results)
+                        }
+
+                        self.makingRequest = false;
+
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                              'hide-loading-indicator',
+                              {source : 'feature'}));
+                    }
+                );
+            }
+        },
         processResults: function(rows) {
             var self = this,
                 o,
@@ -3814,78 +4142,110 @@ mol.modules.map.tiles = function(mol) {
                 inside;
 
             self.display = new mol.map.FeatureDisplay();
+            self.display.mousemove(
+                function(event) {
+                    self.map.setOptions({scrollwheel:false})
+                }
+            );
+            self.display.mouseout(
+                function(event) {
+                    self.map.setOptions({scrollwheel:true})
+                }
+            );
 
+
+            self.featurect = 0;
             _.each(rows, function(row) {
                 var i,
                     j,
-                    k;
-                    
-                o = JSON.parse(row.layer_features);
-                all = _.values(o)[0];
-                allobj = all[0];
-                                
-                
-                head = _.keys(o)[0].split("--");
-                sp = head[1].replace("_", " ");
-                sp = sp.charAt(0).toUpperCase() + sp.slice(1);
-                
-                content = '' + 
-                        '<h3>' + 
-                        '  <a href="#">' + 
-                             sp +
-                        '    <button ' + 
-                                'class="source" ' + 
-                                'title="Layer Source: ' 
-                                + allobj["Source"] + '">' +
-                        '      <img src="/static/maps/search/' + head[3] + '.png">' +
-                        '    </button>' +
-                        '    <button ' + 
-                                'class="type" ' + 
-                                'title="Layer Type: ' 
-                                + allobj["Type"] + '">' + 
-                        '      <img src="/static/maps/search/' + head[2] + '.png">' +  
-                        '    </button>' + 
-                        '  </a>' + 
+                    k,
+                    layerId,
+                    icon,
+                    contentHtml = '' +
+                        '<h3>' +
+                            '<a class="{5}" href="javascript:">' +
+                                '<table width="100%"><tbody><tr>' +
+                                '<td class="name">{0}</td>' +
+                                '<td class="icons">' +
+                                    '<span class="stylerContainer"></span>' +
+                                    '<button ' +
+                                        'class="type" ' +
+                                        'title="Layer Type: {3}">' +
+                                        '<img src="/static/maps/search/{4}.png">' +
+                                    '</button>' +
+                                    '<button ' +
+                                        'class="source" ' +
+                                        'title="Layer Source: {1}">' +
+                                        '<img src="/static/maps/search/{2}.png">' +
+                                    '</button>' +
+                                '</td></tr></tbody></table>' +
+                            '</a>' +
                         '</h3>';
 
+                o = JSON.parse(row.get_map_feature_metadata_test);
+                all = _.values(o)[0];
+                allobj = all[0];
+                layerId =  _.keys(o)[0];
+                head = layerId.split("--");
+                sp = mol.core.decode(head[1]).replace(/_/g, ' ');
+                sp = sp.charAt(0).toUpperCase() + sp.slice(1);
+
+                content = contentHtml.format(
+                    sp,
+                    allobj["Source"],
+                    head[5],
+                    allobj["Type"],
+                    head[2],
+                    layerId
+                );
+
                 //TODO try a stage content display
-                myLength = (all.length > 100) ? 100 : all.length; 
-                
+                myLength = (all.length > 100) ? 100 : all.length;
+                self.featurect+=(all.length);
+
                 if(myLength == 1) {
-                    entry = '<div>' + all.length + " record found.";
+                    entry = '<div>{0} record found.'.format(all.length);
                 } else {
-                    entry = '<div>' + all.length + " records found.";
-                }
-                
-                if(all.length > 100) {
-                    entry+=' Displaying first 100 records. Please zoom in before querying again to reduce the number of records found.</div>';  
-                } else {
-                    entry+='</div>';
-                }    
-                
-                for(j=0;j<myLength;j++) {
-                    vs = all[j];
-                    inside = ''; 
-                      
-                    for(i=0;i < _.keys(vs).length; i++) {
-                        k = _.keys(vs)[i];
-                        inside+='<div class="itemPair">' + 
-                                '  <div class="featureItem">' + k + ': </div>' + 
-                                '  <div class="featureData">' + vs[k] + '</div>' + 
-                                '</div>';          
-                    }
-                     
-                    if(j!=0) {
-                        entry+="<div>&nbsp</div>";  
-                    }
-                     
-                    entry+=inside;  
+                    entry = '<div>{0} records found.'.format(all.length);
                 }
 
-                content+='<div>' + entry + '</div>';
-                
-                $(self.display).find('#accordion').append(content);
-                
+                if(all.length > 100) {
+                    entry+=' Displaying first 100 records. Please zoom in '+
+                        'before querying again to reduce the number of ' +
+                        'records found.</div>';
+                } else {
+                    entry+='</div>';
+                }
+
+                for(j=0;j<myLength;j++) {
+                    vs = all[j];
+                    inside = '';
+
+                    for(i=0;i < _.keys(vs).length; i++) {
+                        k = _.keys(vs)[i];
+                        if(k!=null && vs[k] != null && k!='' && vs[k] != '') {
+                            inside+='<div class="itemPair">' +
+                                '<b>{0}:&nbsp;</b>{1}</div>'
+                                    .format(k,vs[k]);
+                        }
+                    }
+
+                    if(j!=0) {
+                        entry+="<div>&nbsp</div>";
+                    }
+
+                    entry+=inside;
+                }
+
+                content+='<div>{0}</div>'.format(entry);
+
+                $(self.display).find('.accordion').append(content);
+                icon = $('.layers #{0} .styler'.format(
+                            mol.core.encode(layerId))).clone()
+                $(icon).attr('title','');
+                $(self.display).find(
+                    '.{0} .stylerContainer'.format(mol.core.encode(layerId))
+                ).append(icon);
                 $(self.display).find('.source').click(
                     function(event) {
                           self.bus.fireEvent(
@@ -3901,7 +4261,7 @@ mol.modules.map.tiles = function(mol) {
                           event.cancelBubble = true;
                       }
                 );
-                
+
                 $(self.display).find('.type').click(
                     function(event) {
                           self.bus.fireEvent(
@@ -3919,49 +4279,168 @@ mol.modules.map.tiles = function(mol) {
                 );
             });
         },
-        
+
         showFeatures: function(params) {
             var self = this,
                 latHem = (params.latlng.lat() > 0) ? 'N' : 'S',
-                lngHem = (params.latlng.lng() > 0) ? 'E' : 'W';
+                lngHem = (params.latlng.lng() > 0) ? 'E' : 'W',
+                options = {
+                    autoHeight: false,
+                    collapsible: (params.response.total_rows > 1) ? true: false,
+                    change: function (event, ui) {
+                        self.mapMarker.draw();
+                    },
+                    animated: false
+                },
+                zoom = parseInt(self.map.getZoom()),
+                tolerance = 3,
+                radius = Math.round(
+                    tolerance*40075000/(256*1000*Math.pow(2,zoom))
+                ),
+                infoHtml = '' +
+                    '<span>' +
+                        '{0} feature{1} from {2} layer{3} found within<br>' +
+                        '{4} km of {5}&deg;{6}, {7}&deg;{8}' +
+                    '</span>';
 
-            $(self.display)
-                .find('#accordion')
-                    .accordion({autoHeight: false, 
-                                clearStyle: true});                 
-                 
-            self.display.dialog({
-                autoOpen: true,
-                width: 350,
-                minHeight: 250,
-                dialogClass: 'mol-Map-FeatureDialog',
-                modal: false,
-                title: 'Near ' +
-                       Math.abs(Math.round(
-                           params.latlng.lat()*1000)/1000) +
-                           '&deg;&nbsp;' + latHem + '&nbsp;' +
-                       Math.abs(Math.round(
-                           params.latlng.lng()*1000)/1000) +
-                           '&deg;&nbsp;' + lngHem,
-                beforeClose: function(evt, ui) {
-                    self.mapMarker.setMap(null);
+            if(params.response.total_rows > 1) {
+                options.active = false;
+            }
+
+            info = $(infoHtml.format(
+                        self.featurect,
+                        ((self.featurect>1) ? 's' : ''),
+                        params.response.total_rows,
+                        ((params.response.total_rows>1) ? 's' : ''),
+                        radius,
+                        Math.round(params.latlng.lat()*1000)/1000,
+                        latHem,
+                        Math.round(params.latlng.lng()*1000)/1000,
+                        lngHem
+            ));
+
+            $(self.display).find('.info').append(info);
+            $(self.display).find('.accordion').accordion(options);
+
+            self.display.close.click(
+                function(event) {
+                    event.stopPropagation();
+                    self.mapMarker.remove();
+                    self.map.setOptions({scrollwheel:true});
                 }
-            });            
+            );
+            self.mapMarker = new mol.map.FeatureMarker(
+                params.latlng,
+                self.map,
+                self.display[0]
+            );
         }
     });
-    
+
     mol.map.FeatureDisplay = mol.mvp.View.extend({
-        init : function(names) {
+        init : function(d, lat,NS,lng,EW) {
             var className = 'mol-Map-FeatureDisplay',
                 html = '' +
-                    '<div class="' + className + '">' +
-                        '<div id="accordion" ></div>' +
+                    '<div class="cartodb-popup">' +
+                        '<a class="cartodb-popup-close-button close">x</a>' +
+                        '<div class="mol-Map-FeatureDisplay ">' +
+                            '<div class="contents">' +
+                                '<div class="info"></div>' +
+                                '<div class="accordion"></div>' +
+                            '</div>'+
+                        '</div>' +
+                        '<div class="cartodb-popup-tip-container"></div>' +
                     '</div>';
-                //in-line div height     
-
             this._super(html);
+            this.close = $(this).find('.close');
         }
     });
+
+    //
+    //Classes for a google maps info window overlay.
+    //
+    mol.map.FeatureMarker = function(latlng, map, div) {
+            this.latlng_ = latlng;
+            this.init_ = false;
+            this.div_ = div;
+            this.setMap(map);
+    }
+    mol.map.FeatureMarker.prototype = new google.maps.OverlayView();
+    mol.map.FeatureMarker.prototype.draw = function () {
+        var self = this,
+            div = this.div_,
+            panes,
+            point;
+
+        if (!this.init_) {
+            // Then add the overlay to the DOM
+            panes = this.getPanes();
+            panes.overlayImage.appendChild(div);
+            this.init_ = true;
+            // catch mouse events and stop them propogating to the map
+            google.maps.event.addDomListener(
+                this.div_,
+                'mousedown',
+                this.stopPropagation_
+            );
+            google.maps.event.addDomListener(
+                this.div_,
+                'dblclick',
+                this.stopPropagation_
+            );
+
+            google.maps.event.addDomListener(
+                this.div_,
+                'DOMMouseScroll',
+                this.stopPropagation_
+            );
+            google.maps.event.addDomListener(
+                this.div_,
+                'click',
+                function(e) {
+                    google.maps.event.trigger(self, 'click')
+                    self.stopPropagation_(e);
+            });
+        }
+        // Position the overlay
+        point = this.getProjection().fromLatLngToDivPixel(this.latlng_);
+        if (point && div) {
+
+            try {
+                $(div).css('left',((point.x -28)+'px'));
+                $(div).css('top',(point.y - $(div).height()-5) + 'px');
+                if($(div).offset().top<0) {
+                    this.map.panBy(0,$(div).offset().top-10);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    };
+    mol.map.FeatureMarker.prototype.remove = function() {
+        if (this.div_) {
+          if (this.div_.parentNode) {
+            this.div_.parentNode.removeChild(this.div_);
+          }
+          this.div_ = null;
+
+        }
+    };
+    mol.map.FeatureMarker.prototype.getPosition = function() {
+       return this.latlng_;
+    };
+    mol.map.FeatureMarker.prototype.getDOMElement = function() {
+       return this.div_;
+    };
+    mol.map.FeatureMarker.prototype.stopPropagation_ = function(e) {
+      if(navigator.userAgent.toLowerCase().indexOf('msie') != -1 &&
+        document.all) {
+        window.event.cancelBubble = true;
+        window.event.returnValue = false;
+      } else {
+        e.stopPropagation();
+      }
+    }
 }
 
 mol.modules.map.query = function(mol) {
@@ -3970,6 +4449,7 @@ mol.modules.map.query = function(mol) {
 
     mol.map.query.QueryEngine = mol.mvp.Engine.extend({
         init : function(proxy, bus, map) {
+
             this.proxy = proxy;
             this.bus = bus;
             this.map = map;
@@ -3983,38 +4463,66 @@ mol.modules.map.query = function(mol) {
             this.csv_sql = '' +
                 "SELECT * FROM get_species_list_csv('{0}',{1},{2},{3},'{4}')";
             this.queryct=0;
+            this.overlayView = new google.maps.OverlayView();
+            this.overlayView.draw = function () {};
+
+            try {
+                this.overlayView.setMap(map);
+            } catch(e) {}
+
         },
 
         start : function() {
             this.addQueryDisplay();
             this.addEventHandlers();
-            
-            //disable all map clicks
-            this.toggleMapLayerClicks(false);
         },
-        
-        toggleMapLayerClicks : function(boo) {            
-            //true to disable
+
+        toggleMapClicks : function(toggle) {
+            var action = (toggle==true) ? 'list' : '';
             this.bus.fireEvent(
-                new mol.bus.Event('layer-click-toggle', {disable: boo}));          
+                new mol.bus.Event(
+                    'layer-click-action',
+                    {action: action}
+                )
+            );
         },
-        
+
         /*
          *  Add the species list tool controls to the map.
          */
         addQueryDisplay : function() {
             var params = {
-                display: null,
-                slot: mol.map.ControlDisplay.Slot.TOP,
-                position: google.maps.ControlPosition.TOP_RIGHT
-            };
-            
-            this.bus.fireEvent(new mol.bus.Event('register-list-click'));
+                    display: null,
+                    slot: mol.map.ControlDisplay.Slot.TOP,
+                    position: google.maps.ControlPosition.TOP_RIGHT
+                },
+                self = this;
+
+
             this.enabled=true;
             this.features={};
             this.display = new mol.map.QueryDisplay();
             params.display = this.display;
             this.bus.fireEvent(new mol.bus.Event('add-map-control', params));
+        },
+        registerClick : function () {
+            var self = this;
+
+            this.map.setOptions({draggableCursor: 'pointer'});
+
+            google.maps.event.addListener(
+                this.map,
+                "click",
+                function(event) {
+                    var params = {
+                            gmaps_event : event,
+                            map : self.map
+                        }
+                    self.bus.fireEvent(
+                        new mol.bus.Event('species-list-query-click',params)
+                    );
+                }
+            );
         },
         /*
          *  Method to build and submit an AJAX call that retrieves species
@@ -4026,14 +4534,14 @@ mol.modules.map.query = function(mol) {
                 _class = (dataset_id == "ecoregion_species") ? "Reptilia" : "",
                 sql = this.sql.format(
                     dataset_id,
-                    Math.round(lng*100)/100, 
+                    Math.round(lng*100)/100,
                     Math.round(lat*100)/100,
                     listradius.radius,
                     _class),
                 csv_sql = escape(
                     this.csv_sql.format(
                         dataset_id,
-                        Math.round(lng*100)/100, 
+                        Math.round(lng*100)/100,
                         Math.round(lat*100)/100,
                         listradius.radius,
                         _class)),
@@ -4091,36 +4599,56 @@ mol.modules.map.query = function(mol) {
                     );
                 }
             );
-            
+
             /*
              * Toggle Click Handler for Species List Clicking
              */
             this.display.queryButton.click(
                 function(event) {
                     var params = {};
-                    
+
                     params.visible = self.display.speciesDisplay
                                         .is(':visible') ? false : true;
-                    
+
                     self.bus.fireEvent(
                         new mol.bus.Event('species-list-tool-toggle', params));
                 }
             );
             this.bus.addHandler(
+                'layer-click-action',
+                function(event) {
+                    if(event.action == 'list') {
+                        self.enabled = true;
+                        $(self.display.queryButton).addClass('selected');
+                        $(self.display.queryButton).html("ON");
+                    } else {
+                        self.enabled = false;
+                        $(self.display.queryButton).removeClass('selected');
+                        $(self.display.queryButton).html("OFF");
+                    }
+
+                    if(self.enabled == false) {
+                        self.display.speciesDisplay.hide();
+                    } else {
+                        self.display.speciesDisplay.show();
+                    }
+                }
+            );
+            this.bus.addHandler(
                 'dialog-closed-click',
-                function(event) {                  
+                function(event) {
                     if($.cookie('mol_species_list_query_tip_disabled2') == null) {
                         $(self.display.queryButton).qtip({
                             content: {
                                 text: 'Species list querying is currently ' +
                                       'disabled. Toggle this button to enable' +
-                                      ' querying and left-click the map to' + 
+                                      ' querying and left-click the map to' +
                                       ' generate a list.',
                                 title: {
                                     text: 'Species List Tool',
                                     button: true
-                                }     
-                                
+                                }
+
                             },
                             position: {
                                 my: 'top right',
@@ -4135,50 +4663,56 @@ mol.modules.map.query = function(mol) {
                                 event: 'mouseenter'
                             }
                         });
-                        
+
                         $.cookie(
-                            'mol_species_list_query_tip_disabled2', 
+                            'mol_species_list_query_tip_disabled2',
                             'tip_seen',
                             {expires: 1});
                     }
                 }
             );
-            
+
             /*
              *  Map click handler that starts a list tool request.
              */
             this.bus.addHandler(
                 'species-list-query-click',
                 function (event) {
-                    var listradius,
+                    var listradius, overlayPane,
                         dataset_id = $("option:selected",
                             $(self.display.dataset_id)).data(
-                                $('.selected',$(self.display.types)).val() 
+                                $('.selected',$(self.display.types)).val()
                             ),
                         className =  $("option:selected",
                             $(self.display.dataset_id)).text();
-                    
+
                     if($(self.display).data('qtip')) {
                         $(self.display).qtip('destroy');
                     }
 
-                    if (self.enabled 
-                            && 
+                    if (self.enabled
+                            &&
                             $(self.display.queryButton).hasClass('selected')) {
-                        listradius = new google.maps.Circle(
+                            listradius = new google.maps.Circle(
                             {
-                                map: event.map,
+                                map: self.map,
                                 radius: parseInt(
                                     self.display.radiusInput.val())*1000,
                                     // 50 km
                                 center: event.gmaps_event.latLng,
                                 strokeWeight: 3,
                                 strokeColor: 'darkred',
-                                clickable:false,
+                                clickable: true,
                                 fillOpacity:0,
+                                zIndex:0
 
                             }
                         );
+                        try {
+                            self.overlayPane = self.overlayView.getPanes().overlayLayer;
+                            $(self.overlayPane.firstChild.firstChild).show();
+                        } catch(e) {}
+
                         self.bus.fireEvent(new mol.bus.Event(
                             'show-loading-indicator',
                             {source : 'listradius'}));
@@ -4240,6 +4774,9 @@ mol.modules.map.query = function(mol) {
                             listRowsDone.iucnContent);
                     } else {
                         listradius.setMap(null);
+                        $(self.overlayPane.firstChild.firstChild)
+                            .hide();
+
                         delete(
                             self.features[listradius.center.toString()+
                                           listradius.radius]);
@@ -4253,36 +4790,41 @@ mol.modules.map.query = function(mol) {
 
             this.bus.addHandler(
                 'species-list-tool-toggle',
-                function(event, params) {                                      
+                function(event, params) {
                     if(event.visible == true) {
                         self.enabled = true;
                     } else {
                         self.enabled = false;
                     }
-                    
+
                     if(self.enabled == false) {
                         self.display.speciesDisplay.hide();
                     } else {
                         self.display.speciesDisplay.show();
                     }
-                    
+
                     if (self.listradius) {
                         self.listradius.setMap(null);
+                        $(self.overlayPane.firstChild.firstChild).hide();
+
                     }
-                    
+
                     if (self.enabled == true) {
+                        self.registerClick();
                         _.each(
                             self.features,
                             function(feature) {
-                                feature.listradius.setMap(self.map);
-                                feature.listWindow.setMap(self.map);
+                                //feature.listradius.setMap(self.map);
+                                //feature.listWindow.setMap(self.map);
                             }
                         );
-                        
+
                         $(self.display.queryButton).addClass('selected');
                         $(self.display.queryButton).html("ON");
-                        self.toggleMapLayerClicks(true);
+                        self.toggleMapClicks(true);
                     } else {
+                         self.map.setOptions({draggableCursor: 'auto'});
+
                         _.each(
                             self.features,
                             function(feature) {
@@ -4290,12 +4832,14 @@ mol.modules.map.query = function(mol) {
                                     feature.listWindow.dialog("close");
                                 }
                                 feature.listradius.setMap(null);
+                                $(self.overlayPane.firstChild.firstChild).hide();
+
                             }
                         );
-                        
+
                         $(self.display.queryButton).removeClass('selected');
                         $(self.display.queryButton).html("OFF");
-                        self.toggleMapLayerClicks(false);
+                        self.toggleMapClicks(false);
                     }
                 }
             );
@@ -4516,7 +5060,7 @@ mol.modules.map.query = function(mol) {
                 dlContent = $('' +
                     '<div class="mol-Map-ListQuery">' +
                     '   <div>' +
-                    '       <a href="' + 
+                    '       <a href="' +
                                 this.url.format(sqlurl) + '&format=csv"' +
                     '           class="mol-Map-ListQueryDownload">' +
                     '               download csv</a>' +
@@ -4606,7 +5150,7 @@ mol.modules.map.query = function(mol) {
             $(".mol-Map-ListDialog").parent().bind("resize", function() {
                 $(".mol-Map-ListQueryInfoWindow")
                     .height($(".mol-Map-ListDialog").height()-125);
-                    
+
                 $("#gallery")
                     .height($(".mol-Map-ListDialog").height()-125);
             });
@@ -4652,6 +5196,8 @@ mol.modules.map.query = function(mol) {
                    listTabs.tabs("destroy");
                    $(".mol-Map-ListDialogContent").remove();
                    listradius.setMap(null);
+                   $(self.overlayPane.firstChild.firstChild).hide();
+
                    delete (
                        self.features[listradius.center.toString() +
                                      listradius.radius]);
@@ -5138,14 +5684,13 @@ mol.modules.map.query = function(mol) {
             var className = 'mol-Map-QueryDisplay',
                 html = '' +
                     '<div title=' +
-                    '  "Use this control to select species group and radius.' +
-                    '  Then right click (Mac Users: \'control-click\')' +
-                    '  on focal location on map." class="' + className +
+                    '  "Use this control to select species group and radius."' +
+                    ' class="' + className +
                     '  widgetTheme">' +
                     '  <span class="title">Species Lists</span>' +
-                    '  <button id="speciesListButton" ' + 
+                    '  <button id="speciesListButton" ' +
                              'class="toggleBtn" ' +
-                             'title="Click to activate species' + 
+                             'title="Click to activate species' +
                                  ' list querying.">' +
                              'OFF' +
                     '  </button>' +
@@ -5200,7 +5745,7 @@ mol.modules.map.query = function(mol) {
             this.queryButton=$(this).find('#speciesListButton');
             this.speciesDisplay = $(this).find('.speciesDisplay');
             $(this.speciesDisplay).hide();
-            
+
             $(this.types).find('.ecoregion').toggle(false);
             $(this.types).find('.range').toggle(false);
         }
@@ -5284,11 +5829,21 @@ mol.modules.map.basemap = function(mol) {
                                     "visibility" : "off"
                                 }]
                             }, {
-                                "featureType" : "administrative.locality",
+                                "featureType" : "administrative",
                                 "stylers" : [{
                                     "visibility" : "off"
                                 }]
                             }, {
+                                "featureType" : "administrative.country",
+                                "stylers" : [{
+                                    "visibility" : "on"
+                                }]
+                            }, {
+                                "featureType" : "administrative.province",
+                                "stylers" : [{
+                                    "visibility" : "on"
+                                }]
+                            },{
                                 "featureType" : "road",
                                 "stylers" : [{
                                     "visibility" : "simplified"
@@ -5518,7 +6073,6 @@ mol.modules.map.metadata = function(mol) {
         init: function(proxy, bus) {
             this.proxy = proxy;
             this.bus = bus;
-            this.url = 'http://mol.cartodb.com/api/v2/sql?q={0}&callback=?';
             this.sql = {
                 dashboard: '' +
                     'SELECT Coverage as "Coverage", Taxon as "Taxon", ' +
@@ -6084,38 +6638,40 @@ mol.modules.map.status = function(mol) {
 
 mol.modules.map.styler = function(mol) {
     mol.map.styler = {};
-    
+
     mol.map.styler.StylerEngine = mol.mvp.Engine.extend({
         init: function(proxy, bus) {
             this.proxy = proxy;
             this.bus = bus;
         },
-        
+
         start: function() {
             this.display = new mol.map.styler.StylerDisplay();
             this.addEventHandlers();
         },
-        
+
         addEventHandlers: function() {
             var self = this;
-            
+
             this.bus.addHandler(
                 'show-styler',
                 function(event) {
-                    self.displayLayerStyler(event.params.target, 
-                                            event.params.layer);
+                    self.displayLayerStyler(
+                        event.params.target,
+                        event.params.layer);
+
                 }
             );
-            
+
             this.bus.addHandler(
                 'reset-layer-style',
                 function(event) {
                     var o = self.parseLayerStyle(event.params.layer, "orig");
-                            
+
                     //update css
                     self.updateLegendCss(
-                        $(event.params.l).find('.styler'), 
-                        o, 
+                        $(event.params.l).find('.styler'),
+                        o,
                         event.params.layer,
                         event.params.layer.orig_opacity
                     );
@@ -6124,12 +6680,12 @@ mol.modules.map.styler = function(mol) {
                     self.updateLayerStyle(
                         $(event.params.l).find('.styler'),
                         o,
-                        event.params.layer, 
+                        event.params.layer,
                         event.params.layer.orig_opacity
                     );
                 }
             );
-            
+
             this.bus.addHandler(
                 'style-all-layers',
                 function(event) {
@@ -6138,23 +6694,23 @@ mol.modules.map.styler = function(mol) {
                         layers = event.params.layers,
                         baseHtml,
                         q;
-                    
-                    baseHtml = '' + 
+
+                    baseHtml = '' +
                            '<div class="mol-LayerControl-Styler">' +
-                           '  <div class="colorPickers">' + 
-                           '    <div class="colorPicker">' + 
-                           '      <span class="stylerLabel">Color:&nbsp</span>' + 
+                           '  <div class="colorPickers">' +
+                           '    <div class="colorPicker">' +
+                           '      <span class="stylerLabel">Color:&nbsp</span>' +
                            '      <input type="text" id="allFill" />' +
-                           '    </div>' + 
-                           '  </div>' + 
+                           '    </div>' +
+                           '  </div>' +
                            '  <div class="buttonWrapper allStyler">' +
                            '    <button id="applyStyle">Apply</button>' +
                            '    <button id="cancelStyle">Cancel</button>' +
-                           '  </div>' +      
+                           '  </div>' +
                            '</div>';
-                    
+
                     $(button).removeData('qtip');
-                    
+
                     q = $(button).qtip({
                         content: {
                             text: baseHtml,
@@ -6179,29 +6735,29 @@ mol.modules.map.styler = function(mol) {
                             classes: 'ui-tooltip-widgettheme'
                         },
                         events: {
-                            render: function(event, api) {                                       
+                            render: function(event, api) {
                                 var colors = ['black','white','red','yellow',
                                               'blue','green','orange','purple'],
                                     colors2 = ['#66C2A5','#FC8D62', '#8DA0CB',
                                                '#E78AC3', '#A6D854', '#FFD92F',
                                                '#E5C494'];
-         
+
                                 $("#allFill").spectrum({
                                       color: 'black',
                                       showPaletteOnly: true,
                                       palette: [colors, colors2]
-                                });         
+                                });
 
                                 $(api.elements.content)
                                     .find('#applyStyle').click(
                                         function(event) {
                                             var o = {},
                                                 color;
-                                            
+
                                             color = $('#allFill')
                                                         .spectrum("get")
-                                                            .toHexString();               
-                                            
+                                                            .toHexString();
+
                                             o.fill = color;
                                             o.size = 1;
                                             o.border = color;
@@ -6212,58 +6768,62 @@ mol.modules.map.styler = function(mol) {
                                             o.s5 = color;
                                             o.p = color;
                                             
+                                            self.bus.fireEvent(
+                                                new mol.bus.Event(
+                                                    'clear-map'));
+                                            
                                             _.each(
                                                 layers,
                                                 function(layer) {
-                                                    var l, 
+                                                    var l,
                                                         current;
-                                                            
+
                                                     l = display.getLayer(layer);
-                                                        
+
                                                     current = self
                                                             .parseLayerStyle(
-                                                                layer, 
+                                                                layer,
                                                                 "current");
-                                                            
+
                                                     o.s1c = current.s1c;
                                                     o.s2c = current.s2c;
                                                     o.s3c = current.s3c;
                                                     o.s4c = current.s4c;
                                                     o.s5c = current.s5c;
                                                     o.pc = current.pc;
-                                                    
+
                                                     if(layer.type == "range") {
                                                         o.size = 0;
                                                     }
-                                                    
-                                                    if(layer.style_table == 
+
+                                                    if(layer.style_table ==
                                                                 "point_style") {
                                                         o.size = 3;
-                                                    }        
-                                                    
+                                                    }
+
                                                     //update css
                                                     self.updateLegendCss(
-                                                        $(l).find('.styler'), 
-                                                        o, 
+                                                        $(l).find('.styler'),
+                                                        o,
                                                         layer,
                                                         0.9
                                                     );
-                        
+
                                                     //update tiles
                                                     self.updateLayerStyle(
                                                         $(l).find('.styler'),
                                                         o,
-                                                        layer, 
+                                                        layer,
                                                         0.9
                                                     );
                                                 }
-                                            );  
-                                                   
-                                            $(button).prop('disabled', false);            
+                                            );
+
+                                            $(button).prop('disabled', false);
                                             $(button).qtip('destroy');
                                         }
                                 );
-                                    
+
                                 $(api.elements.content)
                                     .find('#cancelStyle').click(
                                         function(event) {
@@ -6272,7 +6832,7 @@ mol.modules.map.styler = function(mol) {
                                         }
                                     );
                             },
-                            show: function(event, api) {                              
+                            show: function(event, api) {
                                 $(button).prop('disabled', true);
                             },
                             hide: function(event, api) {
@@ -6281,37 +6841,39 @@ mol.modules.map.styler = function(mol) {
                             }
                         }
                     });
-                }  
+                }
             );
-            
+
             this.bus.addHandler(
                 'initial-legend-style',
                 function(event) {
                     var o = {};
-                    
+
                     //style legends initially
                     o = self.parseLayerStyle(event.params.layer, "orig");
-                                    
+
                     //initalize css
                     self.updateLegendCss(
-                        $(event.params.l).find('.styler'), 
-                        o, 
+                        $(event.params.l).find('.styler'),
+                        o,
                         event.params.layer,
                         event.params.layer.orig_opacity
                     );
                 }
             );
-            
+
             this.bus.addHandler(
                 'toggle-layer-highlight',
                 function(event) {
-                    self.toggleLayerHighlight(event.params.layer,
-                                              event.params.visible,
-                                              event.params.selected);
+                    self.toggleLayerHighlight(
+                        event.params.layer,
+                        event.params.visible,
+                        event.params.selected
+                    );
                 }
             );
         },
-        
+
         displayLayerStyler: function(button, layer) {
             var baseHtml,
                 layer_curr_style,
@@ -6324,13 +6886,13 @@ mol.modules.map.styler = function(mol) {
                 },
                 q,
                 self = this;
-            
+
             layer_curr_style = self.parseLayerStyle(layer, "current");
             layer_orig_style = self.parseLayerStyle(layer, "orig");
-            
-            baseHtml = '' + 
+
+            baseHtml = '' +
                    '<div class="mol-LayerControl-Styler ' +layer.source+ '">' +
-                   '  <div class="colorPickers"></div>' + 
+                   '  <div class="colorPickers"></div>' +
                    '  <div class="sizerHolder"></div>' +
                    '  <div class="opacityHolder">' +
                    '    <span class="sliderLabel">Opacity:&nbsp</span>' +
@@ -6343,11 +6905,11 @@ mol.modules.map.styler = function(mol) {
                    '    <button id="applyStyle">Apply</button>' +
                    '    <button id="resetStyle">Reset</button>' +
                    '    <button id="cancelStyle">Cancel</button>' +
-                   '  </div>' +      
+                   '  </div>' +
                    '</div>';
-            
-            $(button).removeData('qtip'); 
-            
+
+            $(button).removeData('qtip');
+
             q = $(button).qtip({
                 content: {
                     text: baseHtml,
@@ -6372,53 +6934,53 @@ mol.modules.map.styler = function(mol) {
                     classes: 'ui-tooltip-widgettheme'
                 },
                 events: {
-                    render: function(event, api) {   
+                    render: function(event, api) {
                         self.getStylerLayout(
                                 $(api.elements.content)
                                     .find('.mol-LayerControl-Styler'),
                                 layer);
-                                
+
                         self.setStylerProperties(
                                     api.elements.content,
                                     layer,
-                                    layer_curr_style, 
+                                    layer_curr_style,
                                     layer_orig_style,
                                     false);
-               
+
                         $(api.elements.content).find('#applyStyle').click(
                             function(event) {
                                 var o = {};
 
                                 if(layer.type == "range") {
-                                    //TODO issue #175 replace iucn ref 
-                                    if(layer.source == "jetz" || 
+                                    //TODO issue #175 replace iucn ref
+                                    if(layer.source == "jetz" ||
                                        layer.source == "iucn") {
                                         o.s1 = $('#showFill1Palette')
                                              .spectrum("get")
                                                 .toHexString();
                                         o.s1c = $('#seasChk1')
-                                                    .is(':checked') ? 1:0;        
+                                                    .is(':checked') ? 1:0;
                                         o.s2 = $('#showFill2Palette')
                                                  .spectrum("get")
                                                     .toHexString();
                                         o.s2c = $('#seasChk2')
-                                                    .is(':checked') ? 1:0;            
+                                                    .is(':checked') ? 1:0;
                                         o.s3 = $('#showFill3Palette')
                                                  .spectrum("get")
                                                     .toHexString();
                                         o.s3c = $('#seasChk3')
-                                                    .is(':checked') ? 1:0; 
+                                                    .is(':checked') ? 1:0;
                                     }
-                                    
-                                    //TODO issue #175 replace iucn ref               
+
+                                    //TODO issue #175 replace iucn ref
                                     if(layer.source == "iucn") {
                                         o.s4 = $('#showFill4Palette')
                                              .spectrum("get")
                                                 .toHexString();
                                         o.s4c = $('#seasChk4')
                                                     .is(':checked') ? 1:0;
-                                    }                
-                                     
+                                    }
+
                                     if(layer.source != "jetz") {
                                         o.s5 = $('#showFill5Palette')
                                              .spectrum("get")
@@ -6426,61 +6988,61 @@ mol.modules.map.styler = function(mol) {
                                         o.s5c = $('#seasChk5')
                                                     .is(':checked') ? 1:0;
                                     }
-                                    
-                                    if(layer.source == "iucn") {               
+
+                                    if(layer.source == "iucn") {
                                         o.p = $('#showFill6Palette')
                                              .spectrum("get")
-                                                .toHexString(); 
+                                                .toHexString();
                                         o.pc = $('#seasChk6')
-                                                    .is(':checked') ? 1:0;                
-                                    }                                                               
+                                                    .is(':checked') ? 1:0;
+                                    }
                                 } else {
                                     o.fill = $('#showFillPalette')
                                             .spectrum("get")
                                                 .toHexString();
                                 }
-                                
+
                                 o.border = $('#showBorderPalette')
                                                 .spectrum("get")
-                                                    .toHexString();                
+                                                    .toHexString();
                                 o.size = $(api.elements.content)
                                                 .find('.sizer')
                                                     .slider('value');
-                                
+
                                 self.updateLegendCss(
-                                        button, 
-                                        o, 
+                                        button,
+                                        o,
                                         layer,
                                         parseFloat($(api.elements.content)
                                             .find('.opacity')
                                                 .slider("value")));
-                                
+
                                 self.updateLayerStyle(
                                         button,
                                         o,
                                         layer,
                                         parseFloat($(api.elements.content)
                                             .find('.opacity')
-                                                .slider("value")) 
-                                );       
-                                       
-                                $(button).prop('disabled', false);           
+                                                .slider("value"))
+                                );
+
+                                $(button).prop('disabled', false);
                                 $(button).qtip('destroy');
                             }
                         );
-                        
+
                         $(api.elements.content)
                             .find('#resetStyle').click(
                                 function(event) {
                                     self.setStylerProperties(
                                                     api.elements.content,
                                                     layer,
-                                                    layer_orig_style, 
+                                                    layer_orig_style,
                                                     layer_orig_style,
                                                     true);
                                 }
                             );
-                            
+
                         $(api.elements.content)
                             .find('#cancelStyle').click(
                                 function(event) {
@@ -6489,7 +7051,7 @@ mol.modules.map.styler = function(mol) {
                                 }
                             );
                     },
-                    show: function(event, api) {                              
+                    show: function(event, api) {
                         $(button).prop('disabled', true);
                     },
                     hide: function(event, api) {
@@ -6499,7 +7061,7 @@ mol.modules.map.styler = function(mol) {
                 }
             });
         },
-        
+
         parseLayerStyle: function(layer, original) {
             var o = {},
                 fillStyle, borderStyle, sizeStyle,
@@ -6507,7 +7069,7 @@ mol.modules.map.styler = function(mol) {
                 s1Style, s2Style, s3Style, s4Style, s5Style, pStyle,
                 s1, s2, s3, s4, s5, p, pc,
                 c1, c2, c3, c4, c5;
-                
+
             if(original == "current") {
                 style = layer.style;
             } else if(original == "orig") {
@@ -6515,20 +7077,20 @@ mol.modules.map.styler = function(mol) {
             } else {
                 style = layer.tile_style;
             }
-            
+
             if(layer.style_table == "points_style") {
                 fillStyle = style.substring(
                                     style.indexOf('marker-fill'),
                                     style.length-1);
-                                    
+
                 borderStyle = style.substring(
                                     style.indexOf('marker-line-color'),
-                                    style.length-1);   
-                                    
+                                    style.length-1);
+
                 sizeStyle = style.substring(
                                     style.indexOf('marker-width'),
-                                    style.length-1);                  
-                
+                                    style.length-1);
+
                 o = {fill: fillStyle.substring(
                                     fillStyle.indexOf('#'),
                                     fillStyle.indexOf(';')),
@@ -6544,39 +7106,39 @@ mol.modules.map.styler = function(mol) {
                         s1Style = style.substring(
                                         style.indexOf('seasonality=1'),
                                         style.length-1);
-                                            
+
                         s1 = s1Style.substring(
                                         s1Style.indexOf('polygon-fill'),
                                         s1Style.length-1);
-                                        
+
                         c1 = s1Style.substring(
                                         s1Style.indexOf('polygon-opacity'),
-                                        s1Style.length-1);           
-      
+                                        s1Style.length-1);
+
                         s2Style = style.substring(
                                         style.indexOf('seasonality=2'),
                                         style.length-1);
-                                            
+
                         s2 = s2Style.substring(
                                         s2Style.indexOf('polygon-fill'),
                                         s2Style.length-1);
-                                        
+
                         c2 = s2Style.substring(
                                         s2Style.indexOf('polygon-opacity'),
-                                        s2Style.length-1);                 
-                                    
+                                        s2Style.length-1);
+
                         s3Style = style.substring(
                                         style.indexOf('seasonality=3'),
                                         style.length-1);
-                                            
+
                         s3 = s3Style.substring(
                                         s3Style.indexOf('polygon-fill'),
                                         s3Style.length-1);
-                                        
+
                         c3 = s3Style.substring(
                                         s3Style.indexOf('polygon-opacity'),
-                                        s3Style.length-1);                                 
-                                    
+                                        s3Style.length-1);
+
                         o.s1 = s1.substring(
                                         s1.indexOf('#'),
                                         s1.indexOf(';'));
@@ -6594,71 +7156,71 @@ mol.modules.map.styler = function(mol) {
                                         c2.indexOf(';'));
                         o.s3c = c3.substring(
                                         c3.indexOf(':')+1,
-                                        c3.indexOf(';'));    
+                                        c3.indexOf(';'));
                     }
-                    
-                    //TODO issue #175 replace iucn ref    
+
+                    //TODO issue #175 replace iucn ref
                     if(layer.source == "iucn") {
                         s4Style = style.substring(
                                     style.indexOf('seasonality=4'),
                                     style.length-1);
-                                        
+
                         s4 = s4Style.substring(
                                         s4Style.indexOf('polygon-fill'),
-                                        s4Style.length-1); 
-                                  
+                                        s4Style.length-1);
+
                         c4 = s4Style.substring(
                                         s4Style.indexOf('polygon-opacity'),
-                                        s4Style.length-1);  
-                        
+                                        s4Style.length-1);
+
                         o.s4 = s4.substring(
                                     s4.indexOf('#'),
                                     s4.indexOf(';'));
-                        
+
                         o.s4c = c4.substring(
                                     c4.indexOf(':')+1,
-                                    c4.indexOf(';'));               
+                                    c4.indexOf(';'));
                     }
-                    
+
                     if(layer.source != 'jetz') {
                         s5Style = style.substring(
                                     style.indexOf('seasonality=5'),
                                     style.length-1);
-                                        
+
                         s5 = s5Style.substring(
                                     s5Style.indexOf('polygon-fill'),
-                                    s5Style.length-1); 
-                                    
+                                    s5Style.length-1);
+
                         c5 = s5Style.substring(
                                     s5Style.indexOf('polygon-opacity'),
-                                    s5Style.length-1);                        
-                                    
+                                    s5Style.length-1);
+
                         o.s5 = s5.substring(
                                     s5.indexOf('#'),
                                     s5.indexOf(';'));
-                                    
+
                         o.s5c = c5.substring(
                                     c5.indexOf(':')+1,
-                                    c5.indexOf(';'));    
+                                    c5.indexOf(';'));
                     }
-                    
+
                     if(layer.source == "iucn") {
                         pStyle = style.substring(
                                     style.indexOf('presence=4'),
                                     style.length-1);
-                                        
+
                         p = pStyle.substring(
                                     pStyle.indexOf('polygon-fill'),
-                                    pStyle.length-1);      
-                                    
+                                    pStyle.length-1);
+
                         pc = pStyle.substring(
                                     pStyle.indexOf('polygon-opacity'),
-                                    pStyle.length-1);                  
-                                    
+                                    pStyle.length-1);
+
                         o.p = p.substring(
                                     p.indexOf('#'),
-                                    p.indexOf(';')); 
-                                    
+                                    p.indexOf(';'));
+
                         o.pc = pc.substring(
                                     pc.indexOf(':')+1,
                                     pc.indexOf(';'));
@@ -6666,165 +7228,165 @@ mol.modules.map.styler = function(mol) {
                 } else {
                     fillStyle = style.substring(
                                     style.indexOf('polygon-fill'),
-                                    style.length-1);                  
-                    
+                                    style.length-1);
+
                     o = {fill: fillStyle.substring(
                                     fillStyle.indexOf('#'),
                                     fillStyle.indexOf(';'))};
                 }
-                
+
                 borderStyle = style.substring(
                                     style.indexOf('line-color'),
-                                    style.length-1); 
-                              
+                                    style.length-1);
+
                 sizeStyle = style.substring(
                                 style.indexOf('line-width'),
-                                style.length-1);                   
-                
+                                style.length-1);
+
                 o.border = borderStyle.substring(
                                 borderStyle.indexOf('#'),
                                 borderStyle.indexOf(';'));
-                                
+
                 o.size = Number($.trim(sizeStyle.substring(
                                 sizeStyle.indexOf(':')+1,
                                 sizeStyle.indexOf(';'))));
             }
-                           
+
             return o;
         },
-        
+
         getStylerLayout: function(element, layer) {
             var pickers,
-                sizer;    
-                   
+                sizer;
+
             if(layer.style_table == "points_style") {
-               pickers = '' + 
-                   '<div class="colorPicker">' + 
-                   '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+               pickers = '' +
+                   '<div class="colorPicker">' +
+                   '  <span class="stylerLabel">Fill:&nbsp</span>' +
                    '  <input type="text" id="showFillPalette" />' +
                    '</div>' +
-                   '<div class="colorPicker">' + 
-                   '  <span class="stylerLabel">Border:&nbsp</span>' + 
+                   '<div class="colorPicker">' +
+                   '  <span class="stylerLabel">Border:&nbsp</span>' +
                    '  <input type="text" id="showBorderPalette" />' +
                    '</div>';
-                   
+
                sizer = '' +
                    '<span class="sliderLabel">Size:&nbsp</span>' +
                    '  <div class="sliderContainer">' +
                    '    <div class="sizer"></div>' +
                    '  </div>' +
                    '<span id="pointSizeValue">8px</span>';
-               
+
                $(element).find('.colorPickers').prepend(pickers);
                $(element).find('.sizerHolder').prepend(sizer);
             } else {
                 if(layer.type == "range") {
                    pickers = '';
-                   
-                   //TODO issue #175 replace iucn ref     
+
+                   //TODO issue #175 replace iucn ref
                    if(layer.source == "jetz" || layer.source == "iucn") {
                        pickers+=''+
                            '<span class="seasonLabel">Breeding</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '<div class="colorPicker">' +
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' +
                            '  <input type="text" id="showFill2Palette" />' +
-                           '  <input type="checkbox" id="seasChk2" ' + 
+                           '  <input type="checkbox" id="seasChk2" ' +
                                     'class="seasChk" checked="checked"/>' +
                            '</div>' +
                            '<span class="seasonLabel">Resident</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '<div class="colorPicker">' +
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' +
                            '  <input type="text" id="showFill1Palette" />' +
-                           '  <input type="checkbox" id="seasChk1" ' + 
+                           '  <input type="checkbox" id="seasChk1" ' +
                                     'class="seasChk" checked="checked"/>' +
                            '</div>' +
                            '<span class="seasonLabel">Non-breeding</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '<div class="colorPicker">' +
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' +
                            '  <input type="text" id="showFill3Palette" />' +
-                           '  <input type="checkbox" id="seasChk3" ' + 
+                           '  <input type="checkbox" id="seasChk3" ' +
                                     'class="seasChk" checked="checked"/>' +
                            '</div>';
-                   }                           
-                   
-                   //TODO issue #175 replace iucn ref                           
+                   }
+
+                   //TODO issue #175 replace iucn ref
                    if (layer.source == "iucn") {
                        pickers+=''+
                            '<span class="seasonLabel">Passage</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '<div class="colorPicker">' +
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' +
                            '  <input type="text" id="showFill4Palette" />' +
-                           '  <input type="checkbox" id="seasChk4" ' + 
+                           '  <input type="checkbox" id="seasChk4" ' +
                                     'class="seasChk" checked="checked"/>' +
                            '</div>';
                    }
-                   
-                   //TODO issue #175 replace iucn ref  
+
+                   //TODO issue #175 replace iucn ref
                    if(layer.source != 'jetz') {
                         pickers+=''+
-                           '<span class="seasonLabel">' + 
+                           '<span class="seasonLabel">' +
                                'Seasonality Uncertain</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
+                           '<div class="colorPicker">' +
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' +
                            '  <input type="text" id="showFill5Palette" />' +
-                           '  <input type="checkbox" id="seasChk5" ' + 
-                                    'class="seasChk" checked="checked"/>' +
-                           '</div>';
-                   }            
-                     
-                   //TODO issue #175 replace iucn ref         
-                   if(layer.source == "iucn") {  
-                       pickers+=''+      
-                           '<span class="seasonLabel">' + 
-                               'Extinct or Presence Uncertain</span>' +
-                           '<div class="colorPicker">' + 
-                           '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                           '  <input type="text" id="showFill6Palette" />' +
-                           '  <input type="checkbox" id="seasChk6" ' + 
+                           '  <input type="checkbox" id="seasChk5" ' +
                                     'class="seasChk" checked="checked"/>' +
                            '</div>';
                    }
-                   
+
+                   //TODO issue #175 replace iucn ref
+                   if(layer.source == "iucn") {
+                       pickers+=''+
+                           '<span class="seasonLabel">' +
+                               'Extinct or Presence Uncertain</span>' +
+                           '<div class="colorPicker">' +
+                           '  <span class="stylerLabel">Fill:&nbsp</span>' +
+                           '  <input type="text" id="showFill6Palette" />' +
+                           '  <input type="checkbox" id="seasChk6" ' +
+                                    'class="seasChk" checked="checked"/>' +
+                           '</div>';
+                   }
+
                    pickers+=''+
                        '<span class="seasonLabel">All</span>' +
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Border:&nbsp</span>' + 
+                       '<div class="colorPicker">' +
+                       '  <span class="stylerLabel">Border:&nbsp</span>' +
                        '  <input type="text" id="showBorderPalette" />' +
                        '</div>';
-                       
-                   sizer = '' +
-                       '<span class="sliderLabel">Width:&nbsp</span>' +
-                       '  <div class="sliderContainer">' +
-                       '    <div class="sizer"></div>' +
-                       '  </div>' +
-                       '<span id="pointSizeValue">8px</span>';    
-                       
-                   $(element).find('.colorPickers').prepend(pickers);
-                   $(element).find('.sizerHolder').prepend(sizer);
-                } else {
-                   pickers = '' + 
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Fill:&nbsp</span>' + 
-                       '  <input type="text" id="showFillPalette" />' +
-                       '</div>' +
-                       '<div class="colorPicker">' + 
-                       '  <span class="stylerLabel">Border:&nbsp</span>' + 
-                       '  <input type="text" id="showBorderPalette" />' +
-                       '</div>';
-                       
+
                    sizer = '' +
                        '<span class="sliderLabel">Width:&nbsp</span>' +
                        '  <div class="sliderContainer">' +
                        '    <div class="sizer"></div>' +
                        '  </div>' +
                        '<span id="pointSizeValue">8px</span>';
-                   
+
+                   $(element).find('.colorPickers').prepend(pickers);
+                   $(element).find('.sizerHolder').prepend(sizer);
+                } else {
+                   pickers = '' +
+                       '<div class="colorPicker">' +
+                       '  <span class="stylerLabel">Fill:&nbsp</span>' +
+                       '  <input type="text" id="showFillPalette" />' +
+                       '</div>' +
+                       '<div class="colorPicker">' +
+                       '  <span class="stylerLabel">Border:&nbsp</span>' +
+                       '  <input type="text" id="showBorderPalette" />' +
+                       '</div>';
+
+                   sizer = '' +
+                       '<span class="sliderLabel">Width:&nbsp</span>' +
+                       '  <div class="sliderContainer">' +
+                       '    <div class="sizer"></div>' +
+                       '  </div>' +
+                       '<span id="pointSizeValue">8px</span>';
+
                    $(element).find('.colorPickers').prepend(pickers);
                    $(element).find('.sizerHolder').prepend(sizer);
                 }
             }
         },
-        
+
         setStylerProperties: function(cont, lay, currSty, origSty, reset) {
             var colors = ['black','white','red','yellow',
                           'blue','green','orange','purple'],
@@ -6833,66 +7395,66 @@ mol.modules.map.styler = function(mol) {
                 objs = [],
                 max,
                 min,
-                layOpa;    
-                            
+                layOpa;
+
             if(lay.type == "range") {
                 if(lay.source == "jetz" || lay.source == "iucn") {
-                    objs.push({name: '#showFill1Palette', 
-                            color: currSty.s1, 
+                    objs.push({name: '#showFill1Palette',
+                            color: currSty.s1,
                             def: origSty.s1});
-                    objs.push({name: '#showFill2Palette', 
-                            color: currSty.s2, 
+                    objs.push({name: '#showFill2Palette',
+                            color: currSty.s2,
                             def: origSty.s2});
-                    objs.push({name: '#showFill3Palette', 
-                            color: currSty.s3, 
+                    objs.push({name: '#showFill3Palette',
+                            color: currSty.s3,
                             def: origSty.s3});
-                            
+
                     $(cont).find('#seasChk1')
                         .prop('checked', (currSty.s1c == 1) ? true : false);
                     $(cont).find('#seasChk2')
                         .prop('checked', (currSty.s2c == 1) ? true : false);
                     $(cont).find('#seasChk3')
-                        .prop('checked', (currSty.s3c == 1) ? true : false);         
+                        .prop('checked', (currSty.s3c == 1) ? true : false);
                 }
-                
-                objs.push({name: '#showBorderPalette', 
-                            color: currSty.border, 
-                            def: origSty.border});                        
-                      
-               //TODO issue #175 replace iucn ref           
+
+                objs.push({name: '#showBorderPalette',
+                            color: currSty.border,
+                            def: origSty.border});
+
+               //TODO issue #175 replace iucn ref
                 if(lay.source == "iucn") {
                     $(cont).find('#seasChk4')
                         .prop('checked', (currSty.s4c == 1) ? true : false);
-                    objs.push({name: '#showFill4Palette', 
-                          color: currSty.s4, 
-                          def: origSty.s4});                         
+                    objs.push({name: '#showFill4Palette',
+                          color: currSty.s4,
+                          def: origSty.s4});
                 }
-               
+
                 if(lay.source != 'jetz') {
                     $(cont).find('#seasChk5')
                         .prop('checked', (currSty.s5c == 1) ? true : false);
-                    objs.push({name: '#showFill5Palette', 
-                          color: currSty.s5, 
+                    objs.push({name: '#showFill5Palette',
+                          color: currSty.s5,
                           def: origSty.s5});
                 }
-               
+
                 if(lay.source == "iucn") {
                     $(cont).find('#seasChk6')
                         .prop('checked', (currSty.pc == 1) ? true : false);
-                    objs.push({name: '#showFill6Palette', 
-                              color: currSty.p, 
-                              def: origSty.p});       
-                }        
+                    objs.push({name: '#showFill6Palette',
+                              color: currSty.p,
+                              def: origSty.p});
+                }
             } else {
-                objs = [ {name: '#showFillPalette', 
-                          color: currSty.fill, 
+                objs = [ {name: '#showFillPalette',
+                          color: currSty.fill,
                           def: origSty.fill},
-                         {name: '#showBorderPalette', 
-                          color: currSty.border, 
-                          def: origSty.border}     
+                         {name: '#showBorderPalette',
+                          color: currSty.border,
+                          def: origSty.border}
                        ];
             }
-            
+
             _.each(objs, function(obj) {
                 $(obj.name).spectrum({
                   color: obj.color,
@@ -6901,55 +7463,55 @@ mol.modules.map.styler = function(mol) {
                       [obj.def],
                       colors, colors2
                   ]
-               }); 
+               });
             });
-            
-            //sizer        
+
+            //sizer
             if(lay.style_table == "points_style") {
                 max = 8;
                 min = 1;
             } else {
                 max = 3;
                 min = 0;
-            }        
-                              
+            }
+
             $(cont).find('.sizer').slider({
-                value: currSty.size, 
-                min:min, 
-                max:max, 
-                step:1, 
+                value: currSty.size,
+                min:min,
+                max:max,
+                step:1,
                 animate:"slow",
                 slide: function(event, ui) {
                     $(cont).find('#pointSizeValue').html(ui.value + "px");
                 }
             });
-                
+
             $(cont).find('#pointSizeValue').html(
-                $(cont).find('.sizer').slider('value') + "px"); 
+                $(cont).find('.sizer').slider('value') + "px");
 
             layOpa = reset ? lay.orig_opacity : lay.style_opacity;
-                    
+
             //opacity
             $(cont).find('.opacity').slider({
-                value: layOpa, 
-                min:0, 
-                max:1, 
-                step: 0.1, 
+                value: layOpa,
+                min:0,
+                max:1,
+                step: 0.1,
                 animate:"slow",
                 slide: function(event, ui) {
                     $(cont).find('#opacityValue').html(
                         (ui.value)*100 + "&#37");
                 }}
             );
-            
+
             $(cont).find('#opacityValue').html((layOpa)*100 + "&#37");
         },
-        
+
         updateLegendCss: function(button, o, layer, opa) {
             if(layer.type == "range") {
                 if(layer.source == "jetz" || layer.source == "iucn") {
                     $(button).find('.s1').css({
-                        'background-color':o.s2, 
+                        'background-color':o.s2,
                         'opacity': (o.s2c == 0) ? 0 : opa});
                     $(button).find('.s2').css({
                         'background-color':o.s1,
@@ -6957,21 +7519,21 @@ mol.modules.map.styler = function(mol) {
                     $(button).find('.s3').css({
                         'background-color':o.s3,
                         'opacity': (o.s3c == 0) ? 0 : opa});
-                        
-                    //TODO issue #175 replace iucn ref                
+
+                    //TODO issue #175 replace iucn ref
                     if(layer.source == "iucn") {
                         $(button).find('.s4').css({
                             'background-color':o.s4,
-                            'opacity': (o.s4c == 0) ? 0 : opa}); 
+                            'opacity': (o.s4c == 0) ? 0 : opa});
                     }
-                    
+
                     $(button).find('.legend-seasonal')
                         .css({
                             'border-color':o.border,
                             'border-width':o.size+"px",
                             'opacity':opa
                         }
-                    );     
+                    );
                 } else {
                     $(button).find('.legend-polygon')
                         .css({
@@ -6981,7 +7543,7 @@ mol.modules.map.styler = function(mol) {
                             'opacity':(o.s5c == 0) ? 0 : opa
                         }
                     );
-                }                                  
+                }
             } else {
                 if(layer.style_table == "points_style") {
                     $(button).find('.legend-point')
@@ -7001,11 +7563,11 @@ mol.modules.map.styler = function(mol) {
                             'border-width':o.size+"px",
                             'opacity':opa
                         }
-                    );    
+                    );
                 }
             }
         },
-        
+
         updateLayerStyle: function(button, obj, lay, opa) {
             var o = obj,
                 os = {},
@@ -7014,22 +7576,22 @@ mol.modules.map.styler = function(mol) {
                 params = {},
                 oparams = {},
                 self = this;
-                
+
             $.extend(os, o);
-                                
-            if($(button).parent().hasClass('selected')) {   
+
+            if($(button).parent().hasClass('selected')) {
                 os.border = "#FF00FF";
             }
-            
+
             sel_style_desc = self.updateStyle(lay, lay.tile_style, os);
-            style_desc = self.updateStyle(lay, lay.tile_style, o);                                    
-            
+            style_desc = self.updateStyle(lay, lay.tile_style, o);
+
             params.layer = lay;
             params.style = sel_style_desc;
-            
-            //keep the style around for later        
+
+            //keep the style around for later
             lay.style = style_desc;
-            
+
             self.bus.fireEvent(new mol.bus.Event(
                 'apply-layer-style', params));
 
@@ -7041,20 +7603,20 @@ mol.modules.map.styler = function(mol) {
 
             //store the opacity on the layer object
             lay.style_opacity = oparams.style_opacity;
-            
+
             self.bus.fireEvent(new mol.bus.Event(
-                'layer-opacity', oparams));                
+                'layer-opacity', oparams));
         },
-        
+
         updateStyle: function(layer, style, newStyle) {
             var updatedStyle,
                 season;
-            
+
             if(layer.style_table == "points_style") {
                 style = this.changeStyleProperty(
                             style, 'marker-fill', newStyle.fill, false);
                 style = this.changeStyleProperty(
-                            style, 'marker-line-color', newStyle.border, 
+                            style, 'marker-line-color', newStyle.border,
                                 false);
                 style = this.changeStyleProperty(
                             style, 'marker-width', newStyle.size, false);
@@ -7062,88 +7624,88 @@ mol.modules.map.styler = function(mol) {
                 if(layer.type == "range") {
                     if(layer.source == "jetz" || layer.source == "iucn") {
                         style = this.changeStyleProperty(
-                                    style, 'seasonality=1', newStyle.s1, true, 
+                                    style, 'seasonality=1', newStyle.s1, true,
                                     'polygon-fill');
                         style = this.changeStyleProperty(
-                                    style, 'seasonality=2', newStyle.s2, true, 
+                                    style, 'seasonality=2', newStyle.s2, true,
                                     'polygon-fill');
                         style = this.changeStyleProperty(
-                                    style, 'seasonality=3', newStyle.s3, true, 
-                                    'polygon-fill');                    
-                                    
+                                    style, 'seasonality=3', newStyle.s3, true,
+                                    'polygon-fill');
+
                         style = this.changeStyleProperty(
-                                    style, 'seasonality=1', newStyle.s1c, true, 
+                                    style, 'seasonality=1', newStyle.s1c, true,
                                     'polygon-opacity');
                         style = this.changeStyleProperty(
-                                    style, 'seasonality=2', newStyle.s2c, true, 
+                                    style, 'seasonality=2', newStyle.s2c, true,
                                     'polygon-opacity');
                         style = this.changeStyleProperty(
-                                    style, 'seasonality=3', newStyle.s3c, true, 
-                                    'polygon-opacity');    
+                                    style, 'seasonality=3', newStyle.s3c, true,
+                                    'polygon-opacity');
                     }
 
-                    //TODO issue #175 replace iucn ref                
+                    //TODO issue #175 replace iucn ref
                     if(layer.source == "iucn") {
                         style = this.changeStyleProperty(
-                                style, 'seasonality=4', newStyle.s4, true, 
+                                style, 'seasonality=4', newStyle.s4, true,
                                 'polygon-fill');
                         style = this.changeStyleProperty(
-                                style, 'seasonality=4', newStyle.s4c, true, 
-                                'polygon-opacity');               
+                                style, 'seasonality=4', newStyle.s4c, true,
+                                'polygon-opacity');
                     }
-                    
+
                     if(layer.source != 'jetz') {
                         style = this.changeStyleProperty(
-                                style, 'seasonality=5', newStyle.s5, true, 
+                                style, 'seasonality=5', newStyle.s5, true,
                                 'polygon-fill');
                         style = this.changeStyleProperty(
-                                style, 'seasonality=5', newStyle.s5c, true, 
+                                style, 'seasonality=5', newStyle.s5c, true,
                                 'polygon-opacity');
                         style = this.changeStyleProperty(
-                                style, 'seasonality=0', newStyle.s5, true, 
+                                style, 'seasonality=0', newStyle.s5, true,
                                 'polygon-fill');
                         style = this.changeStyleProperty(
-                                style, 'seasonality=0', newStyle.s5c, true, 
-                                'polygon-opacity');        
+                                style, 'seasonality=0', newStyle.s5c, true,
+                                'polygon-opacity');
                     }
-                    
+
                     if(layer.source == 'iucn') {
                         style = this.changeStyleProperty(
-                                style, 'presence=4', newStyle.p, true, 
+                                style, 'presence=4', newStyle.p, true,
                                 'polygon-fill');
                         style = this.changeStyleProperty(
-                                style, 'presence=5', newStyle.p, true, 
-                                'polygon-fill'); 
-                        style = this.changeStyleProperty(
-                                style, 'presence=6', newStyle.p, true, 
+                                style, 'presence=5', newStyle.p, true,
                                 'polygon-fill');
                         style = this.changeStyleProperty(
-                                style, 'presence=4', newStyle.pc, true, 
+                                style, 'presence=6', newStyle.p, true,
+                                'polygon-fill');
+                        style = this.changeStyleProperty(
+                                style, 'presence=4', newStyle.pc, true,
                                 'polygon-opacity');
                         style = this.changeStyleProperty(
-                                style, 'presence=5', newStyle.pc, true, 
-                                'polygon-opacity'); 
-                        style = this.changeStyleProperty(
-                                style, 'presence=6', newStyle.pc, true, 
+                                style, 'presence=5', newStyle.pc, true,
                                 'polygon-opacity');
-                    }                                                 
+                        style = this.changeStyleProperty(
+                                style, 'presence=6', newStyle.pc, true,
+                                'polygon-opacity');
+                    }
                 } else {
                     style = this.changeStyleProperty(
-                                style, 'polygon-fill', newStyle.fill, 
+                                style, 'polygon-fill', newStyle.fill,
                                     false);
                 }
-                
+
                 style = this.changeStyleProperty(
                                 style, 'line-color', newStyle.border, false);
                 style = this.changeStyleProperty(
-                                style, 'line-width', newStyle.size, false); 
+                                style, 'line-width', newStyle.size, false);
             }
-            
+
             updatedStyle = style;
-            
+
             return updatedStyle;
         },
-        
+
         changeStyleProperty: function(style, prop, newSty, isSeas, seasonProp) {
             var updatedStyle,
                 subStyle,
@@ -7152,44 +7714,44 @@ mol.modules.map.styler = function(mol) {
                 smidStyle,
                 midStyle,
                 srestStyle;
-                            
+
             if(isSeas) {
                 spreStyle = style.substring(
                                 0,
                                 style.indexOf(prop+"]")
                             );
-                
+
                 preStyle = style.substring(
                                 style.indexOf(prop+"]"),
                                 style.length
                            );
-                            
+
                 smidStyle = preStyle.substring(
                                 0,
                                 preStyle.indexOf(seasonProp+":")
                             );
-                
+
                 midStyle = preStyle.substring(
                                 preStyle.indexOf(seasonProp+":"),
                                 preStyle.length
                            );
-                
+
                 srestStyle = midStyle.substring(
                                 midStyle.indexOf(";"),
                                 midStyle.length
                              );
-                
-                updatedStyle = spreStyle + 
+
+                updatedStyle = spreStyle +
                               smidStyle +
-                              seasonProp + ":" + 
+                              seasonProp + ":" +
                               newSty +
-                              srestStyle;                  
+                              srestStyle;
             } else {
                 subStyle = style.substring(style.indexOf(prop), style.length);
-                
+
                 updatedStyle = style.substring(
                                     0,
-                                    style.indexOf(prop + ":") + 
+                                    style.indexOf(prop + ":") +
                                     prop.length+1
                                ) +
                                newSty +
@@ -7197,11 +7759,11 @@ mol.modules.map.styler = function(mol) {
                                     subStyle.indexOf(";"),
                                     subStyle.length
                                );
-            }                
-            
+            }
+
             return updatedStyle;
         },
-        
+
         toggleLayerHighlight: function(layer, visible, sel) {
             var o = {},
                 style_desc,
@@ -7213,49 +7775,49 @@ mol.modules.map.styler = function(mol) {
                     style: null,
                     isSelected: sel
                 };
-                
+
                 oldStyle = self.parseLayerStyle(layer, "current");
-                
+
                 if(layer.style_table == "points_style") {
                     style = this.changeStyleProperty(
-                                style, 
-                                'marker-line-color', 
-                                visible ? '#FF00FF' : oldStyle.border, 
+                                style,
+                                'marker-line-color',
+                                visible ? '#FF00FF' : oldStyle.border,
                                 false
                             );
                 } else {
                     style = this.changeStyleProperty(
-                                style, 
-                                'line-color', 
-                                visible ? '#FF00FF' : oldStyle.border, 
+                                style,
+                                'line-color',
+                                visible ? '#FF00FF' : oldStyle.border,
                                 false
                             );
-                                
+
                     style = this.changeStyleProperty(
-                                style, 
-                                'line-width', 
-                                visible ? 2 : oldStyle.size, 
+                                style,
+                                'line-width',
+                                visible ? 2 : oldStyle.size,
                                 false
                             );
                 }
 
                 style_desc = style;
 
-                params.style = style_desc;   
+                params.style = style_desc;
                 
                 self.bus.fireEvent(
                     new mol.bus.Event(
-                        'apply-layer-style', 
+                        'apply-layer-style',
                         params));
         },
     });
-    
+
     mol.map.styler.StylerDisplay = mol.mvp.View.extend({
         init: function(styler) {
-            var html = '' + 
+            var html = '' +
                        '<div>Something here.</div>',
                 self = this;
-                
+
             this._super(html);
         }
     });
@@ -7390,19 +7952,19 @@ mol.modules.map.boot = function(mol) {
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
-                            '"lng":\',ST_XMin(l.extent),\', '+
-                            '"lat":\',ST_YMin(l.extent),\' '+
+                            '"lng":\',ST_XMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', '+
+                            '"lat":\',ST_YMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' '+
                         '}, '+
                         '"ne":{' +
-                        '"lng":\',ST_XMax(l.extent),\', ' +
-                        '"lat":\',ST_YMax(l.extent),\' ' +
+                        '"lng":\',ST_XMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', ' +
+                        '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
-                    'END as extent, ' +
+		    'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
-                'FROM layer_metadata l ' +
+                'FROM layer_metadata_mar_8_2013 l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
@@ -7411,7 +7973,7 @@ mol.modules.map.boot = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN ac n ON ' +
+                'LEFT JOIN ac_mar_8_2013 n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
                      "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
@@ -7441,7 +8003,7 @@ mol.modules.map.boot = function(mol) {
             } else {
                 // Otherwise, try and get a result using term
                 $.getJSON(
-                    mol.services.cartodb.sqlApi.jsonp_url.format(this.sql.format(self.term)),
+                    mol.services.cartodb.sqlApi.json_url.format(this.sql.format(self.term)),
                     function(response) {
                         var results = response.rows;
                         if (results.length == 0) {

@@ -190,24 +190,7 @@ mol.modules.map = function(mol) {
                         );
                     }
                 );
-                this.bus.addHandler(
-                    'register-list-click',
-                    function(event) {
-                            google.maps.event.addListener(
-                            self.display.map,
-                            "click",
-                            function(event) {
-                                var params = {
-                                    gmaps_event : event,
-                                    map : self.display.map}
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'species-list-query-click',
-                                        params));
-                            }
-                        );
-                    }
-                );
+
                 /*
                  *  Turn on the loading indicator display when zooming
                  */
@@ -285,11 +268,12 @@ mol.modules.map = function(mol) {
                     minLat: -85,
                     maxLat: 85,
                     mapTypeControl: false,
-                    panControl: false,
+                    panControl: true,
                     zoomControl: true,
                     streetViewControl: false,
+                    useStaticMap:false,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    styles:[ 
+                    styles:[
                         {
                             "stylers" : [{
                                 "saturation" : -65
@@ -310,9 +294,19 @@ mol.modules.map = function(mol) {
                                 "visibility" : "off"
                             }]
                         }, {
-                            "featureType" : "administrative.locality",
+                                "featureType" : "administrative",
                             "stylers" : [{
                                 "visibility" : "off"
+                            }]
+                        }, {
+                            "featureType" : "administrative.country",
+                            "stylers" : [{
+                                "visibility" : "on"
+                            }]
+                        }, {
+                            "featureType" : "administrative.province",
+                            "stylers" : [{
+                                "visibility" : "on"
                             }]
                         }, {
                             "featureType" : "road",
