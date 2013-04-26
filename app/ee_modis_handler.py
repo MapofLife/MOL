@@ -82,38 +82,35 @@ class MainPage(webapp2.RequestHandler):
 
             self.render_template('ee_mapid.js', template_values)
         else:
-            #compute the area
+#compute the area
             area = ee.call("Image.pixelArea")
             sum_reducer = ee.call("Reducer.sum")
-
+            
+            area = area.mask(species)
             total = area.mask(result.mask())
 
-            geometry = feature.geometry()
-            #compute area on 1km scale
-            total_area = area.reduceRegion(sum_reducer, geometry, 1000)
-            clipped_area = total.reduceRegion(sum_reducer, geometry, 1000)
+            
+            coordsProps = species.getInfo()
+            print(coordsProps)
+            #coords = coordsProps.properties["system:footprint"].coordinates
+            #feature = ee.Feature(ee.Feature.Polygon(coords))
+            #geometry = feature.geometry()
+            ##compute area on 1km scale
+            #clipped_area = total.reduceRegion(sum_reducer, geometry, 50000)
 
-            properties = {'total': total_area, 'clipped': clipped_area}
+#            properties = {'total': total_area, 'clipped': clipped_area}
 
-            feature = feature.map_update(properties)
+ #           feature = feature.update(properties)
 
-            data = ee.data.getValue({"json": feature.serialize()})
-            ta = 0
-            ca = 0
-
-            for feature in data["features"]:
-               if ("properties" in feature):
-                   if ("total" in feature.get("properties")):
-                       ta=ta+feature.get("properties").get("total").get("area")
-                   if ("clipped" in feature.get("properties")):
-                       ca=ca+feature.get("properties").get("clipped").get("area")
-
-            template_values = {
-                'total_area' : ta/1000000,
-                'clipped_area': ca/1000000
-            }
-
-            self.render_template('ee_area.js', template_values)
+  #          data = ee.data.getValue({"json": feature.serialize()})
+   #         ta = 0
+    #        ca = 0
+     #       ta = data.properties.total.area
+      #      ca = data.properties.clipped.area
+       #     template_values = {
+        ##       'clipped_area': ca/1000000
+          #  }
+           # self.render_template('ee_count.js', template_values)
 
 application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
 

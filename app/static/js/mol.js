@@ -3854,7 +3854,7 @@ mol.modules.map.tiles = function(mol) {
                    self.map.overlayMapTypes.insertAt(0,maptype.layer);
                 }
             );
-            $.getJSON(
+           /* $.getJSON(
                 'ee_{0}'.format(layer.filter_mode),
                 {
                     sciname: layer.name,
@@ -3893,7 +3893,7 @@ mol.modules.map.tiles = function(mol) {
                         "Refined range size: {0}".format(Math.round(ee.clipped_area)) +
                     " km<sup><font size=-2>2</font></sup></div>").dialog({width: 400});
                 }
-            );
+            );*/
         }
     });
 
