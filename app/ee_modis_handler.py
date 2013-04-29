@@ -61,7 +61,7 @@ class MainPage(webapp2.RequestHandler):
         habitat_list = habitats.split(",")
 
 
-        output = output.mask(species.neq(1))
+        output = output.mask(species)
 
         for pref in habitat_list:
             output = output.where(cover.eq(int(pref)).And(elev.gt(min)).And(elev.lt(max)),1)
@@ -71,7 +71,7 @@ class MainPage(webapp2.RequestHandler):
 
         if(get_area == 'false'):
             mapid = result.getMapId({
-                'palette': '000000,FF0000',
+                'palette': '000000,85AD9A',
                 'max': 1,
                 'opacity': 0.5
             })

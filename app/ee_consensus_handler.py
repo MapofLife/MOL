@@ -65,9 +65,9 @@ class MainPage(webapp2.RequestHandler):
         max = int(elevation.split(',')[1])
         habitat_list = habitats.split(",")
 
-        output = output.mask(species.neq(1))
+        output = output.mask(species)
 
-        for pref in consensus:
+        for pref in habitat_list:
             cover = ee.Image(consensus[pref])
             output = output.add(cover)
 
@@ -78,10 +78,10 @@ class MainPage(webapp2.RequestHandler):
 
         if(get_area == 'false'):
             mapid = result.getMapId({
-                'palette': '000000,DDDDDD',
+                'palette': '187F7B,55BFB2,85AD9A,F5821E,8F0B05',
                 'min': 0,
-                'max': 100,
-                'opacity': 1
+                'max': 100
+                #'opacity': 1
             })
             template_values = {
                 'mapid' : mapid['mapid'],

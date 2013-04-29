@@ -190,8 +190,8 @@ mol.modules.map.refine = function(mol) {
                     }
                 },
                 selectedHabitats ={
-                    'modis' : [],
-                    'consensus': []
+                    'modis': new Array(),
+                    'consensus': new Array()
                 },
                 self = this;
                 //TODO make this more general ... probably going to have
@@ -263,7 +263,7 @@ mol.modules.map.refine = function(mol) {
                             function(event) {
                                 if($(this).hasClass('selected')) {
                                     $(this).removeClass('selected');
-                                    layer.selectedHabitats =
+                                    layer.selectedHabitats[mode] =
                                         _.without(
                                             layer.selectedHabitats[mode],
                                             [$(this).data('habitat').toString()]

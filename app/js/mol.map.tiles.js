@@ -60,6 +60,7 @@ mol.modules.map.tiles = function(mol) {
                                     self.map.overlayMapTypes.removeAt(index);
                                     //put it back the layer
                                     self.getEETile(layer);
+                                    layerAdded = true;
                                     //fix the layer order
                                     self.map.overlayMapTypes.forEach(
                                         function(newmaptype, newindex) {
@@ -87,7 +88,7 @@ mol.modules.map.tiles = function(mol) {
                         }
                     );
                     if(!layerAdded) {
-                        self.getTile(layer);
+                        self.getEETile(layer);
                     }
 
                 }
@@ -189,10 +190,17 @@ mol.modules.map.tiles = function(mol) {
                     'apply-layer-style',
                     function(event) {
                         var layer = event.layer,
-                            gridmt;
-                            style = event.style;
+                            gridmt,
+                            style = event.style,
                             sel = event.isSelected;
-
+                        if(layer.mode == 'ee') {
+                            e = new mol.bus.Event(
+                                'layer-opacity',
+                                params
+                            );
+                            self.bus.fireEvent(e);
+                            return;
+                        }
                         self.bus.fireEvent(new mol.bus.Event('clear-map'));
 
                         self.map.overlayMapTypes.forEach(
@@ -607,7 +615,9 @@ mol.modules.map.tiles = function(mol) {
                 minZoom: 0,
                 opacity: layer.orig_opacity
             };
-
+            
+            layer.mode = 'cdb';
+            
             this.layer = new google.maps.ImageMapType(options);
             this.layer.layer = layer;
             this.layer.name = layer.id;
