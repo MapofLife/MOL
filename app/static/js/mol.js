@@ -3534,7 +3534,7 @@ mol.modules.map.tiles = function(mol) {
                         self.map.overlayMapTypes.forEach(
                             function(maptype, index) {
                                 if (maptype.name === layer.id) {
-                                    if(opacity == 1) {
+                                    if(opacity == 1 && layer.mode != 'ee') {
                                         maptype.setOpacity(style_opacity);
                                     } else {
                                         maptype.setOpacity(opacity);
