@@ -51,6 +51,9 @@ handlers:
 
 - url: /gbif/.*
   script: gbif_handler.application
+  
+- url: /list
+  script: list_handler.application
 
 - url: /api/autocomplete
   script: autocomplete_handler.application
