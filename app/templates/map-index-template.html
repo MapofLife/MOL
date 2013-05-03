@@ -61,6 +61,7 @@
      <script type="text/javascript" src="../../../js/mol.map.metadata.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.splash.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.styler.js"></script>
+     <script type="text/javascript" src="../../../js/mol.map.time.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.help.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.status.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.images.js"></script>
@@ -133,6 +134,8 @@
                 hd.start()
                 st = new env.map.status.StatusEngine(proxy, bus)
                 st.start()
+                tme = new env.map.time.TimeEngine(proxy, bus)
+                tme.start()
                 sty = new env.map.styler.StylerEngine(proxy, bus)
                 sty.start()
                 ie = new env.map.images.ImagesEngine(proxy, bus)
@@ -176,6 +179,8 @@
                 hd.start()
                 st = new env.map.status.StatusEngine(proxy, bus)
                 st.start()
+                tme = new env.map.time.TimeEngine(proxy, bus)
+                tme.start()
                 sty = new env.map.styler.StylerEngine(proxy, bus)
                 sty.start()
                 ie = new env.map.images.ImagesEngine(proxy, bus)

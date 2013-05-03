@@ -40,7 +40,7 @@ mol.modules.map.time = function(mol) {
             );
           
             this.bus.addHandler(
-                'show-date-widget',
+                'show-time-widget',
                 function(event) {
                   
                 }
@@ -57,18 +57,39 @@ mol.modules.map.time = function(mol) {
     {
         init : function() {
             var className = 'mol-Map-TimeWidget',
+                selectedDate,
                 html = '' +
-                    '<div class="' + className + '">' +
-                        '<div class="widgetTheme">' +
+                    '<div class="' + className + ' widgetTheme">' +
+                        '<div>' +
                             '<label for="from">From</label>' +
-                            '<input type="text" id="from" name="from" />' +
+                            '<input type="text" size="6" class="from" name="from" value="01/01/1980" />' +
                             '<label for="to">to</label>' +
-                            '<input type="text" id="to" name="to" />' +
+                            '<input type="text" size="6" class="to" name="to" value="12/31/2013" />' +
                         '</div>' +
-                    '</div>';
+                    '</div>',
+                    self = this;
             this._super(html);
             this.from = $(this).find('.from');
+            this.from.datepicker({
+                defaultDate: "-30y",
+                changeMonth: true,
+                changeYear:true,
+                numberOfMonths: 1,
+                onClose: function( selectedDate ) {
+                    self.from.datepicker( "option", "minDate", selectedDate );
+                }
+            });
             this.to = $(this).find('.to');
+            this.to.datepicker({
+                defaultDate: "+1w",
+                changeMonth: true,
+                changeYear:true,
+                numberOfMonths: 1,
+                onClose: function( selectedDate ) {
+                    self.from.datepicker( "option", "maxDate", selectedDate );
+                }
+            });
+            
         }
     });
 };

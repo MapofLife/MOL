@@ -19,6 +19,7 @@ mol.modules.map = function(mol) {
             'help',
             'status',
             'images',
+            'time',
             'boot'
     ];
 

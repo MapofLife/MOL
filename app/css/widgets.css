@@ -1657,4 +1657,14 @@ div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
 .mol-Map-FeatureDisplay .name {
     text-align: left;
 }
+.mol-Map-TimeWidget {
+    height: 26px;
+    width: 210px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    white-space: nowrap;
+    padding: 2px 3px 2px 3px;
+    margin-right:10px;
+    pointer-events:auto;
+}
 
