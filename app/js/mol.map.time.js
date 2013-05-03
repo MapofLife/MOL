@@ -23,7 +23,7 @@ mol.modules.map.time = function(mol) {
                     slot: mol.map.ControlDisplay.Slot.TOP,
                     position: google.maps.ControlPosition.TOP_RIGHT
                 };
-            
+
             this.time = new mol.map.TimeDisplay();
             params.display = this.time;
             event = new mol.bus.Event('add-map-control', params);
@@ -31,18 +31,18 @@ mol.modules.map.time = function(mol) {
         },
         addEventHandlers : function () {
             var self = this;
-          
+
             this.bus.addHandler(
                 'hide-time-widget',
                 function(event) {
-         
+
                 }
             );
-          
+
             this.bus.addHandler(
                 'show-time-widget',
                 function(event) {
-                  
+
                 }
             );
         }
@@ -63,7 +63,7 @@ mol.modules.map.time = function(mol) {
                         '<div>' +
                             '<label for="from">From</label>' +
                             '<input type="text" size="6" class="from" name="from" value="01/01/1980" />' +
-                            '<label for="to">to</label>' +
+                            '<label for="to">To</label>' +
                             '<input type="text" size="6" class="to" name="to" value="12/31/2013" />' +
                         '</div>' +
                     '</div>',
@@ -89,7 +89,7 @@ mol.modules.map.time = function(mol) {
                     self.from.datepicker( "option", "maxDate", selectedDate );
                 }
             });
-            
+
         }
     });
 };

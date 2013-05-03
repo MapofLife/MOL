@@ -301,6 +301,7 @@ mol.modules.map.tiles = function(mol) {
         },
         updateGrid: function(toggle) {
              var gridmt,
+                constraints = this.getConstraints(),
                 self = this;
 
              this.map.overlayMapTypes.forEach(
@@ -314,7 +315,7 @@ mol.modules.map.tiles = function(mol) {
              );
 
              if(toggle==true && this.map.overlayMapTypes.length>0) {
-                gridmt = new mol.map.tiles.GridTile(this.map);
+                gridmt = new mol.map.tiles.GridTile(this.map,constraints);
                 this.map.overlayMapTypes.push(gridmt.layer);
              }
         },
@@ -348,15 +349,24 @@ mol.modules.map.tiles = function(mol) {
                 this
             );
         },
+        getConstraints: function() {
+            //this should be a proxy call to the time widget module..
+            var constraints = {time : {min:null,max:null}};
 
+            constraints.time.min = $('.from').val();
+            constraints.time.max = $('.to').val();
+            return constraints;
+        },
         /**
          * Closure around the layer that returns the ImageMapType for the tile.
          */
         getTile: function(layer) {
             var self = this,
+                constraints = this.getConstraints(),
                 maptype = new mol.map.tiles.CartoDbTile(
                             layer,
-                            this.map
+                            this.map,
+                            constraints
                         ),
                 gridmt;
             maptype.onbeforeload = function (){
@@ -397,15 +407,16 @@ mol.modules.map.tiles = function(mol) {
     });
 
     mol.map.tiles.CartoDbTile = Class.extend({
-        init: function(layer, map) {
+        init: function(layer, map, constraints) {
             var sql =  "" + //c is in case cache key starts with a number
-                "SELECT * FROM get_tile('{0}','{1}','{2}','{3}')"
+                "SELECT * FROM get_tile('{0}','{1}','{2}','{3}','{4}','{5}')"
                 .format(
                     layer.source,
                     layer.type,
                     layer.name,
                     layer.dataset_id,
-                    mol.services.cartodb.tileApi.tile_cache_key
+                    constraints.time.min,
+                    constraints.time.max
                 ),
                 urlPattern = '' +
                     'http://{HOST}/tiles/{DATASET_ID}/{Z}/{X}/{Y}.png?'+
@@ -499,7 +510,7 @@ mol.modules.map.tiles = function(mol) {
     });
 
     mol.map.tiles.GridTile = Class.extend({
-        init: function(map) {
+        init: function(map, constraints) {
             var options = {
                     // Just a blank image
                     getTileUrl: function(tile, zoom) {
@@ -536,7 +547,7 @@ mol.modules.map.tiles = function(mol) {
                         "'{3}' as dataset_id, " +
                         "'{2}' as scientificname " +
                     "FROM " +
-                        "get_tile('{0}','{1}','{2}','{3}')",
+                        "get_tile('{0}','{1}','{2}','{3}','{4}','{5}')",
                 gridUrlPattern = '' +
                     'http://{0}/' +
                     'tiles/generic_style/{z}/{x}/{y}.grid.json?'+
@@ -552,7 +563,9 @@ mol.modules.map.tiles = function(mol) {
                                         mt.layer.source,
                                         mt.layer.type,
                                         unescape(mt.layer.name.replace(/percent/g,'%')),
-                                        mt.layer.dataset_id
+                                        mt.layer.dataset_id,
+                                        constraints.time.min,
+                                        constraints.time.max
                                     );
                                 }
                             }
