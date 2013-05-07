@@ -61,14 +61,41 @@ mol.modules.map.time = function(mol) {
                 html = '' +
                     '<div class="' + className + ' widgetTheme">' +
                         '<div>' +
-                            '<label for="from">From</label>' +
+                            /*'<label for="from">From</label>' +
                             '<input type="text" size="6" class="from" name="from" value="01/01/1980" />' +
                             '<label for="to">To</label>' +
-                            '<input type="text" size="6" class="to" name="to" value="12/31/2013" />' +
+                            '<input type="text" size="6" class="to" name="to" value="12/31/2013" />' +*/
+                            'Year Range' +
+                            '<input type="text" size="1" class="from" value="1950">:' +
+                            '<input type="text" size="1" class="to" value="2013">' +
+                            '<div class="year">' + 
                         '</div>' +
                     '</div>',
                     self = this;
             this._super(html);
+            this.year = $(this).find('.year');
+            this.from = $(this).find('.from');
+            this.to = $(this).find('.to');
+            this.from.change(function(event) {
+                self.year.slider('values',0,$(this).val());
+            });
+            this.to.change(function(event) {
+                self.year.slider('values',1,$(this).val());
+            });
+            this.year.slider({
+                range: true,
+                min:1950,
+                max:2013,
+                values: [1980,2013],
+                step:1,
+                animate: "fast",
+                slide : function (event, ui) {
+                    self.from.val(ui.values[0]);
+                    self.to.val(ui.values[1]);
+                }
+            });
+            
+            /* 
             this.from = $(this).find('.from');
             this.from.datepicker({
                 defaultDate: "-30y",
@@ -88,7 +115,7 @@ mol.modules.map.time = function(mol) {
                 onClose: function( selectedDate ) {
                     self.from.datepicker( "option", "maxDate", selectedDate );
                 }
-            });
+            }); */
 
         }
     });

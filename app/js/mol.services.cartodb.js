@@ -23,7 +23,7 @@ mol.modules.services.cartodb = function(mol) {
 //                    'mol.cartodb.com';
                     'd3dvrpov25vfw0.cloudfront.net';
                 //cache key is mmddyyyyhhmm of cache start
-                this.tile_cache_key = '042420131233';
+                this.tile_cache_key = '050620131233';
             }
         }
     );

@@ -1668,3 +1668,8 @@ div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
     pointer-events:auto;
 }
 
+.mol-Map-TimeWidget .year {
+    height: 5px;
+    margin-top: 5px;
+}
+

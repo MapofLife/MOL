@@ -353,8 +353,8 @@ mol.modules.map.tiles = function(mol) {
             //this should be a proxy call to the time widget module..
             var constraints = {time : {min:null,max:null}};
 
-            constraints.time.min = $('.from').val();
-            constraints.time.max = $('.to').val();
+            constraints.time.min = $('.year').slider('values',0);
+            constraints.time.max = $('.year').slider('values',1);
             return constraints;
         },
         /**
@@ -409,7 +409,7 @@ mol.modules.map.tiles = function(mol) {
     mol.map.tiles.CartoDbTile = Class.extend({
         init: function(layer, map, constraints) {
             var sql =  "" + //c is in case cache key starts with a number
-                "SELECT * FROM get_tile('{0}','{1}','{2}','{3}','{4}','{5}')"
+                "SELECT * FROM get_tile('{0}','{1}','{2}','{3}',{4},{5})"
                 .format(
                     layer.source,
                     layer.type,
@@ -547,7 +547,7 @@ mol.modules.map.tiles = function(mol) {
                         "'{3}' as dataset_id, " +
                         "'{2}' as scientificname " +
                     "FROM " +
-                        "get_tile('{0}','{1}','{2}','{3}','{4}','{5}')",
+                        "get_tile('{0}','{1}','{2}','{3}',{4},{5})",
                 gridUrlPattern = '' +
                     'http://{0}/' +
                     'tiles/generic_style/{z}/{x}/{y}.grid.json?'+
