@@ -45,81 +45,49 @@ class MainPage(webapp2.RequestHandler):
 
     def get(self):
 
-        ee.Initialize(credentials, EE_URL)
+	ee.Initialize(credentials, EE_URL)
 
-        sciname = self.request.get('sciname', None)
-        habitats = self.request.get('habitats', None)
-        elevation = self.request.get('elevation', None)
-        get_area = self.request.get('get_area', 'false')
-        ee_id = self.request.get('ee_id', None)
+	sciname = self.request.get('sciname', None)
+	habitats = self.request.get('habitats', None)
+	elevation = self.request.get('elevation', None)
+	get_area = self.request.get('get_area', 'false')
+	ee_id = self.request.get('ee_id', None)
 
-        #Get land cover and elevation layers
-        elev = ee.Image('srtm90_v4')
+	#Get land cover and elevation layers
+	elev = ee.Image('srtm90_v4')
 
-        output = ee.Image(0)
-        empty = ee.Image(0).mask(0)
+	output = ee.Image(0)
+	empty = ee.Image(0).mask(0)
 
-        species = ee.Image(ee_id)
+	species = ee.Image(ee_id)
 
-        min = int(elevation.split(',')[0])
-        max = int(elevation.split(',')[1])
-        habitat_list = habitats.split(",")
+	min = int(elevation.split(',')[0])
+	max = int(elevation.split(',')[1])
+	habitat_list = habitats.split(",")
 
-        output = output.mask(species)
+	output = output.mask(species)
 
-        for pref in habitat_list:
-            cover = ee.Image(consensus[pref])
-            output = output.add(cover)
+	for pref in habitat_list:
+	    cover = ee.Image(consensus[pref])
+	    output = output.add(cover)
 
-        output = output.where(elev.lt(min).Or(elev.gt(max)),0)
+	output = output.where(elev.lt(min).Or(elev.gt(max)),0)
 
 
-        result = output.mask(output)
+	result = output.mask(output)
 
-        if(get_area == 'false'):
-            mapid = result.getMapId({
-                'palette': '187F7B,55BFB2,85AD9A,F5821E,8F0B05',
-                'min': 0,
-                'max': 100
-                #'opacity': 1
-            })
-            template_values = {
-                'mapid' : mapid['mapid'],
-                'token' : mapid['token']
-            }
-            self.render_template('ee_mapid.js', template_values)
-        else:
-            #compute the area
-            area = ee.call("Image.pixelArea")
-            sum_reducer = ee.call("Reducer.sum")
-
-            total = area.mask(result.mask())
-
-            geometry = feature.geometry()
-            #compute area on 1km scale
-            total_area = area.reduceRegion(sum_reducer, geometry, 1000)
-            clipped_area = total.reduceRegion(sum_reducer, geometry, 1000)
-
-            properties = {'total': total_area, 'clipped': clipped_area}
-
-            feature = feature.map_update(properties)
-
-            data = ee.data.getValue({"json": feature.serialize()})
-            ta = 0
-            ca = 0
-
-            for feature in data["features"]:
-               if ("properties" in feature):
-                   if ("total" in feature.get("properties")):
-                       ta=ta+feature.get("properties").get("total").get("area")
-                   if ("clipped" in feature.get("properties")):
-                       ca=ca+feature.get("properties").get("clipped").get("area")
-
-            template_values = {
-                'total_area' : ta/1000000,
-                'clipped_area': ca/1000000
-            }
-            self.render_template('ee_count.js', template_values)
+	       
+	mapid = result.getMapId({
+		'palette': '5E4FA2,3288BD,66C2A5,ABDDA4,E6F598,FFFFBF,FEE08B,FDAE61,F46D43,D53E4F,9E0142',
+		'min': 0,
+		'max': 100
+	})
+	template_values = {
+		'mapid' : mapid['mapid'],
+		'token' : mapid['token']
+	}
+	self.render_template('ee_mapid.js', template_values)
+		
 
 application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
 

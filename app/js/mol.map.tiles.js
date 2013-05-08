@@ -500,46 +500,48 @@ mol.modules.map.tiles = function(mol) {
                    self.map.overlayMapTypes.insertAt(0,maptype.layer);
                 }
             );
-           /* $.getJSON(
-                'ee_{0}'.format(layer.filter_mode),
-                {
-                    sciname: layer.name,
-                    habitats: layer.selectedHabitats[layer.filter_mode].join(','),
-                    elevation: layer.selectedElev.join(','),
-                    year: layer.selectedYear,
-                    ee_id: layer.ee_id,
-                    get_area: true
-                },
-                function (ee) {
-                    var maptype = new mol.map.tiles.EarthEngineTile(
-                        ee,
-                        layer,
-                        self.map
-                    );
-                    maptype.layer.onafterload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "hide-loading-indicator",
-                                {source : layer.id}
-                            )
-                        )
-                    };
-                    maptype.layer.onbeforeload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "show-loading-indicator",
-                                {source : layer.id}
-                            )
-                        )
-                    };
-                   $("<div>" +
-                        "{0}<br>".format(layer.name) +
-                        "Expert map range size: {0}".format(Math.round(ee.total_area)) +
-                        " km<sup><font size=-2>2</font></sup><br>" +
-                        "Refined range size: {0}".format(Math.round(ee.clipped_area)) +
-                    " km<sup><font size=-2>2</font></sup></div>").dialog({width: 400});
-                }
-            );*/
+            if(layer.filter_mode!='consensus') {
+	            $.getJSON(
+	                'ee_{0}'.format(layer.filter_mode),
+	                {
+	                    sciname: layer.name,
+	                    habitats: layer.selectedHabitats[layer.filter_mode].join(','),
+	                    elevation: layer.selectedElev.join(','),
+	                    year: layer.selectedYear,
+	                    ee_id: layer.ee_id,
+	                    get_area: true
+	                },
+	                function (ee) {
+	                    var maptype = new mol.map.tiles.EarthEngineTile(
+	                        ee,
+	                        layer,
+	                        self.map
+	                    );
+	                    maptype.layer.onafterload = function (){
+	                        self.bus.fireEvent(
+	                            new mol.bus.Event(
+	                                "hide-loading-indicator",
+	                                {source : layer.id}
+	                            )
+	                        )
+	                    };
+	                    maptype.layer.onbeforeload = function (){
+	                        self.bus.fireEvent(
+	                            new mol.bus.Event(
+	                                "show-loading-indicator",
+	                                {source : layer.id}
+	                            )
+	                        )
+	                    };
+	                   $("<div>" +
+	                        "{0}<br>".format(layer.name) +
+	                        "Expert map range size: {0}".format(Math.round(ee.total_area)) +
+	                        " km<sup><font size=-2>2</font></sup><br>" +
+	                        "Refined range size: {0}".format(Math.round(ee.clipped_area)) +
+	                    " km<sup><font size=-2>2</font></sup></div>").dialog({width: 400});
+	                }
+	            );
+            }
         }
     });
 
