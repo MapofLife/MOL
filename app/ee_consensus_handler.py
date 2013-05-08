@@ -70,23 +70,58 @@ class MainPage(webapp2.RequestHandler):
 	for pref in habitat_list:
 	    cover = ee.Image(consensus[pref])
 	    output = output.add(cover)
-
+	
 	output = output.where(elev.lt(min).Or(elev.gt(max)),0)
 
 
 	result = output.mask(output)
 
-	       
-	mapid = result.getMapId({
-		'palette': '5E4FA2,3288BD,66C2A5,ABDDA4,E6F598,FFFFBF,FEE08B,FDAE61,F46D43,D53E4F,9E0142',
-		'min': 0,
-		'max': 100
-	})
-	template_values = {
-		'mapid' : mapid['mapid'],
-		'token' : mapid['token']
-	}
-	self.render_template('ee_mapid.js', template_values)
+	if(get_area == 'false'):       
+		mapid = result.getMapId({
+			'palette': '5E4FA2,3288BD,66C2A5,ABDDA4,E6F598,FFFFBF,FEE08B,FDAE61,F46D43,D53E4F,9E0142',
+			'min': 0,
+			'max': 100
+		})
+		template_values = {
+			'mapid' : mapid['mapid'],
+			'token' : mapid['token']
+		}
+		self.render_template('ee_mapid.js', template_values)
+	else:
+		#compute the area
+          
+		area = ee.call("Image.pixelArea")
+		sum_reducer = ee.call("Reducer.sum")
+
+		total = area.mask(species)
+		clipped = total.multiply(result.multiply(ee.Image(0.01)))
+		clipped = clipped.mask(result.mask())
+
+		region = ee.Feature(ee.Feature.Polygon([[-179.9,-89.9],[-179.9,89.9],[179.9,89.9],[179.9, -89.9], [-179.9, -89.9]]))
+		geometry = region.geometry()
+
+		##compute area on 1km scale
+		clipped_area = clipped.reduceRegion(sum_reducer,geometry,10000)
+		total_area = total.reduceRegion(sum_reducer,geometry,10000)
+
+		properties = {'total': total_area, 'clipped': clipped_area}
+
+		region = region.setProperties(properties)
+
+		data = ee.data.getValue({"json": region.serialize()})
+
+		#self.response.headers["Content-Type"] = "application/json"
+		#self.response.out.write(json.dumps(data))
+		ta = 0
+		ca = 0
+		ta = data["properties"]["total"]["area"]
+		ca = data["properties"]["clipped"]["area"]
+		template_values = {
+			'clipped_area': ca/1000000,
+			'total_area': ta/1000000
+		}
+
+		self.render_template('ee_count.js', template_values)
 		
 
 application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
