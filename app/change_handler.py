@@ -20,18 +20,11 @@ class BaseHandler(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), "html", f)
         self.response.out.write(open(path, 'r').read())
 
-class MapPage(BaseHandler):
-    def get(self):
-        self.render_template('map-index-template.html',
-                             {'prod': PROD, 'r': random.random()})
-
 class ChangePage(BaseHandler):
     def get(self):
         self.render_template('change-chart-template.html', {})
 
-application = webapp2.WSGIApplication(
-         [('/', MapPage), ('/.*',MapPage),
-         ('/change',ChangePage)],
+application = webapp2.WSGIApplication([('/change',ChangePage)],
          debug=True)
 
 def main():

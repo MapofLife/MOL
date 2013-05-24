@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>
+      Google Visualization API Sample
+    </title>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+    </script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    
+    
+      function getEE_ID(name) {
+          var sql = ""; //get habitat and elev pref from cdb
+          $.getJSON(
+              'http://mol.cartodb.com?api/v2/sql?q='+sql,
+              function(response) {
+                  //assemble params here
+                  $.getJSON(
+                      'ee_modis_change',
+                      params,
+                      function(response) {
+                          drawVisualization(response);
+                      }
+                  );
+              }
+          )
+      }
+    
+    
+    
+      function drawVisualization(response) {
+          // Create and populate the data table.
+           var  data = google.visualization.arrayToDataTable([['Modis Year','Area'],[2001, 34098197.8511], [2002, 34196519.5366], [2003, 33996653.8434], [2004, 34084594.3966], [2005, 34259301.7308], [2006, 34463933.6967], [2007, 34395651.4796]]);
+      
+      
+          // Create and draw the visualization.
+          var chart = new google.visualization.ScatterChart(
+              document.getElementById('visualization'));
+          chart.draw(data, {title: 'Suitable habitat for Apus Apus',
+                            width: 600, height: 400,
+                            vAxis: {title: "AREA (SQ KM)", titleTextStyle: {color: "green"}},
+                            hAxis: {title: "YEAR", titleTextStyle: {color: "green"}},
+                            trendlines: { 0: {} }
+                           }
+                    );
+      }
+      google.setOnLoadCallback(drawVisualization);
+    </script>
+  </head>
+  <body style="font-family: Arial;border: 0 none;">
+    <div id="visualization" style="width: 600px; height: 400px;"></div>
+  </body>
+</html>
+​

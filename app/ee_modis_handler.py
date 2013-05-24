@@ -26,7 +26,7 @@ credentials = AppAssertionCredentials(scope=SCOPES)
 class MainPage(webapp2.RequestHandler):
     def render_template(self, f, template_args):
         path = os.path.join(os.path.dirname(__file__), "templates", f)
-        self.response.out.write(template.render(path, template_args))
+        response.out.write(template.render(path, template_args))
 
     def get(self):
 

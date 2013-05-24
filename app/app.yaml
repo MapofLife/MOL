@@ -52,6 +52,9 @@ handlers:
 - url: /ee_modis
   script: ee_modis_handler.application
   
+- url: /ee_modis_change
+  script: ee_modis_change_handler.application
+  
 - url: /ee_consensus
   script: ee_consensus_handler.application
 
@@ -70,10 +73,15 @@ handlers:
 - url: /about.*
   script: homepage.application
 
+- url: /change
+  script: change_handler.application
+
 - url: /
   script: app.application
 
 - url: /.*
   script: app.application
+
+
 
 
