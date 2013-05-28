@@ -1,58 +1,139 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>
-      Google Visualization API Sample
+        Map of Life -- MODIS Habitat Change Tool
     </title>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load('visualization', '1', {packages: ['corechart']});
     </script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+    <script 
+        type="text/javascript" 
+        src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js">
+    </script>
     <script type="text/javascript">
-    
-    
-      function getEE_ID(name) {
-          var sql = ""; //get habitat and elev pref from cdb
-          $.getJSON(
-              'http://mol.cartodb.com?api/v2/sql?q='+sql,
-              function(response) {
-                  //assemble params here
-                  $.getJSON(
-                      'ee_modis_change',
-                      params,
-                      function(response) {
-                          drawVisualization(response);
+         function getURLParameter(name) {
+            return decodeURI(
+                (RegExp(name + '=' + '(.+?)(&|$)')
+                    .exec(location.search)||[,null])[1]
+            );
+        }
+        function getEE_ID(name) {
+            var sql = 'SELECT DISTINCT ' +
+                'l.scientificname as scientificname, ' +
+                'e.habitatprefs as modis_habitats, ' +
+                'e.finalmin as mine, ' +
+                'e.finalmax as maxe, ' +
+                'ee.ee_id as ee_id, ' +
+                'CONCAT(n.v,\'\') as names ' +
+            'FROM layer_metadata_mar_8_2013 l ' +
+            'LEFT JOIN ac_mar_8_2013 n ON ' +
+                'l.scientificname = n.n ' +
+            'LEFT JOIN elevandhabitat e ON ' +
+                'l.scientificname = e.scientific ' +
+            'LEFT JOIN ee_assets ee ON ' +
+                'l.scientificname = ee.scientificname ' +
+                'AND l.dataset_id = ee.dataset_id ' +
+            'WHERE ' +
+                 "(n.n~*'\\m{TERM}' OR n.v~*'\\m{TERM}') " +
+                 " and l.provider='{SOURCE}' and l.type='range' " +
+                 " and e.habitatprefs is not null and ee.ee_id is not null " +
+            ' LIMIT 1',
+         term = getURLParameter("name"),
+         source = (getURLParameter("source") != "null") ? 
+            getURLParameter("source") : 'iucn',
+         params = {q : sql.replace(/{TERM}/g,term).replace(/{SOURCE}/g,source)};
+         $.getJSON(
+             'http://mol.cartodb.com/api/v2/sql',
+             params,
+             function(response) {
+                 if (response.total_rows == 0) {
+                     $('#visualization').html(
+                         "There are no range maps or habitat preference " +
+                         "data for this species."
+                     );
+                     return;
+                 } else {
+                      $('#name').html(
+                          " for "+
+                          response.rows[0].scientificname + 
+                          ' ('+ response.rows[0].names+')'
+                      );
+                 }
+                 var habitats=response.rows[0].modis_habitats,
+                     elev = [
+                         (response.rows[0].mine == 'DD') ? 
+                             -1000 : response.rows[0].mine, 
+                         (response.rows[0].maxe == 'DD') ? 
+                             9000 : response.rows[0].maxe
+                     ],
+                     ee_id = response.rows[0].ee_id,
+                     mod_params = {
+                         habitats: habitats,
+                         elevation: elev.join(','),
+                         ee_id: ee_id 
+                     };
+                 scientificname = response.rows[0].scientificname;
+                 commonnames = ' ('+response.rows[0].names+')';
+                 $.getJSON(
+                     'ee_modis_change',
+                     mod_params,
+                     function(response) {
+                         drawVisualization(response);
                       }
                   );
               }
-          )
+          ).error(
+              function() {
+                  $('#visualization').html(
+                      "There are no range maps or " + 
+                      "habitat preference data for this species."
+                  );
+              }
+              
+          );
       }
     
     
     
       function drawVisualization(response) {
           // Create and populate the data table.
-           var  data = google.visualization.arrayToDataTable([['Modis Year','Area'],[2001, 34098197.8511], [2002, 34196519.5366], [2003, 33996653.8434], [2004, 34084594.3966], [2005, 34259301.7308], [2006, 34463933.6967], [2007, 34395651.4796]]);
+           var  data = google.visualization.arrayToDataTable(response);
       
       
           // Create and draw the visualization.
           var chart = new google.visualization.ScatterChart(
               document.getElementById('visualization'));
-          chart.draw(data, {title: 'Suitable habitat for Apus Apus',
+          chart.draw(data, {title: 'Suitable habitat for {NAME} {COMMON}'
+                                .replace(/{NAME}/g,scientificname)
+                                .replace(/{COMMON}/g,commonnames),
                             width: 600, height: 400,
-                            vAxis: {title: "AREA (SQ KM)", titleTextStyle: {color: "green"}},
-                            hAxis: {title: "YEAR", titleTextStyle: {color: "green"}},
+                            vAxis: {
+                                title: "AREA (SQ KM)", 
+                                titleTextStyle: {color: "green"}
+                            },
+                            hAxis: {
+                                title: "YEAR", 
+                                titleTextStyle: {color: "green"}, 
+                                format: '####'
+                            },
                             trendlines: { 0: {} }
                            }
                     );
       }
-      google.setOnLoadCallback(drawVisualization);
+      var scientificname = getURLParameter("name"),
+        commonnames = '';
+      
+      google.setOnLoadCallback(getEE_ID);
     </script>
   </head>
   <body style="font-family: Arial;border: 0 none;">
-    <div id="visualization" style="width: 600px; height: 400px;"></div>
+    <div id="visualization" style="width: 600px; height: 400px;">
+        Computing habitat area change <span id = "name"></span>. 
+        Please wait.</span>
+        <br>
+        <img src="/static/loading.gif"></div>
   </body>
 </html>
 ​

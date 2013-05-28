@@ -80,36 +80,36 @@ class MainPage(webapp2.RequestHandler):
         #compute the area
           
 	    area = ee.call("Image.pixelArea")
-            sum_reducer = ee.call("Reducer.sum")
+        sum_reducer = ee.call("Reducer.sum")
+        
+        area = area.mask(species)
+        total = area.mask(result.mask())
+      
+        region = ee.Feature(ee.Feature.Polygon([[-179.9999,-89.9999],[-179.9,89.9999],[179.9999,89.9999],[179.9999, -89.9999], [-179.9999, -89.9999]]))
+        geometry = region.geometry()
+
+        ##compute area on 1km scale
+        clipped_area = total.reduceRegion(sum_reducer,geometry,100000)
+        total_area = area.reduceRegion(sum_reducer,geometry,100000)
+
+        properties = {'total': total_area, 'clipped': clipped_area}
+
+        region = region.setProperties(properties)
+
+        data = ee.data.getValue({"json": region.serialize()})
             
-            area = area.mask(species)
-            total = area.mask(result.mask())
-          
-            region = ee.Feature(ee.Feature.Polygon([[-179.9,-89.9],[-179.9,89.9],[179.9,89.9],[179.9, -89.9], [-179.9, -89.9]]))
-	    geometry = region.geometry()
+        #self.response.headers["Content-Type"] = "application/json"
+         #self.response.out.write(json.dumps(data))
+        ta = 0
+        ca = 0
+        ta = data["properties"]["total"]["area"]
+        ca = data["properties"]["clipped"]["area"]
+        template_values = {
+           'clipped_area': ca/1000000,
+           'total_area': ta/1000000
+        }
 
-            ##compute area on 1km scale
-            clipped_area = total.reduceRegion(sum_reducer,geometry,10000)
-	    total_area = area.reduceRegion(sum_reducer,geometry,10000)
-
-            properties = {'total': total_area, 'clipped': clipped_area}
-
-            region = region.setProperties(properties)
-
-            data = ee.data.getValue({"json": region.serialize()})
-            
-	    #self.response.headers["Content-Type"] = "application/json"
-            #self.response.out.write(json.dumps(data))
-	    ta = 0
-            ca = 0
-            ta = data["properties"]["total"]["area"]
-            ca = data["properties"]["clipped"]["area"]
-            template_values = {
-               'clipped_area': ca/1000000,
-               'total_area': ta/1000000
-            }
-
-            self.render_template('ee_count.js', template_values)
+        self.render_template('ee_count.js', template_values)
 
 application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
 
