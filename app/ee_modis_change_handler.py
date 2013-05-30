@@ -22,18 +22,28 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 class changeHandler(webapp2.RequestHandler):
     def get(self):
         
-        self.results = [['Year','Area (sq km)']]
+        self.area_results = [['Year','Area (sq km)']]
+        self.mapid_results = {}
         self.rpcs = []
         
-        url = 'http://habitat.map-of-life.appspot.com/ee_modis?%s'
+        self.url = 'http://change-beta.map-of-life.appspot.com/ee_modis?%s'
           
-        habitats = self.request.get('habitats', None)
-        elevation = self.request.get('elevation', None)
-        get_area = self.request.get('get_area', 'false')
-        ee_id = self.request.get('ee_id', None)
+        self.habitats = self.request.get('habitats', None)
+        self.elevation = self.request.get('elevation', None)
+        self.ee_id = self.request.get('ee_id', None)
+        self.get_area = self.request.get('get_area', "true")
 
         for i in range(2001,2010):
-            year_url = url % (urllib.urlencode(dict(habitats=habitats, elevation=elevation, year=i, ee_id=ee_id, get_area="true")))
+            year_url = self.url % (
+                urllib.urlencode(
+                    dict(habitats=self.habitats, 
+                         elevation=self.elevation, 
+                         year=i, 
+                         ee_id=self.ee_id, 
+                         get_area=self.get_area
+                    )
+                )
+            )
             rpc = urlfetch.create_rpc(deadline=240)
             rpc.callback = self.create_callback(rpc, i)
             logging.info('Calling %s' % year_url)
@@ -47,10 +57,14 @@ class changeHandler(webapp2.RequestHandler):
         result = rpc.get_result()
         try:
            result = rpc.get_result()
-           if result.status_code == 200:
-               self.results.append([year, json.loads(result.content)["clipped_area"]])
-               if len(self.results) > len(self.rpcs):
-                   self.response.out.write(json.dumps(self.results))
+           if result.status_code == 200 and self.get_area == 'true' :
+               self.area_results.append([year, json.loads(result.content)["clipped_area"]])
+               if len(self.area_results) > len(self.rpcs):
+                   self.response.out.write(json.dumps(self.area_results))
+           else:
+               self.mapid_results["modis_%s" % year] = json.loads(result.content)["urlPattern"]
+               if len(self.mapid_results) >= len(self.rpcs):
+                   self.response.out.write(json.dumps(self.mapid_results))
                
         except urlfetch.DownloadError:
             logging.error("Ruh roh.")

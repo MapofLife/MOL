@@ -1,139 +1,152 @@
 <html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>
-        Map of Life -- MODIS Habitat Change Tool
-    </title>
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load('visualization', '1', {packages: ['corechart']});
-    </script>
-    <script 
-        type="text/javascript" 
-        src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js">
-    </script>
-    <script type="text/javascript">
-         function getURLParameter(name) {
-            return decodeURI(
-                (RegExp(name + '=' + '(.+?)(&|$)')
-                    .exec(location.search)||[,null])[1]
-            );
-        }
-        function getEE_ID(name) {
-            var sql = 'SELECT DISTINCT ' +
-                'l.scientificname as scientificname, ' +
-                'e.habitatprefs as modis_habitats, ' +
-                'e.finalmin as mine, ' +
-                'e.finalmax as maxe, ' +
-                'ee.ee_id as ee_id, ' +
-                'CONCAT(n.v,\'\') as names ' +
-            'FROM layer_metadata_mar_8_2013 l ' +
-            'LEFT JOIN ac_mar_8_2013 n ON ' +
-                'l.scientificname = n.n ' +
-            'LEFT JOIN elevandhabitat e ON ' +
-                'l.scientificname = e.scientific ' +
-            'LEFT JOIN ee_assets ee ON ' +
-                'l.scientificname = ee.scientificname ' +
-                'AND l.dataset_id = ee.dataset_id ' +
-            'WHERE ' +
-                 "(n.n~*'\\m{TERM}' OR n.v~*'\\m{TERM}') " +
-                 " and l.provider='{SOURCE}' and l.type='range' " +
-                 " and e.habitatprefs is not null and ee.ee_id is not null " +
-            ' LIMIT 1',
-         term = getURLParameter("name"),
-         source = (getURLParameter("source") != "null") ? 
-            getURLParameter("source") : 'iucn',
-         params = {q : sql.replace(/{TERM}/g,term).replace(/{SOURCE}/g,source)};
-         $.getJSON(
-             'http://mol.cartodb.com/api/v2/sql',
-             params,
-             function(response) {
-                 if (response.total_rows == 0) {
-                     $('#visualization').html(
-                         "There are no range maps or habitat preference " +
-                         "data for this species."
-                     );
-                     return;
-                 } else {
-                      $('#name').html(
-                          " for "+
-                          response.rows[0].scientificname + 
-                          ' ('+ response.rows[0].names+')'
-                      );
-                 }
-                 var habitats=response.rows[0].modis_habitats,
-                     elev = [
-                         (response.rows[0].mine == 'DD') ? 
-                             -1000 : response.rows[0].mine, 
-                         (response.rows[0].maxe == 'DD') ? 
-                             9000 : response.rows[0].maxe
-                     ],
-                     ee_id = response.rows[0].ee_id,
-                     mod_params = {
-                         habitats: habitats,
-                         elevation: elev.join(','),
-                         ee_id: ee_id 
-                     };
-                 scientificname = response.rows[0].scientificname;
-                 commonnames = ' ('+response.rows[0].names+')';
-                 $.getJSON(
-                     'ee_modis_change',
-                     mod_params,
-                     function(response) {
-                         drawVisualization(response);
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+        <title>
+            Map of Life -- MODIS Habitat Change Tool
+        </title>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+        <script type="text/javascript">
+            google.load('visualization', '1', {packages: ['corechart']});
+        </script>
+        <script 
+            type="text/javascript" 
+            src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js">
+        </script>
+        <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+        <style type="text/css">
+            .visualization {
+                float:left;
+                width: 500px;
+            }
+            .modis_class {
+                display:none;
+            }
+            .modis_label {
+                display:none;
+            }
+            #map_container {
+                float: right;
+                width: 500px;
+            }
+            .key {
+                float: right;
+                width: 300px;
+            }
+        </style>
+        <script type="text/javascript" src="/js/mol_change_tool.js"></script>
+        <script type="text/javascript">
+            var scientificname = getURLParameter("name"), 
+                commonnames = '',
+                modis_maptypes = {},
+                map_options = {
+                    zoom: 1,
+                    center: new google.maps.LatLng(0,0),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    styles: [
+                      {
+                        "featureType": "landscape",
+                        "stylers": [
+                          { "color": "#f4f4f4" }
+                        ]
+                      },{
+                        "featureType": "water",
+                        "stylers": [
+                          { "visibility": "simplified" }
+                        ]
+                      },{
+                      },{
+                        "featureType": "water",
+                        "stylers": [
+                          { "color": "#808080" }
+                        ]
+                      },{
+                        "featureType": "administrative",
+                        "stylers": [
+                          { "visibility": "off" }
+                        ]
+                      },{
+                        "featureType": "administrative.country",
+                        "elementType": "labels",
+                        "stylers": [
+                          { "visibility": "off" }
+                        ]
+                      },{
+                        "featureType": "road",
+                        "stylers": [
+                          { "visibility": "off" }
+                        ]
+                      },{
+                        "featureType": "poi",
+                        "stylers": [
+                          { "visibility": "off" }
+                        ]
                       }
-                  );
-              }
-          ).error(
-              function() {
-                  $('#visualization').html(
-                      "There are no range maps or " + 
-                      "habitat preference data for this species."
-                  );
-              }
-              
-          );
-      }
-    
-    
-    
-      function drawVisualization(response) {
-          // Create and populate the data table.
-           var  data = google.visualization.arrayToDataTable(response);
-      
-      
-          // Create and draw the visualization.
-          var chart = new google.visualization.ScatterChart(
-              document.getElementById('visualization'));
-          chart.draw(data, {title: 'Suitable habitat for {NAME} {COMMON}'
-                                .replace(/{NAME}/g,scientificname)
-                                .replace(/{COMMON}/g,commonnames),
-                            width: 600, height: 400,
-                            vAxis: {
-                                title: "AREA (SQ KM)", 
-                                titleTextStyle: {color: "green"}
-                            },
-                            hAxis: {
-                                title: "YEAR", 
-                                titleTextStyle: {color: "green"}, 
-                                format: '####'
-                            },
-                            trendlines: { 0: {} }
-                           }
-                    );
-      }
-      var scientificname = getURLParameter("name"),
-        commonnames = '';
-      
-      google.setOnLoadCallback(getEE_ID);
-    </script>
+                    ]               
+                },
+                map;
+                                
+            google.setOnLoadCallback(init);
+
+            $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+
+                item.label = item.label.replace(
+                    new RegExp("(?![^&;]+;)(?!<[^<>]*)(" +
+                       $.ui.autocomplete.escapeRegex(this.term) +
+                       ")(?![^<>]*>)(?![^&;]+;)", "gi"),
+                    "<strong>$1</strong>"
+                );
+                return $("<li></li>")
+                    .data("item.autocomplete", item)
+                    .append("<a>" + item.label + "</a>")
+                    .appendTo(ul);
+            };
+        </script>
   </head>
   <body style="font-family: Arial;border: 0 none;">
+    <input type="text" placeholder="Search by species name" size=50 class="search">
+    <table>
+       <tbody><tr><td> 
     <div id="visualization" style="width: 600px; height: 400px;">
-        Computing habitat area change <span id = "name"></span>. 
-        Please wait.</span>
+        Computing habitat area change 
+        <span id="name"></span>. 
+        Please wait.
         <br>
-        <img src="/static/loading.gif"></div>
-  </body>
+        <img src="/static/loading.gif">
+    </div>
+    </td>
+    <td>
+        <div id="map_container" style="width: 600px; height: 400px;"></div>
+    </td><td>
+        
+        <div class="elev_range"></div>
+        <div class="modis_label">Selected MODIS habitats:</div>
+        <div class="modis_key">
+            <div class="modis_class 1">Evergreen Needleleaf Forests</div>
+            <div class="modis_class 2">Evergreen Broadleaf Forests</div>
+            <div class="modis_class 3">Deciduous Needleleaf Forests</div>
+            <div class="modis_class 4">Deciduous Broadleaf Forests</div>
+            <div class="modis_class 5">Mixed Forests</div>
+            <div class="modis_class 6">Closed Shrublands</div>
+            <div class="modis_class 7">Open Shrublands</div>
+            <div class="modis_class 8">Woody Savannas</div>
+            <div class="modis_class 9">Savannas</div>
+            <div class="modis_class 10">Grasslands</div>
+            <div class="modis_class 11">Permanent Wetlands</div>
+            <div class="modis_class 12">Cropland</div>
+            <div class="modis_class 13">Urban and Built-up</div>
+            <div class="modis_class 14">Cropland/Natural Vegetation Mosaics</div>
+            <div class="modis_class 15">Snow and Ice Barren</div>
+            <div class="modis_class 16">Barren</div>
+            <div class="modis_class 17">Water Bodies</div>
+        </div>
+       </td>
+       </tr>
+       </tbody>
+       </table>
+    
+   </body>
 </html>
-​

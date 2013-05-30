@@ -26,7 +26,7 @@ credentials = AppAssertionCredentials(scope=SCOPES)
 class MainPage(webapp2.RequestHandler):
     def render_template(self, f, template_args):
         path = os.path.join(os.path.dirname(__file__), "templates", f)
-        response.out.write(template.render(path, template_args))
+        self.response.out.write(template.render(path, template_args))
 
     def get(self):
 
@@ -66,7 +66,7 @@ class MainPage(webapp2.RequestHandler):
 
         if(get_area == 'false'):
             mapid = result.getMapId({
-                'palette': '000000,85AD9A',
+                'palette': '000000,FFAA00',
                 'max': 1,
                 'opacity': 0.5
             })
@@ -79,37 +79,37 @@ class MainPage(webapp2.RequestHandler):
         else:
         #compute the area
           
-	    area = ee.call("Image.pixelArea")
-        sum_reducer = ee.call("Reducer.sum")
-        
-        area = area.mask(species)
-        total = area.mask(result.mask())
-      
-        region = ee.Feature(ee.Feature.Polygon([[-179.9999,-89.9999],[-179.9,89.9999],[179.9999,89.9999],[179.9999, -89.9999], [-179.9999, -89.9999]]))
-        geometry = region.geometry()
+            area = ee.call("Image.pixelArea")
+            sum_reducer = ee.call("Reducer.sum")
+            
+            area = area.mask(species)
+            total = area.mask(result.mask())
+          
+            region = ee.Feature(ee.Feature.Polygon([[-179.9,-89.9],[-179.9,89.9],[179.9,89.9],[179.9, -89.9], [-179.9, -89.9]]))
+            geometry = region.geometry()
 
-        ##compute area on 1km scale
-        clipped_area = total.reduceRegion(sum_reducer,geometry,100000)
-        total_area = area.reduceRegion(sum_reducer,geometry,100000)
+            ##compute area on 1km scale
+            clipped_area = total.reduceRegion(sum_reducer,geometry,10000)
+            total_area = area.reduceRegion(sum_reducer,geometry,10000)
 
-        properties = {'total': total_area, 'clipped': clipped_area}
+            properties = {'total': total_area, 'clipped': clipped_area}
 
-        region = region.setProperties(properties)
+            region = region.setProperties(properties)
 
-        data = ee.data.getValue({"json": region.serialize()})
+            data = ee.data.getValue({"json": region.serialize()})
             
         #self.response.headers["Content-Type"] = "application/json"
-         #self.response.out.write(json.dumps(data))
-        ta = 0
-        ca = 0
-        ta = data["properties"]["total"]["area"]
-        ca = data["properties"]["clipped"]["area"]
-        template_values = {
-           'clipped_area': ca/1000000,
-           'total_area': ta/1000000
-        }
+            #self.response.out.write(json.dumps(data))
+            ta = 0
+            ca = 0
+            ta = data["properties"]["total"]["area"]
+            ca = data["properties"]["clipped"]["area"]
+            template_values = {
+               'clipped_area': ca/1000000,
+               'total_area': ta/1000000
+            }
 
-        self.render_template('ee_count.js', template_values)
+            self.render_template('ee_count.js', template_values)
 
 application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
 
