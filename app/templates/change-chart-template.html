@@ -36,12 +36,25 @@
                 float: right;
                 width: 300px;
             }
+            .sci {
+                display: inline;
+                font-size:9pt;
+                font-style: italic;
+            }
+            .eng {
+                font-size:9pt;
+                display: inline;
+            }
+            .working {
+                display:inline
+            }
         </style>
         <script type="text/javascript" src="/js/mol_change_tool.js"></script>
         <script type="text/javascript">
             var scientificname = getURLParameter("name"), 
                 commonnames = '',
                 modis_maptypes = {},
+                chartData = [],
                 map_options = {
                     zoom: 1,
                     center: new google.maps.LatLng(0,0),
@@ -107,16 +120,24 @@
         </script>
   </head>
   <body style="font-family: Arial;border: 0 none;">
+    <div class="thumb"></div>
     <input type="text" placeholder="Search by species name" size=50 class="search">
+    Chart Type: 
+    <select class="mode">
+        <option value="pct">Percent of 2001 area</option>
+        <option value="area">Area (sq km)</option>
+    </select>
     <table>
-       <tbody><tr><td> 
-    <div id="visualization" style="width: 600px; height: 400px;">
+       <tbody><tr><td>
+           <div id="working">
         Computing habitat area change 
         <span id="name"></span>. 
         Please wait.
         <br>
         <img src="/static/loading.gif">
     </div>
+    
+    <div id="visualization" style="width: 600px; height: 400px;"></div>
     </td>
     <td>
         <div id="map_container" style="width: 600px; height: 400px;"></div>

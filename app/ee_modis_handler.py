@@ -18,8 +18,9 @@ EE_URL = 'https://earthengine.googleapis.com'
 CDB_URL = 'http://mol.cartodb.com/api/v2/sql'
 
 # The OAuth scope URL for the Google Earth Engine API.
-GEE_SCOPE = 'https://www.googleapis.com/auth/earthengine.readonly'
-SCOPES = (GEE_SCOPE)
+SCOPES = ('https://www.googleapis.com/auth/earthengine.readonly', 
+          'https://www.googleapis.com/auth/earthbuilder.readonly')
+SCOPES = ' '.join(SCOPES)
 credentials = AppAssertionCredentials(scope=SCOPES)
 
 
@@ -38,9 +39,18 @@ class MainPage(webapp2.RequestHandler):
         year = self.request.get('year', None)
         get_area = self.request.get('get_area', 'false')
         ee_id = self.request.get('ee_id', None)
+        
+        gme_assets = {
+            '2010' : 'GME/images/04040405428907908306-17118360656965716769',
+            '2011' : 'GME/images/04040405428907908306-08991745517214812316'
+        }
 
         #Get land cover and elevation layers
-        cover = ee.Image('MCD12Q1/MCD12Q1_005_%s_01_01' % (year)).select('Land_Cover_Type_1')
+        if int(year) < 2010:
+            cover = ee.Image('MCD12Q1/MCD12Q1_005_%s_01_01' % (year)).select('Land_Cover_Type_1')
+        else: 
+            cover = ee.Image(gme_assets[year])
+            
         elev = ee.Image('srtm90_v4')
 
         output = ee.Image(0)
