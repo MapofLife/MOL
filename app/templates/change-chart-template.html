@@ -7,8 +7,9 @@
             Map of Life -- MODIS Habitat Change Tool
         </title>
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <link rel="stylesheet" href="/css/change.css" />
         <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
         <script type="text/javascript">
             google.load('visualization', '1', {packages: ['corechart']});
         </script>
@@ -17,38 +18,6 @@
             src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js">
         </script>
         <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-        <style type="text/css">
-            .visualization {
-                float:left;
-                width: 500px;
-            }
-            .modis_class {
-                display:none;
-            }
-            .modis_label {
-                display:none;
-            }
-            #map_container {
-                float: right;
-                width: 500px;
-            }
-            .key {
-                float: right;
-                width: 300px;
-            }
-            .sci {
-                display: inline;
-                font-size:9pt;
-                font-style: italic;
-            }
-            .eng {
-                font-size:9pt;
-                display: inline;
-            }
-            .working {
-                display:inline
-            }
-        </style>
         <script type="text/javascript" src="/js/mol_change_tool.js"></script>
         <script type="text/javascript">
             var scientificname = getURLParameter("name"), 
@@ -59,6 +28,8 @@
                     zoom: 1,
                     center: new google.maps.LatLng(0,0),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    streetViewControl: false,
+                    panControl: false,
                     styles: [
                       {
                         "featureType": "landscape",
@@ -71,6 +42,11 @@
                           { "visibility": "simplified" }
                         ]
                       },{
+                          "featureType": "water",
+                        "elementType": "labels",
+                        "stylers": [
+                          { "visibility": "off" }
+                        ]
                       },{
                         "featureType": "water",
                         "stylers": [
@@ -117,57 +93,97 @@
                     .append("<a>" + item.label + "</a>")
                     .appendTo(ul);
             };
-        </script>
-  </head>
-  <body style="font-family: Arial;border: 0 none;">
-    <div class="thumb"></div>
-    <input type="text" placeholder="Search by species name" size=50 class="search">
-    Chart Type: 
-    <select class="mode">
-        <option value="pct">Percent of 2001 area</option>
-        <option value="area">Area (sq km)</option>
-    </select>
-    <table>
-       <tbody><tr><td>
-           <div id="working">
-        Computing habitat area change 
-        <span id="name"></span>. 
-        Please wait.
-        <br>
-        <img src="/static/loading.gif">
+    </script>
+</head>
+<body>
+
+    <div class="main">
+        <h2 class="HEADLINE">Species change analysis</h2>
+        <h3 class="DATE">Powered by Map of Life and Google Earth Engine</h3> 
+        <div class="topright">
+            <div class="searchContainer">
+                <!--<button class="random">Pick Random</button>-->
+                <input type="text" placeholder="Search by species name" size=40 class="search">
+            </div>
+            <div class='msg'></div>
+        </div>   
+        <table>
+            <tbody>
+                <tr>
+                    <td valign="top" halign="left">
+                        <div class="info">
+                            <div class="name">
+                                <div class="common"></div>
+                                <div class="sciname"></div>
+                            </div>
+                            <div class="tax">
+                                <div class="_class"></div>
+                                <div class="_order"></div>
+                            <div>
+                            <div class="elev_range"></div>
+                            <div class="suitable">
+                                <u>Suitable habitats</u>
+                                <div class="modis_class 1">Evergreen Needleleaf Forests</div>
+                                <div class="modis_class 2">Evergreen Broadleaf Forests</div>
+                                <div class="modis_class 3">Deciduous Needleleaf Forests</div>
+                                <div class="modis_class 4">Deciduous Broadleaf Forests</div>
+                                <div class="modis_class 5">Mixed Forests</div>
+                                <div class="modis_class 6">Closed Shrublands</div>
+                                <div class="modis_class 7">Open Shrublands</div>
+                                <div class="modis_class 8">Woody Savannas</div>
+                                <div class="modis_class 9">Savannas</div>
+                                <div class="modis_class 10">Grasslands</div>
+                                <div class="modis_class 11">Permanent Wetlands</div>
+                                <div class="modis_class 12">Cropland</div>
+                                <div class="modis_class 13">Urban and Built-up</div>
+                                <div class="modis_class 14">Cropland/Natural Vegetation Mosaics</div>
+                                <div class="modis_class 15">Snow and Ice Barren</div>
+                                <div class="modis_class 16">Barren</div>
+                                <div class="modis_class 17">Water Bodies</div>
+                            </div>
+                            <div class="unsuitable">
+                                <u>Unsuitable habitats</u>
+                                <div class="modis_class 1">Evergreen Needleleaf Forests</div>
+                                <div class="modis_class 2">Evergreen Broadleaf Forests</div>
+                                <div class="modis_class 3">Deciduous Needleleaf Forests</div>
+                                <div class="modis_class 4">Deciduous Broadleaf Forests</div>
+                                <div class="modis_class 5">Mixed Forests</div>
+                                <div class="modis_class 6">Closed Shrublands</div>
+                                <div class="modis_class 7">Open Shrublands</div>
+                                <div class="modis_class 8">Woody Savannas</div>
+                                <div class="modis_class 9">Savannas</div>
+                                <div class="modis_class 10">Grasslands</div>
+                                <div class="modis_class 11">Permanent Wetlands</div>
+                                <div class="modis_class 12">Cropland</div>
+                                <div class="modis_class 13">Urban and Built-up</div>
+                                <div class="modis_class 14">Cropland/Natural Vegetation Mosaics</div>
+                                <div class="modis_class 15">Snow and Ice Barren</div>
+                                <div class="modis_class 16">Barren</div>
+                                <div class="modis_class 17">Water Bodies</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td  valign="top" halign="center">
+                        <div class="image"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td valign="center" halign="center">
+                        <div class="visualization" style="width: 450px; height: 400px;"></div>
+                        <div class="modeContainer">
+                            Chart Type: 
+                            <select class="mode">
+                                <option value="pct">Percent of 2001 area</option>
+                                <option value="area">Area (sq km)</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td valign="top">
+                        <div class="map_container" style="width: 450px; height: 400px;"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    
-    <div id="visualization" style="width: 600px; height: 400px;"></div>
-    </td>
-    <td>
-        <div id="map_container" style="width: 600px; height: 400px;"></div>
-    </td><td>
-        
-        <div class="elev_range"></div>
-        <div class="modis_label">Selected MODIS habitats:</div>
-        <div class="modis_key">
-            <div class="modis_class 1">Evergreen Needleleaf Forests</div>
-            <div class="modis_class 2">Evergreen Broadleaf Forests</div>
-            <div class="modis_class 3">Deciduous Needleleaf Forests</div>
-            <div class="modis_class 4">Deciduous Broadleaf Forests</div>
-            <div class="modis_class 5">Mixed Forests</div>
-            <div class="modis_class 6">Closed Shrublands</div>
-            <div class="modis_class 7">Open Shrublands</div>
-            <div class="modis_class 8">Woody Savannas</div>
-            <div class="modis_class 9">Savannas</div>
-            <div class="modis_class 10">Grasslands</div>
-            <div class="modis_class 11">Permanent Wetlands</div>
-            <div class="modis_class 12">Cropland</div>
-            <div class="modis_class 13">Urban and Built-up</div>
-            <div class="modis_class 14">Cropland/Natural Vegetation Mosaics</div>
-            <div class="modis_class 15">Snow and Ice Barren</div>
-            <div class="modis_class 16">Barren</div>
-            <div class="modis_class 17">Water Bodies</div>
-        </div>
-       </td>
-       </tr>
-       </tbody>
-       </table>
-    
-   </body>
+</body>
 </html>

@@ -1,0 +1,138 @@
+html {max-width:1143px;}
+.DATE {
+      font-size: 85%;
+      /*text-transform: uppercase;*/
+      letter-spacing: 1px;
+      color: #333;
+      font-size: 10px;
+      font-family: "Lucida Grande", Verdana, Helvetica, Arial, sans-serif;
+      font-weight: 100;
+      margin:0; 
+}
+
+.HEADLINE{
+    font: bold 34px "Century Schoolbook", Georgia, Times, serif;
+    text-transform: uppercase;
+    color: #333;
+    line-height: 90%;
+    margin: 0.05em 0 0.05em 0;
+    letter-spacing: -1px;
+}
+.main {
+    position:relative;
+    min-width:700px;
+    max-width:916px;
+}
+.TAG{
+    color:  #333;
+    font-size: 10px;
+    margin: 0px;
+    font-family: "Lucida Grande", Verdana, Helvetica, Arial, sans-serif;
+    font-size: 11px;
+}
+.visualization {
+    float:left;
+    width: 500px;
+}
+.unsuitable {
+    float: right;
+}
+.suitable {
+    float:left;
+}
+.modis_class {
+    display:none;
+}
+.modis_label {
+    display:none;
+}
+
+.key {
+    float: right;
+    width: 300px;
+}
+.sci {
+    display: inline;
+    font-size:9pt;
+    font-style: italic;
+}
+.eng {
+    font-size:9pt;
+    display: inline;
+}
+.topright {
+    position:absolute;
+    top:5px;
+    right:9px;
+}
+.working {
+    width:25px;
+    height:25px;
+    float:right;
+}
+.modeContainer {
+    display:none;
+}
+.msg {
+    float:right;
+    max-width:480px;
+    overflow:ellipsis;
+    vertical-align: center;
+}
+.thumb {
+    float:left;
+    width: 50px;
+    height: 50px;
+}
+.image {
+    text-align:center;
+    border-radius:4pt;
+    overflow:hidden;
+}
+.info {
+    font-size:10pt;
+    display:none;
+    margin: 2pt;
+    border: 0.5pt solid gray;
+    border-spacing:0px;
+    max-width:450px;
+}
+.info td{
+    vertical-align: top;
+}
+.habitats {
+   
+}
+.search {
+    left:60px;
+    top:15px;
+}
+.common:first-line {
+    font-size: 22pt;
+    line-height:15pt;
+}
+.common {
+    font-size: 16pt;
+}
+.visualization {
+    text-align:center;
+    position: relative;
+}
+.sciname{
+    font-size:14pt;
+    font-style: italic;
+    
+}
+.searchContainer {
+    float:right;
+    height: 50px;
+}
+.tax {
+    padding: 1em 0 1em 0;
+}
+.elev_range {
+    padding: 0.5em 0 0.5em 0;
+}
+.name {
+    padding: 1em 0 0.2em 0;
+}
