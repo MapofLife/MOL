@@ -93,7 +93,6 @@ function init() {
     } else {
         $('.working').hide();
         $('.visualization').html('');
-        getRandom();
     }
 }
 

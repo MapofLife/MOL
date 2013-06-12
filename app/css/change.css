@@ -9,6 +9,9 @@ html {max-width:1143px;}
       font-weight: 100;
       margin:0; 
 }
+a:link {
+	color: black;
+}
 
 .HEADLINE{
     font: bold 34px "Century Schoolbook", Georgia, Times, serif;

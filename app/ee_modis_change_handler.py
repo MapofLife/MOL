@@ -26,7 +26,7 @@ class changeHandler(webapp2.RequestHandler):
         self.mapid_results = {}
         self.rpcs = []
         
-        self.url = 'http://change.map-of-life.appspot.com/ee_modis?%s'
+        self.url = 'http://habitat.map-of-life.appspot.com/ee_modis?%s'
           
         self.habitats = self.request.get('habitats', None)
         self.elevation = self.request.get('elevation', None)
