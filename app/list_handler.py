@@ -19,26 +19,10 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 api_key = ""
 cdb_url = "http://mol.cartodb.com/api/v2/sql?%s"
 
-taxa_list = [
-        {'class': 'aves',
-         'dataset_id': 'iucn_birds'}, 
-        {'class': 'mammalia',
-         'dataset_id': 'iucn_mammals'},
-        {'class': 'reptilia',
-         'dataset_id': 'iucn_reptiles'},
-        {'class': 'amphibia',
-         'dataset_id': 'iucn_amphibians'},
-        {'class': 'palm',
-	 'dataset_id': 'new_world_palms'},
-	{'class': 'tree',
-	 'dataset_id': 'na_trees'},
-	{'class': 'seagrass',
-         'dataset_id': 'iucn_species2011_seagrasses'},
-	{'class': 'fish',
-	 'dataset_id': 'na_fish'},
-        {'class': 'ant',
-         'dataset_id': 'ant_genera_of_the_world'}
-       ]
+
+
+
+
 
 class ListHandler(webapp2.RequestHandler):
     def handle_result(self, rpc, clas):
@@ -71,6 +55,16 @@ class ListHandler(webapp2.RequestHandler):
     def get(self):
         self.rpcs = []
         self.results = {'results': [], 'success': False }
+        self.taxa_list = [
+        {'class': 'Birds',
+         'dataset_id': 'iucn_birds' }, 
+        {'class': 'Mammals',
+         'dataset_id': 'iucn_mammals'},
+        {'class': 'Amphibians',
+         'dataset_id': 'iucn_amphibians'},
+        {'class': 'New World Palms',
+         'dataset_id': 'new_world_palms'}
+       ]
         
         log_sql = """INSERT INTO list_log (dataset_id, lon, lat, radius, taxa, ip) 
            VALUES ('%s',%f,%f,%i,'%s', '%s')"""
@@ -84,6 +78,15 @@ class ListHandler(webapp2.RequestHandler):
         radius = int(self.request.get('radius',None))
         taxa = cleanup(self.request.get('taxa', 'all'))
         dataset_id = cleanup(self.request.get('dsid', 'all'))
+        
+        if lon < -16 and lat > 14:
+            self.taxa_list.append({'class': 'Reptiles',
+                              'dataset_id': 'iucn_reptiles'})
+            if lat > 25.5:
+                self.taxa_list.append( {'class': 'N American Fish',
+                                   'dataset_id': 'na_fish'})
+                self.taxa_list.append({'class': 'US Trees',
+                                  'dataset_id': 'na_trees'})
         
         # Log the request
         log_sql = log_sql % (
@@ -106,7 +109,7 @@ class ListHandler(webapp2.RequestHandler):
             self.response.out.write(value)
         # for all taxa
         else:
-            for taxa in taxa_list:
+            for taxa in self.taxa_list:
                 rpc = urlfetch.create_rpc(deadline=240)
                 logging.info(json.dumps(taxa))
                 rpc.callback = self.create_callback(rpc, taxa)
