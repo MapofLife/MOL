@@ -17,7 +17,7 @@ from google.appengine.api import urlfetch
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 api_key = ""
-cdb_url = "http://mol.cartodb.com/api/v2/sql?%s"
+cdb_url = "http://mol.cartodb.com/api/v1/sql?%s"
 
 
 
@@ -34,7 +34,7 @@ class ListHandler(webapp2.RequestHandler):
                logging.info('Adding result')
                self.results["results"].append({'class': clas['class'], 'species': json.loads(result.content)["rows"]})
                logging.info("got it")
-               if len(self.results["results"]) >= len(self.rpcs)-1:
+               if len(self.results["results"]) >= len(self.rpcs):
                    self.results["success"]=True
                    self.response.headers["Content-Type"] = "application/json"
                    self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -89,13 +89,13 @@ class ListHandler(webapp2.RequestHandler):
                                   'dataset_id': 'na_trees'})
         
         # Log the request
-        log_sql = log_sql % (
-            dataset_id, float(lon), float(lat), int(radius), taxa, ip)
-        rpc.callback = self.create_callback(
-            rpc, {'class': 'log', 'dataset_id' : 'all'})
-        log_url = cdb_url % (urllib.urlencode(dict(q=log_sql, api_key=api_key)))
-        urlfetch.make_fetch_call(rpc, log_url)
-        self.rpcs.append(rpc)
+        #log_sql = log_sql % (
+        #    dataset_id, float(lon), float(lat), int(radius), taxa, ip)
+        #rpc.callback = self.create_callback(
+        #    rpc, {'class': 'log', 'dataset_id' : 'all'})
+        #log_url = cdb_url % (urllib.urlencode(dict(q=log_sql, api_key=api_key)))
+        #urlfetch.make_fetch_call(rpc, log_url)
+        #self.rpcs.append(rpc)
 
         # Make the list
         # for a single taxa
