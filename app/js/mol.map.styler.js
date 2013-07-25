@@ -358,18 +358,19 @@ mol.modules.map.styler = function(mol) {
                                         o.pc = $('#seasChk6')
                                                     .is(':checked') ? 1:0;
                                     }
-                                } else {
+                                } else if(layer.type != 'sum'){
                                     o.fill = $('#showFillPalette')
                                             .spectrum("get")
                                                 .toHexString();
                                 }
-
-                                o.border = $('#showBorderPalette')
-                                                .spectrum("get")
-                                                    .toHexString();
-                                o.size = $(api.elements.content)
-                                                .find('.sizer')
-                                                    .slider('value');
+                                if(layer.type != 'sum'){
+                                    o.border = $('#showBorderPalette')
+                                                    .spectrum("get")
+                                                        .toHexString();
+                                    o.size = $(api.elements.content)
+                                                    .find('.sizer')
+                                                        .slider('value');
+                                }
 
                                 self.updateLegendCss(
                                         button,
@@ -725,7 +726,7 @@ mol.modules.map.styler = function(mol) {
 
                    $(element).find('.colorPickers').prepend(pickers);
                    $(element).find('.sizerHolder').prepend(sizer);
-                } else {
+                } else if (layer.type != 'sum'){
                    pickers = '' +
                        '<div class="colorPicker">' +
                        '  <span class="stylerLabel">Fill:&nbsp</span>' +
@@ -807,7 +808,7 @@ mol.modules.map.styler = function(mol) {
                               color: currSty.p,
                               def: origSty.p});
                 }
-            } else {
+            } else if (lay.type != 'sum'){
                 objs = [ {name: '#showFillPalette',
                           color: currSty.fill,
                           def: origSty.fill},
@@ -836,7 +837,7 @@ mol.modules.map.styler = function(mol) {
                 max = 3;
                 min = 0;
             }
-
+            if(lay.type != 'sum') {
             $(cont).find('.sizer').slider({
                 value: currSty.size,
                 min:min,
@@ -850,7 +851,7 @@ mol.modules.map.styler = function(mol) {
 
             $(cont).find('#pointSizeValue').html(
                 $(cont).find('.sizer').slider('value') + "px");
-
+            }
             layOpa = reset ? lay.orig_opacity : lay.style_opacity;
 
             //opacity
@@ -865,6 +866,7 @@ mol.modules.map.styler = function(mol) {
                         (ui.value)*100 + "&#37");
                 }}
             );
+            
 
             $(cont).find('#opacityValue').html((layOpa)*100 + "&#37");
         },
@@ -973,7 +975,8 @@ mol.modules.map.styler = function(mol) {
         updateStyle: function(layer, style, newStyle) {
             var updatedStyle,
                 season;
-
+            if(layer.type='sum') {return};
+            
             if(layer.style_table == "points_style") {
                 style = this.changeStyleProperty(
                             style, 'marker-fill', newStyle.fill, false);
@@ -1051,7 +1054,7 @@ mol.modules.map.styler = function(mol) {
                                 style, 'presence=6', newStyle.pc, true,
                                 'polygon-opacity');
                     }
-                } else {
+                } else if (layer.type !='sum'){
                     style = this.changeStyleProperty(
                                 style, 'polygon-fill', newStyle.fill,
                                     false);
@@ -1144,14 +1147,14 @@ mol.modules.map.styler = function(mol) {
                     style = this.changeStyleProperty(
                                 style,
                                 'marker-line-color',
-                                visible ? '#FF00FF' : oldStyle.border,
+                                visible ? '#AA0022' : oldStyle.border,
                                 false
                             );
                 } else {
                     style = this.changeStyleProperty(
                                 style,
                                 'line-color',
-                                visible ? '#FF00FF' : oldStyle.border,
+                                visible ? '#AA0022' : oldStyle.border,
                                 false
                             );
 

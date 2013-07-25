@@ -6,6 +6,7 @@ mol.modules.map.menu = function(mol) {
         init: function(proxy, bus) {
             this.proxy = proxy;
             this.bus = bus;
+            this.seenHint = false;
         },
 
         /**
@@ -29,7 +30,28 @@ mol.modules.map.menu = function(mol) {
         addEventHandlers: function() {
             var self = this;
 
-
+            this.display.start.click(
+                function(Event) {
+                   self.bus.fireEvent(
+                        new mol.bus.Event('toggle-splash')
+                    );
+                     self.bus.fireEvent(
+                        new mol.bus.Event('taxonomy-dashboard-toggle',{visible:false})
+                    );
+                    self.bus.fireEvent(
+                        new mol.bus.Event('remove-all-layers')
+                    );
+                    self.bus.fireEvent(
+                        new mol.bus.Event('clear-lists')
+                    );
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                        	'species-list-tool-toggle',
+                        	{visible: false}
+                    	)
+                    );
+                }
+            );
             this.display.about.click(
                 function(Event) {
                     window.open('/about/');
@@ -59,22 +81,18 @@ mol.modules.map.menu = function(mol) {
                     );
                 }
             );
-
-            this.bus.addHandler(
-                'add-dashboard-toggle-button',
+            this.display.click(
                 function(event) {
-                    $(self.display).prepend(event.button);
-                    self.display.dashboardItem =
-                        $(self.display).find('#dashboard');
-
-                    self.display.dashboardItem.click(
-                        function(event) {
-                            self.bus.fireEvent(
-                                new mol.bus.Event('taxonomy-dashboard-toggle'));
-                        }
-                    );
+                    $(this).qtip("hide");
                 }
             );
+            this.display.dashboard.click(
+                function(event) {
+                    self.bus.fireEvent(
+                        new mol.bus.Event('taxonomy-dashboard-toggle'));
+                }
+            );
+               
 
             this.bus.addHandler(
                 'menu-display-toggle',
@@ -90,7 +108,36 @@ mol.modules.map.menu = function(mol) {
                     }
                 }
             );
+            this.bus.addHandler(
+                'show-menu-hint',
+                function(event) {
+                    
+                    if(!self.seenHint) {
+                        $(self.display).qtip({
+                            content: {
+                                    text: '<div class="mol-hint">Click here to start over.</div>'
+                            },
+                            position: {
+                                my: 'bottom right',
+                                at: 'top left'
+                            },
+                            show: {
+                                event: false,
+                                ready: true
+                            },
+                            hide: {
+                                fixed: false,
+                                event: 'unfocus'
+                            }
+                        })
+                    }
+                    self.seenHint = true
+                        
+                }
+            );
         },
+        
+
 
         /**
          * Fires the 'add-map-control' event. The mol.map.MapEngine handles
@@ -111,6 +158,10 @@ mol.modules.map.menu = function(mol) {
         init: function() {
             var html = '' +
                 '<div class="mol-BottomRightMenu">' +
+                    '<div title="Start over." ' +
+                    ' class="widgetTheme button start">Start Over</div>' +
+                    '<div ' +
+                    ' class="widgetTheme button dashboard">Dashboard</div>' +
                     '<div title="Current known issues." ' +
                     ' class="widgetTheme button status">Status</div>' +
                     '<div title="About the Map of Life Project." ' +
@@ -123,6 +174,8 @@ mol.modules.map.menu = function(mol) {
                 '</div>';
 
             this._super(html);
+            this.start = $(this).find('.start');
+            this.dashboard = $(this).find('.dashboard');
             this.about = $(this).find('.about');
             this.help = $(this).find('.help');
             this.feedback = $(this).find('.feedback');

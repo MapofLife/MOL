@@ -12,10 +12,7 @@ mol.modules.map.boot = function(mol) {
             this.sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
-                    "CASE d.style_table WHEN 'points_style' " + 
-                        'THEN t.carto_css_point ' + 
-                        "WHEN 'polygons_style' " + 
-                        'THEN t.carto_css_poly END as css,' +
+                    't.cartocss as css,' +
                     't.sort_order as type_sort_order, ' +
                     't.title as type_title, '+
                     't.opacity as opacity, ' +
@@ -23,7 +20,7 @@ mol.modules.map.boot = function(mol) {
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
                     's.title as source_type_title, ' +   
-                    "CASE WHEN d.type = 'taxogeooccchecklist' " +
+                    "CASE WHEN l.feature_count is not null THEN CASE WHEN d.type = 'taxogeooccchecklist' " +
                         'THEN ' +
                             "CONCAT("+
                                 "to_char(l.occ_count,'999,999,999'),"+
@@ -33,7 +30,7 @@ mol.modules.map.boot = function(mol) {
                 ") " +
                         'ELSE ' +
                             "CONCAT(to_char(l.feature_count,'999,999,999'),' features') "+
-                    'END as feature_count, '+
+                    'END ELSE \'\' END as feature_count, '+
                     'CONCAT(n.v,\'\') as names, ' +
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
@@ -50,7 +47,7 @@ mol.modules.map.boot = function(mol) {
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
-                'FROM layer_metadata_mar_8_2013 l ' +
+                'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
@@ -59,7 +56,7 @@ mol.modules.map.boot = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN ac_mar_8_2013 n ON ' +
+                'LEFT JOIN ac n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
                      "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
@@ -110,9 +107,7 @@ mol.modules.map.boot = function(mol) {
          */
         loadLayers: function(layers) {
             if (Object.keys(layers).length <= this.maxLayers) {
-                this.bus.fireEvent(
-                    new mol.bus.Event('add-layers', {layers: layers})
-                );
+                
 
             } else if (this.term != null) {
                 this.bus.fireEvent(
@@ -128,10 +123,10 @@ mol.modules.map.boot = function(mol) {
          */
         getLayersWithIds: function(layers) {
             return _.map(
-            layers,
-            function(layer) {
-                return _.extend(layer, {id: mol.core.getLayerId(layer)});
-            }
+                layers,
+                function(layer) {
+                    return _.extend(layer, {id: mol.core.getLayerId(layer)});
+                }
             );
         },
         /* Returns the version of Internet Explorer or a -1

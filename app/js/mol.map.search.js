@@ -11,20 +11,18 @@ mol.modules.map.search = function(mol) {
             this.bus = bus;
             this.searching = {};
             this.names = [];
+            this.seenHint = false;
             this.ac_label_html = ''+
                 '<div class="ac-item">' +
                     '<span class="sci">{0}</span>' +
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v FROM ac_mar_8_2013 WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
-                    "CASE d.style_table WHEN 'points_style' " + 
-                        'THEN t.carto_css_point ' + 
-                        "WHEN 'polygons_style' " + 
-                        'THEN t.carto_css_poly END as css,' +
+                    't.cartocss as css,' +
                     't.sort_order as type_sort_order, ' +
                     't.title as type_title, '+
                     't.opacity as opacity, ' +
@@ -32,7 +30,7 @@ mol.modules.map.search = function(mol) {
                     'CONCAT(p.title,\'\') as source_title,'+
                     's.source_type as source_type, ' +
                     's.title as source_type_title, ' +   
-                    "CASE WHEN d.type = 'taxogeooccchecklist' " +
+                    "CASE WHEN l.feature_count is not null THEN CASE WHEN d.type = 'taxogeooccchecklist' " +
                         'THEN ' +
                             "CONCAT("+
                                 "to_char(l.occ_count,'999,999,999'),"+
@@ -42,7 +40,7 @@ mol.modules.map.search = function(mol) {
 			    ") " +
                         'ELSE ' +
                             "CONCAT(to_char(l.feature_count,'999,999,999'),' features') "+
-                    'END as feature_count, '+
+                    'END ELSE \'\' END as feature_count, '+
                     'CONCAT(n.v,\'\') as names, ' +
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
@@ -59,7 +57,7 @@ mol.modules.map.search = function(mol) {
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
-                'FROM layer_metadata_mar_8_2013 l ' +
+                'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
@@ -68,7 +66,7 @@ mol.modules.map.search = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN ac_mar_8_2013 n ON ' +
+                'LEFT JOIN ac n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
                      "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
@@ -207,28 +205,67 @@ mol.modules.map.search = function(mol) {
             this.bus.addHandler(
                 'search-display-toggle',
                 function(event) {
-                    var params = {},
-                        e = null;
-
-                    if (event.visible === undefined) {
-                        self.display.toggle();
-                        params = {visible: self.display.is(':visible')};
+                    if(event.visible != true ) {
+                        self.display.searchDisplay.hide();
+                        self.display.find('.toggle').text('▶');
                     } else {
-                        self.display.toggle(event.visible);
+                        
+                        self.display.searchDisplay.show();
+                        self.display.find('.toggle').text('◀');
                     }
-
-                    e = new mol.bus.Event('results-display-toggle', params);
-                    self.bus.fireEvent(e);
+                    self.bus.fireEvent(
+                        new mol.bus.Event('results-display-toggle', {})
+                    );
+                  
                 }
             );
-
+            this.bus.addHandler(
+                'show-search-hint',
+                function(event) {
+                    if(!self.seenHint) {
+                        self.display.qtip({
+                            content: {
+                                text: '' +
+                                    '<div class="mol-hint">' +
+                                        'Type a species name here and select.' +
+                                    '</div>'
+                            },
+                            style: { width: {min: 400, max:500}},
+                            position: {
+                                my: 'top left',
+                                at: 'bottom right'
+                            },
+                            show: {
+                                event: false,
+                                ready: true
+                            },
+                            hide: {
+                                fixed: false,
+                                event: 'unfocus'
+                            }
+                        });
+                        self.seenHint=true;
+                    }
+                }
+            );
             this.bus.addHandler(
                 'close-autocomplete',
                 function(event) {
                     $(self.display.searchBox).autocomplete("close");
                 }
             );
-
+            this.bus.addHandler(
+                'hide-search',
+                function(event) {
+                    $(self.display).hide();
+                }
+            );
+            this.bus.addHandler(
+                'show-search',
+                function(event) {
+                    $(self.display).show();
+                }
+            );
             this.bus.addHandler(
                 'search',
                 function(event) {
@@ -254,6 +291,15 @@ mol.modules.map.search = function(mol) {
             /**
              * Clicking the go button executes a search.
              */
+            
+            this.display.click(
+                function(event) {
+                    $(this).qtip("hide");  
+                    
+                    
+                }
+            )
+            
             this.display.goButton.click(
                 function(event) {
                     self.search(self.display.searchBox.val());
@@ -390,7 +436,7 @@ mol.modules.map.search = function(mol) {
                             'placeholder="Search by species name">' +
                 '       <button class="execute">Go</button>' +
                 '   </div>'+
-                '   <button class="toggle">◀</button>' +
+                '   <button class="toggle">▶</button>' +
                 '</div>';
 
             this._super(html);

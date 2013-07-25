@@ -8,6 +8,7 @@ mol.modules.map.query = function(mol) {
             this.proxy = proxy;
             this.bus = bus;
             this.map = map;
+            this.seenHint = false;
             this.url = '' +
                 'http://mol.cartodb.com/' +
                 'api/v2/sql?callback=?&q={0}';
@@ -95,6 +96,11 @@ mol.modules.map.query = function(mol) {
                     Math.round(lat*100)/100,
                     listradius.radius,
                     _class),
+                zooms = {
+                    "50000": 5,
+                    "100000": 4,
+                    "300000": 3
+                },
                 csv_sql = escape(
                     this.csv_sql.format(
                         dataset_id,
@@ -106,7 +112,14 @@ mol.modules.map.query = function(mol) {
             if (self.queryct > 0) {
                 alert('Please wait for your last species list request to ' +
                 'complete before starting another.');
+                listradius.setMap(null);
             } else {
+            
+            	self.map.panTo(new google.maps.LatLng(lat, lng))
+            	if (self.map.getZoom() < zooms[listradius.radius]) {
+                	self.map.setZoom(zooms[listradius.radius]);
+            	}
+            	self.map.panBy($(window).width()/4,0);
                 self.queryct++;
                 $.getJSON(
                     list_url,
@@ -126,6 +139,22 @@ mol.modules.map.query = function(mol) {
                     }
                 );
             }
+        },
+        clearLists: function() {
+            _.each(
+                this.features,
+                function(feature) {
+                    if(feature.listWindow) {
+                        feature.listWindow.dialog("close");
+                    }
+                    if(feature.listradius) {
+                        feature.listradius.setMap(null);
+                    }
+                    
+                }
+            );
+            this.features={};
+            this.queryct=0;
         },
 
         addEventHandlers : function () {
@@ -151,7 +180,12 @@ mol.modules.map.query = function(mol) {
                     );
                 }
             );
-
+			this.display.click(
+				function(event){
+					$(this).qtip('destroy');
+				}
+					
+			);
             /*
              * Toggle Click Handler for Species List Clicking
              */
@@ -166,6 +200,100 @@ mol.modules.map.query = function(mol) {
                         new mol.bus.Event('species-list-tool-toggle', params));
                 }
             );
+            this.bus.addHandler(
+                'clear-lists',
+                function(event) {
+                    self.clearLists();
+                }
+            );
+            this.bus.addHandler(
+                'list-local',
+                function(event) {
+                    var dataset_id = (event.dataset_id != undefined) ? 
+                        event.dataset_id : 'jetz_maps',
+                        className = (event.className != undefined) ? 
+                        event.className : 'Aves';
+                    $(self.display).find('.dataset_id').val(dataset_id);
+                    navigator.geolocation.getCurrentPosition(
+                        function(loc) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'species-list-tool-toggle',
+                                    {visible: true}
+                                )
+                            );
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'species-list-query-click',
+                                    {
+                                        gmaps_event: {
+                                            latLng: new google.maps.LatLng(
+                                                loc.coords.latitude,
+                                                loc.coords.longitude
+                                            )
+                                        },
+                                        dataset_id:dataset_id,
+                                        class_name: className
+                                    }
+                                )
+                            );
+                        
+                        },
+                        function(noloc) {
+                            var lat = prompt(
+                                'We could not determine your location.' +
+                                'Please click a location on the map.');
+                            
+                        }
+                    );
+                }
+            );
+            this.bus.addHandler(
+                'list-random',
+                function(event) {
+                    var dsid = (event.group != undefined) ? 
+                        event.group : 'jetz_maps',
+                        group_name = (event.group_name != undefined) ? 
+                        event.group_name : 'Birds';
+ 
+                    $.getJSON(
+                        'http://mol.cartodb.com/api/v1/sql?q=' +
+                        'SELECT ST_X(g) as lon, ST_Y(g) as lat ' +
+                        'FROM ' +
+                            '(SELECT ST_Centroid(the_geom) as g ' +
+                             'FROM randland ' +
+                             'LIMIT 1 ' +
+                             'OFFSET ' +
+                                'round(' +
+                                    'random()*(SELECT count(*) FROM randland)' +
+                                ')'+
+                             ') c',
+                         function(result) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'species-list-tool-toggle',
+                                    {visible: true}
+                                )
+                            );
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'species-list-query-click',
+                                    {
+                                        gmaps_event: {
+                                            latLng: new google.maps.LatLng(
+                                                result.rows[0].lat,
+                                                result.rows[0].lon
+                                            )
+                                        }
+                                    }
+                                )
+                            );
+                        
+                        }
+                    );
+                }
+            );
+            
             this.bus.addHandler(
                 'layer-click-action',
                 function(event) {
@@ -187,20 +315,16 @@ mol.modules.map.query = function(mol) {
                 }
             );
             this.bus.addHandler(
-                'dialog-closed-click',
+                'show-list-hint',
                 function(event) {
-                    if($.cookie('mol_species_list_query_tip_disabled2') == null) {
+                    if(!self.seenHint) {
                         $(self.display.queryButton).qtip({
                             content: {
-                                text: 'Species list querying is currently ' +
-                                      'disabled. Toggle this button to enable' +
-                                      ' querying and left-click the map to' +
-                                      ' generate a list.',
-                                title: {
-                                    text: 'Species List Tool',
-                                    button: true
-                                }
-
+                                text: '' +
+                                '<div class="mol-hint">'+
+                                	'Click on the map to get a list of species. ' +
+                                	'Use this control to change radius or group.' +
+                            	'</div>'
                             },
                             position: {
                                 my: 'top right',
@@ -212,15 +336,11 @@ mol.modules.map.query = function(mol) {
                             },
                             hide: {
                                 fixed: false,
-                                event: 'mouseenter'
+                                event: 'unfocus'
                             }
-                        });
-
-                        $.cookie(
-                            'mol_species_list_query_tip_disabled2',
-                            'tip_seen',
-                            {expires: 1});
+                        })
                     }
+                    self.seenHint = true
                 }
             );
 
@@ -231,17 +351,20 @@ mol.modules.map.query = function(mol) {
                 'species-list-query-click',
                 function (event) {
                     var listradius, overlayPane,
-                        dataset_id = $("option:selected",
-                            $(self.display.dataset_id)).data(
-                                $('.selected',$(self.display.types)).val()
-                            ),
-                        className =  $("option:selected",
-                            $(self.display.dataset_id)).text();
+                        datasetID = (event.dataset_id == null) ? 
+                            $("option:selected",
+                                $(self.display.dataset_id)).data(
+                                    $('.selected',$(self.display.types)).val()
+                                ): event.dataset_id,
+                        className = (event.class_name == null)?  $("option:selected",
+                            $(self.display.dataset_id)).text(): event.class_name;
 
                     if($(self.display).data('qtip')) {
                         $(self.display).qtip('destroy');
                     }
-
+                    
+                    $(self.display.dataset_id)
+                    
                     if (self.enabled
                             &&
                             $(self.display.queryButton).hasClass('selected')) {
@@ -269,20 +392,14 @@ mol.modules.map.query = function(mol) {
                             'show-loading-indicator',
                             {source : 'listradius'}));
 
-                        _.each(
-                            self.features,
-                            function(feature) {
-                                if(feature.listWindow) {
-                                    feature.listWindow.dialog("close");
-                                }
-                            }
-                        )
-
+                       
+                        self.clearLists();
+                        
                         self.getList(
                             event.gmaps_event.latLng.lat(),
                             event.gmaps_event.latLng.lng(),
                             listradius,
-                            dataset_id,
+                            datasetID,
                             className);
                     }
                 }
@@ -339,7 +456,18 @@ mol.modules.map.query = function(mol) {
                             {source : 'listradius'}));
                 }
             );
-
+            this.bus.addHandler(
+                'hide-list',
+                function(event, params) {
+                    $(self.display).hide();
+                }
+            );
+            this.bus.addHandler(
+                'show-list',
+                function(event, params) {
+                    $(self.display).show();
+                }
+            );
             this.bus.addHandler(
                 'species-list-tool-toggle',
                 function(event, params) {
@@ -353,6 +481,7 @@ mol.modules.map.query = function(mol) {
                         self.display.speciesDisplay.hide();
                     } else {
                         self.display.speciesDisplay.show();
+                        self.bus.fireEvent(new mol.bus.Event('hide-search'));
                     }
 
                     if (self.listradius) {
@@ -685,6 +814,7 @@ mol.modules.map.query = function(mol) {
 
             listWindow.dialog({
                 autoOpen: true,
+                position: "center",
                 width: 680,
                 height: 415,
                 dialogClass: 'mol-Map-ListDialog',
@@ -706,6 +836,9 @@ mol.modules.map.query = function(mol) {
                 $("#gallery")
                     .height($(".mol-Map-ListDialog").height()-125);
             });
+            $(".mol-Map-ListDialog").animate({
+                    left: '{0}px'.format($(window).width() / (7 / 4) - 200)
+                }, 'slow');
 
             //tabs() function needs document ready to
             //have been called on the dialog content
@@ -1255,20 +1388,20 @@ mol.modules.map.query = function(mol) {
                     '    </select>' +
                          'Group ' +
                     '    <select class="dataset_id" value="">' +
-                    '      <option selected data-range="jetz_maps" ' +
+                    '      <option selected value="jetz_maps" data-range="jetz_maps" ' +
                     '        data-class="Aves" >' +
                     '        Birds</option>' +
-                    '      <option data-range="na_fish"' +
+                    '      <option value="na_fish" data-range="na_fish"' +
                     '        data-class="Fishes" >' +
                     '        NA Freshwater Fishes</option>' +
-                    '      <option data-range="iucn_reptiles" ' +
+                    '      <option value="iucn_reptiles" data-range="iucn_reptiles" ' +
                     '        data-regionalchecklist="ecoregion_species" ' +
                     '        data-class="Reptilia" >' +
                     '        NA Reptiles</option>' +
-                    '      <option data-range="iucn_amphibians"' +
+                    '      <option value="iucn_amphibians" data-range="iucn_amphibians"' +
                     '        data-class="Amphibia" >' +
                     '        Amphibians</option>' +
-                    '      <option data-range="iucn_mammals" ' +
+                    '      <option value="iucn_mammals" data-range="iucn_mammals" ' +
                     '        data-class="Mammalia" >' +
                     '        Mammals</option>' +
                     '    </select>' +

@@ -408,7 +408,7 @@ mol.modules.map.tiles = function(mol) {
                     mol.services.cartodb.tileApi.tile_cache_key
                 ),
                 urlPattern = '' +
-                    'http://{HOST}/tiles/{DATASET_ID}/{Z}/{X}/{Y}.png?'+
+                    'http://{HOST}/tiles/mol_style/{Z}/{X}/{Y}.png?'+
                     'sql={SQL}'+
                     '&style={TILE_STYLE}' +
                     '&cache_key={CACHE_KEY}',
@@ -422,8 +422,12 @@ mol.modules.map.tiles = function(mol) {
             }
 
             if(layer.tile_style == undefined) {
-                layer.tile_style = "#{0}{1}"
-                    .format(layer.dataset_id,layer.css);
+                if(layer.css != null && layer.css != '') {
+                    layer.tile_style = "#mol_style {0}"
+                        .format(layer.css);
+                } else {
+                    layer.tile_style = "";
+                }
                 layer.style = layer.tile_style;
                 layer.orig_style = layer.tile_style;
                 layer.orig_opacity = layer.opacity;
@@ -450,7 +454,6 @@ mol.modules.map.tiles = function(mol) {
                     }
                     url = urlPattern
                         .replace("{HOST}",mol.services.cartodb.tileApi.host)
-                        .replace("{DATASET_ID}",layer.dataset_id)
                         .replace("{SQL}",sql)
                         .replace("{X}",x)
                         .replace("{Y}",y)

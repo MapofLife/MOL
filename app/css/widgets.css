@@ -72,6 +72,11 @@ button:hover{
     cursor: pointer;
 }
 
+.mol-hint {
+    font-size: 12pt;
+    line-height: normal;
+}
+
 .mol-Map-TopLeftControl {
     pointer-events: none;
 }
@@ -95,10 +100,142 @@ button:hover{
  * Add, Delete
  * Layer Stack
  */
+
+
+/* css for splash page content */
+
+.mol-Splash {
+    clear: both;
+    text-align: center;
+    color: #555555;
+}
+
 .mol-Splash .IEwarning {
-    color: red;
+	max-width:600px;
+	max-height:400px;
     font-size: 10pt;
 }
+
+.mol-Splash .header {
+    text-align: left;
+    clear: both; 
+    margin-bottom:6px; 
+    font-weight:normal; 
+    padding:10px;
+    padding-top:5px;
+    font-size:16px;
+}
+
+.mol-Splash .speciesPic:hover {   
+   height:110%;
+   width:110%;
+}
+
+.mol-Splash .mainPanel {
+    display:inline-block;
+    height:250px;
+    padding:0.3em;
+    border: 0.15em solid #555555;
+    border-radius: 0.7em;
+}
+.mol-Splash .spacer {
+    display:inline-block;
+    width:1em;
+    height:1em;
+}
+.mol-Splash .innerPanel {
+    margin-top: -0.5em;
+}
+.mol-Splash .bottomPanel {
+    margin-top: 0.5em;
+}
+.mol-Splash .legend {
+    position:relative;
+    top:-0.9em;
+    padding:0 0.3em 0 0.3em;
+    margin:0;
+    font-size:1.5em;
+    background: #eeeeee;
+}
+.mol-Splash .imagePanel {
+   float:left;
+   margin-top: 0.02em;
+   border-radius: 0.7em;
+   height:200px;
+   overflow: hidden;
+    }
+.mol-Splash .buttonPanel {
+    float:left; 
+    margin-left:10px;
+}
+.mol-Splash .middlePanel {
+    font-weight:normal; 
+    margin-top:10px; 
+    margin-bottom:20px;
+     height:90px
+     }
+.mol-Splash .iconPanel {
+    margin-top:10px; 
+    width:150px}
+.mol-Splash .iconTop {
+    width:50px; 
+    height:40px; 
+    float:left;
+    }
+.mol-Splash .iconBottom {
+    width:60px; 
+    height:40px; 
+    float:left;
+    }
+
+.mol-Splash .button {
+    width: 160px;
+    height:20px;
+    position:relative;
+    padding:9px;
+    margin-left:4px;
+    display: inline-block;
+    font-size: 0.7em;
+    cursor: pointer;
+    text-align: center;
+    text-decoration:none;
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, 
+    	rgba(29,43,82,0.75) 57%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.89, rgba(29,43,82,0.65)),
+        color-stop(0.57, rgba(29,43,82,0.75))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );  
+    filter: progid:DXImageTransform.Microsoft.gradient(
+    	startColorstr='#A51D2B52', endColorstr='#BF1D2B52'); 
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px; 
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    color: rgb(240, 240, 260);
+    border-radius:4px;
+}
+
+.mol-Splash .button:hover {
+    background-color: rgba(25, 25, 25, 1.0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF191919', endColorstr='#FF191919');
+    cursor: pointer;
+}
+
+
+.mol-Splash-footer {clear:both;}
+ 
 
 .mol-Sidebar  {
         position:absolute;
@@ -795,6 +932,7 @@ white-space: nowrap;
     -moz-user-select: none;
 }
 .mol-LayerControl-Search .searchDisplay{
+    display: none;
     float:left;
     line-height: 25px;
     font-size: 0.8em;

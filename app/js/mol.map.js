@@ -263,6 +263,7 @@ mol.modules.map = function(mol) {
 
                 mapOptions = {
                     zoom: 3,
+                    center: new google.maps.LatLng(0, -50),
                     maxZoom: 10,
                     minZoom: 2,
                     minLat: -85,

@@ -19,16 +19,16 @@ mol.modules.core = function(mol) {
         return 'layer--{0}--{1}--{2}--{3}--{4}'.format(name, type, source, dataset_id, source_type);
     };
     /*
-     * Makes a srting safe for use as a DOM id or class name.
+     * Makes a string safe for use as a DOM id or class name.
      */
     mol.core.encode = function(string) {
-        return (escape(string)).replace(/%/g,'_percent_').replace(/\./g,'_period_').replace(/\//g, '_slash_');
+        return (escape(string)).replace(/%/g,'222').replace(/\./g,'333').replace(/\//g, '444');
     };
     /*
      * Decodes string encoded with mol.core.encode. 
      */
     mol.core.decode = function(string) {
-        return (unescape(string.replace(/_percent_/g,'%').replace(/_period_/g,'.').replace(/_slash_/g, '/')));
+        return (unescape(string.replace(/222/g,'%').replace(/333/g,'.').replace(/444/g, '/')));
     };
     
 }

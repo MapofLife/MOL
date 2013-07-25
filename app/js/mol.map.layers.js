@@ -8,6 +8,58 @@ mol.modules.map.layers = function(mol) {
             this.bus = bus;
             this.map = map;
             this.clickDisabled = false;
+            this.layer_sql = '' +
+                'SELECT DISTINCT l.scientificname as name,'+
+                    't.type as type,'+
+                    't.cartocss as css,' +
+                    't.sort_order as type_sort_order, ' +
+                    't.title as type_title, '+
+                    't.opacity as opacity, ' +
+                    'CONCAT(l.provider,\'\') as source, '+
+                    'CONCAT(p.title,\'\') as source_title,'+
+                    's.source_type as source_type, ' +
+                    's.title as source_type_title, ' +   
+                    "CASE WHEN l.feature_count is not null THEN CASE WHEN d.type = 'taxogeooccchecklist' " +
+                        'THEN ' +
+                            "CONCAT("+
+                                "to_char(l.occ_count,'999,999,999'),"+
+                                "' records<br>'," +
+                                "to_char(l.feature_count, '999,999,999'),"+
+                                "' locations'"+
+                            ") " +
+                        'ELSE ' +
+                            "CONCAT(to_char(l.feature_count,'999,999,999'),' features') "+
+                    'END ELSE \'\' END as feature_count, '+
+                    'CONCAT(n.v,\'\') as names, ' +
+                    'CASE WHEN l.extent is null THEN null ELSE ' +
+                    'CONCAT(\'{' +
+                        '"sw":{' +
+                            '"lng":\',ST_XMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', '+
+                            '"lat":\',ST_YMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' '+
+                        '}, '+
+                        '"ne":{' +
+                        '"lng":\',ST_XMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', ' +
+                        '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
+                        '}}\') ' +
+                    'END as extent, ' +
+                    'l.dataset_id as dataset_id, ' +
+                    'd.dataset_title as dataset_title, ' + 
+                    'd.style_table as style_table ' +
+                    
+                'FROM layer_metadata l ' +
+                'LEFT JOIN data_registry d ON ' +
+                    'l.dataset_id = d.dataset_id ' +
+                'LEFT JOIN types t ON ' +
+                    'l.type = t.type ' +
+                'LEFT JOIN providers p ON ' +
+                    'l.provider = p.provider ' +
+                'LEFT JOIN source_types s ON ' +
+                    'p.source_type = s.source_type ' +
+                'LEFT JOIN ac n ON ' +
+                    'l.scientificname = n.n ' +
+                'WHERE ' +
+                     "{0}" +
+                'ORDER BY name, type_sort_order';
         },
 
         start: function() {
@@ -198,6 +250,86 @@ mol.modules.map.layers = function(mol) {
                     self.layersToggle(event);
                 }
             );
+            this.bus.addHandler(
+                'remove-all-layers',
+                function(event) {
+                    self.map.overlayMapTypes.clear();
+                    $(self.display.styleAll).prop('disabled', false);
+                    $(self.display.styleAll).qtip('destroy');
+                    $(self.display).find(".close").trigger("click");
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'hide-layer-display-toggle'));
+                    $(self.display.styleAll)
+                        .prop('disabled', false);
+                    $(self.display.styleAll).qtip('destroy');
+                    self.display.toggle(false);
+                }
+            );
+            this.bus.addHandler(
+                'map-single-layer',
+                function(event) {
+                    var name  = event.name,
+                        dataset_id = event.dataset_id;
+                    
+                    $.getJSON(
+                       mol.services.cartodb.sqlApi.json_url.format(
+                        self.layer_sql.format(
+                            "l.scientificname='{0}' and l.dataset_id='{1}"
+                            .format(name, dataset_id))),
+                        function(response) {
+                            var layer = response.rows[0];
+
+                            layer.id =  mol.core.getLayerId(layer);
+                            
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'add-layers', 
+                                    {layers: [layer]}
+                                )
+                            );
+                            self.getBounds(layer);
+                        },
+                        'json'
+                    );
+                    
+                }
+            );
+            this.bus.addHandler(
+                'map-single-species',
+                function(event) {
+                    var name  = event.name,
+                        dataset_id = event.dataset_id;
+                    
+                    $.getJSON(
+                       mol.services.cartodb.sqlApi.json_url.format(
+                        self.layer_sql.format(
+                            "l.scientificname='{0}'"
+                            .format(name, dataset_id))),
+                        function(response) {
+                            var layers = response.rows;
+
+                            layers =  _.map(
+                                layers,
+                                function(layer) {
+                                    layer.id = mol.core.getLayerId(layer);
+                                    return layer;
+                                }
+                            );
+                            
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'add-layers', 
+                                    {layers: layers}
+                                )
+                            );
+                            //self.getBounds(layer);
+                        },
+                        'json'
+                    );
+                    
+                }
+            )
 
             this.bus.addHandler(
                 'add-layers',
@@ -237,7 +369,7 @@ mol.modules.map.layers = function(mol) {
                                 //invalid extent
                             }
                         }
-                    )
+                    );
                     self.addLayers(event.layers);
                     if(bounds != null) {
                         self.map.fitBounds(bounds)
@@ -334,7 +466,31 @@ mol.modules.map.layers = function(mol) {
                  )
              );
         },
-
+        getBounds: function (layer) {
+            var self = this;
+            $.getJSON(
+                 mol.services.cartodb.sqlApi.json_url.format(
+                     "SELECT * FROM get_extent('{0}', '{1}','{2}','{3}')".format(
+                         layer.source,
+                         layer.type,
+                         layer.name,
+                         layer.dataset_id
+                     )
+                 ),
+                 function(result) {
+                     
+                        var extent = result.rows[0],
+                        bounds = new google.maps.LatLngBounds(
+                                            new google.maps.LatLng(
+                                                extent.miny,
+                                                extent.minx),
+                                            new google.maps.LatLng(
+                                                extent.maxy,
+                                                extent.maxx));
+                        self.map.fitBounds(bounds);
+                 }
+            );
+        },
         /**
          * Adds layer widgets to the map. The layers parameter is an array
          * of layer objects {id, name, type, source}.
@@ -411,20 +567,20 @@ mol.modules.map.layers = function(mol) {
                                     layer: layer,
                                     auto_bound: true
                                 },
-                                extent = eval('({0})'.format(layer.extent)),
-                                bounds = new google.maps.LatLngBounds(
+                                extent = (layer.extent != null) ? eval('({0})'.format(layer.extent)) : null,
+                                bounds = (extent != null) ? new google.maps.LatLngBounds(
                                             new google.maps.LatLng(
                                                 extent.sw.lat,
                                                 extent.sw.lng),
                                             new google.maps.LatLng(
                                                 extent.ne.lat,
-                                                extent.ne.lng));
+                                                extent.ne.lng)) : null;
 
-                            //if(!$(l.layer).hasClass('selected')){
-                            //    l.layer.click();
-                            //}
-                            self.map.fitBounds(bounds);
-
+                            if(extent == null || bounds == null ){
+                                self.getBounds(layer);
+                            } else {
+                                self.map.fitBounds(bounds);
+                            }
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
@@ -594,12 +750,12 @@ mol.modules.map.layers = function(mol) {
                 )
             );
 
-            if(sortedLayers.length == 1) {
+            /*if(sortedLayers.length == 1) {
                 //if only one new layer is being added
                 //select it
                 this.display.list.find('.layer')
                     [this.display.list.find('.layer').length-1].click();
-            }
+            }*/
 
             //done making widgets, toggle on if we have layers.
             if(layerIds.length>0) {
@@ -697,9 +853,6 @@ mol.modules.map.layers = function(mol) {
             this.toggle = $(this).find('.toggle').button();
             this.styler = $(this).find('.styler');
             this.zoom = $(this).find('.zoom');
-            if(layer.extent == null) {
-                this.zoom.css('visibility','hidden');
-            }
             this.info = $(this).find('.info');
             this.close = $(this).find('.close');
             this.type = $(this).find('.type');
