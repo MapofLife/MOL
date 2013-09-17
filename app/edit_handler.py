@@ -16,7 +16,7 @@ import webapp2
 from google.appengine.api import urlfetch
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-api_key = 'c96e812aedbfe14ae425e85a0558f6ad10a97b7a'
+api_key = ''
 
 class PutHandler(webapp2.RequestHandler):
     """Request handler for cache requests."""
