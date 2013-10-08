@@ -10,7 +10,7 @@ mol.modules.map.boot = function(mol) {
             this.IE8 = false;
             this.maxLayers = ($.browser.chrome) ? 6 : 25;
             this.sql = '' +
-                'SELECT DISTINCT l.scientificname as name,'+
+                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
                     't.cartocss as css,' +
                     't.sort_order as type_sort_order, ' +
@@ -23,7 +23,7 @@ mol.modules.map.boot = function(mol) {
                     "CASE WHEN l.feature_count is not null THEN CASE WHEN d.type = 'taxogeooccchecklist' " +
                         'THEN ' +
                             "CONCAT("+
-                                "to_char(l.occ_count,'999,999,999'),"+
+                                "to_char(0,'999,999,999'),"+
                                 "' records<br>'," +
                                 "to_char(l.feature_count, '999,999,999'),"+
                                 "' locations'"+
@@ -56,10 +56,10 @@ mol.modules.map.boot = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN ac n ON ' +
+                'LEFT JOIN ac_staging n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
-                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
+                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' OR l.scientificname~*'\\m{0}'" +
                 'ORDER BY name, type_sort_order';
         },
         start: function() {

@@ -18,7 +18,7 @@ mol.modules.map.search = function(mol) {
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+                "SELECT n,v FROM ac_staging WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
@@ -66,7 +66,7 @@ mol.modules.map.search = function(mol) {
                     'l.provider = p.provider ' +
                 'LEFT JOIN source_types s ON ' +
                     'p.source_type = s.source_type ' +
-                'LEFT JOIN ac n ON ' +
+                'LEFT JOIN ac_staging n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
                      "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
