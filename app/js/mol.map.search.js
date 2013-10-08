@@ -33,7 +33,7 @@ mol.modules.map.search = function(mol) {
                     "CASE WHEN l.feature_count is not null THEN CASE WHEN d.type = 'taxogeooccchecklist' " +
                         'THEN ' +
                             "CONCAT("+
-                                "to_char(l.occ_count,'999,999,999'),"+
+                                "to_char(0,'999,999,999'),"+
                                 "' records<br>'," +
                                 "to_char(l.feature_count, '999,999,999'),"+
                                 "' locations'"+
@@ -45,19 +45,19 @@ mol.modules.map.search = function(mol) {
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
-                            '"lng":\',ST_XMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', '+
-                            '"lat":\',ST_YMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' '+
+                            '"lng":\',ST_XMin(l.extent),\', '+
+                            '"lat":\',ST_YMin(l.extent),\' '+
                         '}, '+
                         '"ne":{' +
-                        '"lng":\',ST_XMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', ' +
-                        '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
+                        '"lng":\',ST_XMax(l.extent),\', ' +
+                        '"lat":\',ST_YMax(l.extent),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
-                'FROM layer_metadata l ' +
+                'FROM layer_metadata_staging l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
@@ -116,7 +116,7 @@ mol.modules.map.search = function(mol) {
                     minLength: 3, 
                     source: function(request, response) {
                         $.getJSON(
-                            'http://mol.cartodb.com/api/v1/sql?q={0}'.format(
+                            mol.services.cartodb.sqlApi.json_url.format(
                                     self.ac_sql.format(
                                         $.trim(request.term)
                                             .replace(/ /g, ' ')

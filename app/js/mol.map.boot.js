@@ -35,19 +35,19 @@ mol.modules.map.boot = function(mol) {
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
-                            '"lng":\',ST_XMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', '+
-                            '"lat":\',ST_YMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' '+
+                            '"lng":\',ST_XMin(l.extent),\', '+
+                            '"lat":\',ST_YMin(l.extent),\' '+
                         '}, '+
                         '"ne":{' +
-                        '"lng":\',ST_XMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', ' +
-                        '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
+                        '"lng":\',ST_XMax(l.extent),\', ' +
+                        '"lat":\',ST_YMax(l.extent),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
-                'FROM layer_metadata l ' +
+                'FROM layer_metadata_staging l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
