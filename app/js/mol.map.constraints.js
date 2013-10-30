@@ -24,8 +24,11 @@ mol.modules.map.constraints = function(mol) {
                 range: true, 
                 values:[1970,2013], 
                 step:1,
-                slide: function(event, ui) {
+                stop: function(event, ui) {
                     self.setYearConstraint(event, ui)
+                },
+                slide: function (event, ui) {
+                    self.updateYearLabels(event, ui)
                 }    
             });
         },
@@ -50,6 +53,14 @@ mol.modules.map.constraints = function(mol) {
             );
         },
         setYearConstraint: function(event, ui) {
+            this.bus.fireEvent(
+                new mol.bus.Event(
+                    'set-year-constraint',
+                    {min: ui.values[0], max: ui.values[1]}
+                )
+            );            
+        },
+        updateYearLabels: function (event, ui) {
             this.display.find('.minyear').text(ui.values[0]);
             this.display.find('.minyear').css(
                 'left',
@@ -69,12 +80,6 @@ mol.modules.map.constraints = function(mol) {
                         -$(this.display.find('.ui-slider-handle')[1])
                             .width()/2
             );
-            this.bus.fireEvent(
-                new mol.bus.Event(
-                    'set-year-constraint',
-                    {min: ui.values[0], max: ui.values[1]}
-                )
-            );            
         }
     });
 
