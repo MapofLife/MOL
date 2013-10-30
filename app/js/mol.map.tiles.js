@@ -18,6 +18,7 @@ mol.modules.map.tiles = function(mol) {
             this.proxy = proxy;
             this.bus = bus;
             this.map = map;
+            this.constraints = {year: {min: null, max: null}};
             this.clickAction = 'info';
             this.gmap_events = [];
             this.addEventHandlers();
@@ -37,6 +38,15 @@ mol.modules.map.tiles = function(mol) {
 
                 }
             );
+            
+            this.bus.addHandler(
+                'set-year-constraint',
+                function(event) {
+                    self.constraints.year = event;
+                    self.bus.fireEvent(new mol.bus.Event('refresh-tiles'));
+                }
+            );
+
             /**
              * Handler for when the layer-toggle event is fired. This renders
              * the layer on the map if visible, and removes it if not visible.
@@ -126,7 +136,18 @@ mol.modules.map.tiles = function(mol) {
                         );
                     }
                 );
-
+                this.bus.addHandler(
+                    'refresh-tiles',
+                    function(event) {
+                        self.map.overlayMapTypes.forEach(
+                            function(maptype, index) {
+                                    var layer = maptype.layer;
+                                    self.map.overlayMapTypes.removeAt(index);
+                                    self.getTile(layer,index);
+                            }
+                        )
+                    }
+                );
                 /**
                  * Handler for applying cartocss style to a layer.
                  */
@@ -314,7 +335,7 @@ mol.modules.map.tiles = function(mol) {
              );
 
              if(toggle==true && this.map.overlayMapTypes.length>0) {
-                gridmt = new mol.map.tiles.GridTile(this.map);
+                gridmt = new mol.map.tiles.GridTile(this.map, this.constraints);
                 this.map.overlayMapTypes.push(gridmt.layer);
              }
         },
@@ -352,11 +373,12 @@ mol.modules.map.tiles = function(mol) {
         /**
          * Closure around the layer that returns the ImageMapType for the tile.
          */
-        getTile: function(layer) {
+        getTile: function(layer,index) {
             var self = this,
                 maptype = new mol.map.tiles.CartoDbTile(
                             layer,
-                            this.map
+                            this.map,
+                            this.constraints
                         ),
                 gridmt;
             maptype.onbeforeload = function (){
@@ -385,7 +407,7 @@ mol.modules.map.tiles = function(mol) {
                 }
             );
 
-            this.map.overlayMapTypes.insertAt(0,maptype.layer);
+            this.map.overlayMapTypes.insertAt((index != null)?index:0,maptype.layer);
 
             if(this.clickAction == 'info') {
                 this.updateGrid(true);
@@ -397,15 +419,14 @@ mol.modules.map.tiles = function(mol) {
     });
 
     mol.map.tiles.CartoDbTile = Class.extend({
-        init: function(layer, map) {
+        init: function(layer, map, constraints) {
             var sql =  "" + //c is in case cache key starts with a number
-                "SELECT * FROM get_tile('{0}','{1}','{2}','{3}')"
+                "SELECT * FROM get_tile_beta('{0}','{1}','{2}','{3}')"
                 .format(
-                    layer.source,
-                    layer.type,
-                    layer.name,
                     layer.dataset_id,
-                    mol.services.cartodb.tileApi.tile_cache_key
+                    layer.name,
+                    constraints.year.min,
+                    constraints.year.max
                 ),
                 urlPattern = '' +
                     'http://{HOST}/tiles/mol_style/{Z}/{X}/{Y}.png?'+
@@ -502,7 +523,7 @@ mol.modules.map.tiles = function(mol) {
     });
 
     mol.map.tiles.GridTile = Class.extend({
-        init: function(map) {
+        init: function(map, constraints) {
             var options = {
                     // Just a blank image
                     getTileUrl: function(tile, zoom) {
@@ -539,7 +560,7 @@ mol.modules.map.tiles = function(mol) {
                         "'{3}' as dataset_id, " +
                         "'{2}' as scientificname " +
                     "FROM " +
-                        "get_tile('{0}','{1}','{2}','{3}')",
+                        "get_tile_beta('{0}','{1}','{2}','{3}')",
                 gridUrlPattern = '' +
                     'http://{0}/' +
                     'tiles/generic_style/{z}/{x}/{y}.grid.json?'+
@@ -552,10 +573,10 @@ mol.modules.map.tiles = function(mol) {
                             function(mt) {
                                 if(mt.name != 'grid' && mt.name != undefined) {
                                     return layersql.format(
-                                        mt.layer.source,
-                                        mt.layer.type,
+                                        mt.layer.dataset_id,
                                         unescape(mt.layer.name.replace(/percent/g,'%')),
-                                        mt.layer.dataset_id
+                                        constraints.year.min,
+                                        constraints.year.max
                                     );
                                 }
                             }

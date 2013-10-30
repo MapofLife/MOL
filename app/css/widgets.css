@@ -1,6 +1,7 @@
 /* BEGIN Shared Styles */
 /* sets defaults for units within a widget background greed fade theme,
  * as well as min-height and 100% width */
+/*
 .FIRST {
     pointer-events: none;
 }
@@ -15,7 +16,7 @@
 }
 .LAST {
     pointer-events: none;
-}
+}*/
 .widgetTheme{
     behavior: url(/css/pie/PIE.htc);
     background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
@@ -82,7 +83,7 @@ button:hover{
 }
 
 .mol-Map-CenterTopControl {
-    pointer-events: none;
+    /*pointer-events: none;*/.
 }
 
 .mol-Map-RightControl {
@@ -124,6 +125,7 @@ button:hover{
     padding-top:5px;
     font-size:16px;
 }
+
 
 .mol-Splash .mainPanel {
     display:inline-block;
@@ -1790,3 +1792,14 @@ div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
     text-align: left;
 }
 
+.mol-ConstraintsControl {
+    position: relative;
+    pointer-events: auto;
+    top:15px;
+}
+.mol-ConstraintsControl .minyear {
+    position:relative; float: left;
+}
+.mol-ConstraintsControl .maxyear {
+    position:relative; float: left;
+}

@@ -2,6 +2,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 import logging
+import io
 import os
 import random
 import webapp2

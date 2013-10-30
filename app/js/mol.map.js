@@ -19,7 +19,8 @@ mol.modules.map = function(mol) {
             'help',
             'status',
             'images',
-            'boot'
+            'boot',
+            'constraints'
     ];
 
     mol.map.MapEngine = mol.mvp.Engine.extend(

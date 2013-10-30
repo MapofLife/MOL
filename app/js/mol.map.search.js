@@ -53,7 +53,7 @@ mol.modules.map.search = function(mol) {
                         '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
-                    'l.dataset_id as dataset_id, ' +
+                    "CASE WHEN l.dataset_id = 'gbif_taxloc' THEN TEXT('gbif_aug_2013') ELSE l.dataset_id END as dataset_id, " +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     

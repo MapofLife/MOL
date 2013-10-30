@@ -65,6 +65,7 @@
      <script type="text/javascript" src="../../../js/mol.map.status.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.images.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.boot.js"></script>
+     <script type="text/javascript" src="../../../js/mol.map.constraints.js"></script>
     {% endif %}
 
     <meta charset="utf-8" />
@@ -133,6 +134,8 @@
                 hd.start()
                 st = new env.map.status.StatusEngine(proxy, bus)
                 st.start()
+                ce = new env.map.constraints.ConstraintsEngine(proxy, bus, me.display.map)
+                ce.start()
                 sty = new env.map.styler.StylerEngine(proxy, bus)
                 sty.start()
                 ie = new env.map.images.ImagesEngine(proxy, bus)
@@ -176,6 +179,8 @@
                 hd.start()
                 st = new env.map.status.StatusEngine(proxy, bus)
                 st.start()
+                ce = new env.map.constraints.ConstraintsEngine(proxy, bus, me.display.map)
+                ce.start()
                 sty = new env.map.styler.StylerEngine(proxy, bus)
                 sty.start()
                 ie = new env.map.images.ImagesEngine(proxy, bus)
