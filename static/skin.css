@@ -1,0 +1,51 @@
+
+ 
+#mycarousel.jcarousel-container-horizontal {
+    width: 678px;
+}
+ 
+#mycarousel .jcarousel-clip-horizontal {
+    width: 678px;
+    height: 442px;
+}
+ 
+#mycarousel .jcarousel-item,
+#mycarousel .jcarousel-item-placeholder {
+    width: 217px;
+    height: 420px;
+}
+ 
+#mycarousel .jcarousel-item-horizontal img {
+    border: 1px solid #808080;
+}
+ 
+#mycarousel .jcarousel-item-horizontal p {
+    margin: 5px;
+    text-align: center;
+    clear: both;
+    white-space: wrap;
+}
+ 
+#mycarousel .jcarousel-item-placeholder {
+    background: transparent url(images/loading.gif) 50% 50% no-repeat;
+}
+ 
+#mycarousel .jcarousel-next {
+    top: 150px;
+    right: 5px;
+}
+ 
+#mycarousel .jcarousel-prev {
+    top: 150px;
+    left: 5px;
+}
+ 
+#mycarousel form {
+    margin-top: 10px;
+}
+ 
+#mycarousel form label,
+#mycarousel form small {
+    display: block;
+}
+ 

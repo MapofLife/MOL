@@ -1,0 +1,210 @@
+<!DOCTYPE html> 
+<html>
+    <head>
+        <META http-equiv="Content-Type" CONTENT="text/html; charset=UTF-8" /> 
+        <META NAME="Description" CONTENT="A knowledge-base and platform for species distribution map development.">
+        <META NAME="keywords" CONTENT="map, biodiversity, species, distribution, knowledge" />
+        <meta name="google-site-verification" content="pZrZcT4jdB76onBTxpbhRGSkIonOimgCj8Wk2jflnZ8" />
+        <title>Map of Life</title> 
+        <link href="/css/homepage.css" media="screen" rel="stylesheet" type="text/css" /> 
+        <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Coda">
+        <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu">
+        <script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAhejF1IRVaCyeCqxIQjT19BT2yXp_ZAY8_ufC3CFXhHIE1NvwkxQQVdp0qK6LIdtUMkyJyGau2FAr6Q"></script> 
+        <script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAhejF1IRVaCyeCqxIQjT19BQnqYmZFNw176Z9eGZLF4M7kSq-MhQPJ1PZw_xe7fLxFc65vo_OiMHM5A"></script> 
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script> 
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js"></script>
+        <script src="/js/gfeed.js" type="text/javascript"></script> 
+        <script type="text/javascript">
+            $(document).ready(function() { 
+                var elUp = false;
+                var tobyHide = false;
+                $('#techLink').mouseenter(function(){
+                    if ( !elUp) {
+                        elUp = true;
+                        var eleph = new Image();
+                        eleph.src="/static/home/tech.gif?n="+Math.random();
+                        eleph.onload = function(){
+                            $('.topBackground').html(eleph);
+                        }
+                    }
+                });
+                $('#techLink').mouseleave(function(){
+                    setTimeout(function(){
+                        if (elUp) {
+                            var eleph = new Image();
+                            eleph.src="/static/home/tech-reverse.gif?n="+Math.random();
+                            eleph.onload = function(){
+                                $('.topBackground').html(eleph);
+                                elUp = false;
+                            }
+                        }
+                    },700);
+                });
+                $('#demoLink').mouseenter(function(){
+                    if (!tobyHide){
+                        tobyHide = true;
+                        var toby = new Image();
+                        toby.src="/static/home/turtle.gif?n="+Math.random();
+                        toby.onload = function(){
+                            $('#turtle').html(toby);
+                        }
+                    }
+                });
+                $('#demoLink').mouseleave(function(){
+                    setTimeout(function(){
+                        if (tobyHide){
+                            var toby = new Image();
+                            toby.src="/static/home/turtle-reverse.gif?n="+Math.random();
+                            toby.onload = function(){
+                                $('#turtle').html(toby);
+                                tobyHide = false;
+                            }
+                        }
+                    },8000);
+                });
+
+                $('#blog').gFeed({ 
+                    url: 'http://mappinglife.wordpress.com/feed?cat=-2764',
+                    tabs: false,
+                    max: 4
+                }); 
+                $('#press').gFeed({ 
+                    url: 'http://mappinglife.wordpress.com/category/Press/feed/',
+                    tabs: false,
+                    max: 4
+                }); 
+                $('#code').gFeed({ 
+                    url: 'https://github.com/mapoflife/MOL/commits/develop.atom',
+                    tabs: false,
+                    max: 5
+                }); 
+
+            });
+        </script>
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-26993916-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="title">Map of Life</div>
+            <div id="subtitle">integrating species distribution knowledge</div>
+            <div id="menu">
+                <div class="item"><a href="/about/" class="current">Home</a></div>
+                <div class="item" id="techLink"><a href="/about/tech">Tech</a></div>
+                <div class="item" id="demoLink"><a href="/about/demo">Demo</a></div>
+                <div class="item"><a href="/about/people">People</a></div>
+            </div>
+        </div>
+            <div id="container">
+                <div id="top">
+                    <div class="topQuote"> 
+                        By bringing together all types of information about species 
+                        distributions, providing model-based integration,
+                        and providing a system for
+                        users to build upon our knowledge, 
+                        the Map of Life project hopes to support our community in 
+                        understanding and saving the world's biodiversity.
+                    </div>
+                    <div class="topBackground" ><img src="/static/home/tech-reverse.gif"></div>
+                </div>
+                <div id="middle">
+                    <div id="turtle"><img class="turtle" src="/static/home/turtle.png"></div>
+                    <img class="placemark small" src="/static/home/placemark.png">
+                    <img class="placemark medium" src="/static/home/placemark.png">
+                    <img class="placemark big" src="/static/home/placemark.png">
+                    <span class="horizontalDivider"></span>
+                    <div class="middleQuote">
+                        The result will ultimately be a knowledge-base and platform for
+                        species distribution map development, along with a set of tools for
+                        querying, accessing, downloading and summarizing them.
+                    </div>
+                </div>
+                <div id="content">
+                    <div class="wrapper">
+                        <div id="left">
+
+                            <div class="details">
+                                <div class="pretitle">HIGHLIGHT</div>
+                                <div class="title">MAP OF LIFE BLOG</div>
+                                <div class="description">
+                                The MOL team is rapidly developing many features and 
+                                new technologies. We are also rapidly increasing the 
+                                number of species distribution datasets we make available. 
+                                As we roll out new datasetss and features, you can follow 
+                                our blog to learn what we are up to and provide valuable 
+                                feedback and insight into the work we are doing.
+                                </div>
+                            </div>
+                            <!--
+                            <div class="description recent_updates" style="color: white; border-top: 1px solid white;">
+                                <strong>Recent updates</strong><br>
+                                Nov 2011: We are looking for a <a href="http://www.yale.edu/jetz/GeospatialProgrammer.htm">programmer in geospatial analysis and biodiversity informatics</a> to work on the <em>Map of Life</em> with us. If that sounds like you, apply today!
+                            </div>
+                            -->
+                            <div id="blog"></div>
+                            <div class="all_entries" align="right"><a href="http://mappinglife.wordpress.com/?cat=-2764">All blog posts</a></div>
+                        </div>
+                        <div id="right">
+                            <div class="details">
+                                <div class="pretitle">HIGHLIGHT</div>
+                                <div class="title">PRESS</div>
+                                <div class="description">
+                                    Map of Life has been covered by newspapers, magazines
+                                    and blogs from around the world. Here are a few selected
+                                    quotes from their articles.
+                                </div>
+                            </div>
+                            <div id="press"></div>
+                            <div class="all_entries" align="right"><a href="http://mappinglife.wordpress.com/category/press">All press articles</a></div>
+                        </div>
+
+                        <div id="fill">
+                            <div class="details">
+                                <div class="pretitle">HIGHLIGHT</div>
+                                <div class="title">CODE DEVELOPMENT</div>
+                                <div class="description">
+                                    For those of you in the code development community, 
+                                    MOL is a fully open-source project. Feel free to watch 
+                                    and discuss our progress.
+                                </div>
+                            </div>
+                            <div id="code"></div>
+                            <div class="all_entries" align="right"><a href="https://github.com/MapofLife/MOL">All recent changes</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<div id="footer"> 
+   <div id="footer_links"> 
+        <a href="/about/">Home</a>
+        <a href="http://mappinglife.wordpress.com/">Blog</a>
+        <a href="http://www.yale.edu/jetz/">Jetz Lab</a>
+        <a href="http://sites.google.com/site/robgur/">Guralnick Lab</a>
+        <a href="http://github.com/MapOfLife/MOL">GitHub</a>
+    </div> 
+</div> 
+<div id="footer_imgs">
+        <a href="http://www.nsf.gov/"><img title="National Science Foundation" src="/static/home/nsf.png"></a>
+        <a href="http://www.nasa.gov/"><img title="National Aeronautics and Space Administration" src="/static/home/nasa.png"></a>
+        <a href="http://www.nceas.ucsb.edu/"><img title="National Center for Ecological Analysis and Synthesis" src="/static/home/nceas.png"></a>
+        <a href="http://www.iplantcollaborative.org/"><img title="iPlant Collaborative" src="/static/home/iplant.png"></a>
+        <a href="http://www.mountainbiodiversity.org/"><img title="Global Mountain Biodiversity Assessment" src="/static/home/gmba.png"></a>
+        <a href="http://www.senckenberg.de"><img title="Senckenberg" src="/static/home/senckenberg.png"></a>
+        <a href="http://www.bik-f.de/"><img title="Biodiversität und Klima Forschungszentrum (BiK-F)" src="/static/home/bik_bildzeichen.png"></a>
+        <a href="http://www.eol.org/"><img title="Encyclopedia of Life" src="/static/home/eol.png"></a>
+
+        <a href="http://www.gbif.org/"><img title="Global Biodiversity Information Facility" src="/static/home/gbif.png"></a>
+</div>
+
+    </body>
+</html>      

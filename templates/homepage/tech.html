@@ -1,0 +1,72 @@
+<!DOCTYPE html> 
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+        <title>Map of Life</title> 
+        <link href="/css/homepage.tech.css" media="screen" rel="stylesheet" type="text/css" /> 
+        <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu">
+        <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Coda">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script> 
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-26993916-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="title">Map of Life</div>
+            <div id="subtitle">integrating species distribution knowledge</div>
+            <div id="menu">
+                <div class="item"><a href="/about/" >Home</a></div>
+                <div class="item" id="techLink" ><a class="current" href="/tech">Tech</a></div>
+                <div class="item"><a href="/about/demo">Demo</a></div>
+                <div class="item"><a href="/about/people">People</a></div>
+            </div>
+        </div>
+        <div id="submenu">
+            <div class="link"><a href="#data">Data</a></div>
+            <div class="link"><a href="#architecture">Architecture</a></div>
+        </div>
+        <div id="container">
+            <div class="subject first">
+                <h2 id="data">Data</h2>
+                <div class="block">
+                    <p class="text">
+                        The Map of Life assembles and integrates different sources of data
+                        describing species distributions worldwide. These data include expert
+                        species range maps, species occurrence points, ecoregions, and
+                        protected areas from providers like IUCN, WWF, GBIF, and more. All
+                        data assets are stored, managed, backed up, and accessed using a
+                        hosted CartoDB instance in the cloud.
+                    </p>
+                </div>
+            </div>
+            <div class="subject second">
+                <h2 id="architecture">Architecture</h2>
+                <div class="overview">
+                    <p>
+                        The Map of Life architecture is built for scalability and performance
+                        using JavaScript, HTML5, Google App Engine and CartoDB. On the server
+                        side, all data requests are handled by Google App Engine which
+                        contains data indexes and caches. If the data are not indexed or
+                        cached, Google App Engine sends an HTTP request to CartoDB using the
+                        Maps or SQL API. The resulting data, including map tiles and GeoJSON
+                        documents, are then cached for servicing future requests.
+                    </p>
+
+                    <a href="/about/static/tech/architecture.png"><img 
+                        src="/static/tech/architecture.png" 
+                        alt="A diagram showing the architectural design of Map of Life"
+                    /></a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

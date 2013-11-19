@@ -1,0 +1,18 @@
+/* Set up RightControl defaults */
+#mol-Map-RightControl { margin-right: 5px; width: 290px; }
+#mol-Map-RightControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+#mol-Map-RightControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+#mol-Map-RightControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+
+/* Set up CenterControl defaults */
+#mol-Map-CenterTopControl { margin-right: 5px; width: 290px;  }
+#mol-Map-CenterTopControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+#mol-Map-CenterTopControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+#mol-Map-CenterTopControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+
+/* Set up LeftControl defaults */
+#mol-Map-LeftBottomControl { margin-left: 5px; margin-bottom: 2px; width: 290px;  }
+#mol-Map-LeftBottomControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+#mol-Map-LeftBottomControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+#mol-Map-LeftBottomControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+

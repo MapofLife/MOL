@@ -1,0 +1,181 @@
+body { 
+    font-family: 'Coda', sans-serif;
+    font-size: 12px;
+    min-width: 800px; margin: 0px; height: 100%; width: 100%; 
+    background: #394050; position: relative;}
+
+div#header { 
+    position: absolute;
+    width: 800px;
+    color: #fff; 
+    background: #394050; 
+    left: 50%;
+    margin-left: -400px;
+    padding-top: 10px; 
+    padding-bottom: 8px; 
+    height: 50px; 
+}
+div#header #title{ 
+    font-family: 'Ubuntu', san-sarif;
+    padding-left: 5px; 
+    padding-right: 5px; 
+    width: 245px;
+    font-weight: bold; 
+    font-size: 40px;
+    line-height: 40px;
+    float: left;
+}
+div#header #subtitle{ 
+    font-family: 'Ubuntu', san-sarif;
+    float: left;
+    width: 280px;
+    line-height: 20px;
+    margin-top: 18px;
+    font-style: italic;
+}
+div#header #menu{ 
+    float: right;
+    width: 250px;
+    margin-right: 10px;
+}
+div#header #menu .item a{ 
+    float: left;
+    width: 50px;
+    height: 18px;
+    margin: 5px;
+    padding-top: 4px;
+    text-align: center;
+    background-color: #fff; 
+    color: #394050;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: bold;
+    -moz-box-shadow: 0px px 10px rgba(183,233,163,0.6);
+    -webkit-box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+    box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+}
+div#header #menu .item a:hover{ 
+    -moz-box-shadow: 0px 6px 6px rgba(183,253,133,0.2);
+    -webkit-box-shadow: 0px 6px 6px rgba(183,253,133,0.2);
+    box-shadow: 0px 6px 6px rgba(183,253,133,0.2);
+}
+div#header #menu .item a.current{ 
+    -moz-box-shadow: 0px 6px 6px rgba(183,233,163,0.6);
+    -webkit-box-shadow: 0px 6px 6px rgba(183,233,163,0.6);
+    box-shadow: 0px 8px 6px rgba(183,233,163,0.6);
+    color: #111;
+}
+div#header #menu .item a{ 
+    text-decoration: none;
+    color: #394050;
+}
+div#submenu {
+    position: relative;
+    float: left;
+    width: 100%;
+    margin-top: 70px;
+    margin-bottom: 10px;
+    padding: 10px;
+    padding-left: 15%;
+    font-size: 1.4em;
+    background-color: #6AD2DF; color: #111; 
+}
+div#submenu .link{
+    float: left;
+    margin-left: 45px;
+}
+div#submenu .link a{
+    color: #ddd;
+    color: #111;
+}
+div#container {
+    position: relative;
+    float: left;
+    width:700px;
+    left: 50%;
+    margin-left: -350px;
+    font-size: 1.5em;
+}
+div#container .subject{
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    -moz-border-radius: 35px;
+    border-radius: 35px;
+    -moz-box-shadow: 0 0 5px rgba(222,222,222,0.5);
+    -webkit-box-shadow: 0 0 5px rgba(222,222,222,0.5);
+    box-shadow: 0 0 5px rgba(222,222,222,0.5);
+    color: #111; 
+    float: left;
+}
+div#container .links{
+    margin-left: 30px;
+}
+div#container .link, div#container .label{
+    float: left;
+    padding: 3px;
+    margin-left: 20px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    background-color: rgba(37,168,222,0.8);
+    font-size: 0.8em;
+    font-weight: bold;
+    -moz-box-shadow: 0 0 5px #666;
+    -webkit-box-shadow: 0 0 5px #666;
+    box-shadow: 0 0 5px #666;
+    cursor: pointer;
+}
+
+div#container .subject.first{
+    background-color: #b8fd85; 
+    color: #111; 
+}
+div#container .subject.first .link{
+    background-color: #6AD2DF;
+}
+div#container .subject.second{
+    background-color: #6AD2DF; color: #111; 
+}
+div#container .subject.second .link{
+    background-color: #b8fd85; 
+}
+div#container .subject.third{
+    background-color: #FFC800; color: #111; 
+}
+div#container .subject.third .link{
+    background-color: #6AD2DF;
+}
+div#container .subject.fourth{
+    background-color: #F7AF63; color: #111; 
+}
+div#container .subject.fourth .link{
+    background-color: #b8fd85; 
+}
+div#container .subject.fifth{
+    background-color: #FF6B6B; color: #111; 
+}
+div#container .subject.fifth .link{
+    background-color: #6AD2DF;
+}
+div#container .subject.sixth{
+    background-color: #00BBFF; color: #111; 
+}
+div#container .subject.sixth .link{
+    background-color: #b8fd85; 
+}
+div#container .link a{
+    text-decoration: none;
+    color: #212121; 
+}
+div#container .link:hover{
+    -moz-box-shadow: 0 0 5px #000;
+    -webkit-box-shadow: 0 0 5px #000;
+    box-shadow: 0 0 5px #000;
+}
+div#container .label{
+    background-color: #212121;
+    color: #bbb;
+    cursor: default;
+}
+

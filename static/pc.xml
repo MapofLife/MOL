@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="http://data.gbif.org/ws/rest/occurrence/stylesheet"?>
+<gbif:gbifResponse xsi:schemaLocation="http://portal.gbif.org/ws/response/gbif http://data.gbif.org/ws/rest/occurrence/schema http://purl.org/dc/elements/1.1/ http://data.gbif.org/schema/dc.xsd http://purl.org/dc/terms/ http://data.gbif.org/schema/dcterms.xsd http://www.w3.org/1999/02/22-rdf-syntax-ns# http://data.gbif.org/schema/rdf.xsd http://www.w3.org/2002/07/owl# http://data.gbif.org/schema/owl.xsd http://rs.tdwg.org/ontology/voc/Common# http://data.gbif.org/schema/tcom.xsd http://rs.tdwg.org/ontology/voc/TaxonOccurrence# http://data.gbif.org/schema/TaxonOccurrence.xsd http://rs.tdwg.org/ontology/voc/TaxonConcept# http://data.gbif.org/schema/TaxonConcept.xsd http://rs.tdwg.org/ontology/voc/TaxonName# http://data.gbif.org/schema/TaxonName.xsd" xmlns:gbif="http://portal.gbif.org/ws/response/gbif" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:to="http://rs.tdwg.org/ontology/voc/TaxonOccurrence#" xmlns:tc="http://rs.tdwg.org/ontology/voc/TaxonConcept#" xmlns:tn="http://rs.tdwg.org/ontology/voc/TaxonName#" xmlns:tcom="http://rs.tdwg.org/ontology/voc/Common#">
+ <gbif:header>
+  <gbif:help>http://data.gbif.org/ws/rest/occurrence/help
+</gbif:help>
+  <gbif:request>list</gbif:request>
+  <gbif:statements>-
+
+This document contains data shared through the GBIF Network - see http://data.gbif.org/ for more information.
+					
+All usage of these data must be in accordance with the GBIF Data Use Agreement - see http://www.gbif.org/DataProviders/Agreements/DUA
+
+Please cite these data as follows:
+
+Louisiana State University Museum of Natural Science, Mammal specimens (accessed through GBIF data portal, http://data.gbif.org/datasets/resource/559, 2011-03-09)
+
+-
+</gbif:statements>
+  <gbif:stylesheet>http://data.gbif.org/ws/rest/occurrence/stylesheet</gbif:stylesheet>
+  <gbif:parameter name="maxresults" value="10"/>
+  <gbif:parameter name="request" value="list"/>
+  <gbif:parameter name="service" value="occurrence"/>
+  <gbif:parameter name="format" value="brief"/>
+  <gbif:parameter name="scientificname" value="Puma concolor"/>
+  <gbif:parameter name="coordinatestatus" value="true"/>
+  <gbif:parameter name="mode" value="raw"/>
+  <gbif:nextRequestUrl>http://data.gbif.org/ws/rest/occurrence/list?startindex=10&amp;maxresults=10&amp;format=brief&amp;scientificname=Puma+concolor&amp;coordinatestatus=true&amp;mode=raw</gbif:nextRequestUrl>
+<gbif:summary start="0" totalMatched="10" next="10" totalReturned="10"/>
+ </gbif:header><gbif:dataProviders>
+ <gbif:dataProvider gbifKey="105" rdf:about="http://data.gbif.org/ws/rest/provider/get/105">
+  <gbif:name>Louisiana State University Museum of Natural Science</gbif:name>
+   <gbif:dataResources>
+    <gbif:dataResource gbifKey="559" rdf:about="http://data.gbif.org/ws/rest/resource/get/559">
+     <gbif:name>Mammal specimens</gbif:name>
+     <gbif:rights>LSUMZ data records may be used by individual researchers or research groups, but they may not be repackaged, resold, or redistributed in any form without the express written consent of a curatorial staff member of the LSU Museum of Natural Science. If any of these records are used in an analysis or report, the provenance of the original data must be acknowledged and the LSU Museum of Natural Science notified. The Museum of Natural Science Zoology and its staff are not responsible for damages, injury or loss due to the use of these data.</gbif:rights>
+     <gbif:citation>LSUMZ Mammal Collection</gbif:citation>
+     <gbif:occurrenceRecords>
+      <to:TaxonOccurrence gbifKey="45891625" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891625">
+       <to:catalogNumber>17032</to:catalogNumber>
+       <to:country>USA</to:country>
+       <to:decimalLatitude>33.2281</to:decimalLatitude>
+       <to:decimalLongitude>-91.6973</to:decimalLongitude>
+       <to:earliestDateCollected>1969-12-08</to:earliestDateCollected>
+       <to:latestDateCollected>1969-12-08</to:latestDateCollected>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891260" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891260">
+       <to:catalogNumber>4115</to:catalogNumber>
+       <to:country>Mexico</to:country>
+       <to:decimalLatitude>21.84111</to:decimalLatitude>
+       <to:decimalLongitude>-101.11556</to:decimalLongitude>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891723" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891723">
+       <to:catalogNumber>21905</to:catalogNumber>
+       <to:country>USA</to:country>
+       <to:decimalLatitude>31.3913</to:decimalLatitude>
+       <to:decimalLongitude>-91.4258</to:decimalLongitude>
+       <to:earliestDateCollected>1977-01-15</to:earliestDateCollected>
+       <to:latestDateCollected>1977-01-15</to:latestDateCollected>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891118" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891118">
+       <to:catalogNumber>297</to:catalogNumber>
+       <to:country>USA</to:country>
+       <to:decimalLatitude>31.3208</to:decimalLatitude>
+       <to:decimalLongitude>-91.53</to:decimalLongitude>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891740" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891740">
+       <to:catalogNumber>25202</to:catalogNumber>
+       <to:country>Bolivia</to:country>
+       <to:decimalLatitude>-14.46667</to:decimalLatitude>
+       <to:decimalLongitude>-67.56667</to:decimalLongitude>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891737" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891737">
+       <to:catalogNumber>25004</to:catalogNumber>
+       <to:country>USA</to:country>
+       <to:decimalLatitude>30.306</to:decimalLatitude>
+       <to:decimalLongitude>-103.662</to:decimalLongitude>
+       <to:earliestDateCollected>1978-04-20</to:earliestDateCollected>
+       <to:latestDateCollected>1978-04-20</to:latestDateCollected>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891570" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891570">
+       <to:catalogNumber>14469</to:catalogNumber>
+       <to:country>Mexico</to:country>
+       <to:decimalLatitude>17.4708333</to:decimalLatitude>
+       <to:decimalLongitude>-91.4263889</to:decimalLongitude>
+       <to:earliestDateCollected>1959-04-20</to:earliestDateCollected>
+       <to:latestDateCollected>1959-04-20</to:latestDateCollected>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891475" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891475">
+       <to:catalogNumber>11363</to:catalogNumber>
+       <to:country>USA</to:country>
+       <to:decimalLatitude>32.3328</to:decimalLatitude>
+       <to:decimalLongitude>-93.836</to:decimalLongitude>
+       <to:earliestDateCollected>1965-11-30</to:earliestDateCollected>
+       <to:latestDateCollected>1965-11-30</to:latestDateCollected>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891363" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891363">
+       <to:catalogNumber>7634</to:catalogNumber>
+       <to:country>Mexico</to:country>
+       <to:decimalLatitude>17.4708333</to:decimalLatitude>
+       <to:decimalLongitude>-91.4263889</to:decimalLongitude>
+       <to:earliestDateCollected>1959-04-20</to:earliestDateCollected>
+       <to:latestDateCollected>1959-04-20</to:latestDateCollected>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+      <to:TaxonOccurrence gbifKey="45891370" rdf:about="http://data.gbif.org/ws/rest/occurrence/get/45891370">
+       <to:catalogNumber>8086</to:catalogNumber>
+       <to:country>Mexico</to:country>
+       <to:decimalLatitude>23.7675</to:decimalLatitude>
+       <to:decimalLongitude>-98.2077778</to:decimalLongitude>
+       <to:earliestDateCollected>1959-01-03</to:earliestDateCollected>
+       <to:latestDateCollected>1959-01-03</to:latestDateCollected>
+       <to:identifiedTo>
+        <to:Identification>
+         <to:taxon>
+          <tc:TaxonConcept gbifKey="5190686" rdf:about="http://data.gbif.org/ws/rest/taxon/get/5190686">
+           <tc:hasName>
+            <tn:TaxonName>
+             <tn:nameComplete>Puma concolor</tn:nameComplete>
+             <tn:specificEpithet>concolor</tn:specificEpithet>
+             <tn:scientific>true</tn:scientific>
+            </tn:TaxonName>
+           </tc:hasName>
+          </tc:TaxonConcept>         
+         </to:taxon>
+         <to:taxonName>Puma concolor</to:taxonName>
+        </to:Identification>
+       </to:identifiedTo>
+      </to:TaxonOccurrence>
+     </gbif:occurrenceRecords>
+    </gbif:dataResource>
+   </gbif:dataResources>
+  </gbif:dataProvider>
+ </gbif:dataProviders>
+</gbif:gbifResponse>

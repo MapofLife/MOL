@@ -56,3 +56,5 @@ bulkloader-progress*
 .#*
 *.svn
 .svn
+privatekey.pem
+config.py

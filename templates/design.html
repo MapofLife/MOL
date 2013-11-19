@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="../../../css/mol.css">
+    <link rel="stylesheet" href="../../../css/widgets.css">
+    <!--<link rel="stylesheet" href="../../../css/metadata.css">-->
+    <link rel="stylesheet" href="../../../css/cartodb.css">
+    <!-- <link rel="stylesheet" href="../../../css/wri-style.css"> -->
+
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+
+    <script src="../../../js/lib/cartodb-gmapsv3.js"></script>
+    <script src="../../../js/lib/wax.g.js"></script>
+
+    <script src="../../../js/lib/jquery-1.7.1.js"></script>
+    <script src="../../../js/lib/jquery.ui.core.js"></script>
+    <script src="../../../js/lib/jquery.ui.widget.js"></script>
+    <script src="../../../js/lib/jquery.ui.mouse.js"></script>
+    <script src="../../../js/lib/jquery.ui.sortable.js"></script>
+    <script src="../../../js/lib/jquery.imagesloaded.js"></script>
+    <!-- <script src="../../../js/lib/jquery-ui-1.8.10.custom.min.js"></script> -->
+    <!-- <script src="../../../js/lib/jquery-ui.min.js"></script> -->
+    <script src="../../../js/lib/underscore-min.js"></script>
+    <script src="../../../js/lib/backbone-min.js"></script>
+    <script src="../../../js/lib/class.js"></script>
+
+    {% if prod %}
+    <script src="../../../static/js/mol.js?r={{ r }}"></script>
+    {% else %}
+    <script src="../../../js/mol.js"></script>
+    <script src="../../../js/mol.core.js"></script>
+    <script src="../../../js/mol.bus.js"></script>
+    <script src="../../../js/mol.services.js"></script>
+    <script src="../../../js/mol.services.cartodb.js"></script>
+    <script src="../../../js/mol.mvp.js"></script>
+    <script src="../../../js/mol.map.js"></script>
+    <script src="../../../js/mol.map.search.js"></script>
+    <script src="../../../js/mol.map.results.js"></script>
+    <script src="../../../js/mol.map.layers.js"></script>
+    <script src="../../../js/mol.map.tiles.js"></script>
+    <script src="../../../js/mol.map.menu.js"></script>
+    {% endif %}
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta name="description" content="Map of Life - Range Map." />
+    <meta name="keywords" content="map of life" />
+
+  </head>
+  <body>
+
+    <div class="mol-LayerControl-Results" style=""> 
+      <div class="dashboard">
+        <div class="title">Taxonomy Dashboard</div>
+        <div class="subtitle">Statistics for data served by the Map of Life</div>
+        <table>
+          <tr>
+            <td width="100px"><b>Source</b></td>
+            <td><b>Amphibians</b></td>
+            <td><b>Birds</b></td>
+            <td><b>Mammals</b></td>
+            <td><b>Reptiles</b></td>
+          </tr>
+          <tr>
+            <td>GBIF points</td>
+            <td>500 species with  records</td>
+            <td>1,500 species with 30,000 records</td>
+            <td>152 species with 88,246 records</td>
+            <td>800 species with 100,000 records</td>
+          </tr>
+        </table>    
+      </div>  
+    </div>
+    
+<div class="mol-Map-RightControl" style="z-index: 0; position: absolute; right: 0px; top: 0px; "><div class="mol-LayerControl-Menu ">    <div class="label">       <img class="layersToggle" src="http://localhost:8080/static/maps/layers/expand.png">    </div>    <div class="widgetTheme search button">Search</div></div><div class="mol-LayerControl-Layers">      <div class="staticLink widgetTheme">          <input type="text" class="linkText">      </div>   <div class="scrollContainer">   </div></div>    <div class="TOP"><div class="mol-LayerControl-Layers">  <div class="staticLink widgetTheme" style="display: none; ">    <input type="text" class="linkText">  </div>  <div class="scrollContainer" style="">    <ul id="sortable" class="ui-sortable" style="">    
+
+<li class="layerContainer" id="layer-Coturnicops_notatus-expert_opinion_range_map-mol_rangemaps">
+    <div class="layer widgetTheme">
+        <div class="layerName">
+            <div class="layerNomial">Coturnicops notatus</div>
+        </div>
+        <div class="buttonContainer">
+            <input class="toggle" type="checkbox" checked="checked">
+            <span class="customCheck"></span>
+        </div>
+        <button class="info">x</button>
+        <button class="info">i</button>
+        <button class="zoom">z</button>
+        <input type="range" class="opacity" min=".25" max="1.0" step=".25">
+    </div>
+</li>
+        </ul>  
+      </div>
+  </div></div>    <div class="MIDDLE"></div>    <div class="BOTTOM"></div></div>
+  </body>
+</html>

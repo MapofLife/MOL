@@ -1,0 +1,183 @@
+<!DOCTYPE html> 
+<html> 
+  <head> 
+    <style>
+.mol-TopLeftControl{
+    margin-top: 5px;
+	width: 550px;
+    font-family: Arial, sans-serif;
+    font-weight:700;
+    color: #141414;
+    font-size: 14px;
+}
+#logoSplash{
+    visibility: hidden;
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+}
+#logoSplash img{
+    width: 300px;
+    z-index: 1000;
+}
+    </style>
+    <script>
+    function initImage() {
+      imageId = 'splash';
+      image = document.getElementById(imageId);
+      setOpacity(image, 99);
+      image.style.visibility = 'visible';
+      fadeOut(imageId,99);
+    }
+    function setOpacity(obj, opacity) {
+      opacity = (opacity == 100)?99.999:opacity;
+      // IE/Win
+      obj.style.filter = "alpha(opacity:"+opacity+")";
+      // Safari<1.2, Konqueror
+      obj.style.KHTMLOpacity = opacity/100;
+      // Older Mozilla and Firefox
+      obj.style.MozOpacity = opacity/100;
+      // Safari 1.2, newer Firefox and Mozilla, CSS3
+      obj.style.opacity = opacity/100;
+    }
+    function fadeOut(objId,opacity) {
+      if (document.getElementById) {
+        obj = document.getElementById(objId);
+        console.log(opacity);
+        if (opacity >= 0) {
+          setOpacity(obj, opacity);
+          opacity -= 10;
+          window.setTimeout("fadeOut('"+objId+"',"+opacity+")", 50);
+        } else {
+            document.getElementById("logoSplash").removeChild(document.getElementById('splash')); 
+        }
+      }
+    }
+    </script>
+        <link href="/css/widgets.css" media="screen" rel="stylesheet" type="text/css" /> 
+  </head>
+  <body onload="initImage()">
+  <div id="logoSplash" >
+    <img id="splash" src="/static/maps/logo_full.png">
+  </div>
+  <div class="mol-TopLeftControl">
+   <div class="mol-LayerControl-Search widgetTheme">
+      <div class="title">Search:</div>
+      <input class="value" type="text" />
+      <button class="execute">Go</button>
+   </div>
+   <div class="mainSearchNavigation">
+       <button id="searchCancel">
+            <img src="/static/cancel.png" />
+       </button>
+       <button id="searchRestart">
+            <img src="/static/reload.png" />
+       </button>
+   </div>
+   
+   
+    <div class="mol-LayerControl-Results">
+      <div class="filters">
+        <div class="filter widgetTheme">
+            <div class="filterName">Names</div>
+            <div class="option"><a href="/static/dead_link.html">Puma concolor</a></div>
+            <div class="option"><a href="/static/dead_link.html">Puma yagouaroundi</a></div>
+            <div class="option"><a href="/static/dead_link.html">Smilisca puma</a></div>
+            <div class="option"><a class="selected" href="/static/dead_link.html">All Names</a></div>
+        </div>
+        <div class="filter widgetTheme">
+            <div class="filterName">Types</div>
+            <div class="option"><a href="/static/dead_link.html">Ranges</a></div>
+            <div class="option"><a href="/static/dead_link.html">Points</a></div>
+            <div class="option"><a class="selected" href="/static/dead_link.html">All Types</a></div>
+        </div>
+        <div class="filter widgetTheme">
+            <div class="filterName">Sources</div>
+            <div class="option"><a href="/static/dead_link.html">GBIF</a></div>
+            <div class="option"><a href="/static/dead_link.html">MOL</a></div>
+            <div class="option"><a class="selected" href="/static/dead_link.html">All Sources</a></div>
+        </div>
+      </div>
+      <div class="searchResults widgetTheme">
+        <div class="resultHeader">Results</div>
+        <ol class="resultList">
+            <ul class="result">
+                <div class="resultSource" ><button ><img class="source GBIF" src="/static/maps/search/gbif.png"></button></div>
+                <div class="resultType" ><button ><img class="type Points" src="/static/maps/search/placemark.png"></button></div>
+                <div class="resultName">
+                    <div class="resultNomial" >Puma concolor </div>
+                    <div class="resultAuthor">(author)</div>
+                </div>
+                <div class="resultLink"><a href="/static/dead_link.html">more info</a></div>
+                <div class="buttonContainer"> 
+                    <input type="checkbox" class="checkbox" /> 
+                    <span class="customCheck"></span> 
+                </div> 
+            </ul>
+            <div class="break"></div>
+            <ul class="result">
+                <div class="resultSource" ><button ><img class="source MOL" src="/static/maps/search/mol.png"></button></div>
+                <div class="resultType" ><button ><img class="type Range" src="/static/maps/search/range.png"></button></div>
+                <div class="resultName">
+                    <div class="resultNomial" >Puma concolor </div>
+                    <div class="resultAuthor">(author)</div>
+                </div>
+                <div class="resultLink"><a href="/static/dead_link.html">more info</a></div>
+                <div class="buttonContainer"> 
+                    <input type="checkbox" class="checkbox" /> 
+                    <span class="customCheck"></span> 
+                </div> 
+            </ul>
+            <div class="break"></div>
+            <ul class="result">
+                <div class="resultSource" ><button ><img class="source GBIF" src="/static/maps/search/gbif.png"></button></div>
+                <div class="resultType" ><button ><img class="type Points" src="/static/maps/search/placemark.png"></button></div>
+                <div class="resultName">
+                    <div class="resultNomial" >Puma yagouaroundi </div>
+                    <div class="resultAuthor">(author)</div>
+                </div>
+                <div class="resultLink"><a href="/static/dead_link.html">more info</a></div>
+                <div class="buttonContainer"> 
+                    <input type="checkbox" class="checkbox" /> 
+                    <span class="customCheck"></span> 
+                </div> 
+            </ul>
+            <div class="break"></div>
+            <ul class="result">
+                <div class="resultSource" ><button ><img class="source MOL" src="/static/maps/search/mol.png"></button></div>
+                <div class="resultType" ><button ><img class="type Range" src="/static/maps/search/range.png"></button></div>
+                <div class="resultName">
+                    <div class="resultNomial" >Puma yagouaroundi </div>
+                    <div class="resultAuthor">(author)</div>
+                </div>
+                <div class="resultLink"><a href="/static/dead_link.html">more info</a></div>
+                <div class="buttonContainer"> 
+                    <input type="checkbox" class="checkbox" /> 
+                    <span class="customCheck"></span> 
+                </div> 
+            </ul>
+            <div class="break"></div>
+            <ul class="result">
+                <div class="resultSource" ><button ><img class="source GBIF" src="/static/maps/search/gbif.png"></button></div>
+                <div class="resultType" ><button ><img class="type Points" src="/static/maps/search/placemark.png"></button></div>
+                <div class="resultName">
+                    <div class="resultNomial" >Smilisca puma </div>
+                    <div class="resultAuthor">(author)</div>
+                </div>
+                <div class="resultLink"><a href="/static/dead_link.html">more info</a></div>
+                <div class="buttonContainer"> 
+                    <input type="checkbox" class="checkbox" /> 
+                    <span class="customCheck"></span> 
+                </div> 
+            </ul>
+          </ol>
+          <div class="pageNavigation">
+              <button class="addAll">Map Selected Layers</button>
+          </div>
+      </div>
+    </div>
+    
+    
+  </div>
+</body>
+    

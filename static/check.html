@@ -1,0 +1,51 @@
+
+<html> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" /> 
+<title>CSS Toggle buttons</title> 
+<style type="text/css"> 
+.mol-CenterController .mol-LayerControl-Results .result .buttonContainer {
+	width:32px;
+	height:32px;
+    position: relative;
+}
+.mol-CenterController .mol-LayerControl-Results .result .checkbox {
+	width: 32px;
+    height: 32px;
+    opacity: 0.0;
+	position:absolute;
+	left:0;
+	z-index:100;
+    float: left;
+    
+}
+.mol-CenterController .mol-LayerControl-Results .result .customCheck:after{
+	content:url('/static/unchecked.png');
+	width:32;
+    height: 32px;
+	position:absolute;
+    left: 0;
+}
+
+.mol-CenterController .mol-LayerControl-Results .result .checkbox:checked + .customCheck:after {
+	content:url('/static/checked.png');
+	width:32;
+    height: 32px;
+}
+</style> 
+</head> 
+<body> 
+  <div class="mol-CenterController">
+  
+    <div class="mol-LayerControl-Results">
+    
+        <ul class="result widgetTheme">
+        
+<div class="buttonContainer"> 
+	<input type="checkbox" class="checkbox" /> 
+	<span class="customCheck"></span> 
+</div> 
+
+</ul></div></div>
+</body> 
+</html>

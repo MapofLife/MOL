@@ -1,0 +1,538 @@
+/*
+ * Stylesheet for the homepage (mappinglife.org/about).
+ */
+
+body { 
+    font-family: 'Coda', sans-serif;
+    font-size: 12px;
+    min-width: 800px; margin: 0px; height: 100%; width: 100%; 
+    color: #fff; 
+    background: #394050; 
+    position:relative;}
+
+div#header { 
+    position: absolute;
+    width: 800px;
+    left: 50%;
+    margin-left: -400px;
+    padding-top: 10px; 
+    padding-bottom: 8px; 
+    height: 50px; 
+}
+div#header #title{ 
+    font-family: 'Ubuntu', san-sarif;
+    padding-left: 5px; 
+    padding-right: 5px; 
+    width: 225px;
+    font-weight: bold; 
+    font-size: 40px;
+    line-height: 40px;
+    float: left;
+}
+div#header #subtitle{ 
+    font-family: 'Ubuntu', san-sarif;
+    float: left;
+    width: 250px;
+    line-height: 20px;
+    margin-top: 18px;
+    font-style: italic;
+}
+div#header #menu{ 
+    float: right;
+    width: 250px;
+    margin-right: 10px;
+}
+div#header #menu .item a{ 
+    float: left;
+    width: 50px;
+    height: 18px;
+    margin: 5px;
+    padding-top: 4px;
+    text-align: center;
+    background-color: #fff; 
+    color: #394050;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: bold;
+    -moz-box-shadow: 0px px 10px rgba(183,233,163,0.6);
+    -webkit-box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+    box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+}
+div#header #menu .item a:hover{ 
+    -moz-box-shadow: 0px 6px 6px rgba(183,253,133,0.2);
+    -webkit-box-shadow: 0px 6px 6px rgba(183,253,133,0.2);
+    box-shadow: 0px 6px 6px rgba(183,253,133,0.2);
+}
+div#header #menu .item a.current{ 
+    -moz-box-shadow: 0px 6px 6px rgba(183,233,163,0.6);
+    -webkit-box-shadow: 0px 6px 6px rgba(183,233,163,0.6);
+    box-shadow: 0px 8px 6px rgba(183,233,163,0.6);
+    color: #111;
+}
+div#header #menu .item a{ 
+    text-decoration: none;
+    color: #394050;
+}
+div#submenu {
+    position: relative;
+    float: left;
+    width: 100%;
+    margin-top: 70px;
+    margin-bottom: -60px;
+    padding: 10px;
+    padding-left: 15%;
+    font-size: 1.4em;
+    background-color: #6AD2DF; color: #111; 
+}
+div#submenu .link{
+    float: left;
+    margin-left: 45px;
+}
+div#submenu .link a{
+    color: #ddd;
+    color: #111;
+}
+
+div#container { 
+    font-family: 'Ubuntu', san-sarif;
+    float: left; width: 100%; height: 80%;
+    min-height: 300px;
+    margin-top: 70px;
+    position: relative;
+}
+
+
+div#container #top {
+    width: 100%;
+    float: left;
+    height: 190px;
+    margin-bottom: 10px;
+    background-color: #b8fd85; color: #111; 
+}
+
+div#container #top .topQuote{
+    position: absolute;
+    left: 50%;
+    margin-left: -320px;
+    width: 520px;
+    height: 125px;
+    margin-top: 15px;
+    font-size: 1.6em;
+    text-align: justify;
+    color: #3a0082;
+}
+div#container #top .demoText{
+    position: absolute;
+    left: 50%;
+    margin-left: -400px;
+    width: 800px;
+    margin-top: 15px;
+    font-size: 1.33em;
+    text-align: justify;
+    color: #3a0082;
+}
+div#container #top .topQuote .aboutLink{
+    float: right;
+    margin-right: 20px;
+    margin-top: 5px;
+}
+div#container #top .topQuote .aboutLink a{
+    color: #3a0082;
+    font-style: italic;
+    font-size: 0.9em;
+}
+div#container #top .topBackground img { 
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 190px;
+}
+div#middle { 
+    position: relative;
+    float:left;
+    width: 740px;
+    left: 50%;
+    margin-left: -400px;
+    padding: 25px 0px 35px 30px;
+    height: 120px; 
+    color: #ddd;
+}
+div#middle .demoCol{
+    float: left;
+    width: 230px;
+    padding: 5px;
+    margin-left: 5px;
+    background-color: rgba(33,33,33,0.2); 
+    color: #111; 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+    color: #fff;
+}
+div#middle img{ 
+    float: left;
+    margin-left: 20px;
+}
+div#middle img.big{ 
+    height: 90px;
+}
+div#middle img.medium{ 
+    height: 70px;
+    margin-top: 20px;
+}
+div#middle img.small{ 
+    height: 50px;
+    margin-top: 40px;
+}
+div#middle img.smallest{ 
+    height: 30px;
+    margin-top: 60px;
+}
+div#middle #turtle img{ 
+    height: 30px;
+    margin-top: 60px;
+}
+div#middle .horizontalDivider{
+    height: 90px;
+    float: left;
+    width: 1px;
+    margin: 5px 20px 10px 20px;
+}
+div#middle .middleQuote{
+    font-size: 1.4em;
+    height: 90px;
+    margin-top: 5px;
+}
+div#content{ 
+    position: relative;
+    float: left;
+    width: 100%;
+}
+
+/* Begin people.png styles */
+div#content .person{
+    position: relative;
+    float: left;
+    width: 46%;
+    padding: 1%;
+    margin: 1%;
+    background-color: rgba(33,33,33,0.2); 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+    color: #fff;
+    font-size: 1.2em;
+    text-align: justify;
+/*  min-height: 272px;      <-- This is ideal. */
+    min-height: 325px;
+}
+
+div#content .person.partner {
+    min-height: 290px;
+}
+
+div#content .partner .role {
+    font-size: 80%;
+    color: rgb(180, 180, 180);
+}
+
+div#content .person .name{
+    float: left;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 2px;
+}
+div#content .person .description{
+    float: left;
+    margin-left: 2%;
+    margin-right: 2%;
+    width: 48%;
+    min-height: 200px;
+}
+div#content .person .description.full{
+    width: 95%;
+}
+
+div#content .person.partner .name {
+    float: none;
+}
+div#content .person.partner .description {
+    float: none;
+    display: block;
+    width: 98%;
+    height: auto;
+    min-height: 0px;
+    margin: 7px;
+}
+
+div#content .person.top{
+    width: 96%;
+    font-size: 1.3em;
+    min-height: 200px;
+}
+div#content .person img{
+    padding: 1%;
+    float: left;
+    min-width: 39%;
+    max-width: 40%;
+    max-height: 250px;
+}
+
+div#content .person.partner img {
+    max-height: 100px;
+    min-height: 100px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+    padding: 5px;
+    background: #ffffff;
+    float: right;
+    display: block;
+    margin: 1em;
+    margin-top: 0.7em;
+    margin-bottom: 0em;
+} 
+
+div#content .person.partner img.right {
+    float: left;
+}
+
+div#content .person.top img{
+    width: 45%;
+    height: auto;
+    float: left;
+}
+div#content .person img.right{
+    float: right;
+}
+div#content .person a{
+    color: #fff;
+    /*
+    margin-left: 1px;
+    margin-top: 5px;
+    float: left;
+    */
+}
+
+/* Begin About.html styles */
+div#content .vision{
+    position: relative;
+    float: left;
+    width: 480px;
+    padding: 5px;
+    height: 390px;
+    background-color: #b8fd85; 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+    color: #111;
+    font-size: 1.2em;
+}
+div#content .friends{
+    position: relative;
+    float: left;
+    width: 290px;
+    padding: 5px;
+    height: 390px;
+    margin-left: 10px;
+    background-color: rgba(33,33,33,0.2); 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+    color: #fff;
+    font-size: 1.2em;
+    text-align: justify;
+    -moz-box-shadow: 0px px 10px rgba(183,233,163,0.6);
+    -webkit-box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+    box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+}
+div#content .friends a{
+    float: left;
+    width: 90%;
+    padding: 4px 1px 4px 1px;
+    margin-left: 5%;
+    margin-top: 8px;
+    background-color: #b8fd85; color: #111; 
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    text-align: center;
+    -moz-box-shadow: 0px px 10px rgba(183,233,163,0.6);
+    -webkit-box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+    box-shadow: 0px 0px 10px rgba(183,233,163,0.6);
+}
+div#content .products{
+    position: relative;
+    float: left;
+    padding: 5px;
+    width: 790px;
+    margin-top: 10px; 
+    background-color: #b8fd85;  
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+    color: #111;
+    font-size: 1.2em;
+}
+div#content .demoCol {
+    position: relative;
+    width: 250px;
+    margin-right: 2px;
+    margin-left: 3px;
+    float: left;
+    padding: 5px;
+    background-color: rgba(33,33,33,0.2); 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+    color: #fff;
+    font-size: 1.2em;
+    text-align: center;
+}
+div#content .demoCol img{
+    border: 1px solid black;
+    /* width: 250px; */
+    height: 173px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+/* Generic styles */
+div#content .wrapper{ 
+    position: relative;
+    float: left;
+    width: 800px;
+    left: 50%;
+    margin-left: -400px;
+    /* margin-bottom: 10px; */
+    margin-bottom: 2em;
+}
+div#content .wrapper .details{ 
+    width: 100%;
+    color: #fff;
+    height: 140px;
+}
+div#content .wrapper #fill .details {
+    height: auto;
+    margin-bottom: 20px;
+}
+
+div#content .wrapper .details .pretitle{ 
+    font-style: italic;
+    color: #ccc;
+}
+div#content .wrapper .details .title{ 
+    font-weight: 500;
+    font-size: 2.0em;
+}
+div#content .wrapper .details .description{ 
+    font-weight: 200;
+    font-size: 1.2em;
+    padding: 5px 0 5px 0;
+}
+
+/* Added a new "recent updates" section to the front page */
+div#content .recent_updates {
+    color: white;
+    border-top: 1px solid white;
+    padding-bottom: 1.5em;
+}
+
+/* "Recent update" links should be the same color as blog links. */
+div#content .recent_updates a {
+    color: #B8FD82;
+}
+
+div#content .wrapper #fill { 
+    margin-top: 20px;
+    float: left;
+    width: 785px;
+    padding: 5px;
+    background-color: rgba(33,33,33,0.2); 
+    color: #111; 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+}
+
+div#content .wrapper #left{ 
+    float: left;
+    width: 495px;
+    padding: 5px;
+    background-color: rgba(33,33,33,0.2); 
+    color: #111; 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+}
+div#content .wrapper #blog{ 
+    height: 285px;
+    color: #fff;
+}
+div#content .wrapper #blog a{ 
+    color: #b8fd85;
+}
+
+/* The "all entries" link at the bottom. */
+div#content .wrapper .all_entries {
+    padding: 5px;
+    padding-top: 10px;
+}
+
+div#content .wrapper .all_entries a { 
+    color: #b8fd85;
+}
+
+div#content .wrapper #right{ 
+    float: left;
+    width: 260px;
+    padding: 5px;
+    margin-left: 20px;
+    background-color: rgba(33,33,33,0.2); 
+    color: #111; 
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    overflow-y: hidden;
+}
+div#content .wrapper #press { 
+    height: 285px;
+    color: #fff;
+    overflow: hidden;
+}
+div#content .wrapper #press a{ 
+    color: #b8fd85;
+}
+
+div#content .wrapper #code{ 
+    height: 285px;
+    color: #fff;
+    overflow: hidden;
+}
+div#content .wrapper #code a{ 
+    color: #b8fd85;
+}
+
+div#footer {float: left; position: relative; width: 800px; left: 50%; margin-left: -690px; margin-bottom: 0px; height: 40px;}
+div#footer #footer_links { float: right; width: 500px; text-align: left; margin-right: 10px; height: auto; color: #fff; }
+div#footer #footer_links a { font-size: 1.1em; color: #aaa; padding-right: 8px; padding-left: 8px; line-height: 150%; text-decoration: underline;}
+ 
+#footer_imgs { 
+    clear: both;
+    position: relative;
+    float: left; 
+    width: 780px; 
+    left: 50%;
+    height: auto; 
+    color: #fff; 
+    margin-left: -435px;
+    padding-bottom: 30px;
+}
+
+#footer_imgs img{ 
+    float: right; 
+    height: 42px; 
+    opacity: 0.7;
+    border: 0px;
+    padding-left: 5px;
+}
+

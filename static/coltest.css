@@ -1,0 +1,70 @@
+body {
+    font-size: 20px;
+    color: #0086cb;
+    background-color: #fff;
+    width: 100%;
+    height: 100%;
+}
+#search {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 680px;
+    height: 80px;
+    font-size: 2em;
+    font-weight: bold;
+}
+#search input {
+    margin-right: 20px;
+    width: 300px;
+    height: 50px;
+    font-size: 26;
+}
+#search .loading{
+    float: right;
+    margin-right: 10px;
+    display: none;
+}
+#results {
+    position: absolute;
+    width: 680px;
+    height: 400px;
+    top: 95px;
+    left: 5px;
+    color: #002132;
+}
+.return{
+    margin-top: 2px;
+}
+.species i{
+    font-size: 0.8em;
+}
+.taxonomy{
+    margin-left: 10px;
+    position: relative;
+    width: 100%;
+    font-size: 0.6em;
+}
+.names{
+    margin-left: 10px;
+    position: relative;
+    width: 100%;
+    font-size: 0.6em;
+}
+.names li{
+    float: left;
+}
+.break{
+    border-top: 1px solid grey;
+}
+.time button{
+    float: right;
+}
+.limit{
+    float: right;
+    font-size: 0.75em;
+    margin-right: 5px;
+    margin-left: 5px;
+    color: #fe432e;
+    cursor: pointer;
+}

@@ -1,0 +1,8 @@
+backends:
+
+- name: search-cache-builder-backend
+  start: search_cache_backend.py
+  class: B8
+  instances: 1
+  options: dynamic
+

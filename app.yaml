@@ -1,0 +1,83 @@
+application: map-of-life
+version: canary
+runtime: python27
+threadsafe: true
+api_version: 1
+
+inbound_services:
+- warmup
+
+builtins:
+- remote_api: on
+
+handlers:
+
+- url: /admin/.*
+  script: admin_handler.application
+  login: admin
+
+- url: /tiles/.*
+  script: tile_handler.application
+
+- url: /js
+  static_dir: js
+
+- url: /css
+  static_dir: css
+
+- url: /static
+  static_dir: static
+
+- url: /sitemap.xml
+  static_files: static/config/sitemap.xml
+  upload: static/config/sitemap.xml
+
+- url: /robots.txt
+  static_files: static/config/robots.txt
+  upload: static/config/robots.txt
+
+- url: /(.*\.(gif|png|jpg))
+  static_files: static/\1
+  upload: static/(.*\.(gif|png|jpg))
+
+- url: /cache/.*
+  script: cache_handler.application
+
+- url: /cartodb/.*
+  script: cartodb_handler.application
+
+- url: /eol/.*
+  script: eol_handler.application
+
+- url: /ee_modis
+  script: ee_modis_handler.application
+  
+- url: /ee_consensus
+  script: ee_consensus_handler.application
+
+- url: /gbif/.*
+  script: gbif_handler.application
+  
+- url: /list
+  script: list_handler.application
+
+- url: /api/autocomplete
+  script: autocomplete_handler.application
+
+- url: /backend/.*
+  script: search_cache_backend.application
+
+- url: /about.*
+  script: homepage.application
+
+- url: /
+  script: app.application
+
+- url: /.*
+  script: app.application
+
+libraries:
+- name: pycrypto
+  version: "2.3"
+
+

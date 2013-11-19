@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    background: #444;
+    color: #ddd;
+}
+canvas {
+    background: white;
+    float: left;
+}
+div {
+    float: left;
+    width: 100%;
+    margin-top: 15px;
+}
+</style>
+<script type="text/javascript">//<![CDATA[
+    var cnvs, cntxt;
+    function pmark(ctx,error){
+        //ctx.fillStyle = "rgba(33, 88, 222, .7)"
+        ctx.strokeStyle = "rgba(0, 0, 0, .9)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(52, 52, 25, 0, Math.PI*2, true); 
+        ctx.closePath();
+        ctx.stroke();
+        
+        ctx.fillStyle = "rgba(33, 88, 222, .8)";
+        ctx.beginPath();
+        ctx.arc(52, 52, 23, 0, Math.PI*2, true); 
+        ctx.closePath();
+        ctx.fill();
+        
+        if (error){
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(166, 11, 11, .8)"
+            ctx.lineWidth = 14;
+            ctx.moveTo(67,67);
+            ctx.lineTo(37, 37);
+            ctx.stroke();
+            
+        }
+    }
+    var pm = new Image();
+    pm.src = "/static/placemark.png";
+    var pmError = new Image();
+    pmError.src = "/static/placemark-error.png";
+    
+    function pmark2(ctx,type,error){
+        var x = 24;
+        var y = 24;
+        ctx.drawImage(pm, 0, 0, x, y);
+        if (type){
+            var pmType = new Image();
+            pmType.src = "/static/placemark-type.png";
+            pmType.onload = function() {
+                ctx.drawImage(pmType, 0, 0, x, y);
+            }
+        }
+        if (error){
+            ctx.drawImage(pmError, 0, 0, x, y);
+        }
+    }
+    function cvs2img(cnvs){
+        var dataURL = cnvs.toDataURL("image/png");
+        document.getElementById("canvasPng").src=dataURL ;
+    }
+    window.onload = function () {
+        /* with coord unc */
+        cnvs = document.getElementById("canvas1");
+        ctx = cnvs.getContext("2d");
+        pmark(ctx,false);
+        /* without coord unc */
+        cnvs = document.getElementById("canvas2");
+        ctx = cnvs.getContext("2d");
+        pmark(ctx,true);
+        /* with serverside images */
+        cnvs = document.getElementById("canvas3");
+        ctx = cnvs.getContext("2d");
+        pmark2(ctx);
+        /* with serverside images */
+        cnvs = document.getElementById("canvas4");
+        ctx = cnvs.getContext("2d");
+        pmark2(ctx,true);
+        /* with serverside images */
+        cnvs = document.getElementById("canvas5");
+        ctx = cnvs.getContext("2d");
+        pmark2(ctx,true,true);
+        /* as png */
+        setTimeout(function(){cvs2img(cnvs)},500);
+    }
+//]]></script>
+</head>
+<body>
+    <div class="exp">
+        <div id="title">Placemark with a coordinate uncertainty</div>
+        <canvas id="canvas1" width="104" height="104"></canvas>
+    </div>
+    </br>
+    <div class="exp">
+        <div id="title">
+            Placemark with any error/questionable info </br>
+            including null coordinate uncertainty
+        </div>
+        <canvas id="canvas2" width="104" height="104"></canvas>
+    </div>
+    <div class="exp">
+        <div id="title">
+            Server side.
+        </div>
+        <canvas id="canvas3" width="24" height="24"></canvas>
+    </div>
+    <div class="exp">
+        <div id="title">
+            Server side, typed.
+        </div>
+        <canvas id="canvas4" width="24" height="24"></canvas>
+    </div>
+    <div class="exp">
+        <div id="title">
+            Server side, typed with error.
+        </div>
+        <canvas id="canvas5" width="24" height="24"></canvas>
+    </div>
+    <div class="exp">
+        <div id="title">
+            Canvas 2 as png on the fly.
+        </div>
+        <img id="canvasPng" src='' height=25 width=25/>
+    </div>
+</body>
+</html>

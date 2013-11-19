@@ -1,0 +1,1670 @@
+/* BEGIN Shared Styles */
+/* sets defaults for units within a widget background greed fade theme,
+ * as well as min-height and 100% width */
+.FIRST {
+    pointer-events: none;
+}
+.TOP {
+    pointer-events: none;
+}
+.MIDDLE {
+    pointer-events: none;
+}
+.BOTTOM {
+    pointer-events: none;
+}
+.LAST {
+    pointer-events: none;
+}
+.widgetTheme{
+    behavior: url(/css/pie/PIE.htc);
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.89, rgba(29,43,82,0.65)),
+        color-stop(0.57, rgba(29,43,82,0.75))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    color: rgb(240, 240, 260);
+    pointer-events: auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+button{
+    behavior: url(/css/pie/PIE.htc);
+    width: auto;
+    margin: 2px;
+    font-weight:700;
+    color: rgb(240, 240, 260);
+    background-color: rgba(25, 25, 25, 0.75);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#BF191919', endColorstr='#BF191919');
+    -moz-box-shadow: 2px 2px 5px #000;
+    -webkit-box-shadow: 2px 2px 5px #000;
+    box-shadow: 2px 2px 5px #222;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+}
+button:hover{
+    background-color: rgba(25, 25, 25, 1.0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF191919', endColorstr='#FF191919');
+    cursor: pointer;
+}
+
+.mol-Map-TopLeftControl {
+    pointer-events: none;
+}
+
+.mol-Map-CenterTopControl {
+    pointer-events: none;
+}
+
+.mol-Map-RightControl {
+    pointer-events: none;
+}
+
+.mol-Map-RightBottomControl {
+    pointer-events: none;
+}
+
+.mol-Map-LeftBottomControl {
+    pointer-events: none;
+}
+/* BEGIN Layers Widget
+ * Add, Delete
+ * Layer Stack
+ */
+.mol-Splash .IEwarning {
+    color: red;
+    font-size: 10pt;
+}
+
+.mol-Sidebar  {
+        position:absolute;
+        left: -3px;
+        top: -50px;
+}
+
+.mol-Bottombar  {
+        white-space: nowrap;
+}
+.mol-Sidebar .button {
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.89, rgba(29,43,82,0.65)),
+        color-stop(0.57, rgba(29,43,82,0.75))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+
+}
+
+.mol-Sidebar .status {
+    behavior: url(/css/pie/PIE.htc);
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+}
+.mol-Sidebar .help {
+    behavior: url(/css/pie/PIE.htc);
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+}
+.mol-Sidebar .button{
+        padding:6px;
+        cursor:pointer;
+
+}
+
+.mol-BottomRightMenu {
+    behavior: url(/css/pie/PIE.htc);
+    width: 100%;
+    float: right;
+    pointer-events: auto;
+    border-radius: 3px;
+}
+.mol-BottomRightMenu div:first-child{
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+}
+.mol-BottomRightMenu div:last-child{
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+}
+.mol-BottomRightMenu div {
+    display: inline-block;
+    text-align: center;
+    padding: 5px;
+    margin: 0px;
+}
+
+.mol-BottomRightMenu .button:hover {
+color: white;
+cursor: pointer;
+}
+
+.mol-BottomRightMenu {
+list-style-type: none;
+font-size: 0.8em;
+white-space: nowrap;
+}
+
+/*
+ * Start Layer Control
+ */
+
+.mol-LayerControl-Menu .button:hover{
+    color: #FFF;
+    cursor: pointer;
+}
+
+.mol-LayerControl-Menu div:last-child{
+    behavior: url(/css/pie/PIE.htc);
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+}
+.mol-LayerControl-Menu div.label{
+    behavior: url(/css/pie/PIE.htc);
+    width: 20px;
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    background-image: -ms-linear-gradient(rgba(35, 35, 35,0.85) 37%,rgba(66,66,66,0.85) 69%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.37, rgba(35, 35, 35,0.85)),
+        color-stop(0.69, rgba(66,66,66,0.85))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(35, 35, 35,0.85) 37%,
+        rgba(66,66,66,0.85) 69%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(35, 35, 35,0.85) 37%,
+        rgba(66,66,66,0.85) 69%
+    );
+
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    padding-bottom: 5px;
+
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF191919', endColorstr='#FF191919');
+
+}
+.mol-LayerControl-Menu div.list {
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+}
+.mol-LayerControl-Menu div.label img{
+    float: right;
+    height: 16px;
+    padding-right: 2px;
+}
+.mol-LayerControl-Menu div.label img{
+    float: right;
+    height: 16px;
+    padding-right: 2px;
+}
+.mol-LayerControl-Menu div.label {
+    padding-left: 14px;
+}
+
+.mol-LayerControl-Layers{
+    font-size:0.8em;
+    max-height: 475px;
+}
+
+.mol-LayerControl-Layers .layers {
+    float:right;
+    width:500px;
+}
+
+
+.mol-LayerControl-Layers .scrollContainer{
+    max-height:380px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 0.5em;
+    margin-bottom:0;
+}
+
+.mol-LayerControl-Layers .layersToggle{
+    float:right;
+}
+
+.mol-LayerControl-Layers .layersHeader {
+    margin: 5px;
+    margin-bottom: 0px;
+    padding: 4px;
+    line-height: 25px;
+}
+
+.mol-LayerControl-Layers .layers .layersHeader .title {
+    margin-left: 20px;
+    float: right;
+}
+
+.mol-LayerControl-Layers .layers .layersHeader button.toggleBtn {
+    width:32px;
+    height: 22px;
+    color: #fff;
+    padding: 3px;
+    margin-right:10px;
+    float:right;
+}
+
+.mol-LayerControl-Layers .layers .layersHeader button.selected {
+    border: 3px solid rgba(255, 100, 88, .45);
+    border-radius:5px;
+    -moz-border-radius:5px;
+    -ms-border-radius:5px;
+    padding:0px;
+}
+
+.mol-LayerControl-Layers .layers {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    overflow: hidden;
+}
+
+.mol-LayerControl-Layers .layersContainer {
+    margin: 5px;
+    margin-top: 0px;
+    padding: 4px;
+    border-bottom-left-radius:3px;
+    border-bottom-right-radius:3px;
+    -moz-border-radius-bottomleft: 3px;
+    -moz-border-radius-bottomright: 3px;
+    pointer-events:auto;
+    cursor:default;
+}
+
+.mol-LayerControl-Layers .break{
+    float: left;
+    width: 100%;
+    height: 1px;
+    border-bottom: 1px solid rgba(11,11,11,0.3);
+    margin-bottom: 2px;
+}
+
+.mol-LayerControl-Layers ::-webkit-scrollbar {
+    width: 11px;
+    height: 0px;
+    border: 1px solid black;
+}
+.mol-LayerControl-Layers ::-webkit-scrollbar-button:vertical {
+    background-color: white;
+    border: 1px solid black;
+}
+.mol-LayerControl-Layers ::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: block;
+}
+.mol-LayerControl-Layers
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:start:decrement,
+::-webkit-scrollbar-button:vertical:end:increment,
+::-webkit-scrollbar-button:vertical:end:decrement {
+    display: none;
+}
+.mol-LayerControl-Layers ::-webkit-scrollbar-thumb:vertical {
+    height: 50px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.mol-LayerControl-Layers .ui-sortable {
+    width: 100%;
+}
+
+.mol-LayerControl-Layers .staticLink{
+    display: none;
+}
+.mol-LayerControl-Layers .staticLink .linkText{
+    float: left;
+    height: 20px;
+    line-height: 20px;
+    width: 95%;
+}
+.mol-LayerControl-Layers .staticLink input::selection {
+    background: #ababab;
+    background-color: #ababab;
+}
+.mol-LayerControl-Layers .staticLink input::-webkit-selection {
+    background: #ababab;
+    background-color: #ababab;
+}
+.mol-LayerControl-Layers .staticLink input::-moz-selection {
+    background: #ababab;
+    background-color: #ababab;
+}
+
+.mol-LayerControl-Layers .pageNavigation{
+    width: 100%;
+    height: 25px;
+    padding: 0px;
+    margin: 4px;
+    margin-top: 0px;
+}
+
+.mol-LayerControl-Layers .pageNavigation button {
+    float: right;
+    margin-right: 4px;
+    padding: 3px;
+}
+
+/** reorganized Layer Control entry
+ */
+
+.mol-LayerControl-Layers .layerContainer {
+    height:38px;
+    cursor:inherit;
+}
+
+.mol-LayerControl-Layers .layer {
+    padding: 2px;
+    margin-bottom: 2px;
+    text-align: left;
+    width: 99%;
+    float: left;
+    position: relative;
+}
+
+.mol-LayerControl-Layers .layer.selected{
+    border: 2px solid rgba(255, 100, 88, .45);
+    border-radius:5px;
+    -moz-border-radius:5px;
+    -ms-border-radius:5px;
+    padding:0px;
+}
+.mol-LayerControl-Layers .layer .layerName{
+    float: left;
+    white-space:normal;
+    width: 260px;
+    margin-left: 5px;
+    margin-right: 5px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.mol-LayerControl-Layers .layer .layerNomial {
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.mol-LayerControl-Layers .layer .layerEnglishName {
+    display: block;
+    font-size: 0.8em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.mol-LayerControl-Layers .layer .layerRecords {
+    float: right;
+    font-size: 0.8em;
+    padding-top: 2px;
+}
+
+.mol-LayerControl-Layers .layer .type,
+.mol-LayerControl-Layers .layer .source {
+    float: left;
+    text-align: center;
+    width: 24px;
+    height: 24px;
+    padding: 0px;
+    padding-top: 2px;
+}
+.mol-LayerControl-Layers .layer .styler{
+    float: left;
+    width: 24px;
+    height: 24px;
+    padding: 0px;
+}
+
+.styler{
+    background-color: rgba(25, 25, 25, 0);
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.styler[disabled]{
+    background-color: rgba(25, 25, 25, 0);
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    opacity:0.5;
+}
+.styler[disabled]:hover{
+    background-color: rgba(25, 25, 25, 0);
+}
+
+.styler:hover{
+    background-color: rgba(25, 25, 25, 1);
+}
+
+.styler div{
+    background-color: #FF0000;
+    height: 20px;
+    width: 20px;
+    margin: 0px auto;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    /*border: none;*/
+}
+
+.legend-point {
+    height: 7px;
+    width: 7px;
+    border-style:solid;
+    border-width:1px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.legend-polygon {
+    border-style:solid;
+    width:18px;
+    height:18px;
+}
+
+.legend-seasonal {
+    background-color:transparent;
+    border: solid;
+}
+
+.legend-seasonal div.seasonal {
+    width: 20px;
+    margin: 0px auto;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.legend-seasonal div {
+    height:5px;
+}
+
+.mol-LayerControl-Layers .layer .type img,
+.mol-LayerControl-Layers .layer .source img {
+    height: 20px;
+    width: 20px;
+}
+.mol-LayerControl-Layers .layer .buttonContainer {
+    width: 20px;
+    height: 20px;
+    float: right;
+    position: relative;
+    margin-right: 10px;
+}
+
+.mol-LayerControl-Layers .layer .toggle {
+    opacity: 0.0;
+    position:absolute;
+    left:0;
+    z-index:100;
+    float: left;
+    width:24px;
+    height:24px;
+    cursor: pointer;
+}
+
+.mol-LayerControl-Layers .layer .customCheck:after{
+    content:url('/static/maps/layers/inactive.png');
+    margin: 2px;
+    padding: 0px 1px 0px 1px;
+    height: 24px;
+    position:absolute;
+    left: 0;
+    background-color: rgba(25, 25, 25, 0.75);
+    -moz-box-shadow: 2px 2px 5px #000;
+    -webkit-box-shadow: 2px 2px 5px #000;
+    box-shadow: 2px 2px 5px #222;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+}
+
+.mol-LayerControl-Layers .layer .toggle:hover + .customCheck:after{
+    background-color: rgb(25, 25, 25);
+    background-color: rgba(25, 25, 25, 1.0);
+    cursor: pointer;
+}
+.mol-LayerControl-Layers .layer .toggle:checked + .customCheck:after {
+    content:url('/static/maps/layers/active.png');
+}
+.mol-LayerControl-Layers .layer .close {
+    float: right;
+    position: relative;
+    width: 24px;
+    font-style: italic;
+    font-size: 1.2em;
+    height: 24px;
+}
+
+
+
+.mol-LayerControl-Layers .layer .habitat img {
+    height: 20px;
+    width: 20px;
+}
+.mol-LayerControl-Layers .layer .zoom {
+    float: right;
+    position: relative;
+    width: 24px;
+    font-style: italic;
+    font-size: 1.2em;
+    height: 24px;
+}
+
+/*! Light tooltip style */
+.ui-tooltip-widgettheme{
+    behavior: url(/css/pie/PIE.htc);
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.89, rgba(29,43,82,0.65)),
+        color-stop(0.57, rgba(29,43,82,0.75))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    color: rgb(240, 240, 260);
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.ui-tooltip-widgettheme .ui-tooltip-titlebar{
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 95%, rgba(29,43,82,0.75) 75%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.95, rgba(29,43,82,0.75)),
+        color-stop(0.75, rgba(29,43,82,0.95))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.75) 95%,
+        rgba(29,43,82,0.95) 75%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.75) 95%,
+        rgba(29,43,82,0.95) 75%
+    );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.ui-tooltip-widgettheme .ui-tooltip .qtip {
+    border-width:0;
+    border-radius:3px;
+    -moz-border-radius:3px;
+}
+
+.mol-LayerControl-Styler .colorPicker {
+    width: 130px;
+}
+
+.mol-LayerControl-Styler .colorPickers div + div {
+    padding-top:4px;
+}
+
+.mol-LayerControl-Styler .seasChk {
+    vertical-align:middle;
+}
+
+.mol-LayerControl-Styler .stylerLabel {
+    float:left;
+    width:48px;
+    margin-top:10px;
+    margin-right:4px;
+    text-align:right;
+}
+
+
+.mol-LayerControl-Styler .sliderLabel,
+.mol-LayerControl-Styler .opacityLabel {
+    float:left;
+    width:48px;
+    margin-top:4px;
+    margin-right:4px;
+    text-align:right;
+}
+
+.mol-LayerControl-Styler .colorPickers span + div {
+    margin-top:2px;
+    margin-bottom:2px;
+}
+
+.mol-LayerControl-Styler .sizerHolder,
+.mol-LayerControl-Styler .opacityHolder {
+    padding-top:4px;
+    padding-bottom:4px;
+    width: 140px;
+}
+
+.mol-LayerControl-Styler #pointSizeValue,
+.mol-LayerControl-Styler #opacityValue {
+    margin-top:4px;
+    float:left;
+    clear:right;
+    width:28px;
+}
+
+.mol-LayerControl-Styler .sliderContainer {
+    float: left;
+    position: relative;
+    width: 38%;
+    margin-right:4px;
+    margin-bottom:8px;
+}
+
+.mol-LayerControl-Styler .sliderContainer .sizer,
+.mol-LayerControl-Styler .sliderContainer .opacity {
+    height: 5px;
+    margin-top: 5px;
+}
+
+.mol-LayerControl-Styler .sliderContainer .sizer .ui-slider-handle,
+.mol-LayerControl-Styler .sliderContainer .opacity .ui-slider-handle {
+    width: 8px;
+    height: 11px;
+}
+
+.mol-LayerControl-Styler .buttonWrapper {
+    width:135px;
+    margin:0 auto;
+    margin-top:20px;
+}
+
+.mol-LayerControl-Styler .buttonWrapper.allStyler {
+    width: 75%;
+    margin: 0 auto;
+    margin-top: 4px;
+}
+
+.mol-LayerControl-Styler .buttonWrapper button {
+    font-size:10px;
+    margin:2px 0 2px 0;
+}
+
+.mol-LayerControl-Styler .selected{
+    text-decoration: underline;
+}
+
+.mol-LayerControl-Styler .habitats{
+    cursor: pointer;
+}
+
+/*
+ * End Layer Control
+ */
+
+
+
+
+
+/* BEGIN SEARCH UI
+ * search, results
+ */
+
+.mol-LayerControl-Search {
+    display:inline-block;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    padding: 4px 5px 4px 5px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    pointer-events: auto;
+    -moz-user-select: text;
+}
+.mol-LayerControl-Search .title{
+    float:left;
+    line-height: 25px;
+    font-size: 0.8em;
+    margin-right: 2px;
+    -moz-user-select: none;
+}
+.mol-LayerControl-Search .searchDisplay{
+    float:left;
+    line-height: 25px;
+    font-size: 0.8em;
+    margin-right: 2px;
+    -moz-user-select: none;
+}
+.mol-LayerControl-Search .value{
+    margin-right: 5px;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
+}
+
+.ui-autocomplete {
+        max-height: 500px;
+        max-width: 600px;
+        overflow-y: auto;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+        /* add padding to account for vertical scrollbar */
+        pointer-events: auto;
+
+        font-size:9pt;
+        line-height:1;
+        font-weight:400;
+    }
+.ui-autocomplete .ac-item {
+    text-indent:-0.5em;
+    padding-left:1.1em;
+}
+
+.ui-autocomplete .sci {
+    font-style: italic;
+}
+
+.ui-autocomplete .eng {
+}
+
+
+
+.mol-LayerControl-Search .execute{
+    margin-left: 4px;
+    width: 50px;
+    height:20px;
+}
+.mol-LayerControl-Search .toggle{
+    height: 20px;
+    width: 23px;
+    margin-left: 4px;
+ }
+
+.mol-LayerControl-Search .cancel img{
+    width: 16px;
+    height: 16px;
+}
+
+.mol-LayerControl-Results{
+    float: left;
+    width: 100%;
+    list-style-type: none;
+    text-align: left;
+    outline: none;
+    position: relative;
+    padding: 0px;
+    margin: 0px;
+    pointer-events: none;
+    cursor:default;
+}
+
+.mol-LayerControl-Results .resultRecords{
+    float: right;
+    font-size: 0.8em;
+}
+
+.mol-LayerControl-Results ::-webkit-scrollbar {
+    width: 11px;
+    height: 0px;
+    border: 1px solid black;
+}
+.mol-LayerControl-Results ::-webkit-scrollbar-button:vertical {
+    background-color: white;
+    border: 1px solid black;
+}
+.mol-LayerControl-Results ::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: block;
+}
+
+/* Turn off the down area up on top, and up area on bottom */
+.mol-LayerControl-Results
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:start:decrement,
+::-webkit-scrollbar-button:vertical:end:increment,
+::-webkit-scrollbar-button:vertical:end:decrement {
+    display: none;
+}
+.mol-LayerControl-Results ::-webkit-scrollbar-thumb:vertical {
+    height: 25px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.mol-LayerControl-Results .noresults {
+    text-align: center;
+}
+
+.mol-Dashboard #dialog {
+    font-weight:normal;
+    font-style:normal;
+    font-size: 12px;
+    min-height: 360px;
+    overflow-y:hidden;
+}
+
+.mol-Dashboard #dialog .dashboard .title {
+    font-weight:bold;
+    font-size: 18px;
+    padding-left: 4px;
+}
+.mol-Dashboard #dialog .summary {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    white-space: nowrap;
+    font-size: 12px;
+}
+.mol-Dashboard #dialog .summary span {
+    padding-right:5px;
+}
+.mol-Dashboard #dialog .summary .label {
+    font-weight:bold;
+    font-size: 12px;
+}
+
+.mol-Dashboard span.filterHeader {
+    font-weight:bold;
+    text-decoration:underline;
+    font-size: 12px;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter {
+    padding-bottom: 4px;
+    padding-right: 6px;
+    float: left;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter input {
+    padding-bottom: 4px;
+    padding-right: 6px;
+    float:left;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter div.chkAndLabel {
+    clear: both;
+    float: none;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter div.chkAndLabel input{
+    float: left;
+}
+
+.mol-Dashboard #dialog div#dashTypeFilter div.chkAndLabel label{
+    float: left;
+    margin-top: 3px;
+}
+
+
+.mol-Dashboard #dialog div#dashTypeFilter #dashTitle {
+    font-weight: bold;
+}
+
+div.mol-Dashboard-TableWindow {
+    font-size: 12px;
+    font-style:normal;
+    font-weight:normal;
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+.mol-Dashboard .ui-dialog-titlebar, .ui-widget-header, .dashboard {
+    background: none;
+    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.89, rgba(29,43,82,0.65)),
+        color-stop(0.57, rgba(29,43,82,0.75))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(29,43,82,0.65) 89%,
+        rgba(29,43,82,0.75) 57%
+    );
+
+    filter: progid:DXImageTransform.Microsoft.gradient(
+        startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    color: rgb(240, 240, 260);
+    pointer-events: auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: none;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+}
+
+.mol-LayerControl-Results {
+    font-size:0.8em;
+}
+
+.mol-LayerControl-Results .filters{
+    float: left;
+    width: 30%;
+    height: 100%;
+    margin-right: 5px;
+    padding: 0px;
+    border: 0px;
+}
+.mol-LayerControl-Results .filters .filter{
+    padding: 4px;
+    margin: 0px 0px 5px 0px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    pointer-events: auto;
+}
+
+.mol-LayerControl-Results .filters .filter .options{
+    max-height: 150px;
+    overflow-y: auto;
+}
+.mol-LayerControl-Results .filters .filter .filterName{
+    margin-bottom: 5px;
+}
+
+.mol-LayerControl-Results .filters .filter .option a{
+    color: rgb(230, 254, 230);
+}
+.mol-LayerControl-Results .filters .filter .option {
+    text-decoration: none;
+    margin-left: 10px;
+    margin-bottom: 2px;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.mol-LayerControl-Results .filters .filter .all {
+    text-align: right;
+    margin-right: 10px;
+}
+
+.mol-LayerControl-Results .filters .filter .option img{
+    width: 12px;
+    height: 12px;
+    margin: 0.5px;
+
+}
+
+.mol-LayerControl-Results .filters .filter .option button{
+    margin-right: 0.4em;
+}
+
+.mol-LayerControl-Results .filters .filter .option.selected {
+    cursor: pointer;
+}
+
+.mol-LayerControl-Results .filters .filter .option.selected .option_text {
+    text-decoration: underline;
+}
+
+
+
+.mol-LayerControl-Results .filters .filter .option .hidden {
+    visibility: hidden;
+}
+
+
+.mol-LayerControl-Results .searchResults{
+    padding: 5px;
+    margin: 0px;
+    width: 61%;
+    float: left;
+    padding-top: 10px;
+    position: relative;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    pointer-events: auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.mol-LayerControl-Results .searchResults .selectAll {
+    color: #E6FAE6;
+    padding-left: 2px;
+    font-size: 0.9em;
+    float: right;
+    padding-right: 10px;
+}
+
+.mol-LayerControl-Results .searchResults .selectNone {
+    color: #E6FAE6;
+    padding-left: 2px;
+    font-size: 0.9em;
+    float: right;
+    padding-right: 10px;
+}
+
+.mol-LayerControl-Results .searchResults .resultList{
+    position: relative;
+    list-style-type: none;
+    padding: 0px;
+    max-height: 380px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+    overflow-y: auto;
+}
+.mol-LayerControl-Results .resultEnglishName {
+    font-size: 0.8em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.mol-LayerControl-Results ul {
+    padding-left: 0px;
+    margin-bottom: 5px;
+    text-align: left;
+    width: 100%;
+    float: left;
+    position: relative;
+}
+.mol-LayerControl-Results .result button{
+    width: 20px;
+    height: 20px;
+    color: #fff;
+    padding: 0px;
+    padding-top: 2px;
+
+}
+.mol-LayerControl-Results .result button img{
+    width: 16px;
+    height: 16px;
+}
+.mol-LayerControl-Results .result div.resultName{
+    width: 62%;
+    display:inline-block;
+    margin-left: 4px;
+    text-overflow: ellipsis;
+}
+.mol-LayerControl-Results .result .resultAuthor{
+    font-size: 0.8em;
+    margin-top: -4px;
+}
+.mol-LayerControl-Results .result div.resultLink{
+    width: 20%;
+    font-size: 0.9em;
+    padding-top: 1%;
+    float: left;
+}
+.mol-LayerControl-Results .result a{
+    color: rgb(230, 250, 230);
+}
+.mol-LayerControl-Results .resultType{
+    display:inline-block;
+}
+.mol-LayerControl-Results .resultSource{
+    display:inline-block;
+}
+.mol-LayerControl-Results .result .buttonContainer {
+    width:24px;
+    height:24px;
+    position: relative;
+    float: right;
+    margin-right: 10px;
+}
+
+.mol-LayerControl-Results .result .checkbox {
+    opacity: 0.0;
+    position:absolute;
+    left:0;
+    z-index:100;
+    float: left;
+    width:24px;
+    height:24px;
+    cursor: pointer;
+
+}
+.mol-LayerControl-Results .break{
+    float: left;
+    width: 100%;
+    height: 1px;
+    border-bottom: 1px solid rgba(11,11,11,0.3);
+    margin-bottom: 2px;
+}
+.mol-LayerControl-Results .result .customCheck:after{
+    content:url('/static/maps/search/unchecked.png');
+    position:absolute;
+    left: 0;
+}
+.mol-LayerControl-Results .result .checkbox:checked + .customCheck:after {
+    content:url('/static/maps/search/checked.png');
+}
+.mol-LayerControl-Results .searchResults .pageNavigation{
+    width: 80%;
+    float: right;
+    text-align: right;
+    white-space: nowrap;
+}
+.mol-LayerControl-Results .searchResults .pageNavigation button{
+    margin-right: 4px;
+    padding: 3px;
+}
+
+/* BEGIN ADD UI
+ * add, results
+ */
+.mol-LayerControl-Add {
+    height: 185px;
+    vertical-align: top;
+    padding: 3px 5px 2px 5px;
+    pointer-events: auto;
+}
+
+.mol-LayerControl-Add .title {
+    padding: 0 0 20px 10px;
+    line-height: 29px;
+}
+
+.mol-LayerControl-Add input {
+    float:right;
+    width:220px;
+    height: 17px;
+    margin-right: 10px;
+}
+
+.mol-LayerControl-Add .key {
+    display:block;
+    clear:both;
+    float:left;
+    font-weight:normal;
+    font-size: 0.8em;
+    padding: 0 0 11px 10px;
+}
+.mol-LayerControl-Add .cancel{
+    width: 25px;
+    margin-left: 6px;
+    padding-top: 2px;
+    position: absolute;
+    top: 5px;
+    right: 15px;
+}
+.mol-LayerControl-Add .cancel img{
+    width: 100%;
+}
+.mol-LayerControl-Add .execute{
+    float: left;
+    margin-left: 6px;
+    width: 50px;
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+}
+
+/*
+ * Start Query Bar
+ */
+.mol-Map-QueryDisplay {
+    float: right;
+    display: table-cell;
+    height: 26px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    white-space: nowrap;
+    padding: 2px 3px 2px 3px;
+    pointer-events:auto;
+
+}
+
+.mol-Map-QueryDisplay .types button{
+    width: 20px;
+    height: 20px;
+    color: #fff;
+    padding: 3px;
+    margin: 0px;
+}
+
+.mol-Map-QueryDisplay button.toggleBtn {
+    width:32px;
+    height: 22px;
+    color: #fff;
+    padding: 3px;
+    float: left;
+}
+
+.mol-Map-QueryDisplay button img{
+    width: 14px;
+    height: 14px;
+}
+
+.mol-Map-QueryDisplay button.selected {
+    border: 3px solid rgba(255, 100, 88, .45);
+    border-radius:5px;
+    -moz-border-radius:5px;
+    -ms-border-radius:5px;
+    padding:0px;
+}
+
+.mol-Map-QueryDisplay span.title {
+    line-height: 25px;
+    font-size: 0.8em;
+    margin-right: 2px;
+    -moz-user-select: none;
+    padding-left: 2px;
+    float: left;
+}
+
+.mol-Map-QueryDisplay span.types {
+    display:inline-block;
+    height:14px;
+}
+
+.mol-Map-QueryDisplay div.speciesDisplay {
+    float: left;
+    font-size: 0.7em;
+    margin-right: 2px;
+    margin-top: 2px;
+    -moz-user-select: none;
+}
+
+.mol-Map-QueryDisplay div.speciesDisplay select {
+    font-size: 0.9em;
+}
+
+.mol-Map-QueryDisplay div.speciesDisplay select.radius {
+    margin-right:2px;
+}
+
+
+
+.mol-Map-ListQueryRadius {
+     pointer-events:none;
+}
+
+.mol-Map-ListDialog #tabs {
+    overflow-y:hidden;
+}
+
+.mol-Map-ListDialogContent.ui-tabs div.ui-tabs-panel {
+    padding:0px;
+}
+
+.mol-Map-ListDialogContent.ui-dialog-content.ui-widget-content {
+    padding: 0.5em 0.5em;
+}
+
+.mol-Map-ListDialogContent .ui-tabs-nav.ui-widget-header {
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    background-image: none;
+}
+
+.mol-Map-ListDialogContent li.ui-state-default {
+    background: #1D2B52;
+    opacity: 0.75;
+}
+
+.mol-Map-ListDialogContent li.ui-state-default a {
+    padding: 0.3em 0.4em;
+    /*color: white;*/
+    font-size: 0.8em;
+}
+
+.mol-Map-ListDialogContent li.ui-state-default a {
+    color: white;
+}
+
+.mol-Map-ListDialogContent li.ui-state-hover a {
+    color: #C77405;
+}
+
+.mol-Map-ListDialogContent li.ui-state-active a {
+    color: #1D2B52;
+}
+
+
+
+.mol-Map-ListDialogContent li.ui-state-active {
+    background: none;
+}
+
+.mol-Map-ListDialogContent .ui-tabs.ui-tabs-nav {
+    padding: 0;
+}
+
+
+.mol-Map-ListQuery {
+     margin:4px;
+}
+
+.mol-Map-ListQueryInfo {
+     font-size: 12px;
+     font-style:normal;
+     font-weight:normal;
+}
+
+.mol-Map-ListQueryInfoWindow {
+     overflow-y:auto;
+     overflow-x:hidden;
+}
+
+.mol-Map-ListQueryInfo .iucn_stats{
+    float:right;
+}
+
+.mol-Map-ListQueryInfoWindow td.wiki:hover,
+    .mol-Map-ListQueryInfoWindow td.iucn:hover{
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+.mol-Map-ListQueryInfoWindow tr.iucnvu td{
+    background: #cc9900;
+}
+
+ .mol-Map-ListQueryInfoWindow tr.iucnen td{
+    background: #cc6633;
+}
+
+ .mol-Map-ListQueryInfoWindow tr.iucncr td{
+    background: #cc3333;
+}
+
+.mol-Map-ListQueryInfoWindow .english{
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
+
+.mol-Map-ListQueryEmptyInfoWindow {
+     margin:5px;
+     font-size: 14px;
+     font-style:normal;
+     font-weight:normal;
+}
+
+.mol-BaseMapControl {
+    list-style-type: none;
+    font-size: 0.8em;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    white-space: nowrap;
+}
+.mol-BaseMapControl .button:hover{
+    color: #FFF;
+    cursor: pointer;
+}
+.mol-BaseMapControl div{
+    display: inline-block;
+    text-align: center;
+    padding: 5px;
+    margin: 0px;
+}
+.mol-BaseMapControl div:first-child{
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+}
+.mol-BaseMapControl div:last-child{
+    -moz-border-radius-bottomright: 3px;
+    border-bottom-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+}
+.mol-BaseMapControl div.label{
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    background-image: -ms-linear-gradient(rgba(35, 35, 35,0.85) 37%,rgba(66,66,66,0.85) 69%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.37, rgba(35, 35, 35,0.85)),
+        color-stop(0.69, rgba(66,66,66,0.85))
+    );
+    background-image: -moz-linear-gradient(
+        center bottom,
+        rgba(35, 35, 35,0.85) 37%,
+        rgba(66,66,66,0.85) 69%
+    );
+    background-image: -o-linear-gradient(
+        bottom,
+        rgba(35, 35, 35,0.85) 37%,
+        rgba(66,66,66,0.85) 69%
+    );
+
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    padding-bottom: 5px;
+
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF191919', endColorstr='#FF191919');
+    pointer-events: none;
+}
+
+.mol-LayerMetadata .key {
+    display: inline-block;
+    clear:both;
+    float:left;
+    padding: 5px;
+    font-size:0.8em;
+    font-weight:700;
+}
+.mol-LayerMetadata .val {
+    display: inline-block;
+    font-size:10pt;
+    font-weight:300;
+}
+
+.mol-LayerMetadata .metarow {
+    display: block;
+}
+
+
+.mol-LayerMetadata .values {
+    display: inline-block;
+    float:left;
+    max-width:350px;
+}
+
+.mol-Thumbnail {
+    height:25px;
+}
+
+div.cartodb_infowindow div.top p {
+    padding-top:1px;
+    margin-bottom:2px;
+    max-height: 40px;
+    white-space: normal;
+}
+
+/*
+ * New Feature Metadata
+ *
+ */
+
+.mol-Map-FeatureDisplay {
+    position: relative;
+    width: 210px;
+    padding: 7px 8px 7px 8px;
+    overflow-x: hidden;
+    background: url('/static/light.png') repeat-y -452px 0;
+}
+div.mol-Map-FeatureDisplay.ui-dialog-content.ui-widget-content {
+    padding: 0.5em 0.5em;
+    width:100%;
+}
+
+
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-header {
+    background: rgba(29, 43, 82, 0.75);
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-header .ui-icon{
+    left: 0em;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-header a {
+    font-size: 0.7em;
+    padding: 0.2em 0.2em 0.2em 0.3em;
+    color: #FFF;
+    padding-left: 1.4em;
+    padding-bottom: 0.3em;
+    /*height:18px;*/
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content {
+    font-size: 12px;
+    font-weight: normal;
+    font-style: normal;
+    padding: 0.4em 0.4em;
+    max-height: 250px;
+    min-width:178px;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content p {
+    margin: 0.2em;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.itemPair {
+    margin-top: 1px;
+    margin-bottom: 1px;
+    text-indent:-0.2em;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureItem {
+    width: 49%;
+    float: left;
+    font-weight: bold;
+    text-align: right;
+    margin-right: 2px;
+}
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureData {
+    width: 50%;
+    float: left;
+    text-align: left;
+    min-height: 15px;
+}
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureData SUB,
+.mol-Map-FeatureDisplay .ui-accordion .ui-accordion-content div.featureData SUP {
+    line-height: 0;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion-header button {
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    padding: 0px;
+    padding-top: 1px;
+}
+
+.mol-Map-FeatureDisplay .ui-accordion-header a img{
+    width: 16px;
+    height: 16px;
+}
+/*.mol-Map-FeatureDisplay .styler {
+    float:right;
+}
+.mol-Map-FeatureDisplay .source {
+    float:right;
+}*/
+.mol-Map-FeatureDisplay .icons {
+    text-align:right;
+    white-space: nowrap;
+}
+.mol-Map-FeatureDisplay .info {
+    font-size: 12px;
+}
+.mol-Map-FeatureDisplay .name {
+    text-align: left;
+}
+

@@ -1,0 +1,76 @@
+html { height: 100% }
+body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;
+       min-width: 720px; min-height: 500px;
+       font-family: Arial, sans-serif; color: #141414; font-weight:700;}
+.map_container {min-height: 100%;}
+#metadata { height: 50%; overflow: hidden; }
+
+/* Set up RightControl defaults */
+.mol-Map-RightControl { margin-right: 5px; width: 500px; font-family: Arial, sans-serif;
+    font-weight:700;}
+.mol-Map-RightControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-RightControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px;}
+.mol-Map-RightControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px;}
+
+/* Set up CenterControl defaults */
+.mol-Map-CenterTopControl { margin-right: -50px; width: 465px; font-family: Arial, sans-serif;
+    font-weight:700; }
+.mol-Map-CenterTopControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-CenterTopControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-CenterTopControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+
+/* Set up LeftControl defaults */
+.mol-Map-LeftBottomControl { position:absolute; left:0px; width: 500px; font-family: Arial, sans-serif;
+    font-weight:700; }
+.mol-Map-LeftBottomControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-LeftBottomControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-LeftBottomControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+
+.mol-Map-TopLeftControl {
+    margin-left: 5px;
+	width: 550px;
+    height: auto;
+    font-family: Arial, sans-serif;
+    font-weight:700;
+    color: #141414;
+}
+
+.mol-Map-LoadingWidget {
+    position: relative;
+    left: 50%;
+}
+
+.mol-Map-TopLeftControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-TopLeftControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-TopLeftControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+
+
+.mol-WidgetContainer {
+    margin-top: -11px;
+	width: 290px;
+    float: right;
+}
+
+/* Footer images (see splash page) */
+
+div#footer_imgs {
+    max-height: 32px;
+    width: 100%;
+    font-size: 10pt;
+}
+
+div#footer_imgs #sponsors {
+    float: right;
+
+    background: inherit;
+}
+
+div#footer_imgs #partners {
+    float: left;
+
+    background: inherit;
+}
+
+div#footer_imgs img {
+    max-height: 32px;
+}

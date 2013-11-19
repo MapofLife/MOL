@@ -1,0 +1,96 @@
+/*------------------------------------------------------------------
+[CSS3 Stylesheet]
+
+Project: CSS3 Design Contest
+Last change: 23.06.2010 [created blank stylesheet, vf]
+Designed by: Joel Schwarting
+Works in browsers: FF 3.5+, Opera 10.5+, Safari 4+, Google Chrome 4.0+, IE 9+
+-------------------------------------------------------------------*/
+
+body { background-color: #2574b0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 50px; }
+ul { list-style:none; }
+#load 
+{
+   border-top: 1px solid #FFFCF8;
+   margin: 0 auto;
+   padding: 5px 5px 5px 5px;
+   width: 200px;
+   /* border-radius */
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   border-radius: 5px;
+   /* box-shadow */
+   -webkit-box-shadow: rgba(0,0,0,0.5) 0px 1px 3px;
+   -moz-box-shadow: rgba(0,0,0,0.5) 0px 1px 3px;
+   box-shadow: rgba(0,0,0,0.5) 0px 1px 3px;
+   /* background-gradient */
+   background: -webkit-gradient(linear, left top, left bottom, from(#B6B692), to(#99997B));
+   background: -moz-linear-gradient(top, #B6B692, #99997B);
+   background-color: #B6B692;
+}
+#loadBarBox 
+{
+   background-color: #343434;
+   border: 2px solid #141414;
+   height: 20px;
+   overflow: hidden;
+   width: 196px;
+   /* border-radius */
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   border-radius: 5px;
+   /* box-shadow */
+   -webkit-box-shadow: inset 0px 1px 5px black;
+   -moz-box-shadow: inset 0px 1px 5px black;
+   box-shadow: inset 0px 2px 5px black;
+}
+#loadingBar { width: 100px; overflow: hidden; height: 20px; }
+#bars 
+{
+   background-color: Black;
+   height: 20px;
+   margin: 0px;
+   padding: 0px;
+   width: 220px;
+}
+#bars li 
+{
+   background-color: #FFBF00;
+   display: block;
+   float: left;
+   height: 30px;
+   margin-left: 10px;
+   margin-top: -5px;
+   position: relative;
+   right: 5px;
+   width: 10px;
+   /* transform-rotate */
+   -webkit-transform: rotate(-15deg); 
+   -moz-transform: rotate(-15deg);
+   -o-transform: rotate(-15deg);
+   transform: rotate(-15deg);
+   /*  animation  */
+   -webkit-animation-name: moveLeft;
+   -webkit-animation-duration: 500ms;
+   -webkit-animation-iteration-count: infinite;
+   -webkit-animation-direction: one;
+   -webkit-animation-timing-function: linear;
+}
+/* animation for moveLeft */
+@-webkit-keyframes moveLeft 
+{
+   from{right:5px;}
+   to{right:25px;}
+}
+#awesome 
+{
+   border:1px solid black;
+   float:left;
+   font-size:32px;
+   padding: 10px;
+   width: 110px;
+   /* border-radius */
+   -webkit-border-radius: 10px;
+   -moz-border-radius: 10px;
+   border-radius: 10px;
+}
