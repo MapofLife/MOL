@@ -35,9 +35,6 @@ mol.modules.map.menu = function(mol) {
                    self.bus.fireEvent(
                         new mol.bus.Event('toggle-splash')
                     );
-                     self.bus.fireEvent(
-                        new mol.bus.Event('taxonomy-dashboard-toggle',{state:"close"})
-                    );
                     self.bus.fireEvent(
                         new mol.bus.Event('remove-all-layers')
                     );
@@ -85,14 +82,18 @@ mol.modules.map.menu = function(mol) {
                 function(event) {
                     $(this).qtip("hide");
                 }
-            );
-            this.display.dashboard.click(
+            )
+            this.bus.addHandler(
+                'add-dashboard-toggle-button',
                 function(event) {
-                    self.bus.fireEvent(
-                        new mol.bus.Event('taxonomy-dashboard-toggle'));
+                    self.display.dashboard.click(
+                        function(event) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event('taxonomy-dashboard-toggle'));
+                        }
+                    );
                 }
             );
-               
 
             this.bus.addHandler(
                 'menu-display-toggle',

@@ -107,9 +107,8 @@ mol.modules.map.boot = function(mol) {
          */
         loadLayers: function(layers) {
             if (Object.keys(layers).length <= this.maxLayers) {
-                this.bus.fireEvent(
-                    new mol.bus.Event('add-layers', {layers: layers})
-                );
+                
+
             } else if (this.term != null) {
                 this.bus.fireEvent(
                     new mol.bus.Event('search', {term: this.term})

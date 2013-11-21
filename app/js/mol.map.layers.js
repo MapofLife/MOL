@@ -815,6 +815,7 @@ mol.modules.map.layers = function(mol) {
                 '    <button class="type" title="Layer Type: {6}">' +
                 '      <img src="/static/maps/search/{1}.png">' +
                 '    </button>' +
+                '    <button class="constraints">C</button>' +
                 '    <div class="layerName">' +
                 '      <div class="layerRecords">{4}</div>' +
                 '      <div title="{2}" class="layerNomial">{2}</div>' +
@@ -848,12 +849,13 @@ mol.modules.map.layers = function(mol) {
                     layer.type_title
                 )
             );
-
+            
             this.attr('id', layer.id);
             this.toggle = $(this).find('.toggle').button();
             this.styler = $(this).find('.styler');
             this.zoom = $(this).find('.zoom');
             this.info = $(this).find('.info');
+            this.constraints = $(this).find('.constraints');
             this.close = $(this).find('.close');
             this.type = $(this).find('.type');
             this.source = $(this).find('.source');

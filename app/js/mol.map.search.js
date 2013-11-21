@@ -18,7 +18,7 @@ mol.modules.map.search = function(mol) {
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}' and split_part(n, ' ', 3) = \'\' ";
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
@@ -53,7 +53,7 @@ mol.modules.map.search = function(mol) {
                         '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
-                    'l.dataset_id as dataset_id, ' +
+                    "CASE WHEN l.dataset_id = 'gbif_taxloc' THEN TEXT('gbif_aug_2013') ELSE l.dataset_id END as dataset_id, " +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
@@ -69,7 +69,7 @@ mol.modules.map.search = function(mol) {
                 'LEFT JOIN ac n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
-                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
+                     "l.provider = 'gbif' AND (n.n~*'\\m{0}' OR n.v~*'\\m{0}') AND split_part(l.scientificname,' ',3) = \'\' " +
                 'ORDER BY name, type_sort_order';
         },
 

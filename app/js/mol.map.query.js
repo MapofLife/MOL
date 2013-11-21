@@ -109,33 +109,6 @@ mol.modules.map.query = function(mol) {
                         listradius.radius,
                         _class));
 
-		    if ((lng > -16 || lat < 14) && dataset_id == 'iucn_reptiles') {
-            	alert('Reptile species lists are currently only available for North America.');
-            	listradius.setMap(null);
-            	this.bus.fireEvent(new mol.bus.Event(
-                            'hide-loading-indicator',
-                            {source : 'listradius'}));
-            	return;
-            }
-            if ((lat < 25.5 || lng > -16) && dataset_id == 'na_fish') {
-            	alert('Fish species lists are currently only available for North America.');
-            	listradius.setMap(null);
-            	this.bus.fireEvent(new mol.bus.Event(
-                            'hide-loading-indicator',
-                            {source : 'listradius'}));
-            	return;
-            }
-            if ((lat < 25.5 || lng > -16) && dataset_id == 'na_trees') {
-            	alert('Tree species lists are currently only available for North America.');
-            	listradius.setMap(null);
-            	this.bus.fireEvent(new mol.bus.Event(
-                            'hide-loading-indicator',
-                            {source : 'listradius'}));
-            	return;
-            }
-         
-
-
             if (self.queryct > 0) {
                 alert('Please wait for your last species list request to ' +
                 'complete before starting another.');
@@ -207,12 +180,7 @@ mol.modules.map.query = function(mol) {
                     );
                 }
             );
-			this.display.click(
-				function(event){
-					$(this).qtip('destroy');
-				}
-					
-			);
+
             /*
              * Toggle Click Handler for Species List Clicking
              */

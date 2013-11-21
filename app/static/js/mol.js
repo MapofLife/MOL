@@ -352,7 +352,8 @@ mol.modules.map = function(mol) {
             'help',
             'status',
             'images',
-            'boot'
+            'boot',
+            'constraints'
     ];
 
     mol.map.MapEngine = mol.mvp.Engine.extend(
@@ -775,7 +776,7 @@ mol.modules.map.loading = function(mol) {
             var event,
                 params = {
                     display: null, // The loader gif display
-                    slot: mol.map.ControlDisplay.Slot.TOP,
+                    slot: mol.map.ControlDisplay.Slot.BOTTOM,
                     position: google.maps.ControlPosition.TOP_CENTER
                 };
             
@@ -1907,9 +1908,6 @@ mol.modules.map.menu = function(mol) {
                    self.bus.fireEvent(
                         new mol.bus.Event('toggle-splash')
                     );
-                     self.bus.fireEvent(
-                        new mol.bus.Event('taxonomy-dashboard-toggle',{state:"close"})
-                    );
                     self.bus.fireEvent(
                         new mol.bus.Event('remove-all-layers')
                     );
@@ -1957,14 +1955,18 @@ mol.modules.map.menu = function(mol) {
                 function(event) {
                     $(this).qtip("hide");
                 }
-            );
-            this.display.dashboard.click(
+            )
+            this.bus.addHandler(
+                'add-dashboard-toggle-button',
                 function(event) {
-                    self.bus.fireEvent(
-                        new mol.bus.Event('taxonomy-dashboard-toggle'));
+                    self.display.dashboard.click(
+                        function(event) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event('taxonomy-dashboard-toggle'));
+                        }
+                    );
                 }
             );
-               
 
             this.bus.addHandler(
                 'menu-display-toggle',
@@ -2802,7 +2804,7 @@ mol.modules.map.search = function(mol) {
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}' and split_part(n, ' ', 3) = \'\' ";
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
@@ -2837,7 +2839,7 @@ mol.modules.map.search = function(mol) {
                         '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
-                    'l.dataset_id as dataset_id, ' +
+                    "CASE WHEN l.dataset_id = 'gbif_taxloc' THEN TEXT('gbif_aug_2013') ELSE l.dataset_id END as dataset_id, " +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
@@ -2853,7 +2855,7 @@ mol.modules.map.search = function(mol) {
                 'LEFT JOIN ac n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
-                     "n.n~*'\\m{0}' OR n.v~*'\\m{0}' " +
+                     "l.provider = 'gbif' AND (n.n~*'\\m{0}' OR n.v~*'\\m{0}') AND split_part(l.scientificname,' ',3) = \'\' " +
                 'ORDER BY name, type_sort_order';
         },
 
@@ -3255,6 +3257,7 @@ mol.modules.map.tiles = function(mol) {
             this.proxy = proxy;
             this.bus = bus;
             this.map = map;
+            this.constraints = {year: {min: null, max: null}};
             this.clickAction = 'info';
             this.gmap_events = [];
             this.addEventHandlers();
@@ -3274,6 +3277,15 @@ mol.modules.map.tiles = function(mol) {
 
                 }
             );
+            
+            this.bus.addHandler(
+                'set-year-constraint',
+                function(event) {
+                    self.constraints.year = event;
+                    self.bus.fireEvent(new mol.bus.Event('refresh-tiles'));
+                }
+            );
+
             /**
              * Handler for when the layer-toggle event is fired. This renders
              * the layer on the map if visible, and removes it if not visible.
@@ -3363,7 +3375,24 @@ mol.modules.map.tiles = function(mol) {
                         );
                     }
                 );
-
+                this.bus.addHandler(
+                    'refresh-tiles',
+                    function(event) {
+                        self.map.overlayMapTypes.forEach(
+                            function(maptype, index) {
+                                    var layer = maptype.layer;
+                                    if(layer) {
+                                        
+                                        self.map.overlayMapTypes.removeAt(index);
+                                        if(layer.name!='grid') {
+                                            self.getTile(layer,index);
+                                        }
+                                    }
+                            }
+                        );
+                        self.updateGrid(true);
+                    }
+                );
                 /**
                  * Handler for applying cartocss style to a layer.
                  */
@@ -3551,7 +3580,7 @@ mol.modules.map.tiles = function(mol) {
              );
 
              if(toggle==true && this.map.overlayMapTypes.length>0) {
-                gridmt = new mol.map.tiles.GridTile(this.map);
+                gridmt = new mol.map.tiles.GridTile(this.map, this.constraints);
                 this.map.overlayMapTypes.push(gridmt.layer);
              }
         },
@@ -3589,11 +3618,12 @@ mol.modules.map.tiles = function(mol) {
         /**
          * Closure around the layer that returns the ImageMapType for the tile.
          */
-        getTile: function(layer) {
+        getTile: function(layer,index) {
             var self = this,
                 maptype = new mol.map.tiles.CartoDbTile(
                             layer,
-                            this.map
+                            this.map,
+                            this.constraints
                         ),
                 gridmt;
             maptype.onbeforeload = function (){
@@ -3622,7 +3652,7 @@ mol.modules.map.tiles = function(mol) {
                 }
             );
 
-            this.map.overlayMapTypes.insertAt(0,maptype.layer);
+            this.map.overlayMapTypes.insertAt((index != null)?index:0,maptype.layer);
 
             if(this.clickAction == 'info') {
                 this.updateGrid(true);
@@ -3634,15 +3664,14 @@ mol.modules.map.tiles = function(mol) {
     });
 
     mol.map.tiles.CartoDbTile = Class.extend({
-        init: function(layer, map) {
+        init: function(layer, map, constraints) {
             var sql =  "" + //c is in case cache key starts with a number
-                "SELECT * FROM get_tile('{0}','{1}','{2}','{3}')"
+                "SELECT * FROM get_tile_beta('{0}','{1}','{2}','{3}')"
                 .format(
-                    layer.source,
-                    layer.type,
-                    layer.name,
                     layer.dataset_id,
-                    mol.services.cartodb.tileApi.tile_cache_key
+                    layer.name,
+                    constraints.year.min,
+                    constraints.year.max
                 ),
                 urlPattern = '' +
                     'http://{HOST}/tiles/mol_style/{Z}/{X}/{Y}.png?'+
@@ -3739,7 +3768,7 @@ mol.modules.map.tiles = function(mol) {
     });
 
     mol.map.tiles.GridTile = Class.extend({
-        init: function(map) {
+        init: function(map, constraints) {
             var options = {
                     // Just a blank image
                     getTileUrl: function(tile, zoom) {
@@ -3776,7 +3805,7 @@ mol.modules.map.tiles = function(mol) {
                         "'{3}' as dataset_id, " +
                         "'{2}' as scientificname " +
                     "FROM " +
-                        "get_tile('{0}','{1}','{2}','{3}')",
+                        "get_tile_beta('{0}','{1}','{2}','{3}')",
                 gridUrlPattern = '' +
                     'http://{0}/' +
                     'tiles/generic_style/{z}/{x}/{y}.grid.json?'+
@@ -3789,10 +3818,10 @@ mol.modules.map.tiles = function(mol) {
                             function(mt) {
                                 if(mt.name != 'grid' && mt.name != undefined) {
                                     return layersql.format(
-                                        mt.layer.source,
-                                        mt.layer.type,
+                                        mt.layer.dataset_id,
                                         unescape(mt.layer.name.replace(/percent/g,'%')),
-                                        mt.layer.dataset_id
+                                        constraints.year.min,
+                                        constraints.year.max
                                     );
                                 }
                             }
@@ -3892,7 +3921,25 @@ mol.modules.map.dashboard = function(mol) {
 
             start: function() {
                 this.initDialog();
+                this.addDashboardMenuButton();
             },
+
+            addDashboardMenuButton : function() {
+               var html = '' +
+                    '<div ' +
+                        'title="Toggle dashboard." ' +
+                        'id="dashboard" ' +
+                        'class="widgetTheme dash button">' +
+                        'Dashboard' +
+                    '</div>',
+                    params = {
+                        button: html
+                    },
+                    event = new mol.bus.Event('add-dashboard-toggle-button', params);
+
+               this.bus.fireEvent(event);
+            },
+
             addEventHandlers: function() {
                 var self = this;
 
@@ -3957,14 +4004,13 @@ mol.modules.map.dashboard = function(mol) {
              */
             initDialog: function() {
                 var self = this;
-				
+
                 $.getJSON(
-                    'http://mol.cartodb.com/api/v1/sql?callback=?&q={0}'.format(this.dashboard_sql),
+                    'http://mol.cartodb.com/api/v1/sql?q={0}'.format(this.dashboard_sql),
                     function(response) {
                         self.display = new mol.map.dashboard.DashboardDisplay(
                             response.rows, self.summary
                         );
-                        self.addEventHandlers();
                         self.display.dialog(
                             {
                                 autoOpen: false,
@@ -3991,7 +4037,7 @@ mol.modules.map.dashboard = function(mol) {
                             $(".mol-Dashboard-TableWindow")
                                 .height($(".mol-Dashboard").height()-95);
                         });
-                       
+                        self.addEventHandlers();
                     }
                 );
 
@@ -4793,33 +4839,6 @@ mol.modules.map.query = function(mol) {
                         listradius.radius,
                         _class));
 
-		    if ((lng > -16 || lat < 14) && dataset_id == 'iucn_reptiles') {
-            	alert('Reptile species lists are currently only available for North America.');
-            	listradius.setMap(null);
-            	this.bus.fireEvent(new mol.bus.Event(
-                            'hide-loading-indicator',
-                            {source : 'listradius'}));
-            	return;
-            }
-            if ((lat < 25.5 || lng > -16) && dataset_id == 'na_fish') {
-            	alert('Fish species lists are currently only available for North America.');
-            	listradius.setMap(null);
-            	this.bus.fireEvent(new mol.bus.Event(
-                            'hide-loading-indicator',
-                            {source : 'listradius'}));
-            	return;
-            }
-            if ((lat < 25.5 || lng > -16) && dataset_id == 'na_trees') {
-            	alert('Tree species lists are currently only available for North America.');
-            	listradius.setMap(null);
-            	this.bus.fireEvent(new mol.bus.Event(
-                            'hide-loading-indicator',
-                            {source : 'listradius'}));
-            	return;
-            }
-         
-
-
             if (self.queryct > 0) {
                 alert('Please wait for your last species list request to ' +
                 'complete before starting another.');
@@ -4891,12 +4910,7 @@ mol.modules.map.query = function(mol) {
                     );
                 }
             );
-			this.display.click(
-				function(event){
-					$(this).qtip('destroy');
-				}
-					
-			);
+
             /*
              * Toggle Click Handler for Species List Clicking
              */
@@ -6674,14 +6688,8 @@ mol.modules.map.splash = function(mol) {
             this.IE8 = false;
         },
         start: function() {
-        	if (this.getIEVersion() < 9 && this.getIEVersion() >= 0) {
-                this.badBrowser();
-            } else if (this.MOL_Down) {
-                this.molDown();
-            } else {
-	        	this.display = new mol.map.splash.splashDisplay();
-	            this.addEventHandlers();
-            }
+            this.display = new mol.map.splash.splashDisplay();
+            this.addEventHandlers();
         },
         /*
         *  Returns the version of Internet Explorer or a -1
@@ -6720,34 +6728,27 @@ mol.modules.map.splash = function(mol) {
         *  Display a message for IE8- users.
         */
         badBrowser: function() {
-        	var self = this,
-        		IEwarn = 'Sorry, your version of Internet Explorer requires the ' +
-                    'Google Chrome Frame Plugin to view the Map of Life.<br>' +
-                    'Chrome Frame is available at ' +
-                    '<a href="http://www.google.com/chromeframe">' + 
-                    	'http://www.google.com/chromeframe/</a>' +
-                   	'.</br>Otherwise, please use the latest version of Chrome, ' +
-                   	'Safari, Firefox, or Internet Explorer.' +
-                   	'<p><a href="/about/">Click here</a> to learn more about ' +
-                   	'the Map of Life Project</p>';
             //old ie8, please upgrade
             this.IE8 = true;
-            $('<div class="mol-Splash IEwarning">{0}</div>'.format(IEwarn)).dialog({
-            	title: 'Welcome to the Map of Life',
-            	width: $(window).width()-50,
-            	height: $(window).height()-50
-            });
+            this.display.iframe_content.src = '/static/splash/ie8.html';
+            this.initDialog();
+            this.display.mesg.append($("<div class='IEwarning'>Your version of Internet Explorer requires the Google Chrome Frame Plugin to view the Map of Life. Chrome Frame is available at <a href='http://www.google.com/chromeframe'>http://www.google.com/chromeframe/</a>. Otherwise, please use the latest version of Chrome, Safari, Firefox, or Internet Explorer.</div>"));
+            $(this.display).dialog("option", "closeOnEscape", false);
+            $(this.display).bind(
+            "dialogbeforeclose",
+            function(event, ui) {
+                alert('Your version of Internet Explorer is not supported. Please install Google Chrome Frame, or use the latest version of Chrome, Safari, Firefox, or IE.');
+                return false;
+            }
+            );
+            $(self.display.iframe_content).height(320);
         },
         /*
         * Display a message if the site is down.
         */
         molDown: function() {
             this.initDialog();
-            this.display.mesg.append($("" +
-                "<font color='red'>" +
-                    "Map of Life is down for maintenance. We will be back up shortly." +
-                "</font>"
-            ));
+            this.display.mesg.append($("<font color='red'>Map of Life is down for maintenance. We will be back up shortly.</font>"));
             $(this.display).dialog("option", "closeOnEscape", false);
             $(this.display).bind(
             "dialogbeforeclose",
@@ -6896,8 +6897,13 @@ mol.modules.map.splash = function(mol) {
             'toggle-splash',
             function(event) {
                 self.bus.fireEvent(new mol.bus.Event('clear-lists'));
-                self.initDialog();
-                
+                if (self.getIEVersion() < 9 && self.getIEVersion() >= 0) {
+                    self.badBrowser();
+                } else if (self.MOL_Down) {
+                    self.molDown();
+                } else {
+                    self.initDialog();
+                }
             });
         }
     });
@@ -6905,7 +6911,7 @@ mol.modules.map.splash = function(mol) {
         init: function() {
             var html = '' +
             '<div class="mol-Splash">' +
-                '<div tabindex=0 class="message"></div>' +
+                '<div class="message"></div>' +
                 '<div class="header">' +
                     '<div style="font-size:16px; margin-bottom:6px;">' +
                         'Map of Life is an online resource for mapping, ' +
@@ -6931,7 +6937,7 @@ mol.modules.map.splash = function(mol) {
                                 '<div class="iconTop">' +
                                     '<div style="width:25px; height:37px;">' +
                                         '<img title="Lesser Flamingo" ' +
-                                            'class="mapSingleLayer speciesPic" ' +
+                                            'class="speciesPic mapSingleLayer" ' +
                                             'data-name="Phoeniconaias minor" ' +
                                             'src="../static/img/flamingo25x37px.png" />' +
                                     '</div>' +
@@ -6939,7 +6945,7 @@ mol.modules.map.splash = function(mol) {
                                 '<div class="iconTop">' +
                                     '<div style="width:38px; height:39px;">' +
                                         '<img title="Broad-Banded Grass Frog" ' +
-                                        'class="mapSingleLayer speciesPic" ' +
+                                        'class="speciesPic mapSingleLayer" ' +
                                         'data-name="Ptychadena bibroni" ' +
                                         'src="../static/img/frog38x39px.png" />' +
                                     '</div>' +
@@ -6947,7 +6953,7 @@ mol.modules.map.splash = function(mol) {
                                 '<div class="iconTop">' +
                                     '<div style="width:40px; height:38px;">' +
                                         '<img title="Joshua Tree" ' +
-                                        'class="mapSingleLayer speciesPic" ' +
+                                        'class="speciesPic mapSingleLayer" ' +
                                         'data-name="Yucca brevifolia" ' +
                                         'src="../static/img/jtree40x38px.png" />' +
                                     '</div>' +
@@ -6956,7 +6962,7 @@ mol.modules.map.splash = function(mol) {
                                     '<div style="width:60px; height:27px;">' +
                                         '<img ' +
                                             'title="Hairy-Eared Dwarf Lemur" ' +
-                                            'class="mapSingleLayer speciesPic" ' +
+                                            'class="speciesPic mapSingleLayer" ' +
                                             'data-name="Allocebus trichotis" ' +
                                             'src="../static/img/lemur60x27px.png"/>' +
                                     '</div>' +
@@ -6965,7 +6971,7 @@ mol.modules.map.splash = function(mol) {
                                     '<div style="width:50px; height:33px;">'+
                                         '<img ' +
                                             'title="Arabian Toad-headed Agama" ' +
-                                            'class="mapSingleLayer speciesPic" ' +
+                                            'class="speciesPic mapSingleLayer" ' +
                                             'data-name="Phrynocephalus arabicus" ' +
                                             'src="../static/img/lizard50x33px.png"/>' +
                                     '</div>' +
@@ -6991,61 +6997,29 @@ mol.modules.map.splash = function(mol) {
                         '<span class="mol-Splash button liveNear">' +
                             'Which birds live near me?' +
                         '</span>' +
-                        '<div class="middlePanel">' +
-                            '<div>What lives near me?</div>'  +
+                        '<div style="font-weight:normal; margin-top:10px; margin-bottom: 20px height:90px"">' +
+                            '<div >What lives near me?</div>'  +
                             '<div style="margin-top:10px; width:150px">' +
                                 '<div class="iconTop">' +
                                     '<div style="width:29px; height:40px;">' +
-                                        '<img title="Birds" ' +
-                                        'class="liveNear speciesPic"  ' +
-                                        'data-dataset_id="jetz_maps" ' +
-                                        'data-class_name="Aves" ' +
-                                        'src="../static/img/bird29x40px.png" />' +
-                                    '</div>' +
-                                '</div>' +
-                                '<div class="iconTop">' +
-                            		'<div style="width:38px; height:39px;">' +
-                                    	'<img title="Amphibians" ' +
-                                            'class="liveNear speciesPic" '+
+                                        '<img title="Birds" class="speciesPic liveNear"  data-dataset_id="jetz_maps" data-class_name="Aves" src="../static/img/bird29x40px.png" /></div></div>' +
+                                    '<div class="iconTop"><div style="width:38px; height:39px;">' +
+            '                           <img title="Amphibians" ' +
+                                            'class="speciesPic liveNear" '+
                                             'data-dataset-id="iucn_amphibians" '+
                                             'data-class-name="Amphibia" '+
                                             'src="../static/img/frog38x39px.png" />'+
                                         '</div>'+
                                     '</div>' +
-                                    '<div class="iconTop">'+
-                                    	'<div style="width:40px; height:18px; margin-top:11px">'+
-            								'<img title="North American Freshwater Fishes" ' +
-            									'class="liveNear speciesPic" ' +
-            									'data-dataset-id="na_fish" ' +
-            									'data-class-name="Fishes" ' +
-            									'src="../static/img/bass40x18px.png" />' +
-    									'</div>' +
-									'</div>' +
-            						'<div  class="iconBottom">' +
-            							'<div style="width:60px; height:27px;">' +
-            								'<img title="Mammals" ' +
-            									'class="liveNear speciesPic" ' + 
-            									'data-dataset-id="iucn_mammals" ' + 
-            									'data-class-name="Mammalia" ' + 
-            									'src="../static/img/lemur60x27px.png"/>'+
-    									'</div>' +
-									'</div>' +
-            						'<div class="iconBottom" style="float:right">' +
-            						    '<div style="width:50px; height:33px;">' +
-                                            '<img title="North American Reptiles" ' +
-                                            	'class="liveNear speciesPic" ' +
-                                            	'data-dataset-id="iucn_reptiles" ' +
-                                            	'data-class-name="Reptilia" ' +
-                                            	'src="../static/img/lizard50x33px.png"/>' +
-                                    	'</div>' +
-                                	'</div>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div style="clear:both; padding-top:7px";>' +
-                                '<span  class="mol-Splash button list">' +
-                                    'Let me pick a place' +
-                                '</span>' +
-                            '</div>' + 
+            '                       <div class="iconTop"><div style="width:40px; height:18px; margin-top:11px">'+
+            '                           <img title="Freshwater Fishes"  class="speciesPic liveNear" data-dataset-id="na_fish" data-class-name="Fishes" src="../static/img/bass40x18px.png" /></div></div>' +
+            '                       <div  class="iconBottom"><div style="width:60px; height:27px;">' +
+            '                           <img title="Mammals" class="speciesPic liveNear" data-dataset-id="iucn_mammals" data-class-name="Mammalia" src="../static/img/lemur60x27px.png"/></div></div>' +
+            '                       <div class="iconBottom" style="float:right"><div style="width:50px; height:33px;">' +
+            '                           <img title="Reptiles" class="speciesPic liveNear" data-dataset-id="iucn_reptiles" data-class-name="Reptilia" src="../static/img/lizard50x33px.png"/></div></div>' +
+            '                   </div>' +
+            '               </div>' +
+                            '<div style="clear:both; padding-top:7px";><span  class="mol-Splash button list">Let me pick a place</span></div>'   + //
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -7059,93 +7033,18 @@ mol.modules.map.splash = function(mol) {
                     '</span>' + 
                 '</div>' +
                 
-            '<div id="footer_imgs" style="text-align: center;clear: both;">' + 
-                '<div>Sponsors, partners and supporters</div>' +
-                    '<a target="_blank" ' +
-                    	'tabindex="10" ' +
-                    	'href="http://www.yale.edu/jetz/">' +
-            			'<button>' +
-            				'<img width="72px" ' +
-    					        'height="36px" ' +
-    					        'title="Jetz Lab, Yale University" ' +
-    					        'src="/static/home/yale.png">' +
-        				'</button>' +
-    				'</a>' +
-                    '<a target="_blank" ' +
-                        'tabindex="11" ' +
-                        'href="http://sites.google.com/site/robgur/">' +
-                        '<button>' +
-                            '<img width="149px" height="36px" ' +
-                            'title="Guralnick Lab, University of Colorado Boulder" ' +
-                            'src="/static/home/cuboulder.png">' +
-                        '</button>' +
-                    '</a>' +
-                    '<a target="_blank" ' +
-                    	'tabindex="12" ' +
-                    	'href="http://www.gbif.org/">' +
-                    	'<button>' +
-                    		'<img width="33px" height="32px" ' +
-                    		'title="Global Biodiversity Information Facility" '+
-                    		'src="/static/home/gbif.png">' +
-                		'</button>' +
-            		'</a>' +
-                    '<a target="_blank" tabindex="13" ' +
-                    	'href="http://www.eol.org/">' +
-                    	'<button>' +
-                    		'<img width="51px" height="32px" ' +
-                    			'title="Encyclopedia of Life" ' +
-                    			'src="http://www.mappinglife.org/static/home/eol.png">' +
-            			'</button>' +
-        			'</a>' +
-                    '<a target="_blank" tabindex="14" ' +
-                    	'href="http://www.nasa.gov/">' +
-                    	'<button>' +
-                    		'<img width="37px" height="32px" ' +
-                    			'title="National Aeronautics and Space Administration" ' +
-                    			'src="http://www.mappinglife.org/static/home/nasa.png">' +
-            			'</button>' +
-        			'</a>' +
+            '<div id="footer_imgs" style="text-align: center;clear: both;">' + '<div>Sponsors, partners and supporters</div>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.yale.edu/jetz/"><button><img width="72px" height="36px" title="Jetz Lab, Yale University" src="/static/home/yale.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://sites.google.com/site/robgur/"><button><img width="149px" height="36px" title="Guralnick Lab, University of Colorado Boulder" src="/static/home/cuboulder.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.gbif.org/"><button><img width="33px" height="32px" title="Global Biodiversity Information Facility" src="/static/home/gbif.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.eol.org/"><button><img width="51px" height="32px" title="Encyclopedia of Life" src="http://www.mappinglife.org/static/home/eol.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.nasa.gov/"><button><img width="37px" height="32px" title="National Aeronautics and Space Administration" src="http://www.mappinglife.org/static/home/nasa.png"></button></a>' +
                     '<br>' +
-                    '<a target="_blank" tabindex="15" ' +	
-                    	'href="http://www.nceas.ucsb.edu/">' +
-                    	'<button>' +
-                    	    '<img width="30px" height="32px" ' +
-                    		    'title="National Center for Ecological Analysis and Synthesis" ' +
-                    		    'src="http://www.mappinglife.org/static/home/nceas.png">' +
-        			    '</button>' +
-    			    '</a>' +
-                    '<a target="_blank" tabindex="16" ' +
-                        'href="http://www.iplantcollaborative.org/">' +
-                        '<button>' +
-                            '<img width="105px" height="32px" ' +
-                                'title="iPlant Collaborative" ' +
-                                'src="http://www.mappinglife.org/static/home/iplant.png">' +
-                        '</button>' +
-                    '</a>' +
-                    '<a target="_blank" tabindex="17" ' +
-                    	'href="http://www.senckenberg.de">' +
-                    	'<button>' +
-                    		'<img width="81px" height="32px" ' +
-                    			'title="Senckenberg" ' +
-                    			'src="http://www.mappinglife.org/static/home/senckenberg.png">' +
-            			'</button>' +
-        			'</a>' +	
-                    '<a target="_blank" tabindex="18" ' +
-                    	'href="http://www.bik-f.de/">' +
-                    		'<button>' +
-                    			'<img width="74px" height="32px" ' +
-                    				'title="Biodiversität und Klima Forschungszentrum (BiK-F)" ' +
-                    				'src="http://www.mappinglife.org/static/home/bik_bildzeichen.png">' +
-            				'</button>' +
-    				'</a>' +
-                    '<a target="_blank" tabindex="19" ' +
-                    	'href="http://www.mountainbiodiversity.org/">' +
-                    	'<button>' +
-                    		'<img width="59px" height="32px" ' +
-                    			'title="Global Mountain Biodiversity Assessment" ' +
-                    			'src="http://www.mappinglife.org/static/home/gmba.png">' +
-            			'</button>' +
-        			'</a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.nceas.ucsb.edu/"><button><img width="30px" height="32px" title="National Center for Ecological Analysis and Synthesis" src="http://www.mappinglife.org/static/home/nceas.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.iplantcollaborative.org/"><button><img width="105px" height="32px" title="iPlant Collaborative" src="http://www.mappinglife.org/static/home/iplant.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.senckenberg.de"><button><img width="81px" height="32px"title="Senckenberg" src="http://www.mappinglife.org/static/home/senckenberg.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.bik-f.de/"><button><img width="74px" height="32px" title="Biodiversität und Klima Forschungszentrum (BiK-F)" src="http://www.mappinglife.org/static/home/bik_bildzeichen.png"></button></a>' +
+                    '<a target="_blank" tabindex="-1" href="http://www.mountainbiodiversity.org/"><button><img width="59px" height="32px" title="Global Mountain Biodiversity Assessment" src="http://www.mappinglife.org/static/home/gmba.png"></button></a>' +
                 '</div>' +
             '</div>';
             this._super(html);
@@ -8656,6 +8555,106 @@ mol.modules.map.images = function(mol) {
 
 
 
+mol.modules.map.constraints = function(mol) {
+
+    mol.map.constraints = {};
+
+    mol.map.constraints.ConstraintsEngine = mol.mvp.Engine.extend({
+        init: function(proxy, bus, map) {
+            this.proxy = proxy;
+            this.bus = bus;
+            this.map = map;
+          
+        },    
+        start: function() {
+            this.display = new mol.map.constraints.ConstraintsDisplay();
+            this.fireEvents();
+            this.addEventHandlers();
+        },
+        addEventHandlers: function() {
+            var self = this;
+            this.display.year.slider({
+                width:80, 
+                height:20, 
+                min: 1800, 
+                max: 2013, 
+                range: true, 
+                values:[1970,2013], 
+                step:1,
+                stop: function(event, ui) {
+                    self.setYearConstraint(event, ui)
+                },
+                slide: function (event, ui) {
+                    self.updateYearLabels(event, ui)
+                }    
+            });
+        },
+        /**
+         * Fires the 'add-map-control' event. The mol.map.MapEngine handles
+         * this event and adds the display to the map.
+         */
+        fireEvents: function() {
+            var params = {
+                    display: this.display,
+                    slot: mol.map.ControlDisplay.Slot.TOP,
+                    position: google.maps.ControlPosition.TOP_CENTER
+            };
+            this.bus.fireEvent(new mol.bus.Event('add-map-control', params));
+            
+            this.bus.fireEvent(
+                new mol.bus.Event(
+                    'set-year-constraint',
+                    {min: 1800, 
+                    max: 2014}
+                )
+            );
+        },
+        setYearConstraint: function(event, ui) {
+            this.bus.fireEvent(
+                new mol.bus.Event(
+                    'set-year-constraint',
+                    {min: ui.values[0], max: ui.values[1]}
+                )
+            );            
+        },
+        updateYearLabels: function (event, ui) {
+            this.display.find('.minyear').text(ui.values[0]);
+            this.display.find('.minyear').css(
+                'left',
+                $(this.display.find('.ui-slider-handle')[0])
+                    .offset().left
+                    -$(this.display.year).offset().left
+                    -$(this.display.find('.ui-slider-handle')[1])
+                            .width()/2
+            );
+            this.display.find('.maxyear').text(ui.values[1]);
+            this.display.find('.maxyear').css(
+                'left',
+                $(this.display.find('.ui-slider-handle')[1])
+                    .offset().left
+                        -$(this.display.year).offset().left
+                        -$(this.display.find('.maxyear')).width()
+                        -$(this.display.find('.ui-slider-handle')[1])
+                            .width()/2
+            );
+        }
+    });
+
+    mol.map.constraints.ConstraintsDisplay = mol.mvp.View.extend({
+        init: function() {
+            var html = '' +
+                '<div class="mol-ConstraintsControl">' +
+                    '<div class="year"></div>' +
+                    '<span class="minyear"></span>' +
+                    '<span class="maxyear"></span>' +
+                '</div>',
+                self = this;
+            this._super(html);
+            this.year = $(this).find('.year');
+            
+        }
+    });
+}
 mol.modules.map.boot = function(mol) {
 
     mol.map.boot = {};
@@ -8765,9 +8764,8 @@ mol.modules.map.boot = function(mol) {
          */
         loadLayers: function(layers) {
             if (Object.keys(layers).length <= this.maxLayers) {
-                this.bus.fireEvent(
-                    new mol.bus.Event('add-layers', {layers: layers})
-                );
+                
+
             } else if (this.term != null) {
                 this.bus.fireEvent(
                     new mol.bus.Event('search', {term: this.term})
