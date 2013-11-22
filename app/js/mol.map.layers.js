@@ -617,7 +617,7 @@ mol.modules.map.layers = function(mol) {
                         }
                     );
 
-                    l.layer.click(
+                   /* l.layer.click(
                         function(event) {
                             var boo = false,
                                 isSelected = false;
@@ -681,7 +681,7 @@ mol.modules.map.layers = function(mol) {
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
-                    );
+                    );*/
                     l.toggle.attr('checked', true);
 
                     // Click handler for the toggle button.
@@ -712,6 +712,18 @@ mol.modules.map.layers = function(mol) {
                             );
                             event.stopPropagation();
                             event.cancelBubble = true;
+                        }
+                    );
+                    l.constraints.click(
+                        function(event) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'show-constraints',
+                                    {params : {
+                                        layer: layer
+                                    }}
+                                )
+                            );
                         }
                     );
                     l.type.click(
@@ -815,7 +827,7 @@ mol.modules.map.layers = function(mol) {
                 '    <button class="type" title="Layer Type: {6}">' +
                 '      <img src="/static/maps/search/{1}.png">' +
                 '    </button>' +
-                '    <button class="constraints">C</button>' +
+                '    <button class="constraints">C<img src=""></button>' +
                 '    <div class="layerName">' +
                 '      <div class="layerRecords">{4}</div>' +
                 '      <div title="{2}" class="layerNomial">{2}</div>' +

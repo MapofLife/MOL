@@ -311,7 +311,17 @@ mol.modules.map.results = function(mol) {
             return  _.map(
                 layers,
                 function(layer) {
-                    return _.extend(layer, {id: mol.core.getLayerId(layer)});
+                    return _.extend(
+                        layer, 
+                            {id: mol.core.getLayerId(layer),
+                             constraints: {
+                                 year: {
+                                     min: 1950,
+                                     max: 2013
+                                }
+                            }
+                        }
+                    );
                 }
             );
         },

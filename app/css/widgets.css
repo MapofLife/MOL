@@ -34,7 +34,6 @@
     );
     background-image: -o-linear-gradient(
         bottom,
-        rgba(29,43,82,0.65) 89%,
         rgba(29,43,82,0.75) 57%
     );
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
@@ -741,6 +740,14 @@ white-space: nowrap;
 
 
 .mol-LayerControl-Layers .layer .zoom {
+    float: right;
+    position: relative;
+    width: 24px;
+    font-style: italic;
+    font-size: 1.2em;
+    height: 24px;
+}
+.mol-LayerControl-Layers .layer .constraints {
     float: right;
     position: relative;
     width: 24px;

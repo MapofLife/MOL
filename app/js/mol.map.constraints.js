@@ -18,14 +18,14 @@ mol.modules.map.constraints = function(mol) {
             var self = this;
             
             this.bus.addHandler(
-                'show-constrants',
+                'show-constraints',
                 function(event) {
                     var params = event.params;
-                    self.display.dialog();
+                    self.showConstraints(params)
                 }
             );
             this.bus.addHandler(
-                'hide-constrants',
+                'hide-constraints',
                 function(event) {
                     var params = event.params;
                     self.applyConstraints();
@@ -33,22 +33,41 @@ mol.modules.map.constraints = function(mol) {
                 }
             );
         },
-        applyConstraints: function () {
+        showConstraints: function (params) {
+            var self = this,
+                constraints = (params.layer.constraints == undefined) ?
+                    {
+                        year: {min:1950, max:2013}
+                    } : params.layer.constraints;
+
+                    
             this.display.year.slider({
                 width:80, 
                 height:20, 
                 min: 1800, 
                 max: 2013, 
                 range: true, 
-                values:[1970,2013], 
+                values:[constraints.year.min,constraints.year.max], 
                 step:1,
                 stop: function(event, ui) {
-                    self.setYearConstraint(event, ui)
+                    constraints.year.min = ui.values[0];
+                    constraints.year.max = ui.values[1];
+                    params.layer.constraints = constraints;
+                    self.setConstraints(event, ui, params.layer)
                 },
                 slide: function (event, ui) {
-                    self.updateYearLabels(event, ui)
+                    self.updateYearLabels(event, ui, params.layer);
                 }    
             });
+            
+            this.updateYearLabels(
+                        {}, 
+                        {values:[constraints.year.min,constraints.year.max]}, 
+                        params.layer);
+           this.display.dialog({
+               title:"Set constraints for the {0} layer from {1}"
+                    .format(params.layer.name, params.layer.source_title)
+           });
         },
         /**
          * Fires the 'add-map-control' event. The mol.map.MapEngine handles
@@ -70,11 +89,11 @@ mol.modules.map.constraints = function(mol) {
                 )
             );
         },
-        setYearConstraint: function(event, ui) {
+        setConstraints: function(event, ui, layer) {
             this.bus.fireEvent(
                 new mol.bus.Event(
-                    'set-year-constraint',
-                    {min: ui.values[0], max: ui.values[1]}
+                    'set-constraints',
+                    {layer: layer}
                 )
             );            
         },

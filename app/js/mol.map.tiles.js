@@ -40,9 +40,22 @@ mol.modules.map.tiles = function(mol) {
             );
             
             this.bus.addHandler(
-                'set-year-constraint',
+                'set-constraints',
                 function(event) {
-                    self.constraints.year = event;
+                    var layer = event.layer;
+                    self.map.overlayMapTypes.forEach(
+                        function(mt, i) {
+                            if(mt)
+                            if(mt.layer) {
+                                if (mt.layer.id == layer.id) {
+                                    mt.layer = layer;
+                                    //mt.layer.stale = true;
+                                   //self.map.overlayMapTypes.removeAt(i);
+                                    //self.map.overlayMapTypes.setAt(i,mt);
+                                }
+                            }
+                        }
+                    );
                     self.bus.fireEvent(new mol.bus.Event('refresh-tiles'));
                 }
             );
@@ -384,7 +397,7 @@ mol.modules.map.tiles = function(mol) {
                 maptype = new mol.map.tiles.CartoDbTile(
                             layer,
                             this.map,
-                            this.constraints
+                            layer.constraints
                         ),
                 gridmt;
             maptype.onbeforeload = function (){
@@ -431,8 +444,8 @@ mol.modules.map.tiles = function(mol) {
                 .format(
                     layer.dataset_id,
                     layer.name,
-                    constraints.year.min,
-                    constraints.year.max
+                    (constraints != undefined) ? constraints.year.min : 1950,
+                    (constraints != undefined) ? constraints.year.max : 2013
                 ),
                 urlPattern = '' +
                     'http://{HOST}/tiles/mol_style/{Z}/{X}/{Y}.png?'+
@@ -581,8 +594,8 @@ mol.modules.map.tiles = function(mol) {
                                     return layersql.format(
                                         mt.layer.dataset_id,
                                         unescape(mt.layer.name.replace(/percent/g,'%')),
-                                        constraints.year.min,
-                                        constraints.year.max
+                                        mt.layer.constraints.year.min,
+                                        mt.layer.constraints.year.max
                                     );
                                 }
                             }
