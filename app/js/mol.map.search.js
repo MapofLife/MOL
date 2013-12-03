@@ -53,7 +53,7 @@ mol.modules.map.search = function(mol) {
                         '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
-                    "CASE WHEN l.dataset_id = 'gbif_taxloc' THEN TEXT('gbif_aug_2013') ELSE l.dataset_id END as dataset_id, " +
+                    "CASE WHEN l.dataset_id = 'gbif_taxloc' THEN TEXT('gbif_aug_2013') ELSE CASE WHEN l.dataset_id = 'ebird_taxloc' THEN TEXT('ebird_aug_2013') ELSE l.dataset_id END END as dataset_id, " +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
@@ -69,7 +69,7 @@ mol.modules.map.search = function(mol) {
                 'LEFT JOIN ac n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
-                     "l.provider = 'gbif' AND (n.n~*'\\m{0}' OR n.v~*'\\m{0}') AND split_part(l.scientificname,' ',3) = \'\' " +
+                     "(l.provider = 'gbif' or l.provider = 'ebird') AND (n.n~*'\\m{0}' OR n.v~*'\\m{0}') AND split_part(l.scientificname,' ',3) = \'\' " +
                 'ORDER BY name, type_sort_order';
         },
 
