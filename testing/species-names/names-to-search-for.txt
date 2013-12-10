@@ -1,0 +1,18 @@
+Here are some names which activate odd behavior:
+ - Anser hutchinsii
+    - No data on Map of Life, but we have data on its synonym.
+ - Felis tigris
+ - Eutamias minimus
+ - Cleome serrulata
+    - We have records for both synonyms.
+ - Antelope
+    - It's not a binomial, but GBIF has a genus-level synonym
+      for it.
+ - Ostrea glabra
+ - Zetes pilosus
+    - Multiple synonyms, we only have data on one of them.
+ - Cribrochalina chinensis
+    - We find synonymy information on GBIF, but have no data on
+      any of the synonyms.
+ - Neverita didyma
+    - GBIF says this is a synonym of Glossaulax didyma, which it also says is a synonym of Neverita didyma, so the code goes into an infinite loop unless it is smart enough to figure out that 

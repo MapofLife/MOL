@@ -2072,6 +2072,38 @@ mol.modules.map.results = function(mol) {
             this.bus = bus;
             this.map = map;
             this.maxLayers = ($.browser.chrome) ? 6 : 100;
+
+            /** 
+             * this.current_results = []
+             *
+             * Stores the currently displayed results.
+             */
+            this.current_results = [];
+
+            /**
+             * this.flag_synonym_bar_displayed = (0|1)
+             *
+             * The synonym bar displays "Synonyms" between direct and synonym 
+             * search results. This flag is turned on once the bar has been 
+             * displayed, preventing it from being displayed multiple times,
+             * where multiple synonym searches return separate results, for
+             * instance.
+             */
+            this.flag_synonym_bar_displayed = 0; 
+
+            /**
+             * this.synonym_search_counter = 0, 1, ...
+             *
+             * The number of ongoing asynchronous synonym searches. When zero,
+             * no synonym searches are ongoing, so if rows are being added,
+             * it must be from a direct search. If > 0, then rows are being
+             * added by a synonym search. As the results from synonym searches
+             * return to this module, this counter in decremented, and once
+             * it returns to zero, any "Please wait, synonym search in 
+             * progress  ..." messages are hidden.
+             */
+            this.synonym_search_counter = 0; 
+
             this.filters = { 
                 'name': {
                     title: 'Name', 
@@ -2224,7 +2256,7 @@ mol.modules.map.results = function(mol) {
             this.bus.addHandler(
                 'results-display-toggle',
                 function(event) {
-                    if(self.results == undefined) {
+                    if(self.current_results.length == 0) {
                         self.display.toggle(false);
                     } else {
                         if (event.visible === undefined) {
@@ -2251,23 +2283,332 @@ mol.modules.map.results = function(mol) {
             );
 
             /**
-             * Callback that displays search results.
+             * Callback that displays search results. If synonym searches
+             * are in progress, these will be added to the search results
+             * instead of overwriting them.
              */
             this.bus.addHandler(
                 'search-results',
                 function(event) {
-                    var response= event.response;
+                    var response = event.response;
+                    var search_type = 'direct';
+ 
+                    // Turn off autocomplete.
                     self.bus.fireEvent(new mol.bus.Event('close-autocomplete'));
-                    self.results = response.rows;
 
-                    if (self.getLayersWithIds(self.results).length > 0) {
-                        self.showFilters(self.results);
-                        self.showLayers(self.results);
+                    console.log("*** search results for: " + event.term + ".");
+                    console.log("synonym_search_counter = " + this.synonym_search_counter);
+
+                    // Are we in a synonym search or a direct search?
+                    if(this.synonym_search_counter > 0) {
+                        // We are in a synonym search!
+                        this.synonym_search_counter--;
+
+                        if(this.synonym_search_counter == 0) {
+                            // All synonyms are done. Turn off the 
+                            // 'please wait ...' display.
+                            self.display.synonymSearchInProgress.hide();
+                            self.display.synonymSearchEnded.show();
+                        }
+
+                        // Change the search type to 'synonym'.
+                        search_type = 'synonym';
+
+                    } else {
+                        // No ongoing synonym searches in progress.
+                        // So this is a new direct search result!
+
+                        // Turn off the previous synonym display.
+                        self.display.synonymDisplay.hide();
+                        self.display.synonymDisplay.synonymList.html("");
+
+                        // Clear synonym flags and counters.
+                        self.flag_synonym_bar_displayed = 0;
+                        this.synonym_search_counter = 0;
+
+                        // Clear synonym UI.
+                        self.display.synonymSearchInProgress.hide();
+                        self.display.synonymSearchEnded.show();
+
+                        // Clear current results.
+                        self.current_results = [];
+                        self.display.clearResults();
+                    }
+
+                    // Rows found by the search.
+                    var rows_found = response.rows;
+
+                    // Find all the rows we need to add in this operation.
+                    // Uniqueness is determined by concatenating the source_type,
+                    // dataset_id and name.
+                    var time_start = new Date().getTime();
+                    var ids_currently_in_use = _.map(self.current_results,
+                        function(row) {
+                            return (row.source_type + "-" + row.dataset_id + 
+                                "-" + row.name);
+                        }
+                    );
+                    var rows_to_add = _.filter(rows_found,
+                        function(row) {
+                            var id = (row.source_type + "-" + row.dataset_id
+                                + "-" + row.name);
+                            return(ids_currently_in_use.indexOf(id) == -1);
+                        }
+                    );
+                    console.log("Time taken to test for duplicates: " + 
+                        (new Date().getTime() - time_start) + " ms");
+
+                    // Display the synonym bar if appropriate.
+                    if(
+                        rows_to_add.length > 0 && 
+                        search_type == 'synonym' && 
+                        self.flag_synonym_bar_displayed == 0
+                    ) {
+                        self.flag_synonym_bar_displayed = 1;
+                        self.display.resultList.append(self.display.synonymBar.clone());
+                    }
+
+                    // Add the new search results back to current_results. 
+                    // Since we've already eliminated duplicates, this will 
+                    // only add non-duplicates.
+                    if(rows_to_add.length > 0)
+                        self.current_results = self.current_results.concat(rows_to_add);
+
+                    // Now,this.current_results is all current results,
+                    // and rows_to_add are the new rows to add because
+                    // of these search results.
+
+                    // console.log("search_type: " + search_type);
+                    // console.log("current_results: " + self.current_results.join(', ') + " (" + self.current_results.length + ")");
+                    // console.log("rows_to_add: " + rows_to_add.join(', ') + " (" + rows_to_add.length + ")");
+
+                    if (self.current_results.length > 0) {
+                        self.showFilters(self.current_results);
+
+                        // We only want to add the new rows.
+                        self.showLayers(rows_to_add);
+
+                        // Synonym matches shouldn't trigger further
+                        // synonym searching.
+                        if(search_type != 'synonym')
+                            self.searchForSynonyms(event.term);
                     } else {
                         self.showNoResults();
+
+                        // Synonym matches shouldn't trigger further
+                        // synonym searching.
+                        if(search_type != 'synonym')
+                            self.searchForSynonyms(event.term);
                     }
                 }
             );
+        },
+
+        /**
+         * Check with TaxRefine for known synonyms of this name,
+         * pick the most likely accepted name, add it to the search
+         * display, and search for it to extend the current search.
+         *
+         * TaxRefine uses the GBIF APIs to try to pick the best
+         * supported interpretation of a particular taxonomic name.
+         * Find out more at 
+         * https://github.com/gaurav/taxrefine/#taxrefine
+         *
+         * Parameters:
+         *  name: the name to search for.
+         *                  
+         */
+        searchForSynonyms: function(name) {
+            // Store the URL.
+            var refine_url = 
+                "http://refine.taxonomics.org/gbifchecklists/reconcile?callback=?&query=" 
+                + encodeURIComponent(name);
+
+            // Store display for easy access.
+            var display = this.display;
+
+            // Display the 'processing ...' message.
+            display.synonymSearchEnded.hide();
+            display.synonymSearchInProgress.show();
+            console.log("searchForSynonyms: " + name
+                + " (" + this.synonym_search_counter + ")");
+
+            // For testing reasons, if the URL contains 'test-break-taxrefine'
+            // change the refine_url so we can see what happens if TaxRefine
+            // is down.
+            if(window.location.href.indexOf("test-break-taxrefine") != -1) {
+                refine_url = refine_url.replace("//refine.", "//refine-b.");
+            }
+
+            // Query TaxRefine.
+            $.ajax(refine_url,
+                {
+                    dataType: "json",
+                    timeout: 10000,
+                    complete: function() {
+                        // Log the completion of the JSON request.
+                        console.log("JSONP request complete for " + name + " (" 
+                            + this.synonym_search_counter + ")");
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        // Log the error.
+                        console.log("Error in JSONP request: " + textStatus 
+                            + "/" + errorThrown);
+
+                        // Turn off the UI.
+                        display.synonymSearchInProgress.hide();
+                        display.synonymSearchEnded.show();
+                    },
+                    success: function(result) {
+                        // Make sure we have some results.
+                        if(!result.result)
+                            return;
+                        var names = result.result;
+
+                        // We use this hash to make sure we don't repeat a name.
+                        //
+                        // Add the actual name to this: we don't want to say that
+                        // 'Panthera tigris' is a synonym of 'Panthera tigris'.
+                        var duplicateNameCheck = {};
+                        duplicateNameCheck[name.toLowerCase()] = 1;
+                         
+                        // Make a list of all non-duplicate synonyms, whether
+                        // they are junior synonyms ("related") or senior synonyms
+                        // ("accepted").
+                        // 
+                        // This is particularly importance for TaxRefine which
+                        // differentiates between identical names in, say,
+                        // different kingdoms.
+                        var synonyms = [];
+
+                        // Go through all the names that TaxRefine matched.
+                        names.forEach(function(name_usage) {
+                            // If there is a canonical name, store it.
+                            if(name_usage.summary && name_usage.summary.canonicalName) {
+                                var canonicalName = name_usage.summary.canonicalName;
+
+                                // Make a list of canonical name as long as they
+                                // haven't been duplicated.
+                                if(!duplicateNameCheck[canonicalName.toLowerCase()]) {
+                                    synonyms.push({
+                                        'name': canonicalName,
+                                        'url': name_usage.type[0] + name_usage.id,
+                                        'type': 'related',
+                                        'score': name_usage.score
+                                    });
+                                    duplicateNameCheck[canonicalName.toLowerCase()] = 1;
+                                }
+                            }
+
+                            // If there is an accepted name, store it.
+                            if(name_usage.summary && name_usage.summary.accepted) {
+                                var acceptedName = name_usage.summary.accepted;
+
+                                // The accepted name usually has authority information. So let's find 
+                                // a leading monomial/binomial/trinomial.
+                                var match = acceptedName.match(/^\s*([A-Z][a-z\.]+(?:\s+[a-z\.]+(?:\s+[a-z]+)?)?)/);
+                                if(match) {
+                                    // console.log("Matched '" + acceptedName + "' as '" + match[1] + "'");
+                                    acceptedName = match[1];
+                                } else {
+                                    // console.log("Unable to match '" + acceptedName + "'.");
+                                }
+
+                                // If we found an accepted name, and it's not on the duplicate name check.
+                                if(!duplicateNameCheck[acceptedName.toLowerCase()]) {
+                                    synonyms.push({
+                                        'name': acceptedName,
+                                        'url': name_usage.type[0] + name_usage.id,
+                                        'type': 'accepted',
+                                        'score': name_usage.score
+                                    });
+                                    duplicateNameCheck[acceptedName.toLowerCase()] = 1;
+                                }
+                            }
+                    });
+
+                    // No synonyms? Then we're done.
+                    if(synonyms.length == 0)
+                        return;
+
+                    // Sort the synonyms first by the 'type' ('accepted' sorted above 'related')
+                    // and then by the score.
+                    synonyms.sort(function(a,b) {
+                        if(b.type == a.type)
+                            return b.score - a.score;
+                        else {
+                            if(b.type > a.type) {
+                                return 1;
+                            } else {
+                                return -1;
+                            }
+                        }
+                    });
+
+                    // Render all the synonyms into HTML and display them.
+                    var index = 0;
+                    synonyms.forEach(function(synonym) {
+                        index++;
+
+                        // Get the variables we stored.
+                        var name = synonym.name;
+                        var url = synonym.url;
+                        var type = synonym.type;
+                        var score = synonym.score;
+                        var source = synonym.source;
+
+                        // Set the name and details in the synonymListItem.
+                        var synonymItem = display.synonymDisplay.synonymListItem.clone();
+                        $("#name", synonymItem).text(name);
+
+                        /*
+                         * Adds details about the synonym item. We don't need
+                         * this for now.
+                         * 
+                        var detailsItem = $("#details", synonymItem);
+                        detailsItem.html("<div style='width:100%; text-align: center'>" + score + "&nbsp;checklist(s) <a target='_blank' style='color: rgb(230, 250, 230);' href='" + url + "'>on GBIF</a></div>");
+                        detailsItem.hide();
+
+                        if(type == 'accepted') {
+                            // Something to distinguish this would be nice,
+                            // but (1) it doesn't seem to come up often, and
+                            // (2) bold just looks ugly.
+                            // synonymItem.css('font-weight', 'bold');
+                        }
+
+                        */ 
+                        
+                        // Figure out where to place commas and 'and's.
+                        if(index == 1) {
+                            // Don't display anything before the first item.
+                        } else if(index == synonyms.length) {
+                            display.synonymDisplay.synonymList.append(" and ");
+                        } else {
+                            display.synonymDisplay.synonymList.append(", ");
+                        }
+
+                        // Add this to the synonym list.
+                        display.synonymDisplay.synonymList.append(synonymItem);
+
+                        // Search for this synonym by expanding the current 
+                        // search. Increment the synonym_search_counter so we
+                        // know that we are doing synonym searches.
+                        self.synonym_search_counter++;
+                        self.bus.fireEvent(
+                            new mol.bus.Event(
+                                'search',
+                                {
+                                    'term': name
+                                }
+                            )
+                        );
+                    });
+
+                    // Set the searched name and GO!
+                    display.synonymDisplay.searchedName.text(name);
+                    display.synonymDisplay.show();
+                }
+            });
         },
 
         /**
@@ -2299,8 +2640,6 @@ mol.modules.map.results = function(mol) {
          */
         showLayers: function(layers) {
             var display = this.display;
-
-            display.clearResults();
 
             // Set layer results in display.
              _.each(
@@ -2551,6 +2890,9 @@ mol.modules.map.results = function(mol) {
                                 'Results' +
                                 '<a href="#" class="selectNone">none</a>' +
                                 '<a href="#" class="selectAll">all</a>' +
+                                '<div class="synonymDisplay" style="display: none; padding-top: 5px; padding-bottom: 5px; border-bottom: 1px solid rgba(11, 11, 11, 0.298)">' +
+                                    'Search<span class="synonymSearchInProgress">ing</span><span class="synonymSearchEnded">ed</span> for <span class="searchedName" style="font-style: italic">The name you searched for</span> and these known alternative names: <span class="synonymList"></span>.' +
+                                '</div>' +
                             '</div>' +
                             '<ol class="resultList"></ol>' +
                             '<div class="pageNavigation">' +
@@ -2564,10 +2906,29 @@ mol.modules.map.results = function(mol) {
                         '</div>' +
                         '<div class="noresults">' +
                             '<h3>No results found.</h3>' +
+                            '<div class="synonymSearchInProgress" style="display: none">' +
+                                'Searching for synonyms and associated data ...' +
+                            '</div>' +
+                            '<div class="synonymDisplay" style="display: none">' +
+                                '<div class="break" style="clear:both"></div>' + 
+                                '<span class="searchedName" style="font-style: italic">The name you searched for</span> is also known as <span class="synonymList"></span><span class="synonymSearchInProgress">.</span><span class="synonymSearchEnded" style="display:none">, but we do not have data for any of those names.</span>' +
+                            '</div>' +
                         '</div>' +
                     '</div>' +
                 '</div>';
 
+            // What does one single synonym name entry look like? Some
+            // alternatives are given below.
+            var synonymListItem = "<em><span id='name'></span></em>";
+            // var synonymListItem = "<span><em><span id='name'></span></em><sup><a id='url' target='_blank' style='font-size: 0.9em; color: rgb(230, 250, 230);' href='#'>ref</a></sup></span>";
+            // var synonymListItem = "<span><em><a id='url' target='_blank' style='color: rgb(230, 250, 230);' href='#'><span id='name'></span></a>&nbsp;<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAVElEQVR42n3PgQkAIAhEUXdqJ3dqJ3e6IoTPUSQcgj4EQ5IlUiLE0Jil3PECXhcHGBhZ8kg4hwxAu3MZeCGeyFnAXp4hqNQPnt7QL0nADpD6wHccLvnAKksq8iiaAAAAAElFTkSuQmCC'></span>";
+            // var synonymListItem = "<span><a id='url' href='#' target='_blank' style='color: rgb(230, 250, 230);'><em><span id='name'></span></em></a><span id='details'> (More details go here)</span></span>";
+
+            // Separates direct search results from synonym search results.
+            var synonymBar = "<div class='resultContainer'><center>Synonyms</center></div><div class='break'></div>"
+
+            // Store some HTML elements in the display object so we can refer
+            // to them directly.
             this._super(html);
             this.resultList = $(this).find('.resultList');
             this.filters = $(this).find('.filters');
@@ -2577,6 +2938,14 @@ mol.modules.map.results = function(mol) {
             this.clearResultsButton = $(this).find('.clearResults');
             this.results = $(this).find('.results');
             this.noResults = $(this).find('.noresults');
+
+            this.synonymSearchInProgress = $(this).find('.synonymSearchInProgress');
+            this.synonymSearchEnded = $(this).find('.synonymSearchEnded');
+            this.synonymBar = $(synonymBar);
+            this.synonymDisplay = $(this).find('.synonymDisplay');
+            this.synonymDisplay.searchedName = $(this.synonymDisplay).find('.searchedName');
+            this.synonymDisplay.synonymList = $(this.synonymDisplay).find('.synonymList');
+            this.synonymDisplay.synonymListItem = $(synonymListItem);
         },
 
         clearResults: function() {
@@ -2586,8 +2955,6 @@ mol.modules.map.results = function(mol) {
         clearFilters: function() {
             this.filters.html('');
         },
-
-
 
         toggleSelections: function(showOrHide) {
             $(this).find('.checkbox').each(
@@ -3086,7 +3453,7 @@ mol.modules.map.search = function(mol) {
             
             this.display.goButton.click(
                 function(event) {
-                    self.search(self.display.searchBox.val());
+                    self.userEnteredSearch(self.display.searchBox.val());
                 }
             );
 
@@ -3129,7 +3496,7 @@ mol.modules.map.search = function(mol) {
                                 {source : "autocomplete"}
                             )
                         );
-                        self.search($(this).val());
+                        self.userEnteredSearch($(this).val());
                     }
                 }
             );
@@ -3150,62 +3517,85 @@ mol.modules.map.search = function(mol) {
             this.bus.fireEvent(event);
         },
 
+        /** 
+         * Searches CartoDB using a term from the search box.
+         * This checks the user-entered search term before
+         * passing it on to search().
+         */
+        userEnteredSearch: function(term) {
+            var self = this;
+
+            // Trim the term. Since we later overwrite the search string,
+            // this trims that as well.
+            term = $.trim(term);
+
+            // Turn off autocomplete.
+            $(self.display.searchBox).autocomplete('disable');    
+            $(self.display.searchBox).autocomplete('close');    
+
+            // Produce an error if it's too short.
+            if(term.length < 3) {
+                if (term.length == 0) {
+                    self.bus.fireEvent(new mol.bus.Event('clear-results'));
+                } else {
+                    alert('' +
+                        'Please enter at least 3 characters ' +
+                        'in the search box.'
+                     );
+                }
+                return;
+            }
+
+            // Clear results, otherwise the box just stays on the screen
+            // and looks ugly.
+            self.bus.fireEvent(new mol.bus.Event('clear-results'));
+
+            // Now that the term is cleaned, go through the normal search
+            // procedure.
+            self.search(term);
+        },
+
         /**
-         * Searches CartoDB using a term from the search box. Fires
-         * a search event on the bus. The success callback fires a 
-         * search-results event on the bus.
+         * Searches CartoDB using a term from the search box.
          *
          * @param term the search term (scientific name)
          */
         search: function(term) {
             var self = this;
-                
-                
-                $(self.display.searchBox).autocomplete('disable');
-                $(self.display.searchBox).autocomplete('close');
-                
-                if(term.length<3) {
-                    if ($.trim(term).length==0) {
-                        self.bus.fireEvent(new mol.bus.Event('clear-results'));
-                    } else {
-                        alert('' +
-                            'Please enter at least 3 characters ' +
-                            'in the search box.'
-                        );
-                    }
-                } else {
+
+            // Show loading indicator.
+            self.bus.fireEvent(
+                new mol.bus.Event(
+                    'show-loading-indicator', 
+                    {source : "search-{0}".format(term)}
+                )
+            );
+
+            $.getJSON(
+                'http://mol.cartodb.com/api/v1/sql?q={0}'.format(
+                    this.search_sql.format(
+                        $.trim(term)
+                        .replace(/ /g, ' ')
+                    )
+                ),
+                function (response) {
+                    var results = {term:term, response:response};
+
                     self.bus.fireEvent(
                         new mol.bus.Event(
-                            'show-loading-indicator', 
+                            'hide-loading-indicator', 
                             {source : "search-{0}".format(term)}
                         )
                     );
-                    $(self.display.searchBox).val(term);
-                    $.getJSON(
-                        'http://mol.cartodb.com/api/v1/sql?q={0}'.format(
-                            this.search_sql.format(
-                                $.trim(term)
-                                .replace(/ /g, ' ')
-                            )
-                        ),
-                        function (response) {
-                            var results = {term:term, response:response};
-                            self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    'hide-loading-indicator', 
-                                    {source : "search-{0}".format(term)}
-                                )
-                            );
-                            self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    'search-results', 
-                                    results
-                                )
-                            );
-                            $(self.display.searchBox).autocomplete('enable');
-                        }
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'search-results', 
+                            results
+                        )
                     );
-               }
+                    $(self.display.searchBox).autocomplete('enable');
+                }
+            );
 
         }
     });

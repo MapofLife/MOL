@@ -302,7 +302,7 @@ mol.modules.map.search = function(mol) {
             
             this.display.goButton.click(
                 function(event) {
-                    self.search(self.display.searchBox.val());
+                    self.userEnteredSearch(self.display.searchBox.val());
                 }
             );
 
@@ -345,7 +345,7 @@ mol.modules.map.search = function(mol) {
                                 {source : "autocomplete"}
                             )
                         );
-                        self.search($(this).val());
+                        self.userEnteredSearch($(this).val());
                     }
                 }
             );
@@ -366,62 +366,85 @@ mol.modules.map.search = function(mol) {
             this.bus.fireEvent(event);
         },
 
+        /** 
+         * Searches CartoDB using a term from the search box.
+         * This checks the user-entered search term before
+         * passing it on to search().
+         */
+        userEnteredSearch: function(term) {
+            var self = this;
+
+            // Trim the term. Since we later overwrite the search string,
+            // this trims that as well.
+            term = $.trim(term);
+
+            // Turn off autocomplete.
+            $(self.display.searchBox).autocomplete('disable');    
+            $(self.display.searchBox).autocomplete('close');    
+
+            // Produce an error if it's too short.
+            if(term.length < 3) {
+                if (term.length == 0) {
+                    self.bus.fireEvent(new mol.bus.Event('clear-results'));
+                } else {
+                    alert('' +
+                        'Please enter at least 3 characters ' +
+                        'in the search box.'
+                     );
+                }
+                return;
+            }
+
+            // Clear results, otherwise the box just stays on the screen
+            // and looks ugly.
+            self.bus.fireEvent(new mol.bus.Event('clear-results'));
+
+            // Now that the term is cleaned, go through the normal search
+            // procedure.
+            self.search(term);
+        },
+
         /**
-         * Searches CartoDB using a term from the search box. Fires
-         * a search event on the bus. The success callback fires a 
-         * search-results event on the bus.
+         * Searches CartoDB using a term from the search box.
          *
          * @param term the search term (scientific name)
          */
         search: function(term) {
             var self = this;
-                
-                
-                $(self.display.searchBox).autocomplete('disable');
-                $(self.display.searchBox).autocomplete('close');
-                
-                if(term.length<3) {
-                    if ($.trim(term).length==0) {
-                        self.bus.fireEvent(new mol.bus.Event('clear-results'));
-                    } else {
-                        alert('' +
-                            'Please enter at least 3 characters ' +
-                            'in the search box.'
-                        );
-                    }
-                } else {
+
+            // Show loading indicator.
+            self.bus.fireEvent(
+                new mol.bus.Event(
+                    'show-loading-indicator', 
+                    {source : "search-{0}".format(term)}
+                )
+            );
+
+            $.getJSON(
+                'http://mol.cartodb.com/api/v1/sql?q={0}'.format(
+                    this.search_sql.format(
+                        $.trim(term)
+                        .replace(/ /g, ' ')
+                    )
+                ),
+                function (response) {
+                    var results = {term:term, response:response};
+
                     self.bus.fireEvent(
                         new mol.bus.Event(
-                            'show-loading-indicator', 
+                            'hide-loading-indicator', 
                             {source : "search-{0}".format(term)}
                         )
                     );
-                    $(self.display.searchBox).val(term);
-                    $.getJSON(
-                        'http://mol.cartodb.com/api/v1/sql?q={0}'.format(
-                            this.search_sql.format(
-                                $.trim(term)
-                                .replace(/ /g, ' ')
-                            )
-                        ),
-                        function (response) {
-                            var results = {term:term, response:response};
-                            self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    'hide-loading-indicator', 
-                                    {source : "search-{0}".format(term)}
-                                )
-                            );
-                            self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    'search-results', 
-                                    results
-                                )
-                            );
-                            $(self.display.searchBox).autocomplete('enable');
-                        }
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'search-results', 
+                            results
+                        )
                     );
-               }
+                    $(self.display.searchBox).autocomplete('enable');
+                }
+            );
 
         }
     });
