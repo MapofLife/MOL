@@ -20,6 +20,21 @@ class MainPage(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), "templates", f)
         self.response.out.write(template.render(path, template_args))
 
+    def getRandomPoints(self,sciname):
+        cdburl = 'http://mol.cartodb.com/api/v1/sql?q=%s'
+        sql = "Select " \
+            "ST_X(ST_Transform(the_geom_webmercator,4326)) as lon, " \
+            "ST_Y(ST_Transform(the_geom_webmercator,4326)) as lat, " \
+            "1 as val " \
+            "FROM get_tile_beta('gbif_aug_2013','%s') " \
+            "order by random() limit 1000"
+        url =  cdburl % (sql % (sciname))
+            
+        self.points = urlfetch.fetch(url)
+        logging.info(url)
+        logging.info(self.points)
+        logging.info("HELLO!!!!")
+        
     def get(self):
 
         ee.Initialize(config.EE_CREDENTIALS, config.EE_URL)
@@ -57,6 +72,13 @@ class MainPage(webapp2.RequestHandler):
         result = output.mask(output)
 
         if(get_area == 'false'):
+            
+            self.getRandomPoints(sciname)
+            # TODO: next:
+            # do something with self.points in ee 
+            # paint points into result
+            
+               
             mapid = result.getMapId({
                 'palette': '000000,85AD9A',
                 'max': 1,
@@ -65,6 +87,7 @@ class MainPage(webapp2.RequestHandler):
             template_values = {
                 'mapid' : mapid['mapid'],
                 'token' : mapid['token'],
+                # add points stats to result
             }
 
             self.render_template('ee_mapid.js', template_values)
@@ -100,7 +123,7 @@ class MainPage(webapp2.RequestHandler):
                'clipped_area': ca/1000000,
                'total_area': ta/1000000
             }
-
+            self.response.out.write(json.dumps(template_values))
             self.render_template('ee_count.js', template_values)
 
 application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
