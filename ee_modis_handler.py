@@ -93,7 +93,7 @@ class MainPage(webapp2.RequestHandler):
             logging.info("Point In Range: " + str(ptsIn.getInfo()['sum']))
 
             #TODO: paint points into result
-            
+            #result = result.paint(eePtFc,2,3)
                
             mapid = result.getMapId({
                 'palette': '000000,85AD9A',
