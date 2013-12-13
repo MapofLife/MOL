@@ -566,7 +566,7 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layer .layerName{
     float: left;
     white-space:normal;
-    width: 280px;
+    width: 260px;
     margin-left: 5px;
     margin-right: 5px;
     -webkit-touch-callout: none;
@@ -692,41 +692,7 @@ white-space: nowrap;
     margin-right: 10px;
 }
 
-.mol-LayerControl-Layers .layer .toggle {
-    opacity: 0.0;
-    position:absolute;
-    left:0;
-    z-index:100;
-    float: left;
-    width:24px;
-    height:24px;
-    cursor: pointer;
-}
 
-.mol-LayerControl-Layers .layer .customCheck:after{
-    content:url('/static/maps/layers/inactive.png');
-    margin: 2px;
-    padding: 0px 1px 0px 1px;
-    height: 24px;
-    position:absolute;
-    left: 0;
-    background-color: rgba(25, 25, 25, 0.75);
-    -moz-box-shadow: 2px 2px 5px #000;
-    -webkit-box-shadow: 2px 2px 5px #000;
-    box-shadow: 2px 2px 5px #222;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
-    border: none;
-}
-
-.mol-LayerControl-Layers .layer .toggle:hover + .customCheck:after{
-    background-color: rgb(25, 25, 25);
-    background-color: rgba(25, 25, 25, 1.0);
-    cursor: pointer;
-}
-.mol-LayerControl-Layers .layer .toggle:checked + .customCheck:after {
-    content:url('/static/maps/layers/active.png');
-}
 .mol-LayerControl-Layers .layer .close {
     float: right;
     position: relative;
@@ -747,13 +713,18 @@ white-space: nowrap;
     font-size: 1.2em;
     height: 24px;
 }
+.mol-LayerControl-Layers .layer .toggleContainer {
+    float: right;
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
 .mol-LayerControl-Layers .layer .constraints {
     float: right;
     position: relative;
     width: 24px;
-    font-style: italic;
-    font-size: 1.2em;
     height: 24px;
+    
 }
 
 /*! Light tooltip style */

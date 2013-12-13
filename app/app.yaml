@@ -36,7 +36,7 @@ handlers:
   static_files: static/config/robots.txt
   upload: static/config/robots.txt
 
-- url: /(.*\.(gif|png|jpg))
+- url: /(.*\.(gif|png|jpg|ico))
   static_files: static/\1
   upload: static/(.*\.(gif|png|jpg))
 

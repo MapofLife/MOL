@@ -21,7 +21,7 @@ mol.modules.map.constraints = function(mol) {
                 'show-constraints',
                 function(event) {
                     var params = event.params;
-                    self.showConstraints(params)
+                    self.showConstraints(params);
                 }
             );
             this.bus.addHandler(
@@ -41,19 +41,20 @@ mol.modules.map.constraints = function(mol) {
                     } : params.layer.constraints;
 
                     
-            this.display.year.slider({
+            this.display.year.dragslider({
                 width:80, 
                 height:20, 
                 min: 1800, 
                 max: 2013, 
                 range: true, 
+                rangeDrag: true, 
                 values:[constraints.year.min,constraints.year.max], 
                 step:1,
                 stop: function(event, ui) {
                     constraints.year.min = ui.values[0];
                     constraints.year.max = ui.values[1];
                     params.layer.constraints = constraints;
-                    self.setConstraints(event, ui, params.layer)
+                    self.setConstraints(event, ui, params.layer);
                 },
                 slide: function (event, ui) {
                     self.updateYearLabels(event, ui, params.layer);
@@ -95,7 +96,7 @@ mol.modules.map.constraints = function(mol) {
                     'set-constraints',
                     {layer: layer}
                 )
-            );            
+            );
         },
         updateYearLabels: function (event, ui) {
             this.display.find('.minyear').text(ui.values[0]);
@@ -134,4 +135,5 @@ mol.modules.map.constraints = function(mol) {
             
         }
     });
-}
+};
+
