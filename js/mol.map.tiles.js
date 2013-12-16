@@ -487,7 +487,7 @@ mol.modules.map.tiles = function(mol) {
                                 "hide-loading-indicator",
                                 {source : layer.id}
                             )
-                        )
+                        );
                     };
                     maptype.layer.onbeforeload = function (){
                         self.bus.fireEvent(
@@ -495,9 +495,13 @@ mol.modules.map.tiles = function(mol) {
                                 "show-loading-indicator",
                                 {source : layer.id}
                             )
-                        )
+                        );
                     };
                    self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                   if(ee.pts_in) {
+                       alert('{0} of {1} random occurence records were within the refined range.'
+                         .format(ee.pts_in, ee.pts_out));
+                   }
                 }
             );
             $.getJSON(
@@ -835,4 +839,4 @@ mol.modules.map.tiles = function(mol) {
             }
         }
     );
-}
+};

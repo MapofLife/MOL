@@ -17,7 +17,7 @@ mol.modules.map.search = function(mol) {
                     '<span class="eng">{1}</span>' +
                 '</div>';
             this.ac_sql = "" +
-                "SELECT n,v FROM ac_mar_8_2013 WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
+                "SELECT n,v FROM ac WHERE n~*'\\m{0}' OR v~*'\\m{0}'";
             this.search_sql = '' +
                 'SELECT DISTINCT l.scientificname as name,'+
                     't.type as type,'+
@@ -47,12 +47,12 @@ mol.modules.map.search = function(mol) {
                     'CASE WHEN l.extent is null THEN null ELSE ' +
                     'CONCAT(\'{' +
                         '"sw":{' +
-                            '"lng":\',ST_XMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', '+
-                            '"lat":\',ST_YMin(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' '+
+                            '"lng":\',ST_XMin(l.extent_4326),\', '+
+                            '"lat":\',ST_YMin(l.extent_4326),\' '+
                         '}, '+
                         '"ne":{' +
-                        '"lng":\',ST_XMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\', ' +
-                        '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
+                        '"lng":\',ST_XMax(l.extent_4326),\', ' +
+                        '"lat":\',ST_YMax(l.extent_4326),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
                     'l.dataset_id as dataset_id, ' +
@@ -63,7 +63,7 @@ mol.modules.map.search = function(mol) {
                     'e.finalmin as mine, ' +
                     'e.finalmax as maxe, ' +
                     'ee.ee_id as ee_id ' +
-                'FROM layer_metadata_mar_8_2013 l ' +
+                'FROM layer_metadata l ' +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +

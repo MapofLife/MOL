@@ -31,6 +31,7 @@ class MainPage(webapp2.RequestHandler):
         url = cdburl % (qstr)
 
         points = urlfetch.fetch(url)
+        logging.info(json.dumps(points.content))
         return points.content
         
     def get(self):
@@ -89,9 +90,10 @@ class MainPage(webapp2.RequestHandler):
             
             #now, just sum up the points image.  this is the number of points that overlap the range
             ptsIn = imgPoints.reduceRegion(ee.call('Reducer.sum'), geometry, 10000)
-
-            logging.info("Point In Range: " + str(ptsIn.getInfo()['sum']))
-
+            
+            data = ee.data.getValue({"json": ptsIn.serialize()})
+           
+            pts_in = data["sum"]
             #TODO: paint points into result
             #result = result.paint(eePtFc,2,3)
                
@@ -103,6 +105,8 @@ class MainPage(webapp2.RequestHandler):
             template_values = {
                 'mapid' : mapid['mapid'],
                 'token' : mapid['token'],
+                'pts_in' : pts_in,
+                'pts_out' : 1000 
                 # add points stats to result
             }
 
