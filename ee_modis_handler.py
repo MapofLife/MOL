@@ -14,6 +14,7 @@ from google.appengine.api import urlfetch
 import json
 from oauth2client.appengine import AppAssertionCredentials
 
+EE_TILE_URL = 'https://earthengine.googleapis.com/map/%s/{Z}/{X}/{Y}?token=%s'
 
 class MainPage(webapp2.RequestHandler):
     def render_template(self, f, template_args):
@@ -31,7 +32,6 @@ class MainPage(webapp2.RequestHandler):
         url = cdburl % (qstr)
 
         points = urlfetch.fetch(url)
-        logging.info(json.dumps(points.content))
         return points.content
         
     def get(self):
@@ -87,34 +87,46 @@ class MainPage(webapp2.RequestHandler):
             #contains a count for the number of pixels that intersect with it
             #then, the point count image is masked by the range
             imgPoints = eePtFc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result);
-            
+            #imgOutPoints = eePtFc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result.neq(1));
             #now, just sum up the points image.  this is the number of points that overlap the range
             ptsIn = imgPoints.reduceRegion(ee.call('Reducer.sum'), geometry, 10000)
+            
+            #This would be for making pts_in and pts_out FeatureCollections 
+            #that can be mapped in different colors. Doesn't work...
+            #ptsInFC = imgPoints.reduceToVectors(None,None,100000000)
+            #ptsOutFC = imgOutPoints.reduceToVectors(None, None, 100000000)
+            
             
             data = ee.data.getValue({"json": ptsIn.serialize()})
            
             pts_in = data["sum"]
             #TODO: paint points into result
-            #result = result.paint(eePtFc,2,3)
                
-            mapid = result.getMapId({
-                'palette': '000000,85AD9A',
+            range = result.getMapId({
+                'palette': '000000,85AD5A',
                 'max': 1,
-                'opacity': 0.5
+                'opacity': 0.8
             })
-            template_values = {
-                'mapid' : mapid['mapid'],
-                'token' : mapid['token'],
+            
+            #ptin = ptsInFC.getMapId({'color': '019901'})
+            #ptout = ptsOutFC.getMapId({'color': 'e02070'})
+            points = eePtFc.getMapId({'color': 'e02070'})
+            response = {
+                'maps' : {
+                    'range' : EE_TILE_URL % 
+                         (range['mapid'], range['token']),
+                    'points' : EE_TILE_URL % 
+                         (points['mapid'],points['token'])
+                },
                 'pts_in' : pts_in,
-                'pts_out' : 1000 
+                'pts_tot' : len(eePts)
                 # add points stats to result
             }
-
-            self.render_template('ee_mapid.js', template_values)
+            self.response.out.write(json.dumps(response))
         else:
         #compute the area
           
-	    area = ee.call("Image.pixelArea")
+            area = ee.call("Image.pixelArea")
             sum_reducer = ee.call("Reducer.sum")
             
             area = area.mask(species)
@@ -122,7 +134,7 @@ class MainPage(webapp2.RequestHandler):
 
             ##compute area on 10km scale
             clipped_area = total.reduceRegion(sum_reducer,geometry,10000)
-	    total_area = area.reduceRegion(sum_reducer,geometry,10000)
+            total_area = area.reduceRegion(sum_reducer,geometry,10000)
 
             properties = {'total': total_area, 'clipped': clipped_area}
 
@@ -132,7 +144,7 @@ class MainPage(webapp2.RequestHandler):
             
 	    #self.response.headers["Content-Type"] = "application/json"
             #self.response.out.write(json.dumps(data))
-	    ta = 0
+            ta = 0
             ca = 0
             ta = data["properties"]["total"]["area"]
             ca = data["properties"]["clipped"]["area"]

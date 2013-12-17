@@ -476,31 +476,49 @@ mol.modules.map.tiles = function(mol) {
                     get_area: false
                 },
                 function (ee) {
-                    var maptype = new mol.map.tiles.EarthEngineTile(
-                        ee,
-                        layer,
-                        self.map
-                    );
-                    maptype.layer.onafterload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "hide-loading-indicator",
-                                {source : layer.id}
-                            )
+                    var maptype, type;
+                    
+                    for (type in ee.maps) {
+                        maptype = new mol.map.tiles.EarthEngineTile(
+                            ee,
+                            layer,
+                            self.map,
+                            type
                         );
-                    };
-                    maptype.layer.onbeforeload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "show-loading-indicator",
-                                {source : layer.id}
-                            )
-                        );
-                    };
-                   self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                        
+                        
+                        maptype.layer.onafterload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "hide-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                        maptype.layer.onbeforeload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "show-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                       self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                   }
+                   
+                   
+                   
                    if(ee.pts_in) {
-                       alert('{0} of {1} random occurence records were within the refined range.'
-                         .format(ee.pts_in, ee.pts_out));
+                       self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'points',
+                                    'content':'{0} of {1} random occurence records were within the refined range.'
+                                         .format(ee.pts_in, ee.pts_tot)
+                                 }
+                            )
+                    );
                    }
                 }
             );
@@ -515,33 +533,27 @@ mol.modules.map.tiles = function(mol) {
                     get_area: true
                 },
                 function (ee) {
-                    var maptype = new mol.map.tiles.EarthEngineTile(
-                        ee,
-                        layer,
-                        self.map
+                    
+                    self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'refined_size',
+                                    'content': "Refined range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.clipped_area))
+                                 }
+                            )
                     );
-                    maptype.layer.onafterload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "hide-loading-indicator",
-                                {source : layer.id}
+                               self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'range_size',
+                                    'content': "Expert map range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.total_area))
+                                 }
                             )
-                        )
-                    };
-                    maptype.layer.onbeforeload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "show-loading-indicator",
-                                {source : layer.id}
-                            )
-                        )
-                    };
-                   $("<div>" +
-                        "{0}<br>".format(layer.name) +
-                        "Expert map range size: {0}".format(Math.round(ee.total_area)) +
-                        " km<sup><font size=-2>2</font></sup><br>" +
-                        "Refined range size: {0}".format(Math.round(ee.clipped_area)) +
-                    " km<sup><font size=-2>2</font></sup></div>").dialog({width: 400});
+                    );
+                    
+    
                 }
             );
         }
@@ -781,7 +793,7 @@ mol.modules.map.tiles = function(mol) {
         }
     });
     mol.map.tiles.EarthEngineTile = Class.extend({
-            init: function(ee, layer, map) {
+            init: function(ee, layer, map, type) {
                 var eeMapOptions = {
                         getTileUrl: function(tile, zoom) {
                             var y = tile.y,
@@ -790,15 +802,17 @@ mol.modules.map.tiles = function(mol) {
                             if (y < 0 || y >= tileRange) {
                                 return null;
                             }
+                            
                             if (x < 0 || x >= tileRange) {
                                 x = (x % tileRange + tileRange) % tileRange;
                             }
-
+                            
                             if (self.layer.pending.length === 1) {
                                 $(self.layer).trigger("onbeforeload");
                             }
-
-                            return ee.urlPattern.replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
+                            
+                            return ee.maps[type].replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
+                                 
                         },
                         tileSize: new google.maps.Size(256, 256),
                         maxZoom: 9,

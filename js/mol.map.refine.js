@@ -24,6 +24,15 @@ mol.modules.map.refine = function(mol) {
 
                 }
             );
+            this.bus.addHandler(
+                'update-refine-stats',
+                function(event) {
+                    self.refine_stats.find(event.stat).append(
+                       $('<div>{0}</div>'.format(event.content))
+                    );
+                }
+            );
+            
         },
         displayRefine: function(button, layer) {
             var baseHtml,
@@ -64,6 +73,12 @@ mol.modules.map.refine = function(mol) {
                             '<button class="apply">Apply</button>' +
                             '<button class="reset">Reset</button>' +
                             '<button class="cancel">Cancel</button>' +
+                       '</div>'+
+                       '<div class="refine_stats">' +
+                           '<div class="range_size"></div>' +
+                           '<div class="refined_size"></div>' +
+                           '<div class="points_in"></div>' +
+                           '<div class="points_tot"></div>' +
                        '</div>' +
                    '</div>';
 
@@ -98,7 +113,10 @@ mol.modules.map.refine = function(mol) {
                                     api.elements.content,
                                     layer,
                                     false);
-
+                        
+                        self.refine_stats = $(api.elements.content)
+                            .find('.refine_stats');
+                        
                         $(api.elements.content).find('.apply').click(
                             function(event) {
                                 var params = {
@@ -116,10 +134,10 @@ mol.modules.map.refine = function(mol) {
                             function(event) {
                                 if($(this).val()=='modis') {
                                     $(api.elements.content).find('.modis_year')
-                                        .show()
+                                        .show();
                                 } else {
                                     $(api.elements.content).find('.modis_year')
-                                        .hide()
+                                        .hide();
                                 }
                                 self.setHabitatProperties(
                                     api.elements.content,
@@ -151,6 +169,7 @@ mol.modules.map.refine = function(mol) {
                     }
                 }
             });
+            
         },
         setHabitatProperties: function(cont, layer,  reset) {
             var maxe, mine,
@@ -242,9 +261,7 @@ mol.modules.map.refine = function(mol) {
                     selectedYear = '2001';
                 }
                 layer.selectedYear = selectedYear;
-
-
-
+                
                 //add the habitats
                  $(cont).find('.habitats').empty();
                 _.each(
@@ -308,16 +325,13 @@ mol.modules.map.refine = function(mol) {
             }
         }
     );
-
-
-
     mol.map.refine.RefineDisplay = mol.mvp.View.extend({
         init: function(refine) {
             var html = '' +
-                       '<div>Something here.</div>',
+                       '<div>All the above qtip code needs to go here</div>',
                 self = this;
 
             this._super(html);
         }
     });
-}
+};

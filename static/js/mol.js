@@ -3842,6 +3842,12 @@ mol.modules.map.tiles = function(mol) {
                         ee,
                         layer,
                         self.map
+                    ),
+                    ptmaptype = new mol.map.tiles.EarthEngineTile(
+                        ee,
+                        layer,
+                        self.map,
+                        'points'
                     );
                     maptype.layer.onafterload = function (){
                         self.bus.fireEvent(
@@ -3860,9 +3866,10 @@ mol.modules.map.tiles = function(mol) {
                         );
                     };
                    self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                   self.map.overlayMapTypes.insertAt(1,ptmaptype.layer);
                    if(ee.pts_in) {
                        alert('{0} of {1} random occurence records were within the refined range.'
-                         .format(ee.pts_in, ee.pts_out));
+                         .format(ee.pts_in, ee.pts_tot));
                    }
                 }
             );
@@ -4143,7 +4150,7 @@ mol.modules.map.tiles = function(mol) {
         }
     });
     mol.map.tiles.EarthEngineTile = Class.extend({
-            init: function(ee, layer, map) {
+            init: function(ee, layer, map, type) {
                 var eeMapOptions = {
                         getTileUrl: function(tile, zoom) {
                             var y = tile.y,
@@ -4159,8 +4166,11 @@ mol.modules.map.tiles = function(mol) {
                             if (self.layer.pending.length === 1) {
                                 $(self.layer).trigger("onbeforeload");
                             }
-
-                            return ee.urlPattern.replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
+                            if(type) {
+                                return ee.ptUrlPattern.replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
+                            } else {
+                                return ee.urlPattern.replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
+                            }
                         },
                         tileSize: new google.maps.Size(256, 256),
                         maxZoom: 9,
