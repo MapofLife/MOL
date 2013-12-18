@@ -779,6 +779,14 @@ mol.modules.map.refine = function(mol) {
 
                 }
             );
+            this.bus.addHandler(
+                'update-refine-stats',
+                function(event) {
+                    self.refine_stats.find('.{0}'.format(event.stat))
+                        .html('<div>{0}</div>'.format(event.content));
+                }
+            );
+            
         },
         displayRefine: function(button, layer) {
             var baseHtml,
@@ -819,6 +827,11 @@ mol.modules.map.refine = function(mol) {
                             '<button class="apply">Apply</button>' +
                             '<button class="reset">Reset</button>' +
                             '<button class="cancel">Cancel</button>' +
+                       '</div>'+
+                       '<div class="refine_stats">' +
+                           '<div class="range_size"></div>' +
+                           '<div class="refined_size"></div>' +
+                           '<div class="point_assessment"></div>' +
                        '</div>' +
                    '</div>';
 
@@ -853,7 +866,10 @@ mol.modules.map.refine = function(mol) {
                                     api.elements.content,
                                     layer,
                                     false);
-
+                        
+                        self.refine_stats = $(api.elements.content)
+                            .find('.refine_stats');
+                        
                         $(api.elements.content).find('.apply').click(
                             function(event) {
                                 var params = {
@@ -871,10 +887,10 @@ mol.modules.map.refine = function(mol) {
                             function(event) {
                                 if($(this).val()=='modis') {
                                     $(api.elements.content).find('.modis_year')
-                                        .show()
+                                        .show();
                                 } else {
                                     $(api.elements.content).find('.modis_year')
-                                        .hide()
+                                        .hide();
                                 }
                                 self.setHabitatProperties(
                                     api.elements.content,
@@ -906,6 +922,7 @@ mol.modules.map.refine = function(mol) {
                     }
                 }
             });
+            
         },
         setHabitatProperties: function(cont, layer,  reset) {
             var maxe, mine,
@@ -997,9 +1014,7 @@ mol.modules.map.refine = function(mol) {
                     selectedYear = '2001';
                 }
                 layer.selectedYear = selectedYear;
-
-
-
+                
                 //add the habitats
                  $(cont).find('.habitats').empty();
                 _.each(
@@ -1063,19 +1078,16 @@ mol.modules.map.refine = function(mol) {
             }
         }
     );
-
-
-
     mol.map.refine.RefineDisplay = mol.mvp.View.extend({
         init: function(refine) {
             var html = '' +
-                       '<div>Something here.</div>',
+                       '<div>All the above qtip code needs to go here</div>',
                 self = this;
 
             this._super(html);
         }
     });
-}
+};
 mol.modules.map.loading = function(mol) {
 
     mol.map.loading = {};
@@ -3603,7 +3615,7 @@ mol.modules.map.tiles = function(mol) {
                                                     params
                                                 );
                                                 self.bus.fireEvent(e);
-                                                return;
+                                                //return;
                                             }
                                         }
                                     );
@@ -3835,41 +3847,51 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: false
+                    get_area: false,
+                    extent: layer.extent
                 },
                 function (ee) {
-                    var maptype = new mol.map.tiles.EarthEngineTile(
-                        ee,
-                        layer,
-                        self.map
-                    ),
-                    ptmaptype = new mol.map.tiles.EarthEngineTile(
-                        ee,
-                        layer,
-                        self.map,
-                        'points'
-                    );
-                    maptype.layer.onafterload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "hide-loading-indicator",
-                                {source : layer.id}
-                            )
+                    var maptype, i;
+                    
+                    for (type in ee.maps) {
+                        maptype = new mol.map.tiles.EarthEngineTile(
+                            ee,
+                            layer,
+                            self.map,
+                            type
                         );
-                    };
-                    maptype.layer.onbeforeload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "show-loading-indicator",
-                                {source : layer.id}
-                            )
-                        );
-                    };
-                   self.map.overlayMapTypes.insertAt(0,maptype.layer);
-                   self.map.overlayMapTypes.insertAt(1,ptmaptype.layer);
+                        
+                        
+                        maptype.layer.onafterload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "hide-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                        maptype.layer.onbeforeload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "show-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                       self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                   }
+
                    if(ee.pts_in) {
-                       alert('{0} of {1} random occurence records were within the refined range.'
-                         .format(ee.pts_in, ee.pts_tot));
+                       self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'point_assessment',
+                                    'content':'{0} of {1} occurrence records were within the refined range.'
+                                         .format(ee.pts_in, ee.pts_tot)
+                                 }
+                            )
+                    );
                    }
                 }
             );
@@ -3881,36 +3903,31 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: true
+                    get_area: true,
+                    extent: layer.extent
                 },
                 function (ee) {
-                    var maptype = new mol.map.tiles.EarthEngineTile(
-                        ee,
-                        layer,
-                        self.map
+                    
+                    self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'refined_size',
+                                    'content': "Refined range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.clipped_area))
+                                 }
+                            )
                     );
-                    maptype.layer.onafterload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "hide-loading-indicator",
-                                {source : layer.id}
+                               self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'range_size',
+                                    'content': "Expert map range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.total_area))
+                                 }
                             )
-                        )
-                    };
-                    maptype.layer.onbeforeload = function (){
-                        self.bus.fireEvent(
-                            new mol.bus.Event(
-                                "show-loading-indicator",
-                                {source : layer.id}
-                            )
-                        )
-                    };
-                   $("<div>" +
-                        "{0}<br>".format(layer.name) +
-                        "Expert map range size: {0}".format(Math.round(ee.total_area)) +
-                        " km<sup><font size=-2>2</font></sup><br>" +
-                        "Refined range size: {0}".format(Math.round(ee.clipped_area)) +
-                    " km<sup><font size=-2>2</font></sup></div>").dialog({width: 400});
+                    );
+                    
+    
                 }
             );
         }
@@ -4159,18 +4176,17 @@ mol.modules.map.tiles = function(mol) {
                             if (y < 0 || y >= tileRange) {
                                 return null;
                             }
+                            
                             if (x < 0 || x >= tileRange) {
                                 x = (x % tileRange + tileRange) % tileRange;
                             }
-
+                            
                             if (self.layer.pending.length === 1) {
                                 $(self.layer).trigger("onbeforeload");
                             }
-                            if(type) {
-                                return ee.ptUrlPattern.replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
-                            } else {
-                                return ee.urlPattern.replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
-                            }
+                            
+                            return ee.maps[type].replace("{X}",x).replace("{Y}",y).replace("{Z}",zoom);
+                                 
                         },
                         tileSize: new google.maps.Size(256, 256),
                         maxZoom: 9,

@@ -45,52 +45,11 @@ mol.modules.map.tiles = function(mol) {
                 'toggle-ee-filter',
                 function(event) {
                     var layer = event.layer,
-                        layerAdded = false;
+                        layerAdded = false,
+                        exists = true;
 
-                    self.map.overlayMapTypes.forEach(
-                        function(maptype, index) {
-                            //find the overlaymaptype to switch to ee
-                            if (maptype != undefined) {
-                                if (maptype.name === layer.id) {
-                                    //remove it from the map
-                                    if(maptype.interaction != undefined) {
-                                        maptype.interaction.remove();
-                                        maptype.interaction.clickAction="";
-                                    }
-                                    self.map.overlayMapTypes.removeAt(index);
-                                    //put it back the layer
-                                    self.getEETile(layer);
-                                    layerAdded = true;
-                                    //fix the layer order
-                                    self.map.overlayMapTypes.forEach(
-                                        function(newmaptype, newindex) {
-                                            var mt,
-                                                e,
-                                                params = {
-                                                    layer: layer,
-                                                    opacity: maptype.opacity
-                                                };
-                                            if(newmaptype.name === layer.id) {
-                                                mt = self.map.overlayMapTypes.removeAt(newindex);
-                                                self.map.overlayMapTypes.insertAt(index, mt);
-                                                layerAdded = true;
-                                                e = new mol.bus.Event(
-                                                    'layer-opacity',
-                                                    params
-                                                );
-                                                self.bus.fireEvent(e);
-                                                return;
-                                            }
-                                        }
-                                    );
-                                }
-                            }
-                        }
-                    );
-                    if(!layerAdded) {
-                        self.getEETile(layer);
-                    }
-
+                    self.removeLayer(layer);
+                    self.getEETile(layer);
                 }
             );
             /**
@@ -241,7 +200,7 @@ mol.modules.map.tiles = function(mol) {
                                                     params
                                                 );
                                                 self.bus.fireEvent(e);
-                                                return;
+                                                //return;
                                             }
                                         }
                                     );
@@ -282,16 +241,7 @@ mol.modules.map.tiles = function(mol) {
 
                         _.each(
                             layers,
-                            function(layer) { // "lid" is short for layer id.
-                                var lid = layer.id;
-                                mapTypes.forEach(
-                                    function(mt, index) {
-                                        if (mt != undefined && mt.name === lid) {
-                                            mapTypes.removeAt(index);
-                                        }
-                                    }
-                                );
-                            }
+                            self.removeLayer.bind(self)
                         );
                         if(self.clickAction == 'info') {
                             self.updateGrid(true);
@@ -360,6 +310,25 @@ mol.modules.map.tiles = function(mol) {
                 this.updateGrid(true);
             } else {
                 this.updateGrid(false);
+            }
+        },
+        removeLayer: function(layer) {  
+            var exists = true,
+                self=this;
+            while(exists) {
+                exists=false;
+                this.map.overlayMapTypes.forEach(
+                    function(maptype, index) {
+                        //find the overlaymaptype to switch to ee
+                        if (maptype != undefined) {
+                            if (maptype.name === layer.id) {
+                                //remove it from the map
+                                self.map.overlayMapTypes.removeAt(index);
+                                exists = true;
+                            }
+                        }
+                    }
+                );
             }
         },
         updateGrid: function(toggle) {
@@ -459,12 +428,6 @@ mol.modules.map.tiles = function(mol) {
         },
         getEETile: function(layer) {
             var self = this;
-            this.bus.fireEvent(
-                new mol.bus.Event(
-                    "show-loading-indicator",
-                    {source : layer.id}
-                )
-            );
             $.getJSON(
                 'ee_{0}'.format(layer.filter_mode),
                 {
@@ -477,7 +440,7 @@ mol.modules.map.tiles = function(mol) {
                     extent: layer.extent
                 },
                 function (ee) {
-                    var maptype, type;
+                    var maptype, i;
                     
                     for (type in ee.maps) {
                         maptype = new mol.map.tiles.EarthEngineTile(
@@ -504,6 +467,7 @@ mol.modules.map.tiles = function(mol) {
                                 )
                             );
                         };
+                        
                        self.map.overlayMapTypes.insertAt(0,maptype.layer);
                    }
 
@@ -513,7 +477,7 @@ mol.modules.map.tiles = function(mol) {
                                 'update-refine-stats',
                                 {   
                                     'stat':'point_assessment',
-                                    'content':'{0} of {1} random occurence records were within the refined range.'
+                                    'content':'{0} of {1} occurrence records were within the refined range.'
                                          .format(ee.pts_in, ee.pts_tot)
                                  }
                             )
@@ -849,6 +813,7 @@ mol.modules.map.tiles = function(mol) {
 
                 this.layer.layer = layer;
                 this.layer.name = layer.id;
+                this.layer.type='ee';
 
             }
         }

@@ -45,7 +45,8 @@ class MainPage(webapp2.RequestHandler):
         ee_id = self.request.get('ee_id', None)
         
         # Get land cover and elevation layers
-        elev = ee.Image('srtm90_v4')
+        elev = ee.Image('GME/images/04040405428907908306-08319720230328335274')
+        #elev = ee.Image('srtm90_v4')
         
         output = ee.Image(0)
         empty = ee.Image(0).mask(0)
@@ -75,10 +76,10 @@ class MainPage(webapp2.RequestHandler):
                  }
             )
             response = {
-                'maps' : {
-                      'range' : EE_TILE_URL % 
+                'maps' : [
+                      EE_TILE_URL % 
                           (mapid['mapid'], mapid['token'])
-                }
+                ]
             }
             self.response.out.write(json.dumps(response))
         else:
@@ -104,7 +105,7 @@ class MainPage(webapp2.RequestHandler):
             
             data = ee.data.getValue({"json": region.serialize()})
             
-            # self.response.headers["Content-Type"] = "application/json"
+            # 
             # self.response.out.write(json.dumps(data))
             ta = 0
             ca = 0

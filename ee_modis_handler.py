@@ -26,7 +26,7 @@ class MainPage(webapp2.RequestHandler):
         sql = "Select " \
             "ST_X(ST_Transform(the_geom_webmercator,4326)) as lon, " \
             "ST_Y(ST_Transform(the_geom_webmercator,4326)) as lat " \
-            "FROM get_tile_beta('gbif_aug_2013','%s') " \
+            "FROM get_tile('gbif','points','%s','gbif_taxloc') " \
             "order by random() limit 1000"
         qstr = urllib.quote_plus((sql % (sciname)))
         url = cdburl % (qstr)
@@ -50,7 +50,9 @@ class MainPage(webapp2.RequestHandler):
         #Get land cover and elevation layers
         cover = ee.Image('MCD12Q1/MCD12Q1_005_%s_01_01' % 
                          (year)).select('Land_Cover_Type_1')
-        elev = ee.Image('srtm90_v4')
+                         
+        elev = ee.Image('GME/images/04040405428907908306-08319720230328335274')
+        #elev = ee.Image('srtm90_v4')
         
         #define a global polygon for the reducers
         region = ee.Feature(ee.Feature.Polygon(
@@ -100,13 +102,11 @@ class MainPage(webapp2.RequestHandler):
             #Create a FeatureCollection from that array 
             pts_fc = ee.FeatureCollection(pts)
             
-                        eePtFc = ee.FeatureCollection(eePts)
-            
             #this code reduces the point collection to an image.  Each pixel 
             #contains a count for the number of pixels that intersect with it
             #then, the point count image is masked by the range
-            #imgPoints = eePtFc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result);
-            #imgOutPoints = eePtFc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result.neq(1));
+            #imgPoints = pts_fc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result);
+            #imgOutPoints = pts_fc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result.neq(1));
             #now, just sum up the points image.  this is the number of points that overlap the range
             #ptsIn = imgPoints.reduceRegion(ee.call('Reducer.sum'), geometry, 10000)
             
@@ -125,7 +125,7 @@ class MainPage(webapp2.RequestHandler):
             
             #Sample the range map image
             coll = ee.ImageCollection([result])
-            sample = coll.getRegion(pts_fc,30).getInfo()
+            sample = coll.getRegion(pts_fc,1000).getInfo()
             
             #Create a FC for the points that fell inside the range
             pts_in = []
@@ -139,7 +139,7 @@ class MainPage(webapp2.RequestHandler):
             
             #reverse Join to get the ones that are outside the range
             pts_out_fc = pts_fc.groupedJoin(
-                pts_in,'within_distance',distance=30,mode='inverted')
+                pts_in,'within_distance',distance=1000,mode='inverted')
             
             range = result.getMapId({
                 'palette': '000000,85AD5A',
@@ -151,18 +151,20 @@ class MainPage(webapp2.RequestHandler):
             pts_in_map = pts_in_fc.getMapId({'color': '007733'})
             
             response = {
-                'maps' : {
-                    'pts_in' : EE_TILE_URL % 
+                'maps' : [
+                    EE_TILE_URL % 
                          (pts_in_map['mapid'],pts_in_map['token']),
-                    'pts_out' : EE_TILE_URL % 
+                    EE_TILE_URL % 
                          (pts_out_map['mapid'],pts_out_map['token']),
-                    'range' : EE_TILE_URL % 
+                    EE_TILE_URL % 
                          (range['mapid'], range['token'])
-                },
+                    
+                ],
                 'pts_in' : len(pts_in),
                 'pts_tot' : len(pts)
                 # add points stats to result
             }
+            self.response.headers["Content-Type"] = "application/json"
             self.response.out.write(json.dumps(response))
         else:
         #compute the area
@@ -174,8 +176,10 @@ class MainPage(webapp2.RequestHandler):
             total = area.mask(result.mask())
 
             ##compute area on 10km scale
-            clipped_area = total.reduceRegion(sum_reducer,geometry,scale=1000,bestEffort=True)
-            total_area = area.reduceRegion(sum_reducer,geometry,scale=1000,bestEffort=True)
+            clipped_area = total.reduceRegion(
+                sum_reducer,geometry,scale=1000,bestEffort=True)
+            total_area = area.reduceRegion(
+                sum_reducer,geometry,scale=1000,bestEffort=True)
 
             properties = {'total': total_area, 'clipped': clipped_area}
 
@@ -193,9 +197,11 @@ class MainPage(webapp2.RequestHandler):
                'clipped_area': ca/1000000,
                'total_area': ta/1000000
             }
+            self.response.headers["Content-Type"] = "application/json"
             self.response.out.write(json.dumps(template_values))
             
-application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
+application = webapp2.WSGIApplication(
+    [ ('/', MainPage), ('/.*', MainPage) ], debug=True)
 
 def main():
     run_wsgi_app(application)
