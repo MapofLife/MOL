@@ -44,20 +44,32 @@ class MainPage(webapp2.RequestHandler):
         year = self.request.get('year', None)
         get_area = self.request.get('get_area', 'false')
         ee_id = self.request.get('ee_id', None)
-
+        extent = json.loads(self.request.get('extent', None))
+        
+        logging.info(json.dumps(extent["ne"]))
         #Get land cover and elevation layers
-        cover = ee.Image('MCD12Q1/MCD12Q1_005_%s_01_01' % (year)).select('Land_Cover_Type_1')
+        cover = ee.Image('MCD12Q1/MCD12Q1_005_%s_01_01' % 
+                         (year)).select('Land_Cover_Type_1')
         elev = ee.Image('srtm90_v4')
-
+        
         #define a global polygon for the reducers
-        region = ee.Feature(ee.Feature.Polygon([[-179.9,-89.9],[-179.9,89.9],[179.9,89.9],[179.9, -89.9], [-179.9, -89.9]]))
-        geometry = region.geometry()
+        region = ee.Feature(ee.Feature.Polygon(
+             [[extent["sw"]["lng"],extent["sw"]["lat"]],
+              [extent["sw"]["lng"],extent["ne"]["lat"]],
+              [extent["ne"]["lng"],extent["ne"]["lat"]],
+              [extent["ne"]["lng"],extent["sw"]["lat"]],
+              [extent["sw"]["lng"],extent["sw"]["lat"]]
+             ]))
+       
         
         output = ee.Image(0)
         empty = ee.Image(0).mask(0)
 
         species = ee.Image(ee_id)
-
+        
+        geometry = region.geometry()
+        
+        
         #parse the CDB response
 
         min = int(elevation.split(',')[0])
@@ -67,29 +79,36 @@ class MainPage(webapp2.RequestHandler):
         output = output.mask(species)
 
         for pref in habitat_list:
-            output = output.where(cover.eq(int(pref)).And(elev.gt(min)).And(elev.lt(max)),1)
+            output = output.where(
+                cover.eq(int(pref)).And(elev.gt(min)).And(elev.lt(max)),1)
 
         result = output.mask(output)
 
         if(get_area == 'false'):
-            
             pointjsons = self.getRandomPoints(sciname)
             pjson = json.loads(pointjsons)
-            eePts = []
-            pTmpl = "ee.Feature(ee.Feature.Point(%f,%f))"
-            
+
+            #Create an array of Points
+            pts = []
             for row in pjson["rows"]:
-                eePts.append(ee.Feature(ee.Feature.Point(row["lon"],row["lat"]),{'val':1}))
+                pts.append(
+                   ee.Feature(
+                      ee.Feature.Point(
+                         row["lon"],row["lat"]),
+                         {'val':0 }))
             
-            eePtFc = ee.FeatureCollection(eePts)
+            #Create a FeatureCollection from that array 
+            pts_fc = ee.FeatureCollection(pts)
+            
+                        eePtFc = ee.FeatureCollection(eePts)
             
             #this code reduces the point collection to an image.  Each pixel 
             #contains a count for the number of pixels that intersect with it
             #then, the point count image is masked by the range
-            imgPoints = eePtFc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result);
+            #imgPoints = eePtFc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result);
             #imgOutPoints = eePtFc.reduceToImage(['val'], ee.call('Reducer.sum')).mask(result.neq(1));
             #now, just sum up the points image.  this is the number of points that overlap the range
-            ptsIn = imgPoints.reduceRegion(ee.call('Reducer.sum'), geometry, 10000)
+            #ptsIn = imgPoints.reduceRegion(ee.call('Reducer.sum'), geometry, 10000)
             
             #This would be for making pts_in and pts_out FeatureCollections 
             #that can be mapped in different colors. Doesn't work...
@@ -97,29 +116,51 @@ class MainPage(webapp2.RequestHandler):
             #ptsOutFC = imgOutPoints.reduceToVectors(None, None, 100000000)
             
             
-            data = ee.data.getValue({"json": ptsIn.serialize()})
-           
-            pts_in = data["sum"]
-            #TODO: paint points into result
-               
+            #data = ee.data.getValue({"json": ptsIn.serialize()})
+
+            #pts_in = data["sum"]
+            
+            
+            
+            
+            #Sample the range map image
+            coll = ee.ImageCollection([result])
+            sample = coll.getRegion(pts_fc,30).getInfo()
+            
+            #Create a FC for the points that fell inside the range
+            pts_in = []
+            for row in sample[1:]:
+                pts_in.append(
+                    ee.Feature(
+                        ee.Feature.Point(row[1], row[2]),{'val': 1})
+                )
+            
+            pts_in_fc = ee.FeatureCollection(pts_in)
+            
+            #reverse Join to get the ones that are outside the range
+            pts_out_fc = pts_fc.groupedJoin(
+                pts_in,'within_distance',distance=30,mode='inverted')
+            
             range = result.getMapId({
                 'palette': '000000,85AD5A',
                 'max': 1,
                 'opacity': 0.8
             })
             
-            #ptin = ptsInFC.getMapId({'color': '019901'})
-            #ptout = ptsOutFC.getMapId({'color': 'e02070'})
-            points = eePtFc.getMapId({'color': 'e02070'})
+            pts_out_map = pts_out_fc.getMapId({'color': 'e02070'})
+            pts_in_map = pts_in_fc.getMapId({'color': '007733'})
+            
             response = {
                 'maps' : {
+                    'pts_in' : EE_TILE_URL % 
+                         (pts_in_map['mapid'],pts_in_map['token']),
+                    'pts_out' : EE_TILE_URL % 
+                         (pts_out_map['mapid'],pts_out_map['token']),
                     'range' : EE_TILE_URL % 
-                         (range['mapid'], range['token']),
-                    'points' : EE_TILE_URL % 
-                         (points['mapid'],points['token'])
+                         (range['mapid'], range['token'])
                 },
-                'pts_in' : pts_in,
-                'pts_tot' : len(eePts)
+                'pts_in' : len(pts_in),
+                'pts_tot' : len(pts)
                 # add points stats to result
             }
             self.response.out.write(json.dumps(response))
@@ -133,15 +174,15 @@ class MainPage(webapp2.RequestHandler):
             total = area.mask(result.mask())
 
             ##compute area on 10km scale
-            clipped_area = total.reduceRegion(sum_reducer,geometry,10000)
-            total_area = area.reduceRegion(sum_reducer,geometry,10000)
+            clipped_area = total.reduceRegion(sum_reducer,geometry,scale=1000,bestEffort=True)
+            total_area = area.reduceRegion(sum_reducer,geometry,scale=1000,bestEffort=True)
 
             properties = {'total': total_area, 'clipped': clipped_area}
 
             region = region.set(properties)
 
             data = ee.data.getValue({"json": region.serialize()})
-            
+            logging.info(json.dumps(data))
 	    #self.response.headers["Content-Type"] = "application/json"
             #self.response.out.write(json.dumps(data))
             ta = 0
@@ -153,8 +194,7 @@ class MainPage(webapp2.RequestHandler):
                'total_area': ta/1000000
             }
             self.response.out.write(json.dumps(template_values))
-            self.render_template('ee_count.js', template_values)
-
+            
 application = webapp2.WSGIApplication([ ('/', MainPage), ('/.*', MainPage) ], debug=True)
 
 def main():

@@ -27,9 +27,8 @@ mol.modules.map.refine = function(mol) {
             this.bus.addHandler(
                 'update-refine-stats',
                 function(event) {
-                    self.refine_stats.find(event.stat).append(
-                       $('<div>{0}</div>'.format(event.content))
-                    );
+                    self.refine_stats.find('.{0}'.format(event.stat))
+                        .html('<div>{0}</div>'.format(event.content));
                 }
             );
             
@@ -77,8 +76,7 @@ mol.modules.map.refine = function(mol) {
                        '<div class="refine_stats">' +
                            '<div class="range_size"></div>' +
                            '<div class="refined_size"></div>' +
-                           '<div class="points_in"></div>' +
-                           '<div class="points_tot"></div>' +
+                           '<div class="point_assessment"></div>' +
                        '</div>' +
                    '</div>';
 

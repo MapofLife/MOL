@@ -473,7 +473,8 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: false
+                    get_area: false,
+                    extent: layer.extent
                 },
                 function (ee) {
                     var maptype, type;
@@ -505,15 +506,13 @@ mol.modules.map.tiles = function(mol) {
                         };
                        self.map.overlayMapTypes.insertAt(0,maptype.layer);
                    }
-                   
-                   
-                   
+
                    if(ee.pts_in) {
                        self.bus.fireEvent(
                            new mol.bus.Event(
                                 'update-refine-stats',
                                 {   
-                                    'stat':'points',
+                                    'stat':'point_assessment',
                                     'content':'{0} of {1} random occurence records were within the refined range.'
                                          .format(ee.pts_in, ee.pts_tot)
                                  }
@@ -530,7 +529,8 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: true
+                    get_area: true,
+                    extent: layer.extent
                 },
                 function (ee) {
                     
