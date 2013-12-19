@@ -53,23 +53,40 @@ class MainPage(webapp2.RequestHandler):
                          
         elev = ee.Image('GME/images/04040405428907908306-08319720230328335274')
         #elev = ee.Image('srtm90_v4')
+        minlat = round(extent["sw"]["lat"]*1000)/1000
         
-        #define a global polygon for the reducers
-        region = ee.Feature(ee.Feature.Polygon(
-             [[extent["sw"]["lng"],extent["sw"]["lat"]],
+        minlng = round(extent["sw"]["lng"]*1000)/1000
+        
+        maxlat = round(extent["ne"]["lat"]*1000)/1000
+        
+        maxlng = round(extent["ne"]["lng"]*1000)/1000
+        
+        
+        logging.info(json.dumps( [[extent["sw"]["lng"],extent["sw"]["lat"]],
               [extent["sw"]["lng"],extent["ne"]["lat"]],
               [extent["ne"]["lng"],extent["ne"]["lat"]],
               [extent["ne"]["lng"],extent["sw"]["lat"]],
               [extent["sw"]["lng"],extent["sw"]["lat"]]
              ]))
+        #define a global polygon for the reducers
        
+        region = ee.Feature(
+            ee.Feature.Polygon([
+                [float(extent["sw"]["lng"]),float(extent["sw"]["lat"])],
+                [float(extent["sw"]["lng"]),float(extent["ne"]["lat"])],
+                [float(extent["ne"]["lng"]),float(extent["ne"]["lat"])],
+                [float(extent["ne"]["lng"]),float(extent["sw"]["lat"])],
+                [float(extent["sw"]["lng"]),float(extent["sw"]["lat"])]
+            ])
+        )
+        geometry = region.geometry()
         
+       
         output = ee.Image(0)
         empty = ee.Image(0).mask(0)
 
         species = ee.Image(ee_id)
         
-        geometry = region.geometry()
         
         
         #parse the CDB response

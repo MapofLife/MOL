@@ -1,5 +1,3 @@
-# Copyright 2012 Google Inc. All Rights Reserved.
-
 """Common representation for ImageCollection and FeatureCollection.
 
 This class is never intended to be instantiated by the user.
@@ -7,37 +5,46 @@ This class is never intended to be instantiated by the user.
 
 
 
-# Using old-style python function naming on purpose to match the
-# javascript version's naming.
-# pylint: disable-msg=C6003,C6409
+# Using lowercase function naming to match the JavaScript names.
+# pylint: disable=g-bad-name
 
-# We access protected members in quite a few places.  Disabling the warning.
-# pylint: disable-msg=W0212
-
-import algorithms
-import data
-import filter                   # pylint: disable-msg=W0622
-import serializer
+import apifunction
+import customfunction
+import ee_exception
+import ee_types
+import element
+import filter   # pylint: disable=redefined-builtin
 
 
-class Collection(object):
-  """Baseclass for ImageCollection and FeatureCollection."""
+class Collection(element.Element):
+  """Base class for ImageCollection and FeatureCollection."""
 
-  # The serial number of the next mapping variable.
-  _serialMappingId = 0
+  _initialized = False
 
-  def __init__(self, args):
-    """Constructor, only exists for testing."""
-    self._description = args
+  def __init__(self, func, args):
+    """Constructs a collection by initializing its ComputedObject."""
+    super(Collection, self).__init__(func, args)
+
+  @classmethod
+  def initialize(cls):
+    """Imports API functions to this class."""
+    if not cls._initialized:
+      apifunction.ApiFunction.importApi(cls, 'Collection', 'Collection')
+      apifunction.ApiFunction.importApi(
+          cls, 'AggregateFeatureCollection', 'Collection', 'aggregate_')
+      cls._initialized = True
+
+  @classmethod
+  def reset(cls):
+    """Removes imported API functions from this class.
+
+    Also resets the serial ID used for mapping Python functions to 0.
+    """
+    apifunction.ApiFunction.clearApi(cls)
+    cls._initialized = False
 
   def filter(self, new_filter):
-    """Add a new filter to this collection.
-
-    Collection filtering is done by wrapping a collection in a filter
-    algorithm.  As additional filters are applied to a collection, we
-    try to avoid adding more wrappers and instead search for a wrapper
-    we can add to, however if the collection doesn't have a filter, this
-    will wrap it in one.
+    """Apply a filter to this collection.
 
     Args:
       new_filter: Filter to add to this collection.
@@ -45,18 +52,10 @@ class Collection(object):
     Returns:
       The filtered collection object.
     """
-    # Check if this collection already has a filter.
-    if Collection._isFilterFeatureCollection(self):
-      description = self._description['collection']
-      new_filter = self._description['filters']._append(new_filter)
-    else:
-      description = self._description
-
-    return self.__class__({
-        'algorithm': 'FilterFeatureCollection',
-        'collection': description,
-        'filters': new_filter
-        })
+    if not new_filter:
+      raise ee_exception.EEException('Empty filters.')
+    return self._cast(apifunction.ApiFunction.call_(
+        'Collection.filter', self, new_filter))
 
   def filterMetadata(self, name, operator, value):
     """Shortcut to add a metadata filter to a collection.
@@ -73,9 +72,9 @@ class Collection(object):
       value: The value to compare against.
 
     Returns:
-      The filter object.
+      The filtered collection.
     """
-    return self.filter(filter.Filter().metadata_(name, operator, value))
+    return self.filter(filter.Filter.metadata_(name, operator, value))
 
   def filterBounds(self, geometry):
     """Shortcut to add a geometry filter to a collection.
@@ -91,7 +90,7 @@ class Collection(object):
     Returns:
       The filter object.
     """
-    return self.filter(filter.Filter().geometry(geometry))
+    return self.filter(filter.Filter.geometry(geometry))
 
   def filterDate(self, start, opt_end=None):
     """Shortcut to filter a collection with a date range.
@@ -109,7 +108,7 @@ class Collection(object):
     Returns:
       The filter object.
     """
-    return self.filter(filter.Filter().date(start, opt_end))
+    return self.filter(filter.Filter.date(start, opt_end))
 
   def getInfo(self):
     """Returns all the known information about this collection.
@@ -119,32 +118,14 @@ class Collection(object):
 
     Returns:
       The return contents vary but will include at least:
-           features: an array containing metadata about the items in the
-                      collection that passed all filters.
-           properties: a dictionary containing the collection's metadata
-                        properties.
+       features: an array containing metadata about the items in the
+           collection that passed all filters.
+       properties: a dictionary containing the collection's metadata
+           properties.
     """
-    return data.getValue({'json': self.serialize(False)})
+    return super(Collection, self).getInfo()
 
-  def serialize(self, opt_pretty=True):
-    """Serialize this collection into a JSON string.
-
-    Args:
-      opt_pretty: A flag indicating whether to pretty-print the JSON.
-
-    Returns:
-      A JSON represenation of this image.
-    """
-    # Pop off any unused filter wrappers that might have been added by filter.
-    # We copy the object here, otherwise we might accidentally knock off a
-    # filter in progress.
-    item = self
-    while (Collection._isFilterFeatureCollection(item) and
-           item._description['filters'].predicateCount() == 0):
-      item = item._description['collection']
-    return serializer.toJSON(item._description, opt_pretty)
-
-  def limit(self, maximum, opt_property=None, opt_ascending=True):
+  def limit(self, maximum, opt_property=None, opt_ascending=None):
     """Limit a collection to the specified number of elements.
 
     This limits a collection to the specified number of elements, optionally
@@ -159,17 +140,13 @@ class Collection(object):
     Returns:
        The collection.
     """
-    args = {
-        'algorithm': 'LimitFeatureCollection',
-        'collection': Collection(self._description),
-        'limit': maximum
-        }
+    args = {'collection': self, 'limit': maximum}
     if opt_property is not None:
       args['key'] = opt_property
-      if opt_ascending:
-        args['ascending'] = opt_ascending
-
-    return Collection(args)
+    if opt_ascending is not None:
+      args['ascending'] = opt_ascending
+    return self._cast(
+        apifunction.ApiFunction.apply_('Collection.limit', args))
 
   def sort(self, prop, opt_ascending=None):
     """Sort a collection by the specified property.
@@ -182,83 +159,45 @@ class Collection(object):
     Returns:
        The collection.
     """
-    args = {
-        'algorithm': 'LimitFeatureCollection',
-        'collection': Collection(self._description),
-        'key': prop
-        }
+    args = {'collection': self, 'key': prop}
     if opt_ascending is not None:
       args['ascending'] = opt_ascending
-    return Collection(args)
+    return self._cast(
+        apifunction.ApiFunction.apply_('Collection.limit', args))
 
-  def geometry(self):
-    """Run an algorithm to extract the geometry from this collection.
+  @staticmethod
+  def name():
+    return 'Collection'
 
-    Returns:
-      A naked Algorithm invocation (a JSON dictionary), not an ee object,
-      however this object can be used any place a Geometry object can be used.
-    """
-    return {'algorithm': 'ExtractGeometry', 'collection': self}
-
-  def mapInternal(self,
-                  cls,
-                  algorithm,
-                  opt_dynamicArgs=None,
-                  opt_constantArgs=None,
-                  opt_destination=None):
+  def mapInternal(self, cls, algorithm):
     """Maps an algorithm over a collection.
 
     Args:
-      cls: The collection elements' type (class), Image or Feature.
+      cls: The collection elements' type (class).
       algorithm: The operation to map over the images or features of the
-          collection. Either an algorithm name as a string, or a JavaScript
-          function that receives an image or features and returns one. If a
-          function is passed, it is called only once and the result is captured
-          as a description, so it cannot perform imperative operations or rely
-          on external state.
-      opt_dynamicArgs: A map specifying which properties of the input objects
-          to pass to each argument of the algorithm. This maps from argument
-          names to selector strings. Selector strings are property names,
-          optionally concatenated into chains separated by a period to access
-          properties-of-properties. To pass the whole object, use the special
-          selector string '.all', and to pass the geometry, use '.geo'. If
-          this argument is not specified, the names of the arguments will be
-          matched exactly to the properties of the input object. If algorithm
-          is a JavaScript function, this must be null or undefined as the
-          image will always be the only dynamic argument.
-      opt_constantArgs: A map from argument names to constant values to be
-          passed to the algorithm on every invocation.
-      opt_destination: The property where the result of the algorithm will be
-          put. If this is null or undefined, the result of the algorithm will
-          replace the input, as is the usual behavior of a mapping opeartion.
+          collection, a Python function that receives an image or features and
+          returns one. The function is called only once and the result is
+          captured as a description, so it cannot perform imperative operations
+          or rely on external state.
 
     Returns:
       The mapped collection.
 
     Raises:
-      RuntimeError: if algorithm is a Python function and opt_dynamicArgs is
-          specified.
+      ee_exception.EEException: if algorithm is not a function.
     """
-    if callable(algorithm):
-      if opt_dynamicArgs:
-        raise RuntimeError(
-            'Can\'t use dynamicArgs with a mapped Python function.')
-      varName = '_MAPPING_VAR_%d' % Collection._serialMappingId
-      Collection._serialMappingId += 1
-      variable = algorithms.variable(cls, varName)
-      algorithm = algorithms.lambda_([varName], algorithm(variable))
-      opt_dynamicArgs = {varName: '.all'}
-    description = {
-        'algorithm': 'Collection.map',
-        'collection': self,
-        'baseAlgorithm': algorithm
+    if not callable(algorithm):
+      raise ee_exception.EEException(
+          'Can\'t map non-callable object: %s' % algorithm)
+    signature = {
+        'name': '',
+        'returns': 'Object',
+        'args': [{
+            'name': None,
+            'type': ee_types.classToName(cls)
+        }]
     }
-    if opt_dynamicArgs: description['dynamicArgs'] = opt_dynamicArgs
-    if opt_constantArgs: description['constantArgs'] = opt_constantArgs
-    if opt_destination: description['destination'] = opt_destination
-    return type(self)(description)
-
-  @staticmethod
-  def _isFilterFeatureCollection(collection):
-    """Returns true iff the collection is wrapped with a filter."""
-    return collection._description.get('algorithm') == 'FilterFeatureCollection'
+    return self._cast(apifunction.ApiFunction.apply_('Collection.map', {
+        'collection': self,
+        'baseAlgorithm': customfunction.CustomFunction(signature, algorithm)
+    }))
