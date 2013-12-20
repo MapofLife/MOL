@@ -503,16 +503,20 @@ mol.modules.map.tiles = function(mol) {
                                 'update-refine-stats',
                                 {   
                                     'stat':'refined_size',
-                                    'content': "Refined range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.clipped_area))
+                                    'content': "Refined range size: {0} km<sup><font size=-2>2</font></sup>".format(
+                                        Math.round(ee.clipped_area).toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ',')
+                                        )
                                  }
                             )
                     );
-                               self.bus.fireEvent(
+                     self.bus.fireEvent(
                            new mol.bus.Event(
                                 'update-refine-stats',
                                 {   
                                     'stat':'range_size',
-                                    'content': "Expert map range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.total_area))
+                                    'content': "Expert map range size: {0} km<sup><font size=-2>2</font></sup>".format(
+                                        Math.round(ee.total_area).toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ',')
+                                     )
                                  }
                             )
                     );

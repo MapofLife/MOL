@@ -74,8 +74,10 @@ mol.modules.map.refine = function(mol) {
                             '<button class="cancel">Cancel</button>' +
                        '</div>'+
                        '<div class="refine_stats">' +
+                           '<div><br/></div>' +
                            '<div class="range_size"></div>' +
                            '<div class="refined_size"></div>' +
+                           '<div><br/></div>' +
                            '<div class="point_assessment"></div>' +
                        '</div>' +
                    '</div>';
