@@ -10,7 +10,10 @@ mol.modules.map.constraints = function(mol) {
           
         },    
         start: function() {
-            this.display = new mol.map.constraints.ConstraintsDisplay();
+            this.layerConstraintsDisplay = 
+            new mol.map.constraints.ConstraintsDisplay();
+            this.globalConstraintsDisplay = 
+                new mol.map.constraints.GlobalConstraintsDisplay();
             this.fireEvents();
             this.addEventHandlers();
         },
@@ -28,8 +31,8 @@ mol.modules.map.constraints = function(mol) {
                 'hide-constraints',
                 function(event) {
                     var params = event.params;
-                    self.applyConstraints();
-                    self.display.dialog('hide');
+                    self.globalConstraintsDisplay.dialog('hide');
+                    self.layerConstraintsDisplay.dialog('hide');
                 }
             );
         },
@@ -62,13 +65,13 @@ mol.modules.map.constraints = function(mol) {
             });
             
             this.updateYearLabels(
-                        {}, 
-                        {values:[constraints.year.min,constraints.year.max]}, 
+                {}, 
+                {values:[constraints.year.min,constraints.year.max]}, 
                         params.layer);
-           this.display.dialog({
-               title:"Set constraints for the {0} layer from {1}"
+            this.display.dialog({
+               title:"Filter the {0} layer from {1}"
                     .format(params.layer.name, params.layer.source_title)
-           });
+            });
         },
         /**
          * Fires the 'add-map-control' event. The mol.map.MapEngine handles
@@ -100,6 +103,11 @@ mol.modules.map.constraints = function(mol) {
         },
         updateYearLabels: function (event, ui) {
             this.display.find('.minyear').text(ui.values[0]);
+            this.display.find('.maxyear').text(ui.values[1]);
+            //move the year label under the handle.
+            this.positionYearLabels(event,ui);
+        },
+        positionYearLabels: function(event, ui) {
             this.display.find('.minyear').css(
                 'left',
                 $(this.display.find('.ui-slider-handle')[0])
@@ -108,7 +116,6 @@ mol.modules.map.constraints = function(mol) {
                     -$(this.display.find('.ui-slider-handle')[1])
                             .width()/2
             );
-            this.display.find('.maxyear').text(ui.values[1]);
             this.display.find('.maxyear').css(
                 'left',
                 $(this.display.find('.ui-slider-handle')[1])
@@ -122,6 +129,20 @@ mol.modules.map.constraints = function(mol) {
     });
 
     mol.map.constraints.ConstraintsDisplay = mol.mvp.View.extend({
+        init: function() {
+            var html = '' +
+                '<div class="mol-ConstraintsControl">' +
+                    '<div class="year"></div>' +
+                    '<span class="minyear"></span>' +
+                    '<span class="maxyear"></span>' +
+                '</div>',
+                self = this;
+            this._super(html);
+            this.year = $(this).find('.year');
+            
+        }
+    });
+    mol.map.constraints.GlobalConstraintsDisplay = mol.mvp.View.extend({
         init: function() {
             var html = '' +
                 '<div class="mol-ConstraintsControl">' +

@@ -93,7 +93,7 @@ $.widget("ui.dragslider", $.ui.slider, {
     
     //only for testing purpose
     value: function(input) {
-        console.log("this is working!");
+        //console.log("this is working!");
         $.ui.slider.prototype.value.apply(this,arguments);
     }
     

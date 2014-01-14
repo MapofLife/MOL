@@ -749,7 +749,7 @@ mol.modules.map.layers = function(mol) {
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
-                    )
+                    );
                     self.display.toggle(true);
 
                 },
@@ -818,41 +818,43 @@ mol.modules.map.layers = function(mol) {
         init: function(layer) {
             var html = '' +
                 '<div class="layerContainer">' +
-                '  <div class="layer">' +
-                '    <button title="Click to edit layer style." ' +
+                    '<div class="layer">' +
+                        '<button title="Click to edit layer style." ' +
                             'class="styler">' +
-                '      <div class="legend-point"></div> ' +
-                '      <div class="legend-polygon"></div> ' +
-                '      <div class="legend-seasonal">' +
-                '        <div class="seasonal s1"></div>' +
-                '        <div class="seasonal s2"></div>' +
-                '        <div class="seasonal s3"></div>' +
-                '        <div class="seasonal s4"></div>' +
-                '      </div> ' +
-                '    </button>' +
-                '    <button class="source" title="Layer Source: {5}">' +
-                '      <img src="/static/maps/search/{0}.png">' +
-                '    </button>' +
-                '    <button class="type" title="Layer Type: {6}">' +
-                '      <img src="/static/maps/search/{1}.png">' +
-                '    </button>' +
-                '    <button title="Remove layer." class="close">' +
+                                '<div class="legend-point"></div> ' +
+                                '<div class="legend-polygon"></div> ' +
+                                '<div class="legend-seasonal">' +
+                                '<div class="seasonal s1"></div>' +
+                                    '<div class="seasonal s2"></div>' +
+                                    '<div class="seasonal s3"></div>' +
+                                    '<div class="seasonal s4"></div>' +
+                                '</div>' +
+                        '</button>' +
+                    '<button class="source" title="Layer Source: {5}">' +
+                        '<img src="/static/maps/search/{0}.png">' +
+                    '</button>' +
+                    '<button class="type" title="Layer Type: {6}">' +
+                        '<img src="/static/maps/search/{1}.png">' +
+                    '</button>' +
+                    '<button title="Remove layer." class="close">' +
                        '<i class="fa fa-trash-o"></i>' +
-                '    </button>' +
-                '    <button class="constraints"><i class="fa fa-filter"></i><img src=""></button>' +
-                '    <div class="layerName">' +
-                '      <div class="layerRecords">{4}</div>' +
-                '      <div title="{2}" class="layerNomial">{2}</div>' +
-                '      <div title="{3}" class="layerEnglishName">{3}</div>'+
-                '    </div>' +
-                '    <button title="Zoom to layer extent." class="zoom">' +
-                       '<i class="fa fa-search-plus"></i>' +
-                '    </button>' +
-                '    <button class="toggleContainer">' +
-                '       <i class="fa toggle fa-eye checked"></i>' +
-                '    </button>' +
-                '   </div>' +
-                '   <div class="break"></div>' +
+                    '</button>' +
+                    '<button class="constraints">' +
+                        '<i class="fa fa-filter"></i>' +
+                    '</button>' +
+                        '<div class="layerName">' +
+                            '<div class="layerRecords">{4}</div>' +
+                            '<div title="{2}" class="layerNomial">{2}</div>' +
+                            '<div title="{3}" class="layerEnglishName">{3}</div>'+
+                        '</div>' +
+                        '<button title="Zoom to layer extent." class="zoom">' +
+                           '<i class="fa fa-search-plus"></i>' +
+                        '</button>' +
+                        '<button class="toggleContainer">' +
+                            '<i class="fa toggle fa-eye checked"></i>' +
+                        '</button>' +
+                    '</div>' +
+                    '<div class="break"></div>' +
                 '</div>',
                 self = this;
 
@@ -944,6 +946,9 @@ mol.modules.map.layers = function(mol) {
                                 '<button class="styleAll">' +
                                     'Style All' +
                                 '</button>' +
+                                '<button class="filter">' +
+                                    'Filter All' +
+                                '</button>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -955,6 +960,7 @@ mol.modules.map.layers = function(mol) {
             this.toggleAll = $(this).find(".toggleAll");
             this.resetAll = $(this).find(".resetAll");
             this.styleAll = $(this).find(".styleAll");
+            this.filterAll = $(this).find(".styleAll");
             this.open = false;
             this.views = {};
             this.layers = [];
