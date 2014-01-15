@@ -426,27 +426,11 @@ mol.modules.map.tiles = function(mol) {
             }
 
         },
-        getEETile: function(layer) {
-            var self = this;
-            $.getJSON(
-                'ee_{0}'.format(layer.filter_mode),
-                {
-                    sciname: layer.name,
-                    habitats: layer.selectedHabitats[layer.filter_mode].join(','),
-                    elevation: layer.selectedElev.join(','),
-                    year: layer.selectedYear,
-                    ee_id: layer.ee_id,
-                    mode: 'range',
-                    extent: layer.extent
-                },
-                function (ee) {
-                    var maptype, i;
-                    
-                    for (type in ee.maps) {
-                        maptype = new mol.map.tiles.EarthEngineTile(
+        addEEMapType: function(ee, type, layer, map) {
+            maptype = new mol.map.tiles.EarthEngineTile(
                             ee,
                             layer,
-                            self.map,
+                            map,
                             type
                         );
                         
@@ -468,7 +452,26 @@ mol.modules.map.tiles = function(mol) {
                             );
                         };
                         
-                       self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                       map.overlayMapTypes.insertAt(0,maptype.layer);
+        },
+        getEETile: function(layer) {
+            var self = this;
+            $.getJSON(
+                'ee_{0}'.format(layer.filter_mode),
+                {
+                    sciname: layer.name,
+                    habitats: layer.selectedHabitats[layer.filter_mode].join(','),
+                    elevation: layer.selectedElev.join(','),
+                    year: layer.selectedYear,
+                    ee_id: layer.ee_id,
+                    mode: 'range',
+                    extent: layer.extent
+                },
+                function (ee) {
+                    var maptype, i;
+                    
+                    for (type in ee.maps) {
+                        self.addEEMapType(ee, type, layer, self.map);
                    }
                 }
             );
@@ -496,34 +499,9 @@ mol.modules.map.tiles = function(mol) {
                                  }
                             )
                          );
-                                           for (type in ee.maps) {
-                        maptype = new mol.map.tiles.EarthEngineTile(
-                            ee,
-                            layer,
-                            self.map,
-                            type
-                        );
-                        
-                        
-                        maptype.layer.onafterload = function (){
-                            self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    "hide-loading-indicator",
-                                    {source : layer.id + type}
-                                )
-                            );
-                        };
-                        maptype.layer.onbeforeload = function (){
-                            self.bus.fireEvent(
-                                new mol.bus.Event(
-                                    "show-loading-indicator",
-                                    {source : layer.id + type}
-                                )
-                            );
-                        };
-                        
-                       self.map.overlayMapTypes.insertAt(0,maptype.layer);
-                   }
+                         for (type in ee.maps) {
+                             self.addEEMapType(ee, type, layer, self.map);
+                         }
                     } else {
                          self.bus.fireEvent(
                            new mol.bus.Event(
