@@ -829,8 +829,10 @@ mol.modules.map.refine = function(mol) {
                             '<button class="cancel">Cancel</button>' +
                        '</div>'+
                        '<div class="refine_stats">' +
+                           '<div><br/></div>' +
                            '<div class="range_size"></div>' +
                            '<div class="refined_size"></div>' +
+                           '<div><br/></div>' +
                            '<div class="point_assessment"></div>' +
                        '</div>' +
                    '</div>';
@@ -881,7 +883,7 @@ mol.modules.map.refine = function(mol) {
                                 $(api.elements.content).find('.refined_size')
                                     .html('Calculating refined range size...');
                                 $(api.elements.content).find('.point_assessment')
-                                    .html('Assessing occurrence inventory...');
+                                    .html('Assessing GBIF occurrence inventory...');
                                 
                                 params.layer.mode = 'ee';
                                 params.layer.filter_mode =  $(api.elements.content).find('.mode').val();
@@ -3818,7 +3820,7 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: false,
+                    mode: 'range',
                     extent: layer.extent
                 },
                 function (ee) {
@@ -3852,19 +3854,6 @@ mol.modules.map.tiles = function(mol) {
                         
                        self.map.overlayMapTypes.insertAt(0,maptype.layer);
                    }
-
-                   if(ee.pts_in) {
-                       self.bus.fireEvent(
-                           new mol.bus.Event(
-                                'update-refine-stats',
-                                {   
-                                    'stat':'point_assessment',
-                                    'content':'{0} of {1} occurrence records were within the refined range.'
-                                         .format(ee.pts_in, ee.pts_tot)
-                                 }
-                            )
-                    );
-                   }
                 }
             );
             $.getJSON(
@@ -3875,7 +3864,74 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: true,
+                    mode: 'assess',
+                    extent: layer.extent
+                },
+                function(ee) {
+                     
+                     if(ee.has_pts) {
+                       self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'point_assessment',
+                                    'content':'{0} of {1} occurrence records were within the refined range.'
+                                         .format(ee.pts_in, ee.pts_tot)
+                                 }
+                            )
+                         );
+                                           for (type in ee.maps) {
+                        maptype = new mol.map.tiles.EarthEngineTile(
+                            ee,
+                            layer,
+                            self.map,
+                            type
+                        );
+                        
+                        
+                        maptype.layer.onafterload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "hide-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                        maptype.layer.onbeforeload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "show-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                        
+                       self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                   }
+                    } else {
+                         self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'point_assessment',
+                                    'content':'No GBIF points to assess.'
+                                         .format(ee.pts_in, ee.pts_tot)
+                                 }
+                            )
+                         );
+                    }
+
+                }
+            );
+            $.getJSON(
+                'ee_{0}'.format(layer.filter_mode),
+                {
+                    sciname: layer.name,
+                    habitats: layer.selectedHabitats[layer.filter_mode].join(','),
+                    elevation: layer.selectedElev.join(','),
+                    year: layer.selectedYear,
+                    ee_id: layer.ee_id,
+                    mode: 'area',
                     extent: layer.extent
                 },
                 function (ee) {
@@ -3885,16 +3941,20 @@ mol.modules.map.tiles = function(mol) {
                                 'update-refine-stats',
                                 {   
                                     'stat':'refined_size',
-                                    'content': "Refined range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.clipped_area))
+                                    'content': "Refined range size: {0} km<sup><font size=-2>2</font></sup>".format(
+                                        Math.round(ee.clipped_area).toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ',')
+                                        )
                                  }
                             )
                     );
-                               self.bus.fireEvent(
+                     self.bus.fireEvent(
                            new mol.bus.Event(
                                 'update-refine-stats',
                                 {   
                                     'stat':'range_size',
-                                    'content': "Expert map range size: {0}km<sup><font size=-2>2</font></sup>".format(Math.round(ee.total_area))
+                                    'content': "Expert map range size: {0} km<sup><font size=-2>2</font></sup>".format(
+                                        Math.round(ee.total_area).toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ',')
+                                     )
                                  }
                             )
                     );
@@ -3996,7 +4056,7 @@ mol.modules.map.tiles = function(mol) {
                         self.onafterload != undefined) {
                             self.onafterload();
                     }
-                }).one("error", function() {
+                }).error(function() {
                     var index = $.inArray(this.__src__, pendingurls);
                     pendingurls.splice(index, 1);
                     if (pendingurls.length === 0) {

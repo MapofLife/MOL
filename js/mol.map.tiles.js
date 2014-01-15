@@ -436,7 +436,7 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: false,
+                    mode: 'range',
                     extent: layer.extent
                 },
                 function (ee) {
@@ -470,19 +470,6 @@ mol.modules.map.tiles = function(mol) {
                         
                        self.map.overlayMapTypes.insertAt(0,maptype.layer);
                    }
-
-                   if(ee.pts_in) {
-                       self.bus.fireEvent(
-                           new mol.bus.Event(
-                                'update-refine-stats',
-                                {   
-                                    'stat':'point_assessment',
-                                    'content':'{0} of {1} occurrence records were within the refined range.'
-                                         .format(ee.pts_in, ee.pts_tot)
-                                 }
-                            )
-                    );
-                   }
                 }
             );
             $.getJSON(
@@ -493,7 +480,74 @@ mol.modules.map.tiles = function(mol) {
                     elevation: layer.selectedElev.join(','),
                     year: layer.selectedYear,
                     ee_id: layer.ee_id,
-                    get_area: true,
+                    mode: 'assess',
+                    extent: layer.extent
+                },
+                function(ee) {
+                     
+                     if(ee.has_pts) {
+                       self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'point_assessment',
+                                    'content':'{0} of {1} occurrence records were within the refined range.'
+                                         .format(ee.pts_in, ee.pts_tot)
+                                 }
+                            )
+                         );
+                                           for (type in ee.maps) {
+                        maptype = new mol.map.tiles.EarthEngineTile(
+                            ee,
+                            layer,
+                            self.map,
+                            type
+                        );
+                        
+                        
+                        maptype.layer.onafterload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "hide-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                        maptype.layer.onbeforeload = function (){
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    "show-loading-indicator",
+                                    {source : layer.id + type}
+                                )
+                            );
+                        };
+                        
+                       self.map.overlayMapTypes.insertAt(0,maptype.layer);
+                   }
+                    } else {
+                         self.bus.fireEvent(
+                           new mol.bus.Event(
+                                'update-refine-stats',
+                                {   
+                                    'stat':'point_assessment',
+                                    'content':'No GBIF points to assess.'
+                                         .format(ee.pts_in, ee.pts_tot)
+                                 }
+                            )
+                         );
+                    }
+
+                }
+            );
+            $.getJSON(
+                'ee_{0}'.format(layer.filter_mode),
+                {
+                    sciname: layer.name,
+                    habitats: layer.selectedHabitats[layer.filter_mode].join(','),
+                    elevation: layer.selectedElev.join(','),
+                    year: layer.selectedYear,
+                    ee_id: layer.ee_id,
+                    mode: 'area',
                     extent: layer.extent
                 },
                 function (ee) {
@@ -618,7 +672,7 @@ mol.modules.map.tiles = function(mol) {
                         self.onafterload != undefined) {
                             self.onafterload();
                     }
-                }).one("error", function() {
+                }).error(function() {
                     var index = $.inArray(this.__src__, pendingurls);
                     pendingurls.splice(index, 1);
                     if (pendingurls.length === 0) {

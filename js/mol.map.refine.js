@@ -128,7 +128,7 @@ mol.modules.map.refine = function(mol) {
                                 $(api.elements.content).find('.refined_size')
                                     .html('Calculating refined range size...');
                                 $(api.elements.content).find('.point_assessment')
-                                    .html('Assessing occurrence inventory...');
+                                    .html('Assessing GBIF occurrence inventory...');
                                 
                                 params.layer.mode = 'ee';
                                 params.layer.filter_mode =  $(api.elements.content).find('.mode').val();
