@@ -1457,7 +1457,7 @@ mol.modules.map.layers = function(mol) {
                         }
                     );
 
-                    l.layer.click(
+                   /* l.layer.click(
                         function(event) {
                             var boo = false,
                                 isSelected = false;
@@ -1521,19 +1521,28 @@ mol.modules.map.layers = function(mol) {
                             event.stopPropagation();
                             event.cancelBubble = true;
                         }
-                    );
+                    );*/
                     l.toggle.attr('checked', true);
 
                     // Click handler for the toggle button.
                     l.toggle.click(
                         function(event) {
-                            var showing = $(event.currentTarget).is(':checked'),
+                            var showing = $(event.currentTarget).hasClass('checked'),
                                 params = {
                                     layer: layer,
-                                    showing: showing
+                                    showing: !showing
                                 },
                                 e = new mol.bus.Event('layer-toggle', params);
-
+                            
+                            if(showing) {
+                                $(this).removeClass('checked');
+                                $(this).removeClass('fa-eye');
+                                $(this).addClass('fa-eye-slash');
+                            } else {
+                                $(this).addClass('checked');
+                                $(this).removeClass('fa-eye-slash');
+                                $(this).addClass('fa-eye');
+                            }
                             self.bus.fireEvent(e);
                             event.stopPropagation();
                             event.cancelBubble = true;
@@ -1552,6 +1561,18 @@ mol.modules.map.layers = function(mol) {
                             );
                             event.stopPropagation();
                             event.cancelBubble = true;
+                        }
+                    );
+                    l.constraints.click(
+                        function(event) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'show-constraints',
+                                    {params : {
+                                        layer: layer
+                                    }}
+                                )
+                            );
                         }
                     );
                     l.type.click(
@@ -1655,22 +1676,21 @@ mol.modules.map.layers = function(mol) {
                 '    <button class="type" title="Layer Type: {6}">' +
                 '      <img src="/static/maps/search/{1}.png">' +
                 '    </button>' +
+                '    <button title="Remove layer." class="close">' +
+                       '<i class="fa fa-trash-o"></i>' +
+                '    </button>' +
+                '    <button class="constraints"><i class="fa fa-filter"></i><img src=""></button>' +
                 '    <div class="layerName">' +
                 '      <div class="layerRecords">{4}</div>' +
                 '      <div title="{2}" class="layerNomial">{2}</div>' +
                 '      <div title="{3}" class="layerEnglishName">{3}</div>'+
                 '    </div>' +
-                '    <button title="Remove layer." class="close">' +
-                       'x' +
-                '    </button>' +
                 '    <button title="Zoom to layer extent." class="zoom">' +
-                       'z' +
+                       '<i class="fa fa-search-plus"></i>' +
                 '    </button>' +
-                '    <label class="buttonContainer">' +
-                '       <input class="toggle" type="checkbox">' +
-                '       <span title="Toggle layer visibility." ' +
-                        'class="customCheck"></span>' +
-                '    </label>' +
+                '    <button class="toggleContainer">' +
+                '       <i class="fa toggle fa-eye checked"></i>' +
+                '    </button>' +
                 '   </div>' +
                 '   <div class="break"></div>' +
                 '</div>',
@@ -1688,12 +1708,13 @@ mol.modules.map.layers = function(mol) {
                     layer.type_title
                 )
             );
-
+            
             this.attr('id', layer.id);
-            this.toggle = $(this).find('.toggle').button();
+            this.toggle = $(this).find('.toggle');
             this.styler = $(this).find('.styler');
             this.zoom = $(this).find('.zoom');
             this.info = $(this).find('.info');
+            this.constraints = $(this).find('.constraints');
             this.close = $(this).find('.close');
             this.type = $(this).find('.type');
             this.source = $(this).find('.source');
@@ -2371,7 +2392,17 @@ mol.modules.map.results = function(mol) {
             return  _.map(
                 layers,
                 function(layer) {
-                    return _.extend(layer, {id: mol.core.getLayerId(layer)});
+                    return _.extend(
+                        layer, 
+                            {id: mol.core.getLayerId(layer),
+                             constraints: {
+                                 year: {
+                                     min: 1950,
+                                     max: 2013
+                                }
+                            }
+                        }
+                    );
                 }
             );
         },
@@ -2839,7 +2870,7 @@ mol.modules.map.search = function(mol) {
                         '"lat":\',ST_YMax(box2d(ST_Transform(ST_SetSRID(l.extent,3857),4326))),\' ' +
                         '}}\') ' +
                     'END as extent, ' +
-                    "CASE WHEN l.dataset_id = 'gbif_taxloc' THEN TEXT('gbif_aug_2013') ELSE l.dataset_id END as dataset_id, " +
+                    "CASE WHEN l.dataset_id = 'gbif_taxloc' THEN TEXT('gbif_aug_2013') ELSE CASE WHEN l.dataset_id = 'ebird_taxloc' THEN TEXT('ebird_aug_2013') ELSE l.dataset_id END END as dataset_id, " +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
                     
@@ -2855,7 +2886,7 @@ mol.modules.map.search = function(mol) {
                 'LEFT JOIN ac n ON ' +
                     'l.scientificname = n.n ' +
                 'WHERE ' +
-                     "l.provider = 'gbif' AND (n.n~*'\\m{0}' OR n.v~*'\\m{0}') AND split_part(l.scientificname,' ',3) = \'\' " +
+                     "(l.provider = 'gbif' or l.provider = 'ebird') AND (n.n~*'\\m{0}' OR n.v~*'\\m{0}') AND split_part(l.scientificname,' ',3) = \'\' " +
                 'ORDER BY name, type_sort_order';
         },
 
@@ -3279,9 +3310,22 @@ mol.modules.map.tiles = function(mol) {
             );
             
             this.bus.addHandler(
-                'set-year-constraint',
+                'set-constraints',
                 function(event) {
-                    self.constraints.year = event;
+                    var layer = event.layer;
+                    self.map.overlayMapTypes.forEach(
+                        function(mt, i) {
+                            if(mt)
+                            if(mt.layer) {
+                                if (mt.layer.id == layer.id) {
+                                    mt.layer = layer;
+                                    //mt.layer.stale = true;
+                                   //self.map.overlayMapTypes.removeAt(i);
+                                    //self.map.overlayMapTypes.setAt(i,mt);
+                                }
+                            }
+                        }
+                    );
                     self.bus.fireEvent(new mol.bus.Event('refresh-tiles'));
                 }
             );
@@ -3623,7 +3667,7 @@ mol.modules.map.tiles = function(mol) {
                 maptype = new mol.map.tiles.CartoDbTile(
                             layer,
                             this.map,
-                            this.constraints
+                            layer.constraints
                         ),
                 gridmt;
             maptype.onbeforeload = function (){
@@ -3670,8 +3714,8 @@ mol.modules.map.tiles = function(mol) {
                 .format(
                     layer.dataset_id,
                     layer.name,
-                    constraints.year.min,
-                    constraints.year.max
+                    (constraints != undefined) ? constraints.year.min : 1950,
+                    (constraints != undefined) ? constraints.year.max : 2013
                 ),
                 urlPattern = '' +
                     'http://{HOST}/tiles/mol_style/{Z}/{X}/{Y}.png?'+
@@ -3820,8 +3864,8 @@ mol.modules.map.tiles = function(mol) {
                                     return layersql.format(
                                         mt.layer.dataset_id,
                                         unescape(mt.layer.name.replace(/percent/g,'%')),
-                                        constraints.year.min,
-                                        constraints.year.max
+                                        mt.layer.constraints.year.min,
+                                        mt.layer.constraints.year.max
                                     );
                                 }
                             }
@@ -8573,21 +8617,59 @@ mol.modules.map.constraints = function(mol) {
         },
         addEventHandlers: function() {
             var self = this;
-            this.display.year.slider({
+            
+            this.bus.addHandler(
+                'show-constraints',
+                function(event) {
+                    var params = event.params;
+                    self.showConstraints(params);
+                }
+            );
+            this.bus.addHandler(
+                'hide-constraints',
+                function(event) {
+                    var params = event.params;
+                    self.applyConstraints();
+                    self.display.dialog('hide');
+                }
+            );
+        },
+        showConstraints: function (params) {
+            var self = this,
+                constraints = (params.layer.constraints == undefined) ?
+                    {
+                        year: {min:1950, max:2013}
+                    } : params.layer.constraints;
+
+                    
+            this.display.year.dragslider({
                 width:80, 
                 height:20, 
                 min: 1800, 
                 max: 2013, 
                 range: true, 
-                values:[1970,2013], 
+                rangeDrag: true, 
+                values:[constraints.year.min,constraints.year.max], 
                 step:1,
                 stop: function(event, ui) {
-                    self.setYearConstraint(event, ui)
+                    constraints.year.min = ui.values[0];
+                    constraints.year.max = ui.values[1];
+                    params.layer.constraints = constraints;
+                    self.setConstraints(event, ui, params.layer);
                 },
                 slide: function (event, ui) {
-                    self.updateYearLabels(event, ui)
+                    self.updateYearLabels(event, ui, params.layer);
                 }    
             });
+            
+            this.updateYearLabels(
+                        {}, 
+                        {values:[constraints.year.min,constraints.year.max]}, 
+                        params.layer);
+           this.display.dialog({
+               title:"Set constraints for the {0} layer from {1}"
+                    .format(params.layer.name, params.layer.source_title)
+           });
         },
         /**
          * Fires the 'add-map-control' event. The mol.map.MapEngine handles
@@ -8604,18 +8686,18 @@ mol.modules.map.constraints = function(mol) {
             this.bus.fireEvent(
                 new mol.bus.Event(
                     'set-year-constraint',
-                    {min: 1800, 
+                    {min: 1950, 
                     max: 2014}
                 )
             );
         },
-        setYearConstraint: function(event, ui) {
+        setConstraints: function(event, ui, layer) {
             this.bus.fireEvent(
                 new mol.bus.Event(
-                    'set-year-constraint',
-                    {min: ui.values[0], max: ui.values[1]}
+                    'set-constraints',
+                    {layer: layer}
                 )
-            );            
+            );
         },
         updateYearLabels: function (event, ui) {
             this.display.find('.minyear').text(ui.values[0]);
@@ -8654,7 +8736,8 @@ mol.modules.map.constraints = function(mol) {
             
         }
     });
-}
+};
+
 mol.modules.map.boot = function(mol) {
 
     mol.map.boot = {};

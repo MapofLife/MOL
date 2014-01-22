@@ -11,7 +11,7 @@ mol.modules.map.feature = function(mol) {
             this.url = 'http://mol.cartodb.com/api/v2/sql?callback=?&q={0}';
             //TODO add
             this.sql = "SELECT * FROM " +
-                       "get_map_feature_metadata({0},{1},{2},{3},'{4}')";
+                       "get_feature_metadata({0},{1},{2},{3},'{4}')";
             
             this.clickDisabled = false;
             this.makingRequest = false;
@@ -118,7 +118,7 @@ mol.modules.map.feature = function(mol) {
                 }
             );
         },
-        featureclick : function (mouseevent) {
+        featureclick : function (mouseevent, constraints) {
             var tolerance = 4,
                 sqlLayers,
                 sql,
@@ -142,6 +142,7 @@ mol.modules.map.feature = function(mol) {
                         tolerance,
                         this.map.getZoom(),
                         sqlLayers.toString()
+                        
                 );
 
                 this.bus.fireEvent(new mol.bus.Event(
@@ -228,7 +229,7 @@ mol.modules.map.feature = function(mol) {
                             '</a>' +
                         '</h3>';
 
-                o = JSON.parse(row.get_map_feature_metadata);
+                o = JSON.parse(row.get_feature_metadata);
                 all = _.values(o)[0];
                 allobj = all[0];
                 layerId =  _.keys(o)[0];
