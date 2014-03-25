@@ -75,6 +75,7 @@ button:hover{
     clear: both;
     text-align: center;
     color: #555555;
+    overflow: hidden;
 }
 
 .mol-Splash .lists {
@@ -1407,8 +1408,6 @@ div.mol-Dashboard-TableWindow {
 .mol-Map-QueryDisplay div.speciesDisplay select.radius {
     margin-right:2px;
 }
-
-
 
 .mol-Map-ListQueryRadius {
      pointer-events:none;
