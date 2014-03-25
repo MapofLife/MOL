@@ -23,7 +23,7 @@ button{
     margin: 2px;
     font-weight:700;
     color: rgb(240, 240, 260);
-    background-color: rgba(25, 25, 25, 0.75);
+    background-color:rgba(25, 25, 25, 0.75);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#BF191919', endColorstr='#BF191919');
     -moz-box-shadow: 2px 2px 5px #000;
     -webkit-box-shadow: 2px 2px 5px #000;
@@ -177,7 +177,19 @@ button:hover{
     cursor: pointer;
     text-align: center;
     text-decoration:none;
-    background-image: linear-gradient(to bottom, #062d66 0,#072e67 100%);
+    
+    background-image: -webkit-gradient(
+		linear,
+		left top,
+		right bottom,
+		color-stop(1, #062C66),
+		color-stop(1, #072D67)
+	);
+	background-image: -o-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: -moz-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: -webkit-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: -ms-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: linear-gradient(to right bottom, #062C66 100%, #072D67 100%);
     
     -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px; 
     -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
@@ -1056,8 +1068,19 @@ div.mol-Dashboard-TableWindow {
 }
 
 .mol-Dashboard .ui-dialog-titlebar, .ui-widget-header, .dashboard {
-    background: none;
-    background-image: linear-gradient(to bottom, #062d66 0,#072e67 100%);
+    background-image: -webkit-gradient(
+		linear,
+		left top,
+		right bottom,
+		color-stop(1, #062C66),
+		color-stop(1, #072D67)
+	);
+	background-image: -o-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: -moz-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: -webkit-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: -ms-linear-gradient(right bottom, #062C66 100%, #072D67 100%);
+	background-image: linear-gradient(to right bottom, #062C66 100%, #072D67 100%);
+
     -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
     -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
     box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;

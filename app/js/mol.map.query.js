@@ -1086,12 +1086,15 @@ mol.modules.map.query = function(mol) {
                     visible: function(event, api) {
                         $("button.mapButton").click(
                             function(event) {
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'search',
-                                        {term : $.trim(event.target.value)}
-                                    )
+                                window.location.href = '/{0}'.format(
+                                	event.target.value
                                 );
+                                //self.bus.fireEvent(
+                                //    new mol.bus.Event(
+                                //        'search',
+                                //        {term : $.trim(event.target.value)}
+                                //    )
+                                //);
                             }
                         );
 
@@ -1254,12 +1257,15 @@ mol.modules.map.query = function(mol) {
 
             $("button.mapButton").click(
                 function(event) {
-                    self.bus.fireEvent(
-                        new mol.bus.Event(
-                            'search',
-                            {term : $.trim(event.target.value)}
-                        )
+                    window.location.href = '/{0}'.format(
+                    	event.target.value
                     );
+                    //self.bus.fireEvent(
+                    //    new mol.bus.Event(
+                    //        'search',
+                    //        {term : $.trim(event.target.value)}
+                    //    )
+                    //);
                 }
             );
         },

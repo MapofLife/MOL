@@ -2,7 +2,7 @@ html { height: 100% }
 body { height: 100%; margin: 0px; padding: 0px; overflow-y: auto;
        min-width: 720px; min-height: 500px;
        font-family: Arial, sans-serif; color: #141414; font-weight:700;}
-.map_container {min-height: 300px; height: 70%}
+.map_container {min-height: 300px; }
 #metadata { height: 50%; overflow: hidden; }
 
 /* Set up RightControl defaults */

@@ -102,18 +102,61 @@
   ga('create', 'UA-26993916-3', 'mol.org');
   ga('send', 'pageview');
 </script>
+<link href="css/font-awesome/font-awesome.css" rel="stylesheet" type="text/css">
+<link href="css/screen.css" rel="stylesheet" type="text/css">
+<!--[if IE ]>
+    <link href="css/ie.css" rel="stylesheet" type="text/css">
+<![endif]-->
+<script>
+  WebFontConfig = {
+	  google: {
+	    families: ['Cantarell:400,700,400italic,700italic']
+	  },
+  };
+
+  (function() {
+    var wf = document.createElement('script');
+    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+              '://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js';
+    wf.type = 'text/javascript';
+    wf.async = 'true';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(wf, s);
+  })();
+</script>
+<noscript>
+	<link href='http://fonts.googleapis.com/css?family=Cantarell:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+</noscript>
+
   </head>
   <body>
-    <div class="header">
-         <div class="logo">
-            <img src="static/img/logo.png" 
-            onclick="http://www.mol.org/" 
-            class="logo" />
-         </div>
-    </div> 
+    <header>
+	<figure class="logo">
+		<a href="http://mol.hwdesignco.com"><img src="static/img/logo.png" alt="Map of Life" /></a>
+	</figure>
+	<nav class="main_navigation">
+		<ul class="menu">
+			<li class="tab">
+				<a href="/maps">Explore the Map</a>
+			</li>
+			<!--<li class="tab">
+				<a href="/lists">Species List by Location</a>
+			</li>-->
+			<li>
+				<a href="http://mol.hwdesignco.com/about">About MOL</a>
+			</li>
+			<li>
+				<a href="http://mol.hwdesignco.com/news">News</a>
+			</li>
+			<li>
+				<a href="http://mol.hwdesignco.com">Help</a>
+			</li>
+		</ul>
+	</nav>
+    </header>
     <div class="navigation">
-        <div class="nav_buttons col-md-12">
-            <span class="nav_button maps" 
+        <div class="nav_buttons">
+            <span class="nav_button maps selected" 
                 onclick="window.location.href='/maps';">
                 Map a Species
             </span>
@@ -126,8 +169,6 @@
         </div>
     </div>
     <div id="map_container" class="map_container">
-    </div>
-    <div class="footer">
     </div>
     <script type="text/javascript">
       $.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase());

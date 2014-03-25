@@ -255,7 +255,7 @@ mol.modules.map = function(mol) {
     mol.map.MapDisplay = mol.mvp.View.extend(
         {
             init: function(element) {
-                var mapOptions = null;
+                var mapOptions = null, self = this;
 
                 this._super(element);
 
@@ -353,7 +353,16 @@ mol.modules.map = function(mol) {
                     ]
                 };
 
+				$(this.element).height($(window).height()-$('.navigation').height()-$('header').height());
+				$(window).resize(
+					function(event) {
+						$(self.element).height($(window).height()-$('.navigation').height()-$('header').height())	
+					}
+				)
+				
                 this.map = new google.maps.Map(this.element, mapOptions);
+                
+                
             }
         }
     );
