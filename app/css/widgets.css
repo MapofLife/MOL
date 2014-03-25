@@ -16,39 +16,6 @@
 .LAST {
     pointer-events: none;
 }
-.widgetTheme{
-    behavior: url(/css/pie/PIE.htc);
-    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, rgba(29,43,82,0.75) 57%);
-    background-image: -webkit-gradient(
-        linear,
-        left bottom,
-        left top,
-        color-stop(0.89, rgba(29,43,82,0.65)),
-        color-stop(0.57, rgba(29,43,82,0.75))
-    );
-    background-image: -moz-linear-gradient(
-        center bottom,
-        rgba(29,43,82,0.65) 89%,
-        rgba(29,43,82,0.75) 57%
-    );
-    background-image: -o-linear-gradient(
-        bottom,
-        rgba(29,43,82,0.65) 89%,
-        rgba(29,43,82,0.75) 57%
-    );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
-    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
-    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
-    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
-    color: rgb(240, 240, 260);
-    pointer-events: auto;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
 
 button{
     behavior: url(/css/pie/PIE.htc);
@@ -110,6 +77,15 @@ button:hover{
     color: #555555;
 }
 
+.mol-Splash .lists {
+    display: none;
+}
+
+.mol-Splash .maps {
+    display: none;
+}
+
+
 .mol-Splash .IEwarning {
 	max-width:600px;
 	max-height:400px;
@@ -135,6 +111,7 @@ button:hover{
     display:inline-block;
     height:250px;
     padding:0.3em;
+    margin: 1em;
     border: 0.15em solid #555555;
     border-radius: 0.7em;
 }
@@ -144,7 +121,7 @@ button:hover{
     height:1em;
 }
 .mol-Splash .innerPanel {
-    margin-top: -0.5em;
+    margin: 1em;
 }
 .mol-Splash .bottomPanel {
     margin-top: 0.5em;
@@ -199,27 +176,8 @@ button:hover{
     cursor: pointer;
     text-align: center;
     text-decoration:none;
-    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%, 
-    	rgba(29,43,82,0.75) 57%);
-    background-image: -webkit-gradient(
-        linear,
-        left bottom,
-        left top,
-        color-stop(0.89, rgba(29,43,82,0.65)),
-        color-stop(0.57, rgba(29,43,82,0.75))
-    );
-    background-image: -moz-linear-gradient(
-        center bottom,
-        rgba(29,43,82,0.65) 89%,
-        rgba(29,43,82,0.75) 57%
-    );
-    background-image: -o-linear-gradient(
-        bottom,
-        rgba(29,43,82,0.65) 89%,
-        rgba(29,43,82,0.75) 57%
-    );  
-    filter: progid:DXImageTransform.Microsoft.gradient(
-    	startColorstr='#A51D2B52', endColorstr='#BF1D2B52'); 
+    background-image: linear-gradient(to bottom, #062d66 0,#072e67 100%);
+    
     -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px; 
     -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
     box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
@@ -1098,28 +1056,7 @@ div.mol-Dashboard-TableWindow {
 
 .mol-Dashboard .ui-dialog-titlebar, .ui-widget-header, .dashboard {
     background: none;
-    background-image: -ms-linear-gradient(rgba(29,43,82,0.65) 89%,
-        rgba(29,43,82,0.75) 57%);
-    background-image: -webkit-gradient(
-        linear,
-        left bottom,
-        left top,
-        color-stop(0.89, rgba(29,43,82,0.65)),
-        color-stop(0.57, rgba(29,43,82,0.75))
-    );
-    background-image: -moz-linear-gradient(
-        center bottom,
-        rgba(29,43,82,0.65) 89%,
-        rgba(29,43,82,0.75) 57%
-    );
-    background-image: -o-linear-gradient(
-        bottom,
-        rgba(29,43,82,0.65) 89%,
-        rgba(29,43,82,0.75) 57%
-    );
-
-    filter: progid:DXImageTransform.Microsoft.gradient(
-        startColorstr='#A51D2B52', endColorstr='#BF1D2B52');
+    background-image: linear-gradient(to bottom, #062d66 0,#072e67 100%);
     -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
     -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
     box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
@@ -1158,7 +1095,7 @@ div.mol-Dashboard-TableWindow {
 }
 
 .mol-LayerControl-Results .filters .filter .options{
-    max-height: 150px;
+    max-height: 77px;
     overflow-y: auto;
 }
 .mol-LayerControl-Results .filters .filter .filterName{
@@ -1245,7 +1182,7 @@ div.mol-Dashboard-TableWindow {
     position: relative;
     list-style-type: none;
     padding: 0px;
-    max-height: 380px;
+    max-height: 280px;
     margin-top: 3px;
     margin-bottom: 0px;
     overflow-y: auto;

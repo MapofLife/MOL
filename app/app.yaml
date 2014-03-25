@@ -55,6 +55,12 @@ handlers:
 - url: /list
   script: list_handler.application
   
+- url: /lists
+  script: app.application
+  
+- url: /maps
+  script: app.application
+  
 - url: /tile
   script: demo_handler.application
   

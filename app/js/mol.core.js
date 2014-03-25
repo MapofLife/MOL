@@ -31,4 +31,5 @@ mol.modules.core = function(mol) {
         return (unescape(string.replace(/222/g,'%').replace(/333/g,'.').replace(/444/g, '/')));
     };
     
-}
+};
+

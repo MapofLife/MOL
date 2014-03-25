@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../../../css/tablesorter.css">
     <link rel="stylesheet" href="../../../css/theme.blue.css">
     <link rel="stylesheet" href="../../../css/spectrum.css">
+    <link rel="stylesheet" href="../../../css/theme.css">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v2/themes/css/cartodb.css" />
 
@@ -21,7 +22,6 @@
     <script type="text/javascript">
         google.load("visualization", "1", {packages:["corechart"]});
     </script>
-    <script type="text/javascript" src="http://mapbox.com/wax/dist/wax.g.js"></script>
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.0&sensor=false"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
@@ -54,9 +54,9 @@
      <script type="text/javascript" src="../../../js/mol.map.results.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.layers.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.tiles.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.menu.js"></script>
+  
      <script type="text/javascript" src="../../../js/mol.map.loading.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.dashboard.js"></script>
+     
      <script type="text/javascript" src="../../../js/mol.map.feature.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.query.js"></script>
      <script type="text/javascript" src="../../../js/mol.map.basemap.js"></script>
@@ -104,7 +104,31 @@
 </script>
   </head>
   <body>
-    <div id="map_container" class="map_container"></div>
+    <div class="header">
+         <div class="logo">
+            <img src="static/img/logo.png" 
+            onclick="http://www.mol.org/" 
+            class="logo" />
+         </div>
+    </div> 
+    <div class="navigation">
+        <div class="nav_buttons col-md-12">
+            <span class="nav_button maps" 
+                onclick="window.location.href='/maps';">
+                Map a Species
+            </span>
+            <span class="nav_button lists"  
+                onclick="window.location.href='/lists'">
+                List Species at a Location
+            </span>
+            <span class="map_control">
+            </span>
+        </div>
+    </div>
+    <div id="map_container" class="map_container">
+    </div>
+    <div class="footer">
+    </div>
     <script type="text/javascript">
       $.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase());
       $(document).ready(function() {
@@ -126,12 +150,8 @@
                le.start()
                re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
                re.start()
-               ne = new env.map.menu.MenuEngine(proxy, bus)
-               ne.start()
                le = new env.map.loading.LoadingEngine(proxy, bus)
                 le.start()
-                de = new env.map.dashboard.DashboardEngine(proxy, bus)
-                de.start()
                 fe = new env.map.feature.FeatureEngine(proxy, bus, me.display.map)
                 fe.start()
                 qe = new env.map.query.QueryEngine(proxy, bus, me.display.map)
@@ -169,12 +189,10 @@
                le.start()
                re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
                re.start()
-               ne = new env.map.menu.MenuEngine(proxy, bus)
-               ne.start()
+              
                le = new env.map.loading.LoadingEngine(proxy, bus)
                 le.start()
-                de = new env.map.dashboard.DashboardEngine(proxy, bus);
-                 de.start()
+              
                  fe = new env.map.feature.FeatureEngine(proxy, bus, me.display.map)
                 fe.start()
                 qe = new env.map.query.QueryEngine(proxy, bus, me.display.map);

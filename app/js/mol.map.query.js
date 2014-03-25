@@ -30,8 +30,18 @@ mol.modules.map.query = function(mol) {
         },
 
         start : function() {
-            this.addQueryDisplay();
-            this.addEventHandlers();
+            var mode = unescape(
+                window.location.pathname
+                    .replace(/\//g, '')
+                    .replace(/\+/g, ' ')
+                    .replace(/_/g, ' ')
+                );
+            if (mode == 'lists') {
+                this.enabled == true;
+                this.addQueryDisplay();
+                this.addEventHandlers();
+                this.registerClick();
+            }
         },
 
         toggleMapClicks : function(toggle) {
@@ -54,13 +64,15 @@ mol.modules.map.query = function(mol) {
                     position: google.maps.ControlPosition.TOP_RIGHT
                 },
                 self = this;
-
+                
+            
 
             this.enabled=true;
             this.features={};
             this.display = new mol.map.QueryDisplay();
             params.display = this.display;
-            this.bus.fireEvent(new mol.bus.Event('add-map-control', params));
+            this.bus.fireEvent(new mol.bus.Event(
+                'add-map-control', params));
         },
         registerClick : function () {
             var self = this;
@@ -74,7 +86,7 @@ mol.modules.map.query = function(mol) {
                     var params = {
                             gmaps_event : event,
                             map : self.map
-                        }
+                    };
                     self.bus.fireEvent(
                         new mol.bus.Event('species-list-query-click',params)
                     );
@@ -213,20 +225,7 @@ mol.modules.map.query = function(mol) {
 				}
 					
 			);
-            /*
-             * Toggle Click Handler for Species List Clicking
-             */
-            this.display.queryButton.click(
-                function(event) {
-                    var params = {};
-
-                    params.visible = self.display.speciesDisplay
-                                        .is(':visible') ? false : true;
-
-                    self.bus.fireEvent(
-                        new mol.bus.Event('species-list-tool-toggle', params));
-                }
-            );
+            
             this.bus.addHandler(
                 'clear-lists',
                 function(event) {
@@ -322,30 +321,10 @@ mol.modules.map.query = function(mol) {
             );
             
             this.bus.addHandler(
-                'layer-click-action',
-                function(event) {
-                    if(event.action == 'list') {
-                        self.enabled = true;
-                        $(self.display.queryButton).addClass('selected');
-                        $(self.display.queryButton).html("ON");
-                    } else {
-                        self.enabled = false;
-                        $(self.display.queryButton).removeClass('selected');
-                        $(self.display.queryButton).html("OFF");
-                    }
-
-                    if(self.enabled == false) {
-                        self.display.speciesDisplay.hide();
-                    } else {
-                        self.display.speciesDisplay.show();
-                    }
-                }
-            );
-            this.bus.addHandler(
                 'show-list-hint',
                 function(event) {
                     if(!self.seenHint) {
-                        $(self.display.queryButton).qtip({
+                        $(self.display).qtip({
                             content: {
                                 text: '' +
                                 '<div class="mol-hint">'+
@@ -392,9 +371,7 @@ mol.modules.map.query = function(mol) {
                     
                     $(self.display.dataset_id)
                     
-                    if (self.enabled
-                            &&
-                            $(self.display.queryButton).hasClass('selected')) {
+                    if (self.enabled) {
                             listradius = new google.maps.Circle(
                             {
                                 map: self.map,
@@ -498,19 +475,6 @@ mol.modules.map.query = function(mol) {
             this.bus.addHandler(
                 'species-list-tool-toggle',
                 function(event, params) {
-                    if(event.visible == true) {
-                        self.enabled = true;
-                    } else {
-                        self.enabled = false;
-                    }
-
-                    if(self.enabled == false) {
-                        self.display.speciesDisplay.hide();
-                    } else {
-                        self.display.speciesDisplay.show();
-                        self.bus.fireEvent(new mol.bus.Event('hide-search'));
-                    }
-
                     if (self.listradius) {
                         self.listradius.setMap(null);
                         $(self.overlayPane.firstChild.firstChild).hide();
@@ -545,8 +509,6 @@ mol.modules.map.query = function(mol) {
                             }
                         );
 
-                        $(self.display.queryButton).removeClass('selected');
-                        $(self.display.queryButton).html("OFF");
                         self.toggleMapClicks(false);
                     }
                 }
@@ -811,7 +773,7 @@ mol.modules.map.query = function(mol) {
             return {speciestotal: speciestotal,
                     content: content,
                     dlContent: dlContent,
-                    iucnContent: iucnContent}
+                    iucnContent: iucnContent};
         },
 
         /*
@@ -1150,7 +1112,7 @@ mol.modules.map.query = function(mol) {
                       //
                     }
                 }
-            )
+            );
 
             $('#gallery li div').qtip({
                 content: {
@@ -1399,13 +1361,6 @@ mol.modules.map.query = function(mol) {
                     '  "Use this control to select species group and radius."' +
                     ' class="' + className +
                     '  widgetTheme">' +
-                    '  <span class="title">Species Lists</span>' +
-                    '  <button id="speciesListButton" ' +
-                             'class="toggleBtn" ' +
-                             'title="Click to activate species' +
-                                 ' list querying.">' +
-                             'OFF' +
-                    '  </button>' +
                     '  <div class="speciesDisplay" >' +
                          'Radius </span>' +
                     '    <select class="radius">' +
@@ -1456,8 +1411,6 @@ mol.modules.map.query = function(mol) {
             this.types=$(this).find('.types');
             this.queryButton=$(this).find('#speciesListButton');
             this.speciesDisplay = $(this).find('.speciesDisplay');
-            $(this.speciesDisplay).hide();
-
             $(this.types).find('.ecoregion').toggle(false);
             $(this.types).find('.range').toggle(false);
         }

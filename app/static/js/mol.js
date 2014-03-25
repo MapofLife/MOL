@@ -102,7 +102,8 @@ mol.modules.core = function(mol) {
         return (unescape(string.replace(/222/g,'%').replace(/333/g,'.').replace(/444/g, '/')));
     };
     
-}
+};
+
 mol.modules.bus = function(mol) {
 
     mol.bus = {};
@@ -340,9 +341,7 @@ mol.modules.map = function(mol) {
             'results',
             'layers',
             'tiles',
-            'menu',
             'loading',
-            'dashboard',
             'feature',
             'query',
             'basemap',
@@ -3405,11 +3404,19 @@ mol.modules.map.search = function(mol) {
          * ignored.
          */
         start: function() {
-            this.display = new mol.map.search.SearchDisplay();
-            this.display.toggle(true);
-            this.initAutocomplete();
-            this.addEventHandlers();
-            this.fireEvents();
+            var mode = unescape(
+                window.location.pathname
+                    .replace(/\//g, '')
+                    .replace(/\+/g, ' ')
+                    .replace(/_/g, ' ')
+                );
+            if (mode != 'lists') {
+                this.display = new mol.map.search.SearchDisplay();
+                this.display.toggle(true);
+                this.initAutocomplete();
+                this.addEventHandlers();
+                this.fireEvents();
+            }
         },
         /*
          * Initialize autocomplate functionality
@@ -5310,8 +5317,18 @@ mol.modules.map.query = function(mol) {
         },
 
         start : function() {
-            this.addQueryDisplay();
-            this.addEventHandlers();
+            var mode = unescape(
+                window.location.pathname
+                    .replace(/\//g, '')
+                    .replace(/\+/g, ' ')
+                    .replace(/_/g, ' ')
+                );
+            if (mode == 'lists') {
+                this.enabled == true;
+                this.addQueryDisplay();
+                this.addEventHandlers();
+                this.registerClick();
+            }
         },
 
         toggleMapClicks : function(toggle) {
@@ -5334,13 +5351,15 @@ mol.modules.map.query = function(mol) {
                     position: google.maps.ControlPosition.TOP_RIGHT
                 },
                 self = this;
-
+                
+            
 
             this.enabled=true;
             this.features={};
             this.display = new mol.map.QueryDisplay();
             params.display = this.display;
-            this.bus.fireEvent(new mol.bus.Event('add-map-control', params));
+            this.bus.fireEvent(new mol.bus.Event(
+                'add-map-control', params));
         },
         registerClick : function () {
             var self = this;
@@ -5354,7 +5373,7 @@ mol.modules.map.query = function(mol) {
                     var params = {
                             gmaps_event : event,
                             map : self.map
-                        }
+                    };
                     self.bus.fireEvent(
                         new mol.bus.Event('species-list-query-click',params)
                     );
@@ -5493,20 +5512,7 @@ mol.modules.map.query = function(mol) {
 				}
 					
 			);
-            /*
-             * Toggle Click Handler for Species List Clicking
-             */
-            this.display.queryButton.click(
-                function(event) {
-                    var params = {};
-
-                    params.visible = self.display.speciesDisplay
-                                        .is(':visible') ? false : true;
-
-                    self.bus.fireEvent(
-                        new mol.bus.Event('species-list-tool-toggle', params));
-                }
-            );
+            
             this.bus.addHandler(
                 'clear-lists',
                 function(event) {
@@ -5602,30 +5608,10 @@ mol.modules.map.query = function(mol) {
             );
             
             this.bus.addHandler(
-                'layer-click-action',
-                function(event) {
-                    if(event.action == 'list') {
-                        self.enabled = true;
-                        $(self.display.queryButton).addClass('selected');
-                        $(self.display.queryButton).html("ON");
-                    } else {
-                        self.enabled = false;
-                        $(self.display.queryButton).removeClass('selected');
-                        $(self.display.queryButton).html("OFF");
-                    }
-
-                    if(self.enabled == false) {
-                        self.display.speciesDisplay.hide();
-                    } else {
-                        self.display.speciesDisplay.show();
-                    }
-                }
-            );
-            this.bus.addHandler(
                 'show-list-hint',
                 function(event) {
                     if(!self.seenHint) {
-                        $(self.display.queryButton).qtip({
+                        $(self.display).qtip({
                             content: {
                                 text: '' +
                                 '<div class="mol-hint">'+
@@ -5672,9 +5658,7 @@ mol.modules.map.query = function(mol) {
                     
                     $(self.display.dataset_id)
                     
-                    if (self.enabled
-                            &&
-                            $(self.display.queryButton).hasClass('selected')) {
+                    if (self.enabled) {
                             listradius = new google.maps.Circle(
                             {
                                 map: self.map,
@@ -5778,19 +5762,6 @@ mol.modules.map.query = function(mol) {
             this.bus.addHandler(
                 'species-list-tool-toggle',
                 function(event, params) {
-                    if(event.visible == true) {
-                        self.enabled = true;
-                    } else {
-                        self.enabled = false;
-                    }
-
-                    if(self.enabled == false) {
-                        self.display.speciesDisplay.hide();
-                    } else {
-                        self.display.speciesDisplay.show();
-                        self.bus.fireEvent(new mol.bus.Event('hide-search'));
-                    }
-
                     if (self.listradius) {
                         self.listradius.setMap(null);
                         $(self.overlayPane.firstChild.firstChild).hide();
@@ -5825,8 +5796,6 @@ mol.modules.map.query = function(mol) {
                             }
                         );
 
-                        $(self.display.queryButton).removeClass('selected');
-                        $(self.display.queryButton).html("OFF");
                         self.toggleMapClicks(false);
                     }
                 }
@@ -6091,7 +6060,7 @@ mol.modules.map.query = function(mol) {
             return {speciestotal: speciestotal,
                     content: content,
                     dlContent: dlContent,
-                    iucnContent: iucnContent}
+                    iucnContent: iucnContent};
         },
 
         /*
@@ -6430,7 +6399,7 @@ mol.modules.map.query = function(mol) {
                       //
                     }
                 }
-            )
+            );
 
             $('#gallery li div').qtip({
                 content: {
@@ -6679,13 +6648,6 @@ mol.modules.map.query = function(mol) {
                     '  "Use this control to select species group and radius."' +
                     ' class="' + className +
                     '  widgetTheme">' +
-                    '  <span class="title">Species Lists</span>' +
-                    '  <button id="speciesListButton" ' +
-                             'class="toggleBtn" ' +
-                             'title="Click to activate species' +
-                                 ' list querying.">' +
-                             'OFF' +
-                    '  </button>' +
                     '  <div class="speciesDisplay" >' +
                          'Radius </span>' +
                     '    <select class="radius">' +
@@ -6736,8 +6698,6 @@ mol.modules.map.query = function(mol) {
             this.types=$(this).find('.types');
             this.queryButton=$(this).find('#speciesListButton');
             this.speciesDisplay = $(this).find('.speciesDisplay');
-            $(this.speciesDisplay).hide();
-
             $(this.types).find('.ecoregion').toggle(false);
             $(this.types).find('.range').toggle(false);
         }
@@ -7268,6 +7228,7 @@ mol.modules.map.splash = function(mol) {
             this.bus = bus;
             this.map = map;
             this.IE8 = false;
+            this.mode = 'maps';
         },
         start: function() {
         	if (this.getIEVersion() < 9 && this.getIEVersion() >= 0) {
@@ -7296,12 +7257,14 @@ mol.modules.map.splash = function(mol) {
         },
         initDialog: function() {
             var self = this;
+            
             this.display.dialog({
                 autoOpen: true,
-                width: $(window).width() > 778  ? 778 : $(window).width() - 30,
-                height: $(window).width() > 535  ? 535 : $(window).width() - 30,
+                class: 'widgetTheme',
+                width: $(window).width() > 415  ? 415 : $(window).width() - 30,
+                height: $(window).height() > 280  ? 280 : $(window).width() - 30,
                 DialogClass: "mol-splash",
-                title: "Map of Life",
+                title: (self.mode == 'maps') ? "Map a species" : "See a species list.",
                 close: function() {
                     self.bus.fireEvent(new mol.bus.Event('dialog-closed-click'));
                 }
@@ -7492,6 +7455,8 @@ mol.modules.map.splash = function(mol) {
             'toggle-splash',
             function(event) {
                 self.bus.fireEvent(new mol.bus.Event('clear-lists'));
+                $(self.display).find('.{0}'.format(event.mode)).show();
+                self.mode = event.mode;
                 self.initDialog();
                 
             });
@@ -7501,17 +7466,7 @@ mol.modules.map.splash = function(mol) {
         init: function() {
             var html = '' +
             '<div class="mol-Splash">' +
-                '<div tabindex=0 class="message"></div>' +
-                '<div class="header">' +
-                    '<div style="font-size:16px; margin-bottom:6px;">' +
-                        'Map of Life is an online resource for mapping, ' +
-                        'monitoring and analyzing biodiversity worldwide. ' +
-                        'Welcome to this demo version!' +
-                    '</div>' +
-                '</div>' +
-                '<div class="mainPanel">' +
-                    '<span class="legend">Map a species</span>' +
-                    '<div class="innerPanel">' +
+                    '<div class="innerPanel maps">' +
                         '<div class="imagePanel">' +
                             '<img src="../static/img/puma-range150px.jpg"/>' +
                         '</div>' +
@@ -7575,11 +7530,7 @@ mol.modules.map.splash = function(mol) {
                         '</div>'   +
                     '</div>'+
                 '</div>' +
-            '</div>' +
-            '<div class="spacer"></div>' +
-            '<div class="mainPanel">' +       
-                '<span class="legend">See a species list</span>' +
-                '<div class="innerPanel">' +
+                '<div class="innerPanel lists">' +
                     '<div class="imagePanel">' +
                         '<img src="../static/img/species-list150px.jpg"/>' +
                     '</div>' +
@@ -7643,106 +7594,6 @@ mol.modules.map.splash = function(mol) {
                                 '</span>' +
                             '</div>' + 
                         '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="bottomPanel">' +
-                    '<span class="mol-Splash dashboard button">' +
-                        'All datasets' +
-                    '</span>' +
-                    '<div class="spacer"></div>'+
-                    '<span class="mol-Splash about button">' +
-                        'About' +
-                    '</span>' + 
-                '</div>' +
-                
-            '<div id="footer_imgs" style="text-align: center;clear: both;">' + 
-                '<div>Sponsors, partners and supporters</div>' +
-                    '<a target="_blank" ' +
-                    	'tabindex="10" ' +
-                    	'href="http://www.yale.edu/jetz/">' +
-            			'<button>' +
-            				'<img width="72px" ' +
-    					        'height="36px" ' +
-    					        'title="Jetz Lab, Yale University" ' +
-    					        'src="/static/home/yale.png">' +
-        				'</button>' +
-    				'</a>' +
-                    '<a target="_blank" ' +
-                        'tabindex="11" ' +
-                        'href="http://sites.google.com/site/robgur/">' +
-                        '<button>' +
-                            '<img width="149px" height="36px" ' +
-                            'title="Guralnick Lab, University of Colorado Boulder" ' +
-                            'src="/static/home/cuboulder.png">' +
-                        '</button>' +
-                    '</a>' +
-                    '<a target="_blank" ' +
-                    	'tabindex="12" ' +
-                    	'href="http://www.gbif.org/">' +
-                    	'<button>' +
-                    		'<img width="33px" height="32px" ' +
-                    		'title="Global Biodiversity Information Facility" '+
-                    		'src="/static/home/gbif.png">' +
-                		'</button>' +
-            		'</a>' +
-                    '<a target="_blank" tabindex="13" ' +
-                    	'href="http://www.eol.org/">' +
-                    	'<button>' +
-                    		'<img width="51px" height="32px" ' +
-                    			'title="Encyclopedia of Life" ' +
-                    			'src="http://www.mappinglife.org/static/home/eol.png">' +
-            			'</button>' +
-        			'</a>' +
-                    '<a target="_blank" tabindex="14" ' +
-                    	'href="http://www.nasa.gov/">' +
-                    	'<button>' +
-                    		'<img width="37px" height="32px" ' +
-                    			'title="National Aeronautics and Space Administration" ' +
-                    			'src="http://www.mappinglife.org/static/home/nasa.png">' +
-            			'</button>' +
-        			'</a>' +
-                    '<br>' +
-                    '<a target="_blank" tabindex="15" ' +	
-                    	'href="http://www.nceas.ucsb.edu/">' +
-                    	'<button>' +
-                    	    '<img width="30px" height="32px" ' +
-                    		    'title="National Center for Ecological Analysis and Synthesis" ' +
-                    		    'src="http://www.mappinglife.org/static/home/nceas.png">' +
-        			    '</button>' +
-    			    '</a>' +
-                    '<a target="_blank" tabindex="16" ' +
-                        'href="http://www.iplantcollaborative.org/">' +
-                        '<button>' +
-                            '<img width="105px" height="32px" ' +
-                                'title="iPlant Collaborative" ' +
-                                'src="http://www.mappinglife.org/static/home/iplant.png">' +
-                        '</button>' +
-                    '</a>' +
-                    '<a target="_blank" tabindex="17" ' +
-                    	'href="http://www.senckenberg.de">' +
-                    	'<button>' +
-                    		'<img width="81px" height="32px" ' +
-                    			'title="Senckenberg" ' +
-                    			'src="http://www.mappinglife.org/static/home/senckenberg.png">' +
-            			'</button>' +
-        			'</a>' +	
-                    '<a target="_blank" tabindex="18" ' +
-                    	'href="http://www.bik-f.de/">' +
-                    		'<button>' +
-                    			'<img width="74px" height="32px" ' +
-                    				'title="Biodiversität und Klima Forschungszentrum (BiK-F)" ' +
-                    				'src="http://www.mappinglife.org/static/home/bik_bildzeichen.png">' +
-            				'</button>' +
-    				'</a>' +
-                    '<a target="_blank" tabindex="19" ' +
-                    	'href="http://www.mountainbiodiversity.org/">' +
-                    	'<button>' +
-                    		'<img width="59px" height="32px" ' +
-                    			'title="Global Mountain Biodiversity Assessment" ' +
-                    			'src="http://www.mappinglife.org/static/home/gmba.png">' +
-            			'</button>' +
-        			'</a>' +
-                '</div>' +
             '</div>';
             this._super(html);
             this.about = $(this).find('.about');
@@ -9332,11 +9183,21 @@ mol.modules.map.boot = function(mol) {
                     .replace(/\+/g, ' ')
                     .replace(/_/g, ' ')
             );
+            if (this.term == 'maps' || this.term == 'lists') {
+                self.bus.fireEvent(new mol.bus.Event(
+                        'toggle-splash', {mode: this.term}));
+                $('.nav_button').removeClass('selected');
+                $('.nav_button.{0}'.format(this.term)).addClass('selected');
+                return;
+            } 
+            
 
             if ((this.getIEVersion() >= 0 && this.getIEVersion() <= 8) 
                 || this.term == '') {
                 // If on IE8- or no query params, fire the splash event
-                self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
+                 $('.nav_button').removeClass('selected');
+                $('.nav_button.maps'.format(this.term)).addClass('selected');
+                self.bus.fireEvent(new mol.bus.Event('toggle-splash',{mode:'maps'}));
             } else {
                 // Otherwise, try and get a result using term
                 $.getJSON(

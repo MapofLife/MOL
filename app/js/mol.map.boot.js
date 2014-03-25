@@ -78,11 +78,21 @@ mol.modules.map.boot = function(mol) {
                     .replace(/\+/g, ' ')
                     .replace(/_/g, ' ')
             );
+            if (this.term == 'maps' || this.term == 'lists') {
+                self.bus.fireEvent(new mol.bus.Event(
+                        'toggle-splash', {mode: this.term}));
+                $('.nav_button').removeClass('selected');
+                $('.nav_button.{0}'.format(this.term)).addClass('selected');
+                return;
+            } 
+            
 
             if ((this.getIEVersion() >= 0 && this.getIEVersion() <= 8) 
                 || this.term == '') {
                 // If on IE8- or no query params, fire the splash event
-                self.bus.fireEvent(new mol.bus.Event('toggle-splash'));
+                 $('.nav_button').removeClass('selected');
+                $('.nav_button.maps'.format(this.term)).addClass('selected');
+                self.bus.fireEvent(new mol.bus.Event('toggle-splash',{mode:'maps'}));
             } else {
                 // Otherwise, try and get a result using term
                 $.getJSON(

@@ -1,0 +1,60 @@
+.widgetTheme{
+    background-image: linear-gradient(to bottom, #062d66 0,#072e67 100%);
+    -webkit-box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
+    box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
+    color: rgb(240, 240, 260);
+    opacity: 0.8;
+    pointer-events: auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+.navigation {
+    display:block;
+    text-align: center;
+    background-color: #8cbf44;
+    width: 100%;
+    
+}
+.nav_buttons {
+    text-align: left;
+    color: #fff;
+    font-size:1.1em;
+    font-weight: normal;
+    padding: 0.62em;
+    
+}
+.nav_button {
+    padding:0.3em;
+    /*border-radius: 0.3em;*/
+    margin-right:1.5em;
+    cursor: pointer;
+    
+    /*line-height: 2.4em;*/
+}
+.nav_button:hover {
+    background-color: #7bae33;
+}
+.map_control {
+    float:right;
+}
+.nav_buttons .selected {
+   background-color: #7bae33;
+}
+.logo {
+    height:80px;
+}
+.footer {
+    display: block;
+    color: #fff;
+    background: #062d66 
+        url(../static/img/footer_background.png) no-repeat left bottom;
+    height: 15em;
+    width: 100%;
+}

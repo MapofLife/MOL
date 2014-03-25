@@ -78,11 +78,19 @@ mol.modules.map.search = function(mol) {
          * ignored.
          */
         start: function() {
-            this.display = new mol.map.search.SearchDisplay();
-            this.display.toggle(true);
-            this.initAutocomplete();
-            this.addEventHandlers();
-            this.fireEvents();
+            var mode = unescape(
+                window.location.pathname
+                    .replace(/\//g, '')
+                    .replace(/\+/g, ' ')
+                    .replace(/_/g, ' ')
+                );
+            if (mode != 'lists') {
+                this.display = new mol.map.search.SearchDisplay();
+                this.display.toggle(true);
+                this.initAutocomplete();
+                this.addEventHandlers();
+                this.fireEvents();
+            }
         },
         /*
          * Initialize autocomplate functionality
