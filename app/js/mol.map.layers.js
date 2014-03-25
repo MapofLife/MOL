@@ -904,13 +904,6 @@ mol.modules.map.layers = function(mol) {
                     '<div class="layers widgetTheme">' +
                         '<div class="layersHeader">' +
                             '<button class="layersToggle button">▲</button>' +
-                            '<button id="layerClickButton" ' +
-                                     'class="toggleBtn selected" ' +
-                                     'title="Click to activate map layer' +
-                                         ' querying.">' +
-                                     'ON' +
-                            '</button>' +
-                            '<span class="title">Identify Layers</span>' +
                             'Layers' +
                         '</div>' +
                         '<div class="layersContainer">' +

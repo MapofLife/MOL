@@ -589,7 +589,7 @@ mol.modules.map = function(mol) {
     mol.map.MapDisplay = mol.mvp.View.extend(
         {
             init: function(element) {
-                var mapOptions = null;
+                var mapOptions = null, self = this;
 
                 this._super(element);
 
@@ -687,7 +687,16 @@ mol.modules.map = function(mol) {
                     ]
                 };
 
+				$(this.element).height($(window).height()-$('.navigation').height()-$('header').height());
+				$(window).resize(
+					function(event) {
+						$(self.element).height($(window).height()-$('.navigation').height()-$('header').height())	
+					}
+				)
+				
                 this.map = new google.maps.Map(this.element, mapOptions);
+                
+                
             }
         }
     );
@@ -1742,13 +1751,6 @@ mol.modules.map.layers = function(mol) {
                     '<div class="layers widgetTheme">' +
                         '<div class="layersHeader">' +
                             '<button class="layersToggle button">▲</button>' +
-                            '<button id="layerClickButton" ' +
-                                     'class="toggleBtn selected" ' +
-                                     'title="Click to activate map layer' +
-                                         ' querying.">' +
-                                     'ON' +
-                            '</button>' +
-                            '<span class="title">Identify Layers</span>' +
                             'Layers' +
                         '</div>' +
                         '<div class="layersContainer">' +
@@ -6373,12 +6375,15 @@ mol.modules.map.query = function(mol) {
                     visible: function(event, api) {
                         $("button.mapButton").click(
                             function(event) {
-                                self.bus.fireEvent(
-                                    new mol.bus.Event(
-                                        'search',
-                                        {term : $.trim(event.target.value)}
-                                    )
+                                window.location.href = '/{0}'.format(
+                                	event.target.value
                                 );
+                                //self.bus.fireEvent(
+                                //    new mol.bus.Event(
+                                //        'search',
+                                //        {term : $.trim(event.target.value)}
+                                //    )
+                                //);
                             }
                         );
 
@@ -6541,12 +6546,15 @@ mol.modules.map.query = function(mol) {
 
             $("button.mapButton").click(
                 function(event) {
-                    self.bus.fireEvent(
-                        new mol.bus.Event(
-                            'search',
-                            {term : $.trim(event.target.value)}
-                        )
+                    window.location.href = '/{0}'.format(
+                    	event.target.value
                     );
+                    //self.bus.fireEvent(
+                    //    new mol.bus.Event(
+                    //        'search',
+                    //        {term : $.trim(event.target.value)}
+                    //    )
+                    //);
                 }
             );
         },
