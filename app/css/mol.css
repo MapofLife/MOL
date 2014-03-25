@@ -1,5 +1,5 @@
 html { height: 100% }
-body { height: 100%; margin: 0px; padding: 0px; overflow-y: auto;
+body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;
        min-width: 720px; min-height: 500px;
        font-family: Arial, sans-serif; color: #141414; font-weight:700;}
 .map_container {min-height: 300px; }
