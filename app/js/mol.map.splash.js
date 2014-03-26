@@ -42,7 +42,7 @@ mol.modules.map.splash = function(mol) {
                 autoOpen: true,
                 class: 'widgetTheme',
                 width: $(window).width() > 415  ? 415 : $(window).width() - 30,
-                height: $(window).height() > 280  ? 280 : $(window).width() - 30,
+                height: $(window).height() > 285  ? 285 : $(window).height() - 30,
                 DialogClass: "mol-splash",
                 title: (self.mode == 'maps') ? "Map a species" : "See a species list.",
                 close: function() {
@@ -173,16 +173,7 @@ mol.modules.map.splash = function(mol) {
                     self.display.dialog("close");
                 }
             );
-            this.display.dashboard.click(
-                function(event) {
-                    self.bus.fireEvent(
-                        new mol.bus.Event(
-                            'taxonomy-dashboard-toggle',
-                            {visible: true}
-                        )
-                    );
-                }
-            );
+
             
             this.display.search.click(
                 function(event) {

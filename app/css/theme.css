@@ -17,7 +17,7 @@
     -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.347656);
     box-shadow: rgba(0, 0, 0, 0.347656) 2px 2px 3px;
     color: rgb(240, 240, 260);
-    opacity: 0.8;
+    opacity: 1;
     pointer-events: auto;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -60,9 +60,7 @@
 .nav_buttons .selected {
    background-color: #7bae33;
 }
-.logo {
-    height:80px;
-}
+
 .footer {
     display: block;
     color: #fff;

@@ -81,8 +81,8 @@ mol.modules.map.boot = function(mol) {
             if (this.term == 'maps' || this.term == 'lists') {
                 self.bus.fireEvent(new mol.bus.Event(
                         'toggle-splash', {mode: this.term}));
-                $('.nav_button').removeClass('selected');
-                $('.nav_button.{0}'.format(this.term)).addClass('selected');
+                $('.nav_tab').removeClass('selected');
+                $('.nav_tab.{0}'.format((this.term=='') ? 'maps' : this.term)).addClass('selected');
                 return;
             } 
             
@@ -90,8 +90,8 @@ mol.modules.map.boot = function(mol) {
             if ((this.getIEVersion() >= 0 && this.getIEVersion() <= 8) 
                 || this.term == '') {
                 // If on IE8- or no query params, fire the splash event
-                 $('.nav_button').removeClass('selected');
-                $('.nav_button.maps'.format(this.term)).addClass('selected');
+                 $('.nav_tab').removeClass('selected');
+                $('.nav_tab.{0}'.format((this.term=='') ? 'maps' : this.term)).addClass('selected');
                 self.bus.fireEvent(new mol.bus.Event('toggle-splash',{mode:'maps'}));
             } else {
                 // Otherwise, try and get a result using term

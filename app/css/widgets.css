@@ -1067,7 +1067,7 @@ div.mol-Dashboard-TableWindow {
     overflow-x:hidden;
 }
 
-.mol-Dashboard .ui-dialog-titlebar, .ui-widget-header, .dashboard {
+.ui-dialog-titlebar, .ui-widget-header, .dashboard {
     background-image: -webkit-gradient(
 		linear,
 		left top,
@@ -1449,6 +1449,7 @@ div.mol-Dashboard-TableWindow {
 }
 
 .mol-Map-ListDialogContent .ui-tabs-nav.ui-widget-header {
+    background: #eeeeee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;
     box-shadow: none;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;

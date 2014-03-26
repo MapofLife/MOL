@@ -13,7 +13,7 @@ body, caption, th, td, input, textarea, select, option, legend, fieldset {
 	font-family: "Cantarell", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif
 }
 header {
-	/*border-bottom: solid 1.5em #8cbf44*/
+    border-bottom: solid 1.5em #8cbf44
 }
 .logo {
 	margin: 0.5em;
@@ -53,6 +53,9 @@ header {
 		font-size: 1em
 	}
 }
+
+
+
 .menu li {
 	list-style: none;
 	list-style-image: none;
@@ -61,6 +64,8 @@ header {
 	*zoom: 1;
 	margin: 0
 }
+
+
 .menu a:link, .menu a:visited {
 	color: #3d3c3c;
 	text-decoration: none;
@@ -79,6 +84,8 @@ header {
 	-o-border-radius: 0.5em 0.5em 0 0;
 	border-radius: 0.5em 0.5em 0 0
 }
+
+
 .menu .tab a:link:before, .menu .tab a:visited:before {
 	content: "\f041";
 	font-family: FontAwesome;
@@ -99,3 +106,8 @@ header {
 .menu .tab a:hover {
 	background-color: #e86e1d
 }
+
+.menu .tab a.selected {
+    background-color: #8cbf44;
+}
+

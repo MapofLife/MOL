@@ -25,7 +25,9 @@ mol.modules.map.query = function(mol) {
 
             try {
                 this.overlayView.setMap(map);
-            } catch(e) {}
+            } catch(e) {
+                console.log('couldnt set overlayview');
+            }
 
         },
 
@@ -194,6 +196,14 @@ mol.modules.map.query = function(mol) {
             );
             this.features={};
             this.queryct=0;
+            this.overlayView = new google.maps.OverlayView();
+            this.overlayView.draw = function () {};
+
+            try {
+                this.overlayView.setMap(map);
+            } catch(e) {
+                console.log('couldnt set overlayview');
+            }
         },
 
         addEventHandlers : function () {
@@ -240,8 +250,19 @@ mol.modules.map.query = function(mol) {
                         className = (event.className != undefined) ? 
                         event.className : 'Aves';
                     $(self.display).find('.dataset_id').val(dataset_id);
+                    self.bus.fireEvent(
+                        new mol.bus.Event(
+                            'show-loading-indicator', {source: 'geoloc'}));
+                    
                     navigator.geolocation.getCurrentPosition(
+                        
                         function(loc) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'hide-loading-indicator', 
+                                    {source: 'geoloc'}
+                                )
+                            );
                             self.bus.fireEvent(
                                 new mol.bus.Event(
                                     'species-list-tool-toggle',
@@ -344,7 +365,7 @@ mol.modules.map.query = function(mol) {
                                 fixed: false,
                                 event: 'unfocus'
                             }
-                        })
+                        });
                     }
                     self.seenHint = true
                 }
@@ -387,10 +408,7 @@ mol.modules.map.query = function(mol) {
 
                             }
                         );
-                        try {
-                            self.overlayPane = self.overlayView.getPanes().overlayLayer;
-                            $(self.overlayPane.firstChild.firstChild).show();
-                        } catch(e) {}
+                        
 
                         self.bus.fireEvent(new mol.bus.Event(
                             'show-loading-indicator',
@@ -447,8 +465,7 @@ mol.modules.map.query = function(mol) {
                             listRowsDone.iucnContent);
                     } else {
                         listradius.setMap(null);
-                        $(self.overlayPane.firstChild.firstChild)
-                            .hide();
+                       
 
                         delete(
                             self.features[listradius.center.toString()+
@@ -477,8 +494,7 @@ mol.modules.map.query = function(mol) {
                 function(event, params) {
                     if (self.listradius) {
                         self.listradius.setMap(null);
-                        $(self.overlayPane.firstChild.firstChild).hide();
-
+                      
                     }
 
                     if (self.enabled == true) {
@@ -870,7 +886,6 @@ mol.modules.map.query = function(mol) {
                    listTabs.tabs("destroy");
                    $(".mol-Map-ListDialogContent").remove();
                    listradius.setMap(null);
-                   $(self.overlayPane.firstChild.firstChild).hide();
 
                    delete (
                        self.features[listradius.center.toString() +
