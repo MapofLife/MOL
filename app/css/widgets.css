@@ -77,6 +77,9 @@ button:hover{
     color: #555555;
     overflow: hidden;
 }
+.mol-Splash.ui-dialog-content {
+    overflow:hidden;
+}
 
 .mol-Splash .lists {
     display: none;
@@ -883,7 +886,6 @@ white-space: nowrap;
 .mol-LayerControl-Search .title{
     float:left;
     line-height: 25px;
-    font-size: 0.8em;
     margin-right: 2px;
     -moz-user-select: none;
 }
@@ -1361,10 +1363,12 @@ div.mol-Dashboard-TableWindow {
 /*
  * Start Query Bar
  */
+
+
+
 .mol-Map-QueryDisplay {
-    float: right;
-    display: table-cell;
-    height: 26px;
+    display: block;
+    padding: 1em;
     -moz-border-radius: 4px;
     border-radius: 4px;
     white-space: nowrap;
@@ -1417,10 +1421,6 @@ div.mol-Dashboard-TableWindow {
 }
 
 .mol-Map-QueryDisplay div.speciesDisplay {
-    float: left;
-    font-size: 0.7em;
-    margin-right: 2px;
-    margin-top: 2px;
     -moz-user-select: none;
 }
 

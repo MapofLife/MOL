@@ -1186,4 +1186,6 @@ mol.modules.map.styler = function(mol) {
             this._super(html);
         }
     });
-}
+};
+
+

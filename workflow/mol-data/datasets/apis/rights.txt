@@ -1,5 +1,0 @@
-Please respect the rights declared for each dataset in the download:
-
-Dataset: APIS - Antarctic Pack Ice Seals 1994-1999, plus historical data from the 1980's, http://data.gbif.org/datasets/resource/83
-Rights as supplied: Data are freely available through GBIF, OBIS, SCAR-MarBIN and through the AADC web site. If substantial parts of the database is used for other data or information products, please acknowledge the source.
-

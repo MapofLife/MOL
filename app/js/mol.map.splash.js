@@ -41,7 +41,7 @@ mol.modules.map.splash = function(mol) {
             this.display.dialog({
                 autoOpen: true,
                 class: 'widgetTheme',
-                width: $(window).width() > 415  ? 415 : $(window).width() - 30,
+                width: $(window).width() > 405  ? 405 : $(window).width() - 30,
                 height: $(window).height() > 285  ? 285 : $(window).height() - 30,
                 DialogClass: "mol-splash",
                 title: (self.mode == 'maps') ? "Map a species" : "See a species list.",
@@ -115,7 +115,7 @@ mol.modules.map.splash = function(mol) {
             this.display.mapSingleLayer.click(
                 function(event) {
                     var params = {dataset_id: 'mol',
-                                    name: $(this).data("name")}
+                                    name: $(this).data("name")};
                     self.bus.fireEvent(new mol.bus.Event('map-single-species',params));
                     self.display.dialog("close");
                     self.bus.fireEvent(new mol.bus.Event('show-menu-hint'));

@@ -1,3 +1,0 @@
-Please cite this data as follows, and pay attention to the rights documented in the rights.txt:
-
-(accessed through GBIF data portal, APIS - Antarctic Pack Ice Seals 1994-1999, plus historical data from the 1980's, http://data.gbif.org/datasets/resource/83)

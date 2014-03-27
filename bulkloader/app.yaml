@@ -1,9 +1,0 @@
-application: map-of-life
-version: canary
-runtime: python27
-threadsafe: true
-api_version: 1
-
-builtins:
-- remote_api: on
-

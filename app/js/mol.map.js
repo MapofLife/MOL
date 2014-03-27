@@ -14,9 +14,6 @@ mol.modules.map = function(mol) {
             'metadata',
             'splash',
             'styler',
-            'help',
-            'status',
-            'images',
             'boot'
     ];
 
@@ -142,6 +139,7 @@ mol.modules.map = function(mol) {
                     self.display.map,
                     "idle",
                     function () {
+                        $('.gm-style').removeClass('gm-style');
                         self.bus.fireEvent(new mol.bus.Event('map-idle'));
                     }
                 );
@@ -353,13 +351,13 @@ mol.modules.map = function(mol) {
                     ]
                 };
 
-				$(this.element).height($(window).height()-$('.navigation').height()-$('header').height());
-				$(window).resize(
-					function(event) {
-						$(self.element).height($(window).height()-$('.navigation').height()-$('header').height())	
-					}
-				)
-				
+                $(this.element).height($(window).height()-$('header').height()-30);
+                $(window).resize(
+                    function(event) {
+                        $(self.element).height($(window).height()-$('header').height()-30)	
+                    }
+                );
+                
                 this.map = new google.maps.Map(this.element, mapOptions);
                 
                 

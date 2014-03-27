@@ -1,3 +1,0 @@
-Please cite this data as follows, and pay attention to the rights documented in the rights.txt:
-
-(accessed through GBIF data portal, National Whale and Dolphin Sightings and Strandings Database, http://data.gbif.org/datasets/resource/79)
