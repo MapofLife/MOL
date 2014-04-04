@@ -196,6 +196,9 @@ mol.modules.map.query = function(mol) {
             );
             this.features={};
             this.queryct=0;
+            try{
+                this.overlayView.setMap(null)
+            } catch(e) {};
             this.overlayView = new google.maps.OverlayView();
             this.overlayView.draw = function () {};
 
@@ -390,7 +393,7 @@ mol.modules.map.query = function(mol) {
                         $(self.display).qtip('destroy');
                     }
                     
-                    $(self.display.dataset_id)
+                   
                     
                     if (self.enabled) {
                             listradius = new google.maps.Circle(
@@ -498,7 +501,6 @@ mol.modules.map.query = function(mol) {
                     }
 
                     if (self.enabled == true) {
-                        self.registerClick();
                         _.each(
                             self.features,
                             function(feature) {
