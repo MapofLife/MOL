@@ -72,12 +72,14 @@ mol.modules.map.boot = function(mol) {
             var self = this;
             
             // Remove backslashes and replace characters that equal spaces.
-            this.term = unescape(
-                window.location.pathname
-                    .replace(/\//g, '')
-                    .replace(/\+/g, ' ')
-                    .replace(/_/g, ' ')
-            );
+            
+            
+            
+            this.term = unescape(location.pathname.split('/').pop())
+                .replace(/_/g,' ')
+                .replace(/\+/g, ' ')
+                .replace(/_/g, ' ');
+    
             if (this.term == 'maps' || this.term == 'lists') {
                 self.bus.fireEvent(new mol.bus.Event(
                         'toggle-splash', {mode: this.term}));

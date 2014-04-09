@@ -76,7 +76,7 @@ mol.modules.map.loading = function(mol) {
             var className = 'mol-Map-LoadingWidget',
                 html = '' +
                         '<div class="' + className + '">' +
-                        '   <img src="static/loading.gif">' +
+                        '   <img src="/static/loading.gif">' +
                         '</div>';
             this._super(html);
         }
