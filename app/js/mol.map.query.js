@@ -635,6 +635,9 @@ mol.modules.map.query = function(mol) {
                         "   <td class='arrowBox'>" +
                         "       <div class='arrow'></div>" +
                         "   </td>" +
+                        "   <td>" + ((row.sequenceid != null) ?
+                                        row.sequenceid : '') +
+                        "   </td>" +
                         "   <td class='wiki sci' value='" +
                                 row.thumbsrc + "'>" +
                                 row.scientificname +
@@ -652,8 +655,11 @@ mol.modules.map.query = function(mol) {
                                 ((row.family != null) ?
                                     row.family : '') +
                         "   </td>" +
-                        "   <td>" + ((row.sequenceid != null) ?
-                                        row.sequenceid : '') +
+                        "   <td>" + ((row.ed != null) ?
+                                        (+row.ed.toFixed(2)) : '') +
+                        "   </td>" +
+                        "   <td>" + ((row.edr != null) ?
+                                        (+row.edr.toFixed(2)) : '') +
                         "   </td>" +
                         "   <td class='iucn' data-scientificname='" +
                                 row.scientificname + "'>" +
@@ -730,11 +736,13 @@ mol.modules.map.query = function(mol) {
                     '           <thead>' +
                     '               <tr>' +
                     '                   <th></th>' +
+                    '                   <th>Taxa Rank</th>' +
                     '                   <th>Scientific Name</th>' +
                     '                   <th>English Name</th>' +
                     '                   <th>Order</th>' +
                     '                   <th>Family</th>' +
-                    '                   <th>Rank&nbsp;&nbsp;&nbsp;</th>' +
+                    '                   <th>ED&nbsp;&nbsp;&nbsp;</th>' +
+                    '                   <th>EDR&nbsp;&nbsp;&nbsp;</th>' +
                     '                   <th>IUCN&nbsp;&nbsp;</th>' +
                     '               </tr>' +
                     '           </thead>' +
