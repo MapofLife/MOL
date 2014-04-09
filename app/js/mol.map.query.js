@@ -969,7 +969,7 @@ mol.modules.map.query = function(mol) {
                 }
             );
             $(".listtable", $(lw)).tablesorter({
-                sortList: [[5,0]]
+                sortList: [[1,0]]
             });
 
             _.each(
