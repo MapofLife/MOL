@@ -648,10 +648,6 @@ mol.modules.map.query = function(mol) {
                                 ((english != null) ? english : '') +
                         "   </td>" +
                         "   <td class='wiki'>" +
-                                ((row.order != null) ?
-                                    row.order : '') +
-                        "   </td>" +
-                        "   <td class='wiki'>" +
                                 ((row.family != null) ?
                                     row.family : '') +
                         "   </td>" +
@@ -736,10 +732,9 @@ mol.modules.map.query = function(mol) {
                     '           <thead>' +
                     '               <tr>' +
                     '                   <th></th>' +
-                    '                   <th>Taxa Rank</th>' +
+                    '                   <th>Taxon Rank</th>' +
                     '                   <th>Scientific Name</th>' +
                     '                   <th>English Name</th>' +
-                    '                   <th>Order</th>' +
                     '                   <th>Family</th>' +
                     '                   <th>ED&nbsp;&nbsp;&nbsp;</th>' +
                     '                   <th>EDR&nbsp;&nbsp;&nbsp;</th>' +
