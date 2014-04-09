@@ -736,8 +736,16 @@ mol.modules.map.query = function(mol) {
                     '                   <th>Scientific Name</th>' +
                     '                   <th>English Name</th>' +
                     '                   <th>Family</th>' +
-                    '                   <th>ED&nbsp;&nbsp;&nbsp;</th>' +
-                    '                   <th>EDR&nbsp;&nbsp;&nbsp;</th>' +
+                    '                   <th class="qtip-info" qtip-info-title="ED" ' + 
+                    '                       qtip-info-body="Evolutionary Distinctness, ' + 
+                    '                           the evolutionary history that a species ' + 
+                    '                           contributes to the avian tree of life">ED (MY)'+
+                    '                   </th>' +
+                    '                   <th class="qtip-info" qtip-info-title="EDR" ' + 
+                    '                       qtip-info-body="Evolutionary Distinctness Rarity, ' + 
+                    '                       the spatial concentration of a species’ evolutionary' + 
+                    '                       history">EDR (MY)'+
+                    '                   </th>' +
                     '                   <th>IUCN&nbsp;&nbsp;</th>' +
                     '               </tr>' +
                     '           </thead>' +
@@ -971,6 +979,27 @@ mol.modules.map.query = function(mol) {
             $(".listtable", $(lw)).tablesorter({
                 sortList: [[1,0]]
             });
+            $('.qtip-info').qtip({
+                            content: {
+                                text: function(api) {
+                                    return '<div>' + $(this).attr('qtip-info-body') +
+                                        '<br/><a href="http://www.mol.org/projects/ED"' + 
+                                        ' target="_blank">More info</a></div>';
+                                },
+                                title: function(api) {
+                                    return $(this).attr('qtip-info-title');
+                                }
+                            },
+                            position: {
+                                my: 'bottom right',  
+                                at: 'top right', 
+                                target: $('.qtip-info') 
+                            },
+                            hide: {
+                                fixed: true,
+                                delay: 500
+                            }
+                        });
 
             _.each(
                 $('.wiki',$(lw)),
