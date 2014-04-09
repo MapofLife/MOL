@@ -60,6 +60,9 @@ handlers:
   
 - url: /maps
   script: app.application
+
+- url: /maps/*
+  script: app.application
   
 - url: /tile
   script: demo_handler.application

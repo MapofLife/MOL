@@ -17,7 +17,7 @@ header {
 }
 .logo {
 	margin: 0.5em;
-	width: 10em
+	width: 10em;
 }
 @media (min-width: 740px) {
 	.logo {
@@ -25,12 +25,11 @@ header {
 	}
 }
 .logo a {
-	display: block
+	display: block;
+	height:60px;
 }
 .logo img {
-	width: 100%;
-	max-width: 100%;
-	height: auto
+	width: 160px;
 }
 @media (min-width: 740px) {
 	nav {
@@ -86,23 +85,24 @@ header {
 }
 
 
-.menu .tab a:link:before, .menu .tab a:visited:before {
-	content: "\f041";
-	font-family: FontAwesome;
-	color: #23a9d0;
-	background-color: #fff;
-	margin-right: 0.5em;
-	height: 1.25em;
-	width: 1.25em;
-	line-height: 1.25;
-	display: inline-block;
-	text-align: center;
-	-webkit-border-radius: 5em;
-	-moz-border-radius: 5em;
-	-ms-border-radius: 5em;
-	-o-border-radius: 5em;
-	border-radius: 5em
+.menu .tab i {
+    display: inline-block;
+    margin-left: 0.5em;
+    font-family: FontAwesome;
+    color: #23a9d0;
+    background-color: #fff;
+    margin: 0.5em;
+    height: 1.25em;
+    width: 1.25em;
+    line-height: 1.25;
+    text-align: center;
+    -webkit-border-radius: 5em;
+    -moz-border-radius: 5em;
+    -ms-border-radius: 5em;
+    -o-border-radius: 5em;
+    border-radius: 5em
 }
+
 .menu .tab a:hover {
 	background-color: #e86e1d
 }
