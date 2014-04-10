@@ -651,11 +651,11 @@ mol.modules.map.query = function(mol) {
                                 ((row.family != null) ?
                                     row.family : '') +
                         "   </td>" +
-                        "   <td>" + ((row.ed != null) ?
-                                        (+row.ed.toFixed(2)) : '') +
+                        "   <td>" + ((row.ed_rank != null) ?
+                                        (+row.ed_rank) : '') +
                         "   </td>" +
-                        "   <td>" + ((row.edr != null) ?
-                                        (+row.edr.toFixed(2)) : '') +
+                        "   <td>" + ((row.edr_rank != null) ?
+                                        (+row.edr_rank) : '') +
                         "   </td>" +
                         "   <td class='iucn' data-scientificname='" +
                                 row.scientificname + "'>" +
@@ -737,12 +737,12 @@ mol.modules.map.query = function(mol) {
                     '                   <th>English Name</th>' +
                     '                   <th>Family</th>' +
                     '                   <th class="qtip-info" qtip-info-title="ED" ' + 
-                    '                       qtip-info-body="Evolutionary Distinctness (MY)' + 
+                    '                       qtip-info-body="Global rank of Evolutionary Distinctness,' + 
                     '                           the evolutionary history that a species ' + 
                     '                           contributes to the avian tree of life">ED'+
                     '                   </th>' +
                     '                   <th class="qtip-info" qtip-info-title="EDR" ' + 
-                    '                       qtip-info-body="Evolutionary Distinctness Rarity (MY/10<sup>4</sup> km<sup>2</sup>),  ' + 
+                    '                       qtip-info-body="Global rank of Evolutionary Distinctness Rarity,  ' + 
                     '                       the spatial concentration of a species’ evolutionary' + 
                     '                       history">EDR'+
                     '                   </th>' +
