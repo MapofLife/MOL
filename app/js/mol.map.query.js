@@ -564,16 +564,16 @@ mol.modules.map.query = function(mol) {
                         };
                     } else if ($(this).val().toLowerCase()
                         .indexOf('reptil') > 0) {
-                        $(self.display.types).find('.ecoregion')
-                            .toggle(true);
-                        $(self.display.types).find('.ecoregion')
-                            .removeClass('selected');
-                        $(self.display.types).find('.range')
-                            .toggle(true);
-                        if ($(self.display.types).find('.range')
-                            .hasClass('selected')) {
+                       // $(self.display.types).find('.ecoregion')
+                       //     .toggle(true);
+                       // $(self.display.types).find('.ecoregion')
+                       //     .removeClass('selected');
+                       // $(self.display.types).find('.range')
+                       //     .toggle(true);
+                       // if ($(self.display.types).find('.range')
+                        //    .hasClass('selected')) {
                                 alert('Available for North America only.');
-                        };
+                       // };
                     } else {
                         $(self.display.types).find('.ecoregion')
                             .toggle(false);
@@ -635,6 +635,9 @@ mol.modules.map.query = function(mol) {
                         "   <td class='arrowBox'>" +
                         "       <div class='arrow'></div>" +
                         "   </td>" +
+                        "   <td class='rank'>" + ((row.sequenceid != null) ?
+                                        row.sequenceid : '') +
+                        "   </td>" +
                         "   <td class='wiki sci' value='" +
                                 row.thumbsrc + "'>" +
                                 row.scientificname +
@@ -645,15 +648,14 @@ mol.modules.map.query = function(mol) {
                                 ((english != null) ? english : '') +
                         "   </td>" +
                         "   <td class='wiki'>" +
-                                ((row.order != null) ?
-                                    row.order : '') +
-                        "   </td>" +
-                        "   <td class='wiki'>" +
                                 ((row.family != null) ?
                                     row.family : '') +
                         "   </td>" +
-                        "   <td>" + ((row.sequenceid != null) ?
-                                        row.sequenceid : '') +
+                        "   <td>" + ((row.ed != null) ?
+                                        (+row.ed.toFixed(2)) : '') +
+                        "   </td>" +
+                        "   <td>" + ((row.edr != null) ?
+                                        (+row.edr.toFixed(2)) : '') +
                         "   </td>" +
                         "   <td class='iucn' data-scientificname='" +
                                 row.scientificname + "'>" +
@@ -726,15 +728,24 @@ mol.modules.map.query = function(mol) {
                            '.&nbsp;All&nbsp;seasonalities.<br>' +
                     '   </div> ' +
                     '   <div class="mol-Map-ListQueryInfoWindow"> ' +
-                    '       <table class="listtable">' +
+                    '       <table class="listtable" className="' + ((className.trim()=="Aves")?"Birds":className.trim()) + '" >' +
                     '           <thead>' +
                     '               <tr>' +
                     '                   <th></th>' +
+                    '                   <th>Taxon Rank</th>' +
                     '                   <th>Scientific Name</th>' +
                     '                   <th>English Name</th>' +
-                    '                   <th>Order</th>' +
                     '                   <th>Family</th>' +
-                    '                   <th>Rank&nbsp;&nbsp;&nbsp;</th>' +
+                    '                   <th class="qtip-info" qtip-info-title="ED" ' + 
+                    '                       qtip-info-body="Evolutionary Distinctness (MY)' + 
+                    '                           the evolutionary history that a species ' + 
+                    '                           contributes to the avian tree of life">ED'+
+                    '                   </th>' +
+                    '                   <th class="qtip-info" qtip-info-title="EDR" ' + 
+                    '                       qtip-info-body="Evolutionary Distinctness Rarity (MY/10<sup>4</sup> km<sup>2</sup>),  ' + 
+                    '                       the spatial concentration of a species’ evolutionary' + 
+                    '                       history">EDR'+
+                    '                   </th>' +
                     '                   <th>IUCN&nbsp;&nbsp;</th>' +
                     '               </tr>' +
                     '           </thead>' +
@@ -966,8 +977,37 @@ mol.modules.map.query = function(mol) {
                 }
             );
             $(".listtable", $(lw)).tablesorter({
-                sortList: [[5,0]]
+                sortList: [[1,0]]
             });
+
+            // Display a tooltip on ED and EDR column hover
+            $('.qtip-info').qtip({
+                content: {
+                    text: function(api) {
+                        return '<div>' + $(this).attr('qtip-info-body') +
+                            '<br/><a href="http://www.mol.org/projects/ED"' + 
+                            ' target="_blank">More info</a></div>';
+                    },
+                    title: function(api) {
+                        return $(this).attr('qtip-info-title');
+                    }
+                },
+                position: {
+                    my: 'bottom right',  
+                    at: 'top center'
+                },
+                hide: {
+                    fixed: true,
+                    delay: 500
+                }
+            });
+
+            // Hide the ED and EDR columns for any class but Birds
+            // as no data is available
+            $('.listtable[classname!="Birds"] td:nth-child(6),.listtable[classname!="Birds"] th:nth-child(6)').hide();
+            $('.listtable[classname!="Birds"] td:nth-child(7),.listtable[classname!="Birds"] th:nth-child(7)').hide();
+
+
 
             _.each(
                 $('.wiki',$(lw)),

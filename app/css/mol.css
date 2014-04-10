@@ -6,7 +6,7 @@ body { height: 100%; margin: 0px; padding: 0px; overflow: hidden;
 
 /* Set up RightControl defaults */
 .mol-Map-RightControl { margin-right: 5px; width: 500px; }
-.mol-Map-RightControl .TOP { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px; }
+.mol-Map-RightControl .TOP { position: relative; float: left;  height: auto; margin-bottom: 5px; }
 .mol-Map-RightControl .MIDDLE { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px;}
 .mol-Map-RightControl .BOTTOM { position: relative; float: left; width: 100%; height: auto; margin-bottom: 5px;}
 
