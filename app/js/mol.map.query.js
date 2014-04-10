@@ -739,12 +739,12 @@ mol.modules.map.query = function(mol) {
                     '                   <th class="qtip-info" qtip-info-title="ED Rank" ' + 
                     '                       qtip-info-body="Global rank of Evolutionary Distinctness,' + 
                     '                           the evolutionary history that a species ' + 
-                    '                           contributes to the avian tree of life">ED'+
+                    '                           contributes to the avian tree of life">ED Rank'+
                     '                   </th>' +
                     '                   <th class="qtip-info" qtip-info-title="EDR Rank" ' + 
                     '                       qtip-info-body="Global rank of Evolutionary Distinctness Rarity,  ' + 
                     '                       the spatial concentration of a species’ evolutionary' + 
-                    '                       history">EDR'+
+                    '                       history">EDR Rank'+
                     '                   </th>' +
                     '                   <th>IUCN&nbsp;&nbsp;</th>' +
                     '               </tr>' +
