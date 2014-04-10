@@ -1428,9 +1428,7 @@ div.mol-Dashboard-TableWindow {
     font-size: 0.9em;
 }
 
-.mol-Map-QueryDisplay div.speciesDisplay select.radius {
-    margin-right:2px;
-}
+^
 
 .mol-Map-ListQueryRadius {
      pointer-events:none;
@@ -1515,6 +1513,11 @@ div.mol-Dashboard-TableWindow {
     color: blue;
     text-decoration: underline;
 }
+
+.mol-Map-ListQueryInfoWindow .rank {
+    text-align: center;
+}
+
 
 .mol-Map-ListQueryInfoWindow tr.iucnvu td{
     background: #cc9900;

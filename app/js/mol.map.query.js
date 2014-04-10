@@ -564,16 +564,16 @@ mol.modules.map.query = function(mol) {
                         };
                     } else if ($(this).val().toLowerCase()
                         .indexOf('reptil') > 0) {
-                        $(self.display.types).find('.ecoregion')
-                            .toggle(true);
-                        $(self.display.types).find('.ecoregion')
-                            .removeClass('selected');
-                        $(self.display.types).find('.range')
-                            .toggle(true);
-                        if ($(self.display.types).find('.range')
-                            .hasClass('selected')) {
+                       // $(self.display.types).find('.ecoregion')
+                       //     .toggle(true);
+                       // $(self.display.types).find('.ecoregion')
+                       //     .removeClass('selected');
+                       // $(self.display.types).find('.range')
+                       //     .toggle(true);
+                       // if ($(self.display.types).find('.range')
+                        //    .hasClass('selected')) {
                                 alert('Available for North America only.');
-                        };
+                       // };
                     } else {
                         $(self.display.types).find('.ecoregion')
                             .toggle(false);
@@ -635,7 +635,7 @@ mol.modules.map.query = function(mol) {
                         "   <td class='arrowBox'>" +
                         "       <div class='arrow'></div>" +
                         "   </td>" +
-                        "   <td>" + ((row.sequenceid != null) ?
+                        "   <td class='rank'>" + ((row.sequenceid != null) ?
                                         row.sequenceid : '') +
                         "   </td>" +
                         "   <td class='wiki sci' value='" +
@@ -737,14 +737,14 @@ mol.modules.map.query = function(mol) {
                     '                   <th>English Name</th>' +
                     '                   <th>Family</th>' +
                     '                   <th class="qtip-info" qtip-info-title="ED" ' + 
-                    '                       qtip-info-body="Evolutionary Distinctness, ' + 
+                    '                       qtip-info-body="Evolutionary Distinctness (MY)' + 
                     '                           the evolutionary history that a species ' + 
-                    '                           contributes to the avian tree of life">ED (MY)'+
+                    '                           contributes to the avian tree of life">ED'+
                     '                   </th>' +
                     '                   <th class="qtip-info" qtip-info-title="EDR" ' + 
-                    '                       qtip-info-body="Evolutionary Distinctness Rarity, ' + 
+                    '                       qtip-info-body="Evolutionary Distinctness Rarity (MY/10<sup>4</sup> km<sup>2</sup>),  ' + 
                     '                       the spatial concentration of a species’ evolutionary' + 
-                    '                       history">EDR (MY)'+
+                    '                       history">EDR'+
                     '                   </th>' +
                     '                   <th>IUCN&nbsp;&nbsp;</th>' +
                     '               </tr>' +
@@ -994,8 +994,7 @@ mol.modules.map.query = function(mol) {
                 },
                 position: {
                     my: 'bottom right',  
-                    at: 'top right', 
-                    target: $('.qtip-info') 
+                    at: 'top center'
                 },
                 hide: {
                     fixed: true,
