@@ -728,7 +728,7 @@ mol.modules.map.query = function(mol) {
                            '.&nbsp;All&nbsp;seasonalities.<br>' +
                     '   </div> ' +
                     '   <div class="mol-Map-ListQueryInfoWindow"> ' +
-                    '       <table class="listtable">' +
+                    '       <table class="listtable" className="' + ((className.trim()=="Aves")?"Birds":className.trim()) + '" >' +
                     '           <thead>' +
                     '               <tr>' +
                     '                   <th></th>' +
@@ -979,27 +979,36 @@ mol.modules.map.query = function(mol) {
             $(".listtable", $(lw)).tablesorter({
                 sortList: [[1,0]]
             });
+
+            // Display a tooltip on ED and EDR column hover
             $('.qtip-info').qtip({
-                            content: {
-                                text: function(api) {
-                                    return '<div>' + $(this).attr('qtip-info-body') +
-                                        '<br/><a href="http://www.mol.org/projects/ED"' + 
-                                        ' target="_blank">More info</a></div>';
-                                },
-                                title: function(api) {
-                                    return $(this).attr('qtip-info-title');
-                                }
-                            },
-                            position: {
-                                my: 'bottom right',  
-                                at: 'top right', 
-                                target: $('.qtip-info') 
-                            },
-                            hide: {
-                                fixed: true,
-                                delay: 500
-                            }
-                        });
+                content: {
+                    text: function(api) {
+                        return '<div>' + $(this).attr('qtip-info-body') +
+                            '<br/><a href="http://www.mol.org/projects/ED"' + 
+                            ' target="_blank">More info</a></div>';
+                    },
+                    title: function(api) {
+                        return $(this).attr('qtip-info-title');
+                    }
+                },
+                position: {
+                    my: 'bottom right',  
+                    at: 'top right', 
+                    target: $('.qtip-info') 
+                },
+                hide: {
+                    fixed: true,
+                    delay: 500
+                }
+            });
+
+            // Hide the ED and EDR columns for any class but Birds
+            // as no data is available
+            $('.listtable[classname!="Birds"] td:nth-child(6),.listtable[classname!="Birds"] th:nth-child(6)').hide();
+            $('.listtable[classname!="Birds"] td:nth-child(7),.listtable[classname!="Birds"] th:nth-child(7)').hide();
+
+
 
             _.each(
                 $('.wiki',$(lw)),
