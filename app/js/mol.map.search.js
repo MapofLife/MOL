@@ -49,8 +49,13 @@ mol.modules.map.search = function(mol) {
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
-                'FROM (SELECT scientificname, extent, feature_count, provider, type, dataset_id FROM layer_metadata UNION ALL  ' +
-                " SELECT scientificname, box2d(ST_Extent(the_geom)) as extent, count(*) as feature_count, 'webuser' as provider, 'custom' as type, 'userdata' as dataset_id from userdata group by scientificname) l " +
+                'FROM (SELECT scientificname, extent, feature_count, ' +
+                 'provider, type, dataset_id FROM layer_metadata_staging UNION ALL ' +
+                 'SELECT scientificname, extent_4326 as extent, feature_count, ' +
+                 'provider, type, dataset_id FROM layer_metadata UNION ALL  ' +
+                " SELECT scientificname, box2d(ST_Extent(the_geom)) as extent, " +
+                " count(*) as feature_count, 'webuser' as provider, 'range' as type, " +
+                " dataset_id as dataset_id from userdata group by scientificname, dataset_id) l " +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +

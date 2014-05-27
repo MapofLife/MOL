@@ -7,16 +7,9 @@ mol.modules.map = function(mol) {
             'results',
             'layers',
             'tiles',
-            'menu',
-            'loading',
-            'dashboard',
-            'query',
-            'basemap',
             'metadata',
-            'splash',
-            'help',
-            'status',
-            'images',
+            'loading',
+            'basemap',
             'boot',
             'editor'
     ];
@@ -168,7 +161,7 @@ mol.modules.map = function(mol) {
                             function(event) {
                                 var params = {
                                     gmaps_event : event,
-                                    map : self.display.map}
+                                    map : self.display.map};
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
                                         'species-list-query-click',
@@ -325,9 +318,9 @@ mol.modules.map = function(mol) {
                         }
                     ]
                 };
-                this.drawing = 
+      
                 this.map = new google.maps.Map(this.element, mapOptions);
-                
+                this.map.setCenter(new google.maps.LatLng(0,-50));
             }
         }
     );

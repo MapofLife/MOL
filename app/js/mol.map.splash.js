@@ -10,7 +10,7 @@ mol.modules.map.splash = function(mol) {
             this.IE8 = false;
         },
         start: function() {
-            this.display = new mol.map.splash.splashDisplay();
+            //this.display = new mol.map.splash.splashDisplay();
             this.addEventHandlers();
         },
         /*

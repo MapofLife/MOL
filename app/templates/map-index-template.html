@@ -37,33 +37,23 @@
     <script type="text/javascript" src="../../../js/lib/jquery.cookie.js"></script>
     <script type="text/javascript" src="../../../js/lib/GeoJSON.js"></script>
 
-    {% if prod %}
-    <script type="text/javascript" src="../../../static/js/mol.js?r={{ r }}"></script>
-    {% else %}
-     <script type="text/javascript" src="../../../js/mol.js"></script>
-     <script type="text/javascript" src="../../../js/mol.core.js"></script>
-     <script type="text/javascript" src="../../../js/mol.bus.js"></script>
-     <script type="text/javascript" src="../../../js/mol.services.js"></script>
-     <script type="text/javascript" src="../../../js/mol.services.cartodb.js"></script>
-     <script type="text/javascript" src="../../../js/mol.mvp.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.search.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.results.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.layers.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.tiles.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.menu.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.loading.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.dashboard.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.query.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.basemap.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.metadata.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.splash.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.help.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.status.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.images.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.boot.js"></script>
-     <script type="text/javascript" src="../../../js/mol.map.editor.js"></script>
-    {% endif %}
+    <script type="text/javascript" src="../../../js/mol.js"></script>
+    <script type="text/javascript" src="../../../js/mol.core.js"></script>
+    <script type="text/javascript" src="../../../js/mol.bus.js"></script>
+    <script type="text/javascript" src="../../../js/mol.services.js"></script>
+    <script type="text/javascript" src="../../../js/mol.services.cartodb.js"></script>
+    <script type="text/javascript" src="../../../js/mol.mvp.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.search.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.results.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.layers.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.tiles.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.metadata.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.loading.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.basemap.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.boot.js"></script>
+    <script type="text/javascript" src="../../../js/mol.map.editor.js"></script>
+
 
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
@@ -91,94 +81,39 @@
     </script>
   </head>
   <body>
-    <div id="map_container" class="map_container"></div>
+    <div id="map_container" class="map_container">
+    </div>
     <script type="text/javascript">
       $.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); 
       $(document).ready(function() {
-          {% if prod %}
-          <!-- Production, so load app without logging and run it. -->
-          mol(function(env) {
-            bus = env.bus.Bus()
-             proxy = new env.services.Proxy(bus)
-             me = new env.map.MapEngine(proxy, bus)
-             me.start('body');
-             spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
-             spe.start()
-             if(!spe.IE8) {
-               se = new env.map.search.SearchEngine(proxy, bus)
-               se.start(null)
-               te = new env.map.tiles.TileEngine(proxy, bus, me.display.map)
-               te.start()
-               le = new env.map.layers.LayerEngine(proxy, bus, me.display.map)
-               le.start()
-               re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
-               re.start()
-               ne = new env.map.menu.MenuEngine(proxy, bus)
-               ne.start()
-               le = new env.map.loading.LoadingEngine(proxy, bus)
-                le.start()
-                de = new env.map.dashboard.DashboardEngine(proxy, bus)
-                de.start()
-                qe = new env.map.query.QueryEngine(proxy, bus, me.display.map)
-                qe.start()
-                bme = new env.map.basemap.BaseMapEngine(proxy, bus, me.display.map)
-                bme.start()
-                mde = new env.map.metadata.MetadataEngine(proxy, bus)
-                mde.start()
-                hd = new env.map.help.HelpDialog(proxy, bus)
-                hd.start()
-                st = new env.map.status.StatusEngine(proxy, bus)
-                st.start()
-                ie = new env.map.images.ImagesEngine(proxy, bus)
-                ie.start()
-                ee = new env.map.editor.EditorEngine(proxy, bus, me.display.map)
-                ee.start()
-             }
-             be = new env.map.boot.BootEngine(proxy, bus, me.display.map)
-             be.start()
-          });
-          {% else %}
+         
           env = mol(function(env) {
             bus = env.bus.Bus()
              proxy = new env.services.Proxy(bus)
              me = new env.map.MapEngine(proxy, bus)
-             me.start('body');
-             spe = new env.map.splash.SplashEngine(proxy, bus, me.display.map)
-             spe.start()
-             if(!spe.IE8) {
-               se = new env.map.search.SearchEngine(proxy, bus)
-               se.start(null)
+             me.start('body')
+             se = new env.map.search.SearchEngine(proxy, bus)
+             se.start(null)
                te = new env.map.tiles.TileEngine(proxy, bus, me.display.map)
                te.start()
                le = new env.map.layers.LayerEngine(proxy, bus, me.display.map)
                le.start()
                re = new env.map.results.ResultsEngine(proxy, bus, me.display.map)
                re.start()
-               ne = new env.map.menu.MenuEngine(proxy, bus)
-               ne.start()
+              
                le = new env.map.loading.LoadingEngine(proxy, bus)
                 le.start()
-                de = new env.map.dashboard.DashboardEngine(proxy, bus);
-                 de.start()
-                qe = new env.map.query.QueryEngine(proxy, bus, me.display.map);
-                qe.start()
+               
                 bme = new env.map.basemap.BaseMapEngine(proxy, bus, me.display.map)
                 bme.start()
                 mde = new env.map.metadata.MetadataEngine(proxy, bus)
                 mde.start()
-                hd = new env.map.help.HelpDialog(proxy, bus)
-                hd.start()
-                st = new env.map.status.StatusEngine(proxy, bus)
-                st.start()
-                ie = new env.map.images.ImagesEngine(proxy, bus)
-                ie.start()
                 ee = new env.map.editor.EditorEngine(proxy, bus, me.display.map)
                 ee.start()
-             }
+             
              be = new env.map.boot.BootEngine(proxy, bus, me.display.map)
              be.start()
           });
-          {% endif %}
       });
 
     </script>

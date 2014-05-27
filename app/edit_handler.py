@@ -22,28 +22,32 @@ class PutHandler(webapp2.RequestHandler):
     """Request handler for cache requests."""
     def post(self):
 
-        sciname = self.request.get('scientificname')
-        userid = self.request.get('userid')
-        seasonality = self.request.get('seasonality')
-        description = self.request.get('description')
-        dataset_id = self.request.get('dataset_id')
-        geojson = self.request.get('geojson')
+        sciname = self.request.get('scientificname','')
+        userid = self.request.get('username','')
+        description = self.request.get('description','')
+        dataset_id = self.request.get('dataset_id','')
+        geojson = self.request.get('geojson','')
 
         sql = "INSERT INTO userdata \
-    (userid, scientificname, seasonality, description, dataset_id, the_geom) \
-    VALUES( \
-        '%s', \
-        '%s', \
-        '%s', \
-        '%s', \
-        '%s', \
-        ST_SetSRID(ST_GeomFromGeoJSON('%s'),4326) \
-        )" % (userid, sciname, seasonality, description, dataset_id, geojson)
+            (userid, scientificname, description, dataset_id, the_geom) \
+                VALUES( \
+                    '%s', \
+                    '%s', \
+                    '%s', \
+                    '%s', \
+                    ST_SetSRID(ST_GeomFromGeoJSON('%s'),4326) \
+                    )" % (userid, sciname, description, dataset_id, geojson)
 
-        url = 'http://mol.cartodb.com/api/v2/sql?%s' % (urllib.urlencode(dict(q=sql, api_key=api_key)))
+        url = 'http://mol.cartodb.com/api/v2/sql'
+        payload = urllib.urlencode({"q":sql, "api_key":api_key})
         logging.info(url)
-        value = urlfetch.fetch(url, deadline=60).content
-
+        value = urlfetch.fetch(
+            url=url, 
+            payload=payload,
+            method=urlfetch.POST,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            deadline=60).content
+        
         self.response.headers["Cache-Control"] = "max-age=2629743" # Cache 1 month
         self.response.headers["Content-Type"] = "application/json"
         self.response.out.write(value)
@@ -53,8 +57,11 @@ class DelHandler(webapp2.RequestHandler):
     def post(self):
 
         dataset_id = self.request.get('dataset_id')
+        name = self.request.get('name')
 
-        sql = "DELETE FROM userdata WHERE dataset_id = '%s'" % (dataset_id)
+        sql = """DELETE FROM userdata 
+                 WHERE dataset_id = '%s' and 
+                    scientificname = '%s'""" % (dataset_id, name)
 
         url = 'http://mol.cartodb.com/api/v2/sql?%s' % (urllib.urlencode(dict(q=sql, api_key=api_key)))
         logging.info(url)

@@ -362,7 +362,7 @@ mol.modules.map.tiles = function(mol) {
         {
             init: function(layer, table, map) {
                 var sql =  "" + //c is in case cache key starts with a number
-                    "SELECT c{4}.* FROM get_tile('{0}','{1}','{2}','{3}') c{4}"
+                    "SELECT c{4}.*, ST_GeometryType(the_geom_webmercator) as gt FROM get_tile('{0}','{1}','{2}','{3}') c{4}"
                     .format(
                         layer.source, 
                         layer.type, 
@@ -380,7 +380,7 @@ mol.modules.map.tiles = function(mol) {
                        '{0}:8080'.format(hostname) : hostname;
                 
                 if(layer.tile_style == undefined) {
-                    layer.tile_style = "#" + layer.dataset_id + layer.css;
+                    layer.tile_style = "";
                     layer.style = layer.tile_style;
                     layer.orig_style = layer.tile_style;
                     
@@ -391,14 +391,14 @@ mol.modules.map.tiles = function(mol) {
 
                 this.layer = new google.maps.CartoDBLayer({
                         tile_name: layer.id,
-                        tile_style: layer.tile_style,
+                        //tile_style: layer.tile_style,
                         hostname: hostname,
                         map_canvas: 'map_container',
                         map: map,
                         user_name: 'mol',
-                        table_name: table,
+                        table_name: 'mol_style',
                         mol_layer: layer,
-                        style_table_name: layer.dataset_id,
+                        style_table_name: 'mol_style',
                         query: sql,
                         info_query: info_query,
                         meta_query: meta_query,

@@ -327,16 +327,9 @@ mol.modules.map = function(mol) {
             'results',
             'layers',
             'tiles',
-            'menu',
-            'loading',
-            'dashboard',
-            'query',
-            'basemap',
             'metadata',
-            'splash',
-            'help',
-            'status',
-            'images',
+            'loading',
+            'basemap',
             'boot',
             'editor'
     ];
@@ -488,7 +481,7 @@ mol.modules.map = function(mol) {
                             function(event) {
                                 var params = {
                                     gmaps_event : event,
-                                    map : self.display.map}
+                                    map : self.display.map};
                                 self.bus.fireEvent(
                                     new mol.bus.Event(
                                         'species-list-query-click',
@@ -645,9 +638,9 @@ mol.modules.map = function(mol) {
                         }
                     ]
                 };
-                this.drawing = 
+      
                 this.map = new google.maps.Map(this.element, mapOptions);
-                
+                this.map.setCenter(new google.maps.LatLng(0,-50));
             }
         }
     );
@@ -1261,7 +1254,7 @@ mol.modules.map.layers = function(mol) {
                             mt.interaction.clickAction = "";
                         }
                     );
-                    
+
                     if(layer.editing) {
                         l.styler.css('visibility','hidden');
                         l.find(".buttonContainer").hide();
@@ -1270,7 +1263,7 @@ mol.modules.map.layers = function(mol) {
                         l.addClass('selected');
                         l.edit.show();
                     }
-                    
+
                     //Hack so that at the end
                     //we can fire opacity event with all layers
                     all.push({layer:layer, l:l, opacity:opacity});
@@ -1360,6 +1353,17 @@ mol.modules.map.layers = function(mol) {
                                     .removeClass("selected");
                                 $(l.layer).addClass("selected");
                             }
+                        }
+                    );
+                    l.del.click(
+                        function(event) {
+                            self.bus.fireEvent(
+                                new mol.bus.Event(
+                                    'delete-layer',
+                                    {layer: layer}
+                                )
+                            );
+                            l.close.click();
                         }
                     );
                     // Click handler for style toggle
@@ -2205,7 +2209,7 @@ mol.modules.map.layers = function(mol) {
                 smidStyle,
                 midStyle,
                 srestStyle;
-            
+
             if(isSeas) {
                 spreStyle = style.substring(
                                 0,
@@ -2474,7 +2478,7 @@ mol.modules.map.layers = function(mol) {
                 return;
             }
                 oldStyle = self.parseLayerStyle(layer, "current");
-                
+
                 if(layer.style_table == "points_style") {
                     style = this.changeStyleProperty(
                                 style,
@@ -2571,6 +2575,9 @@ mol.modules.map.layers = function(mol) {
                 '    <button title="Save layer." class="edit">' +
                        'Save' +
                 '    </button>' +
+                '    <button title="Delete layer." class="del">' +
+                       'Delete' +
+                '    </button>' +
                 '    <button title="Zoom to layer extent." class="zoom">' +
                        'z' +
                 '    </button>' +
@@ -2596,7 +2603,9 @@ mol.modules.map.layers = function(mol) {
                     layer.type_title
                 )
             );
-
+            if (layer.source!='webuser') {
+                $(this).find('.del').remove();
+            }
             this.attr('id', layer.id);
             this.toggle = $(this).find('.toggle').button();
             this.styler = $(this).find('.styler');
@@ -2607,6 +2616,7 @@ mol.modules.map.layers = function(mol) {
             this.info = $(this).find('.info');
             this.edit = $(this).find('.edit');
             this.edit.hide();
+            this.del = $(this).find('.del');
             this.close = $(this).find('.close');
             this.type = $(this).find('.type');
             this.source = $(this).find('.source');
@@ -3638,7 +3648,8 @@ mol.modules.map.results = function(mol) {
             
         }
     });
-}
+};
+
 mol.modules.map.search = function(mol) {
 
     mol.map.search = {};
@@ -3690,8 +3701,13 @@ mol.modules.map.search = function(mol) {
                     'l.dataset_id as dataset_id, ' +
                     'd.dataset_title as dataset_title, ' + 
                     'd.style_table as style_table ' +
-                'FROM (SELECT scientificname, extent, feature_count, provider, type, dataset_id FROM layer_metadata UNION ALL  ' +
-                " SELECT scientificname, box2d(ST_Extent(the_geom)) as extent, count(*) as feature_count, 'webuser' as provider, 'custom' as type, 'userdata' as dataset_id from userdata group by scientificname) l " +
+                'FROM (SELECT scientificname, extent, feature_count, ' +
+                 'provider, type, dataset_id FROM layer_metadata_staging UNION ALL ' +
+                 'SELECT scientificname, extent_4326 as extent, feature_count, ' +
+                 'provider, type, dataset_id FROM layer_metadata UNION ALL  ' +
+                " SELECT scientificname, box2d(ST_Extent(the_geom)) as extent, " +
+                " count(*) as feature_count, 'webuser' as provider, 'range' as type, " +
+                " dataset_id as dataset_id from userdata group by scientificname, dataset_id) l " +
                 'LEFT JOIN data_registry d ON ' +
                     'l.dataset_id = d.dataset_id ' +
                 'LEFT JOIN types t ON ' +
@@ -4036,7 +4052,8 @@ mol.modules.map.search = function(mol) {
             this.searchBox.html('');
         }
     });
-};/**
+};
+/**
  * This module handles add-layers events and layer-toggle events. tI basically
  * proxies the CartoDB JavaScript API for adding and removing CartoDB layers
  * to and from the map.
@@ -4400,7 +4417,7 @@ mol.modules.map.tiles = function(mol) {
         {
             init: function(layer, table, map) {
                 var sql =  "" + //c is in case cache key starts with a number
-                    "SELECT c{4}.* FROM get_tile('{0}','{1}','{2}','{3}') c{4}"
+                    "SELECT c{4}.*, ST_GeometryType(the_geom_webmercator) as gt FROM get_tile('{0}','{1}','{2}','{3}') c{4}"
                     .format(
                         layer.source, 
                         layer.type, 
@@ -4418,7 +4435,7 @@ mol.modules.map.tiles = function(mol) {
                        '{0}:8080'.format(hostname) : hostname;
                 
                 if(layer.tile_style == undefined) {
-                    layer.tile_style = "#" + layer.dataset_id + layer.css;
+                    layer.tile_style = "";
                     layer.style = layer.tile_style;
                     layer.orig_style = layer.tile_style;
                     
@@ -4429,14 +4446,14 @@ mol.modules.map.tiles = function(mol) {
 
                 this.layer = new google.maps.CartoDBLayer({
                         tile_name: layer.id,
-                        tile_style: layer.tile_style,
+                        //tile_style: layer.tile_style,
                         hostname: hostname,
                         map_canvas: 'map_container',
                         map: map,
                         user_name: 'mol',
-                        table_name: table,
+                        table_name: 'mol_style',
                         mol_layer: layer,
-                        style_table_name: layer.dataset_id,
+                        style_table_name: 'mol_style',
                         query: sql,
                         info_query: info_query,
                         meta_query: meta_query,
@@ -6540,7 +6557,7 @@ mol.modules.map.splash = function(mol) {
             this.IE8 = false;
         },
         start: function() {
-            this.display = new mol.map.splash.splashDisplay();
+            //this.display = new mol.map.splash.splashDisplay();
             this.addEventHandlers();
         },
         /*
@@ -7279,7 +7296,8 @@ mol.modules.map.editor = function(mol) {
          */
         handleFeatureClick: function(event) {
             var name = event.layer.name,
-                display = new mol.map.editor.FeatureOptionsDisplay(name);
+                display = new mol.map.editor.FeatureOptionsDisplay(name),
+                self = this;
 
             display.cancel.click(
                 function(e) {
@@ -7295,7 +7313,7 @@ mol.modules.map.editor = function(mol) {
             );
             display.save.click(
                 function(e) {
-                    event.seasonality = $(display.seasonality).val();
+                    
                     event.description = $(display.description).val();
                     display.dialog('close');
                 }
@@ -7334,6 +7352,7 @@ mol.modules.map.editor = function(mol) {
                     }
                     self.startEditing(
                         $(display.name).val(),
+                        $(display.username).val(),
                         useExisting,
                         usePoints,
                         detail
@@ -7363,9 +7382,8 @@ mol.modules.map.editor = function(mol) {
             }
 
             q = "geojson={0}".format(JSON.stringify(payload)) +
-                "&userid=webuser" +
+                "&username={0}".format(layer.username) +
                 "&scientificname={0}".format(layer.name) +
-                "&seasonality={0}".format(feature.seasonality) +
                 "&description={0}".format(feature.description) +
                 "&dataset_id={0}".format(layer.dataset_id);
 
@@ -7378,7 +7396,19 @@ mol.modules.map.editor = function(mol) {
                   error: function() { }
             });
         },
-        startEditing: function(name, useExisting, usePoints, detail) {
+        deleteDataset: function(layer) {
+            var q= "dataset_id={0}&name={1}".format(layer.dataset_id,layer.name);
+
+            $.ajax({
+              url: "userdata/del",
+              type: 'POST',
+              dataType: 'jsonp',
+                  data: q,
+                  success: function() { },
+                  error: function() { }
+            });
+        },
+        startEditing: function(name, username, useExisting, usePoints, detail) {
             //TODO: zoom to max layer extent
             //first get a very simplified convex hull of all available maps
             var layers = [], //all current layers
@@ -7404,6 +7434,7 @@ mol.modules.map.editor = function(mol) {
                     'FROM ({0}) g ';
             this.current_layer = {
                     name: name,
+                    username: username,
                     type:'custom',
                     type_title: 'User defined layer.',
                     source_title: 'Web user',
@@ -7425,7 +7456,7 @@ mol.modules.map.editor = function(mol) {
                         layers.push(mt.name);
                     }
                 }
-            )
+            );
             tiles = _.map(
                 layers,
                 function(layer) {
@@ -7509,7 +7540,13 @@ mol.modules.map.editor = function(mol) {
                                 }
                             );
                         }
-                    )
+                    );
+                }
+            );
+            this.bus.addHandler(
+                'delete-layer',
+                function(event) {
+                    self.deleteDataset(event.layer);
                 }
             );
             /*editing of an existinglayer... TODO!*/
@@ -7522,7 +7559,7 @@ mol.modules.map.editor = function(mol) {
                             'ST_AsGeoJson('+
                                 'ST_Transform(the_geom_webmercator,4326)' +
                             ') as geom ' +
-                            'FROM get_tile(\'{1}\',\'{2}\',\'{3}\',\'{4}\')';
+                            'FROM get_tile(\'{1}\',\'{2}\',\'{3}\',\'{4}\')',
                         url = mol.services.cartodb.sqlApi.jsonp_url.format(
                             sql.format(
                                 gridres,
@@ -7531,7 +7568,7 @@ mol.modules.map.editor = function(mol) {
                                 layer.name,
                                 layer.dataset_id
                             )
-                        )
+                        );
                     self.map.overlayMapTypes.forEach(
                         function(mt,i) {
                             if(mt.name==layer.id) {
@@ -7539,7 +7576,7 @@ mol.modules.map.editor = function(mol) {
                                 self.maptype_index = i;
                             }
                         }
-                    )
+                    );
                     $.getJSON(
                         url,
                         self.addEditableLayer.bind(self)
@@ -7570,7 +7607,7 @@ mol.modules.map.editor = function(mol) {
                             );
 
                 }
-            )
+            );
         },
     });
 
@@ -7592,16 +7629,8 @@ mol.modules.map.editor = function(mol) {
         init : function(name) {
             var html = '' +
                     '<div class="mol-Map-EditorFeatureOptions">' +
-                    	'Set Feature Metadata for {0}<br><br> ' +
-                        'Seasonality'+
-                        '<select class="seasonality">'+
-                            '<option value=1>Resident</option>' +
-                            '<option value=2>Breeding Season</option>' +
-                            '<option value=3>Non-breeding Season</option>' +
-                            '<option value=4>Passage</option>' +
-                            '<option value=5>Seasonal Occurrence Uncertain</option>' +
-                         '</select><br>' +
-                         'Description' +
+                    'Set Feature Metadata for {0}<br><br> ' +
+                    'Description' +
                          '<textarea class="description" height=10 width=200 value=""></textarea>' +
                          '<br>' +
                          '<button class="delete">Delete feature</button>' +
@@ -7629,6 +7658,10 @@ mol.modules.map.editor = function(mol) {
                                 '<option selected value=true>Yes</option>' +
                                 '<option value=false>No</option>' +
                             '</select></td></tr>' +
+                            '<td>What is your name?</td>' +
+                            '<td  align="right">'+
+                                '<input type ="text" size=15 class="username">' +
+                            '</td></tr>' +
                             '<tr><td>Would you like to include points in the '+
                             'outline?</td>' +
                             '<td  align="right"><select class="usePoints">' +
@@ -7655,6 +7688,7 @@ mol.modules.map.editor = function(mol) {
                 this.start = $(this).find('.start');
                 this.cancel = $(this).find('.cancel');
                 this.usePoints = $(this).find('.usePoints');
+                this.username = $(this).find('.username');
                 this.useExistingContainer = $(this).find('.useExistingContainer');
                 this.useExisting = $(this).find('.useExisting');
                 this.detail = $(this).find('.detail');

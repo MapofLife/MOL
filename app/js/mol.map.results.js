@@ -723,4 +723,5 @@ mol.modules.map.results = function(mol) {
             
         }
     });
-}
+};
+

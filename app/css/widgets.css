@@ -412,7 +412,7 @@ white-space: nowrap;
 .mol-LayerControl-Layers .layer .layerName{
     float: left;
     white-space:normal;
-    width: 280px;
+    
     margin-left: 5px;
     margin-right: 5px;
     -webkit-touch-callout: none;

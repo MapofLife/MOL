@@ -568,10 +568,11 @@ mol.modules.map.layers = function(mol) {
                         function(event) {
                             self.bus.fireEvent(
                                 new mol.bus.Event(
-                                    'delete-layers',
-                                    {dataset_id: layer.dataset_id}
+                                    'delete-layer',
+                                    {layer: layer}
                                 )
-                            )
+                            );
+                            l.close.click();
                         }
                     );
                     // Click handler for style toggle
@@ -1811,7 +1812,9 @@ mol.modules.map.layers = function(mol) {
                     layer.type_title
                 )
             );
-
+            if (layer.source!='webuser') {
+                $(this).find('.del').remove();
+            }
             this.attr('id', layer.id);
             this.toggle = $(this).find('.toggle').button();
             this.styler = $(this).find('.styler');
