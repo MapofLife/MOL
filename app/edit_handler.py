@@ -1,6 +1,6 @@
 """This module contains a handler that pushes geometries to a userdata table."""
 
-__author__ = 'Aaron Steele'
+__author__ = 'Jeremy Malczyk'
 
 # MOL imports
 import cache
@@ -40,14 +40,14 @@ class PutHandler(webapp2.RequestHandler):
 
         url = 'http://mol.cartodb.com/api/v2/sql'
         payload = urllib.urlencode({"q":sql, "api_key":api_key})
-        logging.info(url)
+        logging.info(payload)
         value = urlfetch.fetch(
             url=url, 
             payload=payload,
             method=urlfetch.POST,
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             deadline=60).content
-        
+        logging.info(value)
         self.response.headers["Cache-Control"] = "max-age=2629743" # Cache 1 month
         self.response.headers["Content-Type"] = "application/json"
         self.response.out.write(value)
